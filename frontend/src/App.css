@@ -1,0 +1,113 @@
+.container {
+  max-width: 640px;
+  margin: 0 auto;
+  padding: 2rem 1rem;
+}
+
+header {
+  margin-bottom: 2rem;
+}
+
+h1 {
+  font-size: 2rem;
+  margin: 0;
+}
+
+.subtitle {
+  color: #888;
+  margin: 0.25rem 0 0;
+}
+
+.add-form {
+  display: flex;
+  gap: 0.5rem;
+  margin-bottom: 1.5rem;
+}
+
+.add-form input {
+  flex: 1;
+  padding: 0.6rem 0.8rem;
+  border: 1px solid #333;
+  border-radius: 6px;
+  background: inherit;
+  color: inherit;
+  font-size: 0.95rem;
+}
+
+.add-form button {
+  white-space: nowrap;
+}
+
+.status {
+  text-align: center;
+  color: #888;
+}
+
+.item-list {
+  list-style: none;
+  padding: 0;
+  margin: 0;
+  display: flex;
+  flex-direction: column;
+  gap: 0.5rem;
+}
+
+.item-list li {
+  display: flex;
+  align-items: flex-start;
+  justify-content: space-between;
+  gap: 1rem;
+  padding: 0.75rem 1rem;
+  border: 1px solid #333;
+  border-radius: 8px;
+  transition: opacity 0.2s;
+}
+
+.item-list li.completed {
+  opacity: 0.5;
+}
+
+.item-content {
+  flex: 1;
+  min-width: 0;
+}
+
+.item-content label {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+  cursor: pointer;
+}
+
+.item-title {
+  font-weight: 500;
+}
+
+li.completed .item-title {
+  text-decoration: line-through;
+}
+
+.item-desc {
+  margin: 0.25rem 0 0 1.6rem;
+  color: #888;
+  font-size: 0.875rem;
+}
+
+.delete-btn {
+  background: transparent;
+  color: #e55;
+  border-color: #e55;
+  padding: 0.3rem 0.6rem;
+  font-size: 0.8rem;
+}
+
+.delete-btn:hover {
+  background: #e55;
+  color: #fff;
+}
+
+@media (max-width: 600px) {
+  .add-form {
+    flex-direction: column;
+  }
+}
