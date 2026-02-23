@@ -1,6 +1,6 @@
 from sqlalchemy.orm import Session
 
-from ..models import Catalogue, Code, ContactInfo, Patient, User
+from ..models import Catalogue, Code, ContactInfo, MedicalValueTemplate, Patient, User
 
 
 def sync_codes(db: Session) -> None:
@@ -47,11 +47,36 @@ def sync_patients(db: Session) -> None:
     db.commit()
 
 
+def sync_medical_value_templates(db: Session) -> None:
+    """Replace all MEDICAL_VALUE_TEMPLATE rows with seed data on every startup."""
+    from .medical_values_template_data import ALL as mv_records
+
+    db.query(MedicalValueTemplate).delete()
+    for entry in mv_records:
+        raw = dict(entry)
+        datatype_key = raw.pop("datatype_key")
+        code = (
+            db.query(Code)
+            .filter(Code.type == "DATATYPE", Code.key == datatype_key)
+            .first()
+        )
+        if code:
+            db.add(MedicalValueTemplate(datatype_id=code.id, **raw))
+    db.commit()
+
+
 def sync_users(db: Session) -> None:
     """Replace all USER rows with the data defined in users_data.py on every startup."""
     from .users_data import ALL as user_records
 
     db.query(User).delete()
     for entry in user_records:
-        db.add(User(**entry))
+        raw = dict(entry)
+        role_key = raw.pop("role_key", "")
+        role = (
+            db.query(Code)
+            .filter(Code.type == "ROLE", Code.key == role_key)
+            .first()
+        )
+        db.add(User(role_id=role.id if role else None, **raw))
     db.commit()

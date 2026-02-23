@@ -1,0 +1,23 @@
+/* Patient tab specific styles */
+
+.detail-contact-table tbody tr[draggable="true"] {
+  cursor: grab;
+}
+
+.ci-dragging {
+  opacity: 0.4;
+}
+
+.ci-drag-over {
+  border-top: 2px solid #7c8aff;
+}
+
+.ab-date {
+  width: 7rem;
+  white-space: nowrap;
+}
+
+.ab-comment {
+  color: #aaa;
+  font-size: 0.85rem;
+}

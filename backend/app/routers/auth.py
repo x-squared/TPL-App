@@ -1,6 +1,6 @@
 from fastapi import APIRouter, Depends, HTTPException
 from pydantic import BaseModel
-from sqlalchemy.orm import Session
+from sqlalchemy.orm import Session, joinedload
 
 from ..auth import create_token, get_current_user
 from ..database import get_db
@@ -21,7 +21,12 @@ class LoginResponse(BaseModel):
 
 @router.post("/login", response_model=LoginResponse)
 def login(payload: LoginRequest, db: Session = Depends(get_db)):
-    user = db.query(User).filter(User.ext_id == payload.ext_id).first()
+    user = (
+        db.query(User)
+        .options(joinedload(User.role))
+        .filter(User.ext_id == payload.ext_id)
+        .first()
+    )
     if not user:
         raise HTTPException(status_code=401, detail="Unknown user")
     token = create_token(user.ext_id)

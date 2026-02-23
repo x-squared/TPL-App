@@ -1,7 +1,8 @@
 /* ── Patient detail view ── */
 
 .patient-detail {
-  max-width: 640px;
+  max-width: 1200px;
+  width: 100%;
 }
 
 .back-btn {
@@ -11,20 +12,20 @@
   cursor: pointer;
   font-size: 0.85rem;
   padding: 0;
-  margin-bottom: 1rem;
+  flex-shrink: 0;
 }
 
 .back-btn:hover {
   text-decoration: underline;
 }
 
-/* ── Heading row (name + edit button) ── */
+/* ── Heading row (back + name on one line) ── */
 
 .detail-heading {
   display: flex;
-  justify-content: space-between;
   align-items: center;
-  margin-bottom: 1.5rem;
+  gap: 1rem;
+  margin-bottom: 1rem;
 }
 
 .detail-heading h1 {
@@ -39,6 +40,8 @@
   border-radius: 4px;
   font-size: 0.85rem;
   cursor: pointer;
+  min-height: 1.7rem;
+  line-height: 1;
 }
 
 .edit-btn:hover {
@@ -59,6 +62,8 @@
   border-radius: 4px;
   font-size: 0.85rem;
   cursor: pointer;
+  min-height: 1.7rem;
+  line-height: 1;
 }
 
 .save-btn:hover {
@@ -78,6 +83,8 @@
   border-radius: 4px;
   font-size: 0.85rem;
   cursor: pointer;
+  min-height: 1.7rem;
+  line-height: 1;
 }
 
 .cancel-btn:hover {
@@ -90,12 +97,73 @@
   margin: 0;
 }
 
+.detail-section-heading {
+  display: flex;
+  align-items: center;
+  gap: 0.4rem;
+  margin-bottom: 0.75rem;
+}
+
+.detail-section-heading h2 {
+  margin: 0 !important;
+  flex: 1;
+}
+
 .patient-detail h2 {
   font-size: 1rem;
   margin: 0 0 0.75rem;
   color: #aaa;
   text-transform: uppercase;
   letter-spacing: 0.04em;
+}
+
+/* ── Tab bar ── */
+
+.detail-tabs {
+  display: flex;
+  gap: 0;
+  border-bottom: 1px solid #bbb;
+  position: sticky;
+  top: 0;
+  background: #2a2a44;
+  z-index: 10;
+  margin: 0 -2rem;
+  padding: 0 2rem;
+}
+
+.detail-tab {
+  background: transparent;
+  border: none;
+  color: #ccc;
+  padding: 0.6rem 1.2rem;
+  font-size: 0.9rem;
+  cursor: pointer;
+  border-bottom: 3px solid transparent;
+  margin-bottom: -1px;
+  font-family: inherit;
+  transition: color 0.15s, border-color 0.15s, background 0.15s;
+}
+
+.detail-tab:hover {
+  color: #fff;
+  background: rgba(255, 255, 255, 0.08);
+}
+
+.detail-tab.active {
+  color: #fff;
+  font-weight: 500;
+  border-bottom-color: #a0b0ff;
+  background: rgba(255, 255, 255, 0.06);
+}
+
+.detail-tab-toolbar {
+  display: flex;
+  justify-content: flex-end;
+  margin: 1rem 0 0.5rem;
+}
+
+.tab-placeholder {
+  margin-top: 1.5rem;
 }
 
 /* ── Detail sections ── */
@@ -118,7 +186,7 @@
 
 .detail-label {
   font-size: 0.75rem;
-  color: #888;
+  color: #6f768a;
   text-transform: uppercase;
   letter-spacing: 0.03em;
 }
@@ -138,6 +206,32 @@
   box-sizing: border-box;
 }
 
+.lang-custom-row {
+  display: flex;
+  gap: 0.3rem;
+  align-items: center;
+}
+
+.lang-custom-row .detail-input {
+  flex: 1;
+}
+
+.lang-switch-btn {
+  background: transparent;
+  border: 1px solid #222;
+  border-radius: 4px;
+  color: #888;
+  font-size: 0.75rem;
+  padding: 0.3rem 0.4rem;
+  cursor: pointer;
+  flex-shrink: 0;
+}
+
+.lang-switch-btn:hover {
+  color: #222;
+  background: #f5f5fa;
+}
+
 .detail-checkbox {
   display: flex;
   align-items: center;
@@ -151,6 +245,17 @@
 .detail-contact-table {
   width: 100%;
   border-collapse: collapse;
+}
+
+.detail-contact-table th {
+  padding: 0.35rem 0.75rem;
+  border-bottom: 1px solid #555;
+  font-size: 0.75rem;
+  color: #6f768a;
+  text-transform: uppercase;
+  letter-spacing: 0.03em;
+  font-weight: 500;
+  text-align: left;
 }
 
 .detail-contact-table td {
@@ -184,6 +289,9 @@
   text-align: right;
 }
 
+/* ── Inline edit/delete buttons ── */
+
+.ci-edit-inline,
 .ci-delete-btn {
   background: transparent;
   border: none;
@@ -194,8 +302,53 @@
   line-height: 1;
 }
 
+.ci-edit-inline:hover {
+  color: #7c8aff;
+}
+
 .ci-delete-btn:hover {
   color: #e55;
+}
+
+.ci-save-inline,
+.ci-cancel-inline {
+  background: transparent;
+  border: none;
+  font-size: 1rem;
+  cursor: pointer;
+  padding: 0 0.3rem;
+  line-height: 1;
+}
+
+.ci-save-inline {
+  color: #4a6;
+}
+
+.ci-save-inline:hover {
+  color: #6c8;
+}
+
+.ci-save-inline:disabled {
+  opacity: 0.5;
+  cursor: default;
+}
+
+.ci-cancel-inline {
+  color: #888;
+}
+
+.ci-cancel-inline:hover {
+  color: #ccc;
+}
+
+.ci-inline-input {
+  width: 100%;
+  padding: 0.2rem 0.4rem !important;
+  font-size: 0.85rem !important;
+}
+
+.ci-editing-row {
+  background: rgba(124, 138, 255, 0.08);
 }
 
 .ci-confirm {
@@ -245,10 +398,12 @@
   background: transparent;
   border: 1px solid #7c8aff;
   color: #7c8aff;
-  padding: 0.2rem 0.6rem;
+  padding: 0.2rem 0.7rem;
   border-radius: 4px;
-  font-size: 0.8rem;
+  font-size: 0.85rem;
   cursor: pointer;
+  min-height: 1.7rem;
+  line-height: 1;
 }
 
 .ci-add-btn:hover {

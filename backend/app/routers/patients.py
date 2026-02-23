@@ -3,7 +3,7 @@ from sqlalchemy.orm import Session, joinedload, subqueryload
 
 from ..auth import get_current_user
 from ..database import get_db
-from ..models import ContactInfo, Patient, User
+from ..models import Absence, Catalogue, ContactInfo, Diagnosis, Episode, MedicalValue, MedicalValueTemplate, Patient, User
 from ..schemas import PatientCreate, PatientResponse, PatientUpdate
 
 router = APIRouter(prefix="/patients", tags=["patients"])
@@ -15,8 +15,19 @@ def list_patients(skip: int = 0, limit: int = 100, db: Session = Depends(get_db)
         db.query(Patient)
         .options(
             joinedload(Patient.changed_by_user),
+            joinedload(Patient.blood_type),
+            joinedload(Patient.resp_coord),
             subqueryload(Patient.contact_infos).joinedload(ContactInfo.type),
             subqueryload(Patient.contact_infos).joinedload(ContactInfo.changed_by_user),
+            subqueryload(Patient.absences).joinedload(Absence.changed_by_user),
+            subqueryload(Patient.diagnoses).joinedload(Diagnosis.catalogue),
+            subqueryload(Patient.diagnoses).joinedload(Diagnosis.changed_by_user),
+            subqueryload(Patient.medical_values).joinedload(MedicalValue.medical_value_template).joinedload(MedicalValueTemplate.datatype),
+            subqueryload(Patient.medical_values).joinedload(MedicalValue.datatype),
+            subqueryload(Patient.medical_values).joinedload(MedicalValue.changed_by_user),
+            subqueryload(Patient.episodes).joinedload(Episode.organ),
+            subqueryload(Patient.episodes).joinedload(Episode.status),
+            subqueryload(Patient.episodes).joinedload(Episode.changed_by_user),
         )
         .offset(skip)
         .limit(limit)
@@ -30,8 +41,19 @@ def get_patient(patient_id: int, db: Session = Depends(get_db)):
         db.query(Patient)
         .options(
             joinedload(Patient.changed_by_user),
+            joinedload(Patient.blood_type),
+            joinedload(Patient.resp_coord),
             subqueryload(Patient.contact_infos).joinedload(ContactInfo.type),
             subqueryload(Patient.contact_infos).joinedload(ContactInfo.changed_by_user),
+            subqueryload(Patient.absences).joinedload(Absence.changed_by_user),
+            subqueryload(Patient.diagnoses).joinedload(Diagnosis.catalogue),
+            subqueryload(Patient.diagnoses).joinedload(Diagnosis.changed_by_user),
+            subqueryload(Patient.medical_values).joinedload(MedicalValue.medical_value_template).joinedload(MedicalValueTemplate.datatype),
+            subqueryload(Patient.medical_values).joinedload(MedicalValue.datatype),
+            subqueryload(Patient.medical_values).joinedload(MedicalValue.changed_by_user),
+            subqueryload(Patient.episodes).joinedload(Episode.organ),
+            subqueryload(Patient.episodes).joinedload(Episode.status),
+            subqueryload(Patient.episodes).joinedload(Episode.changed_by_user),
         )
         .filter(Patient.id == patient_id)
         .first()
@@ -72,8 +94,19 @@ def update_patient(
         db.query(Patient)
         .options(
             joinedload(Patient.changed_by_user),
+            joinedload(Patient.blood_type),
+            joinedload(Patient.resp_coord),
             subqueryload(Patient.contact_infos).joinedload(ContactInfo.type),
             subqueryload(Patient.contact_infos).joinedload(ContactInfo.changed_by_user),
+            subqueryload(Patient.absences).joinedload(Absence.changed_by_user),
+            subqueryload(Patient.diagnoses).joinedload(Diagnosis.catalogue),
+            subqueryload(Patient.diagnoses).joinedload(Diagnosis.changed_by_user),
+            subqueryload(Patient.medical_values).joinedload(MedicalValue.medical_value_template).joinedload(MedicalValueTemplate.datatype),
+            subqueryload(Patient.medical_values).joinedload(MedicalValue.datatype),
+            subqueryload(Patient.medical_values).joinedload(MedicalValue.changed_by_user),
+            subqueryload(Patient.episodes).joinedload(Episode.organ),
+            subqueryload(Patient.episodes).joinedload(Episode.status),
+            subqueryload(Patient.episodes).joinedload(Episode.changed_by_user),
         )
         .filter(Patient.id == patient_id)
         .first()

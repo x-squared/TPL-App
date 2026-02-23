@@ -1,7 +1,7 @@
 from fastapi import Depends, HTTPException, status
 from fastapi.security import HTTPAuthorizationCredentials, HTTPBearer
 from jose import JWTError, jwt
-from sqlalchemy.orm import Session
+from sqlalchemy.orm import Session, joinedload
 
 from .database import get_db
 from .models import User
@@ -32,7 +32,12 @@ def get_current_user(
             detail="Invalid or expired token",
         )
 
-    user = db.query(User).filter(User.ext_id == ext_id).first()
+    user = (
+        db.query(User)
+        .options(joinedload(User.role))
+        .filter(User.ext_id == ext_id)
+        .first()
+    )
     if user is None:
         raise HTTPException(
             status_code=status.HTTP_401_UNAUTHORIZED,

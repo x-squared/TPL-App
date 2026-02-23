@@ -1,5 +1,87 @@
 /* ── Filter bar ── */
 
+.patients-header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 0.75rem;
+}
+
+.patients-add-btn {
+  background: transparent;
+  border: 1px solid #7c8aff;
+  color: #7c8aff;
+  border-radius: 4px;
+  padding: 0.25rem 0.7rem;
+  font-size: 0.85rem;
+  cursor: pointer;
+}
+
+.patients-add-btn:hover {
+  background: #7c8aff;
+  color: #fff;
+}
+
+.patients-add-form {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.5rem;
+  align-items: center;
+  margin-bottom: 0.75rem;
+  padding: 0.75rem;
+  border: 1px solid #333;
+  border-radius: 6px;
+  background: rgba(124, 138, 255, 0.05);
+}
+
+.patients-add-form input {
+  padding: 0.4rem 0.6rem;
+  border: 1px solid #222;
+  border-radius: 4px;
+  background: #f5f5fa;
+  color: #222;
+  font-size: 0.85rem;
+  min-width: 10rem;
+}
+
+.patients-add-actions {
+  display: flex;
+  gap: 0.4rem;
+}
+
+.patients-save-btn,
+.patients-cancel-btn {
+  border-radius: 4px;
+  font-size: 0.85rem;
+  cursor: pointer;
+  min-height: 1.7rem;
+  padding: 0.2rem 0.7rem;
+}
+
+.patients-save-btn {
+  background: #4a6cf7;
+  border: 1px solid #4a6cf7;
+  color: #fff;
+}
+
+.patients-save-btn:disabled {
+  opacity: 0.6;
+  cursor: default;
+}
+
+.patients-cancel-btn {
+  background: transparent;
+  border: 1px solid #888;
+  color: #aaa;
+}
+
+.patients-add-error {
+  margin: 0;
+  color: #e55;
+  font-size: 0.8rem;
+  flex-basis: 100%;
+}
+
 .filter-bar {
   display: flex;
   gap: 0.5rem;
@@ -21,6 +103,24 @@
 .filter-bar input::placeholder {
   color: #777;
 }
+
+.filter-select {
+  padding: 0.4rem 0.6rem;
+  border: 1px solid #222;
+  border-radius: 4px;
+  background: #f5f5fa;
+  color: #222;
+  font-size: 0.85rem;
+  min-width: 100px;
+}
+
+.filter-episode-filters {
+  display: flex;
+  gap: 0.5rem;
+  align-items: center;
+  flex-wrap: nowrap;
+}
+
 
 /* ── Open button ── */
 
@@ -62,6 +162,14 @@
   background: rgba(124, 138, 255, 0.1);
 }
 
+.patients-table-wrap {
+  overflow-x: auto;
+}
+
+.patients-table-wrap .data-table {
+  min-width: 1150px;
+}
+
 /* ── Contact info ── */
 
 .contact-row td {
@@ -78,7 +186,7 @@
 .contact-section h4 {
   margin: 0 0 0.5rem;
   font-size: 0.85rem;
-  color: #555;
+  color: #6f768a;
   text-transform: uppercase;
   letter-spacing: 0.04em;
 }
@@ -98,7 +206,7 @@
 }
 
 .contact-table th {
-  color: #555;
+  color: #6f768a;
   font-weight: 500;
   font-size: 0.8rem;
   text-transform: uppercase;
@@ -131,4 +239,12 @@
   font-size: 0.85rem;
   color: #666;
   font-style: italic;
+}
+
+.ep-open-indicators {
+  font-size: 0.75rem;
+  font-weight: 600;
+  color: #5a6abf;
+  margin-right: 0.4rem;
+  letter-spacing: 0.02em;
 }

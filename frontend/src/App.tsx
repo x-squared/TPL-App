@@ -5,14 +5,12 @@ import {
   getToken,
   setToken,
   type AppUser,
-  type Code,
-  type Item,
 } from './api';
 import './App.css';
 import PatientDetailView from './views/PatientDetailView';
 import PatientsView from './views/PatientsView';
 
-type Page = 'items' | 'patients';
+type Page = 'patients';
 
 function App() {
   const [user, setUser] = useState<AppUser | null>(null);
@@ -25,14 +23,6 @@ function App() {
   const [sidebarOpen, setSidebarOpen] = useState(true);
   const [userMenuOpen, setUserMenuOpen] = useState(false);
 
-  const [items, setItems] = useState<Item[]>([]);
-  const [codes, setCodes] = useState<Code[]>([]);
-  const [title, setTitle] = useState('');
-  const [description, setDescription] = useState('');
-  const [codeId, setCodeId] = useState<number | null>(null);
-  const [itemsLoading, setItemsLoading] = useState(true);
-
-
   useEffect(() => {
     const token = getToken();
     if (token) {
@@ -44,13 +34,6 @@ function App() {
       setAuthLoading(false);
     }
   }, []);
-
-  useEffect(() => {
-    if (user) {
-      fetchItems();
-      fetchCodes();
-    }
-  }, [user]);
 
   const handleLogin = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -67,47 +50,7 @@ function App() {
   const handleLogout = () => {
     clearToken();
     setUser(null);
-    setItems([]);
     setUserMenuOpen(false);
-  };
-
-  /* ── Items ── */
-  const fetchItems = async () => {
-    try {
-      const data = await api.listItems();
-      setItems(data);
-    } finally {
-      setItemsLoading(false);
-    }
-  };
-
-  const fetchCodes = async () => {
-    const data = await api.listCodes();
-    setCodes(data);
-  };
-
-  const handleAddItem = async (e: React.FormEvent) => {
-    e.preventDefault();
-    if (!title.trim()) return;
-    await api.createItem({
-      title: title.trim(),
-      description: description.trim(),
-      code_id: codeId,
-    });
-    setTitle('');
-    setDescription('');
-    setCodeId(null);
-    fetchItems();
-  };
-
-  const toggleComplete = async (item: Item) => {
-    await api.updateItem(item.id, { completed: !item.completed });
-    fetchItems();
-  };
-
-  const handleDeleteItem = async (id: number) => {
-    await api.deleteItem(id);
-    fetchItems();
   };
 
   /* ── Auth loading ── */
@@ -166,14 +109,6 @@ function App() {
             <span className="nav-icon">{'\u2695'}</span>
             {sidebarOpen && <span className="nav-label">Patients</span>}
           </button>
-          <button
-            className={`nav-item ${page === 'items' ? 'active' : ''}`}
-            onClick={() => setPage('items')}
-            title="Items"
-          >
-            <span className="nav-icon">{'\u2630'}</span>
-            {sidebarOpen && <span className="nav-label">Items</span>}
-          </button>
         </nav>
 
         <div className="sidebar-bottom">
@@ -202,79 +137,6 @@ function App() {
       </aside>
 
       <main className="main-content">
-        {page === 'items' && (
-          <>
-            <header>
-              <h1>Items</h1>
-            </header>
-
-            <form className="add-form" onSubmit={handleAddItem}>
-              <input
-                type="text"
-                placeholder="Title"
-                value={title}
-                onChange={(e) => setTitle(e.target.value)}
-                required
-              />
-              <input
-                type="text"
-                placeholder="Description (optional)"
-                value={description}
-                onChange={(e) => setDescription(e.target.value)}
-              />
-              <select
-                value={codeId ?? ''}
-                onChange={(e) => setCodeId(e.target.value ? Number(e.target.value) : null)}
-              >
-                <option value="">No code</option>
-                {codes.map((c) => (
-                  <option key={c.id} value={c.id}>
-                    {c.type} – {c.name_default || c.key}
-                  </option>
-                ))}
-              </select>
-              <button type="submit">Add Item</button>
-            </form>
-
-            {itemsLoading ? (
-              <p className="status">Loading...</p>
-            ) : items.length === 0 ? (
-              <p className="status">No items yet. Add one above.</p>
-            ) : (
-              <ul className="item-list">
-                {items.map((item) => (
-                  <li key={item.id} className={item.completed ? 'completed' : ''}>
-                    <div className="item-content">
-                      <label>
-                        <input
-                          type="checkbox"
-                          checked={item.completed}
-                          onChange={() => toggleComplete(item)}
-                        />
-                        <span className="item-title">{item.title}</span>
-                      </label>
-                      {item.description && (
-                        <p className="item-desc">{item.description}</p>
-                      )}
-                      <div className="item-meta">
-                        {item.code && (
-                          <span className="item-code">{item.code.type}: {item.code.name_default || item.code.key}</span>
-                        )}
-                        {item.changed_by_user && (
-                          <span className="item-changed-by">by {item.changed_by_user.name}</span>
-                        )}
-                      </div>
-                    </div>
-                    <button className="delete-btn" onClick={() => handleDeleteItem(item.id)}>
-                      Delete
-                    </button>
-                  </li>
-                ))}
-              </ul>
-            )}
-          </>
-        )}
-
         {page === 'patients' && !selectedPatientId && (
           <PatientsView onSelectPatient={(id) => setSelectedPatientId(id)} />
         )}

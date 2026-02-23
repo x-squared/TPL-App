@@ -1,12 +1,14 @@
 ---
-description: Always extract page/view components and their styles into separate files under src/views/
-globs: frontend/src/**/*.{tsx,css}
+description: Always extract views and API modules into separate files, organised by domain
+globs: frontend/src/**/*.{ts,tsx,css}
 alwaysApply: false
 ---
 
-# Factor Out Views
+# Factor Out Views and API Modules
 
-When creating or modifying a page-level view (e.g. Patients, Items), always place it in its own file under `frontend/src/views/`, with a co-located CSS file.
+## Views
+
+When creating or modifying a page-level view (e.g. Patients), always place it in its own file under `frontend/src/views/`, with a co-located CSS file.
 
 - Each view is a self-contained component with its own state, data fetching, and event handlers.
 - The view file exports a default function component (e.g. `PatientsView`).
@@ -19,12 +21,32 @@ When creating or modifying a page-level view (e.g. Patients, Items), always plac
 frontend/src/views/
   PatientsView.tsx
   PatientsView.css
-  ItemsView.tsx
-  ItemsView.css
+  PatientDetailView.tsx
+  PatientDetailView.css
 ```
 
 ```tsx
 // App.tsx – render views by page
 {page === 'patients' && <PatientsView />}
-{page === 'items' && <ItemsView />}
+```
+
+## API Modules
+
+The API layer lives under `frontend/src/api/`. Each domain entity gets its own file with types and methods. Shared infrastructure stays in `core.ts`.
+
+- `core.ts` – shared `request` helper, token management (`getToken`, `setToken`, `clearToken`), auth API methods, reference-data API methods (codes, catalogues), and shared types (`AppUser`, `Code`).
+- One file per domain entity (e.g. `patients.ts`) – contains all interfaces (entity, create, update, child entities) and all API methods for that entity and its children.
+- `index.ts` – barrel file that re-exports everything and provides a unified `api` object.
+
+When adding a new entity:
+1. If it is a top-level domain (like patients), create a new file (e.g. `api/orders.ts`).
+2. If it is a child of an existing domain (like contact info is to patients), add it to the parent's file.
+3. Export all types and the entity's API object from the new file.
+4. Re-export from `index.ts` and merge into the unified `api` object.
+
+```
+frontend/src/api/
+  core.ts        – request, tokens, auth, codes/catalogues, shared types
+  patients.ts    – Patient, ContactInfo, Absence, Diagnosis types & methods
+  index.ts       – barrel re-exports + unified api object
 ```

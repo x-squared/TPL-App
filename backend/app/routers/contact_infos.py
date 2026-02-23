@@ -1,4 +1,5 @@
 from fastapi import APIRouter, Depends, HTTPException
+from sqlalchemy import func as sa_func
 from sqlalchemy.orm import Session, joinedload
 
 from ..auth import get_current_user
@@ -35,9 +36,15 @@ def create_contact_info(
     current_user: User = Depends(get_current_user),
 ):
     _get_patient_or_404(patient_id, db)
+    max_pos = (
+        db.query(sa_func.max(ContactInfo.pos))
+        .filter(ContactInfo.patient_id == patient_id)
+        .scalar()
+    ) or 0
     ci = ContactInfo(
         patient_id=patient_id,
         **payload.model_dump(),
+        pos=max_pos + 1,
         changed_by=current_user.id,
     )
     db.add(ci)
