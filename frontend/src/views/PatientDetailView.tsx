@@ -326,8 +326,32 @@ export default function PatientDetailView({ patientId, onBack }: Props) {
 
   const handleAddAllMv = async () => {
     if (!patient || mvTemplates.length === 0) return;
+    const templateMatchesOrgan = (tpl: MedicalValueTemplate, organKey: string) => {
+      switch (organKey) {
+        case 'kidney': return tpl.use_kidney;
+        case 'liver': return tpl.use_liver;
+        case 'heart': return tpl.use_heart;
+        case 'lung': return tpl.use_lung;
+        case 'donor': return tpl.use_donor;
+        default: return false;
+      }
+    };
     const existingTplIds = new Set(patient.medical_values?.map((mv) => mv.medical_value_template_id).filter(Boolean));
-    const missing = mvTemplates.filter((tpl) => !existingTplIds.has(tpl.id));
+    const openOrganKeys = new Set(
+      (patient.episodes ?? [])
+        .filter((ep) => !ep.closed)
+        .map((ep) => ep.organ?.key ?? organCodes.find((c) => c.id === ep.organ_id)?.key ?? '')
+        .filter((key) => key !== '')
+        .map((key) => key.toLowerCase())
+    );
+    const eligible = mvTemplates.filter((tpl) => {
+      if (tpl.use_base) return true;
+      for (const organKey of openOrganKeys) {
+        if (templateMatchesOrgan(tpl, organKey)) return true;
+      }
+      return false;
+    });
+    const missing = eligible.filter((tpl) => !existingTplIds.has(tpl.id));
     if (missing.length === 0) return;
     setMvSaving(true);
     try {
@@ -629,8 +653,8 @@ export default function PatientDetailView({ patientId, onBack }: Props) {
 
       <nav className="detail-tabs">
         <button className={`detail-tab ${tab === 'patient' ? 'active' : ''}`} onClick={() => setTab('patient')}>Patient</button>
-        <button className={`detail-tab ${tab === 'medical' ? 'active' : ''}`} onClick={() => setTab('medical')}>Medical Data</button>
         <button className={`detail-tab ${tab === 'episodes' ? 'active' : ''}`} onClick={() => setTab('episodes')}>Episodes</button>
+        <button className={`detail-tab ${tab === 'medical' ? 'active' : ''}`} onClick={() => setTab('medical')}>Medical Data</button>
       </nav>
 
       {tab === 'patient' && (
@@ -686,6 +710,31 @@ export default function PatientDetailView({ patientId, onBack }: Props) {
           abForm={abForm}
           setAbForm={setAbForm}
           handleAddAbsence={handleAddAbsence}
+        />
+      )}
+
+      {tab === 'episodes' && (
+        <EpisodesTab
+          patient={patient}
+          addingEpisode={addingEpisode}
+          setAddingEpisode={setAddingEpisode}
+          editingEpId={editingEpId}
+          epEditForm={epEditForm}
+          setEpEditForm={setEpEditForm}
+          epSaving={epSaving}
+          handleSaveEp={handleSaveEp}
+          cancelEditingEp={cancelEditingEp}
+          startEditingEp={startEditingEp}
+          confirmDeleteEpId={confirmDeleteEpId}
+          setConfirmDeleteEpId={setConfirmDeleteEpId}
+          handleDeleteEpisode={handleDeleteEpisode}
+          organCodes={organCodes}
+          tplStatusCodes={tplStatusCodes}
+          epForm={epForm}
+          setEpForm={setEpForm}
+          handleAddEpisode={handleAddEpisode}
+          formatDate={formatDate}
+          refreshPatient={refreshPatient}
         />
       )}
 
@@ -753,31 +802,6 @@ export default function PatientDetailView({ patientId, onBack }: Props) {
           setMvForm={setMvForm}
           datatypeCodes={datatypeCodes}
           handleAddMv={handleAddMv}
-        />
-      )}
-
-      {tab === 'episodes' && (
-        <EpisodesTab
-          patient={patient}
-          addingEpisode={addingEpisode}
-          setAddingEpisode={setAddingEpisode}
-          editingEpId={editingEpId}
-          epEditForm={epEditForm}
-          setEpEditForm={setEpEditForm}
-          epSaving={epSaving}
-          handleSaveEp={handleSaveEp}
-          cancelEditingEp={cancelEditingEp}
-          startEditingEp={startEditingEp}
-          confirmDeleteEpId={confirmDeleteEpId}
-          setConfirmDeleteEpId={setConfirmDeleteEpId}
-          handleDeleteEpisode={handleDeleteEpisode}
-          organCodes={organCodes}
-          tplStatusCodes={tplStatusCodes}
-          epForm={epForm}
-          setEpForm={setEpForm}
-          handleAddEpisode={handleAddEpisode}
-          formatDate={formatDate}
-          refreshPatient={refreshPatient}
         />
       )}
     </div>
