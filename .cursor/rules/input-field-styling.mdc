@@ -1,0 +1,32 @@
+---
+description: Consistent styling for input fields across all views
+globs: frontend/src/**/*.css
+alwaysApply: false
+---
+
+# Input Field Styling
+
+All editable input fields (text, date, select, textarea) must use a consistent colour scheme across every view.
+
+- **Text colour**: `#222` (black)
+- **Background**: `#f5f5fa` (near-white with a subtle cool tint)
+- **Border**: `1px solid #222`
+- **Border radius**: `4px`
+- **Font size**: `0.9rem` for detail/edit fields, `0.85rem` for filter fields
+
+This applies to:
+- Filter bar inputs
+- Detail view edit inputs
+- Any form inputs for data entry
+
+```css
+.some-input {
+  color: #222;
+  background: #f5f5fa;
+  border: 1px solid #222;
+  border-radius: 4px;
+  color-scheme: dark;
+}
+```
+
+Never use dark backgrounds or light text colours for input fields.

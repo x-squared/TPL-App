@@ -1,0 +1,15 @@
+---
+description: Never remove or modify existing comments when editing code
+alwaysApply: true
+---
+
+# Preserve Existing Comments
+
+When editing files, **never remove, modify, or relocate existing comments** unless the user explicitly asks you to.
+
+This includes:
+- Module-level / file-level docstrings and comment blocks
+- Inline comments
+- Section separators or TODO/FIXME markers
+
+If a comment becomes outdated due to your changes, flag it to the user instead of silently removing it.
