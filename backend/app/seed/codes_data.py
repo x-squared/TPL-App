@@ -26,13 +26,23 @@ ROLES = [
 
 ALL = ALL + ROLES
 
-# ---- STATUS ----
-STATUS = [
-    {"type": "STATUS", "key": "ACTIVE", "pos": 1, "ext_sys": "", "ext_key": "", "name_default": "Aktiv"},
-    {"type": "STATUS", "key": "INACTIVE", "pos": 2, "ext_sys": "", "ext_key": "", "name_default": "Inaktiv"},
+# --- PRIORITY ----
+PRIORITY = [
+    {"type": "PRIORITY", "key": "NORMAL", "pos": 1, "ext_sys": "", "ext_key": "", "name_default": "Normal"},
+    {"type": "PRIORITY", "key": "MEDIUM", "pos": 2, "ext_sys": "", "ext_key": "", "name_default": "Mittel"},
+    {"type": "PRIORITY", "key": "HIGH", "pos": 3, "ext_sys": "", "ext_key": "", "name_default": "Hoch"},
 ]
 
-ALL = ALL + STATUS
+ALL = ALL + PRIORITY
+
+# --- TASK_STATUS ----
+TASK_STATUS = [
+    {"type": "TASK_STATUS", "key": "PENDING", "pos": 1, "ext_sys": "", "ext_key": "", "name_default": "Ausstehend"},
+    {"type": "TASK_STATUS", "key": "COMPLETED", "pos": 3, "ext_sys": "", "ext_key": "", "name_default": "Abgeschlossen"},
+    {"type": "TASK_STATUS", "key": "CANCELLED", "pos": 4, "ext_sys": "", "ext_key": "", "name_default": "Abgebrochen"},
+]
+
+ALL = ALL + TASK_STATUS
 
 # ---- CONTACT ----
 CONTACT = [
@@ -57,6 +67,16 @@ ORGAN = [
 ]
 
 ALL = ALL + ORGAN
+
+# --- TPL_PHASE ----
+TPL_PHASE = [
+    {"type": "TPL_PHASE", "key": "EVALUATION", "pos": 1, "ext_sys": "", "ext_key": "", "name_default": "Evaluation"},
+    {"type": "TPL_PHASE", "key": "LISTING", "pos": 2, "ext_sys": "", "ext_key": "", "name_default": "Listing"},
+    {"type": "TPL_PHASE", "key": "TRANSPLANTATION", "pos": 3, "ext_sys": "", "ext_key": "", "name_default": "Transplantation"},
+    {"type": "TPL_PHASE", "key": "FOLLOW_UP", "pos": 4, "ext_sys": "", "ext_key": "", "name_default": "Follow-Up"},
+]
+
+ALL = ALL + TPL_PHASE
 
 # ---- TPL_STATUS ----
 TPL_STATUS = [
