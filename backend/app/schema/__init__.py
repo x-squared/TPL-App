@@ -23,6 +23,24 @@ from .clinical import (
     MedicalValueTemplateResponse,
     MedicalValueUpdate,
 )
+from .colloqium import (
+    ColloqiumAgendaBase,
+    ColloqiumAgendaCreate,
+    ColloqiumAgendaResponse,
+    ColloqiumAgendaUpdate,
+    ColloqiumBase,
+    ColloqiumCreate,
+    ColloqiumResponse,
+    ColloqiumTaskBase,
+    ColloqiumTaskCreate,
+    ColloqiumTaskResponse,
+    ColloqiumTaskUpdate,
+    ColloqiumTypeBase,
+    ColloqiumTypeCreate,
+    ColloqiumTypeResponse,
+    ColloqiumTypeUpdate,
+    ColloqiumUpdate,
+)
 from .patient import PatientBase, PatientCreate, PatientListResponse, PatientResponse, PatientUpdate
 from .reference import (
     CatalogueBase,

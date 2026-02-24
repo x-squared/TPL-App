@@ -202,9 +202,9 @@ def instantiate_task_group_template(
     task_group = TaskGroup(
         patient_id=payload.patient_id,
         task_group_template_id=template.id,
+        name=template.name,
         episode_id=payload.episode_id,
         tpl_phase_id=effective_tpl_phase_id,
-        done=False,
         changed_by=current_user.id,
     )
     db.add(task_group)
@@ -222,16 +222,15 @@ def instantiate_task_group_template(
         key=lambda item: (item.sort_pos, item.id),
     )
     for item in active_task_templates:
-        until = None
+        # Tasks must always have a due date. If template has no offset, use anchor_date.
+        until = payload.anchor_date
         if item.due_days_default is not None:
-            # due_days_default is a signed offset relative to the provided anchor_date
             until = payload.anchor_date + timedelta(days=item.due_days_default)
         db.add(
             Task(
                 task_group_id=task_group.id,
                 description=item.description,
                 priority_id=item.priority_id,
-                must=item.is_must,
                 assigned_to_id=None,
                 until=until,
                 status_id=pending_status.id,

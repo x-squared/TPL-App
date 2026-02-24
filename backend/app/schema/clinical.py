@@ -13,7 +13,6 @@ class MedicalValueTemplateBase(BaseModel):
     datatype_id: int
     name_default: str = ""
     pos: int
-    use_base: bool = False
     use_liver: bool = False
     use_kidney: bool = False
     use_heart: bool = False

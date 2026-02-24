@@ -5,12 +5,12 @@ SYSTEM = [
 
 # ---- KOORD ----
 KOORD = [
-    {"ext_id": "TKOORD", "name": "Test-Koordinator", "role_key": "KOORD"},
+    {"ext_id": "TKOORD", "name": "TKo", "role_key": "KOORD"},
 ]
 
 # ---- ARZT ----
 ARZT = [
-    {"ext_id": "TARZT", "name": "Test-Arzt", "role_key": "ARZT"},
+    {"ext_id": "TARZT", "name": "TA", "role_key": "ARZT"},
 ]
 
 # ---- all users combined ----

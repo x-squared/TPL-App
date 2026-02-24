@@ -16,7 +16,6 @@ class MedicalValueTemplate(Base):
     datatype_id = Column("DATATYPE_ID", Integer, ForeignKey("CODE.ID"), nullable=False)
     name_default = Column("NAME_DEFAULT", String(64), default="")
     pos = Column("POS", Integer, nullable=False)
-    use_base = Column("USE_BASE", Boolean, default=False)
     use_liver = Column("USE_LIVER", Boolean, default=False)
     use_kidney = Column("USE_KIDNEY", Boolean, default=False)
     use_heart = Column("USE_HEART", Boolean, default=False)

@@ -1,5 +1,7 @@
 import { useEffect, useState } from 'react';
 import { api, type Code, type Patient, type PatientCreate, type PatientListItem } from '../api';
+import TaskBoard from './tasks/TaskBoard';
+import './layout/PanelLayout.css';
 import './PatientsView.css';
 
 function formatDate(iso: string | null): string {
@@ -51,6 +53,7 @@ export default function PatientsView({ onSelectPatient }: Props) {
   const [addingPatient, setAddingPatient] = useState(false);
   const [creatingPatient, setCreatingPatient] = useState(false);
   const [createPatientError, setCreatePatientError] = useState('');
+  const [selectedTaskPatientId, setSelectedTaskPatientId] = useState<number | null>(null);
   const [newPatient, setNewPatient] = useState<PatientCreate>({
     pid: '',
     first_name: '',
@@ -223,7 +226,7 @@ export default function PatientsView({ onSelectPatient }: Props) {
       ) : filteredPatients.length === 0 ? (
         <p className="status">No patients match the filter.</p>
       ) : (
-        <div className="patients-table-wrap">
+        <div className="patients-table-wrap ui-table-wrap">
         <table className="data-table">
           <thead>
             <tr>
@@ -246,8 +249,9 @@ export default function PatientsView({ onSelectPatient }: Props) {
               <>
                 <tr
                   key={p.id}
-                  className={expandedContacts === p.id || expandedEpisodes === p.id ? 'row-expanded' : ''}
+                  className={`${expandedContacts === p.id || expandedEpisodes === p.id ? 'row-expanded' : ''} ${selectedTaskPatientId === p.id ? 'row-selected-for-tasks' : ''}`}
                   onDoubleClick={() => onSelectPatient(p.id)}
+                  onClick={() => setSelectedTaskPatientId((prev) => (prev === p.id ? null : p.id))}
                 >
                   <td className="open-col">
                     <button
@@ -357,6 +361,31 @@ export default function PatientsView({ onSelectPatient }: Props) {
         </table>
         </div>
       )}
+
+      <section className="patients-tasks-section ui-panel-section">
+        <TaskBoard
+          criteria={{
+            patientId: selectedTaskPatientId ?? undefined,
+          }}
+          title="Tasks"
+          maxTableHeight={360}
+          onAddClick={() => undefined}
+          headerMeta={(
+            <>
+              <p className="patients-tasks-selection-hint">
+                ({selectedTaskPatientId !== null
+                  ? `filtered to patient #${selectedTaskPatientId}`
+                  : 'showing tasks for all patients'})
+              </p>
+              {selectedTaskPatientId !== null && (
+                <button className="patients-clear-selection-btn" onClick={() => setSelectedTaskPatientId(null)}>
+                  Clear patient selection
+                </button>
+              )}
+            </>
+          )}
+        />
+      </section>
     </>
   );
 }

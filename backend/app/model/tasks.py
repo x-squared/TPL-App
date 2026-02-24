@@ -47,7 +47,6 @@ class TaskTemplate(Base):
     )
     description = Column("DESCRIPTION", String(512), nullable=False, default="")
     priority_id = Column("PRIORITY_ID", Integer, ForeignKey("CODE.ID"), nullable=False)
-    is_must = Column("IS_MUST", Boolean, default=False)
     due_days_default = Column("DUE_DAYS_DEFAULT", Integer, nullable=True)
     is_active = Column("IS_ACTIVE", Boolean, default=True)
     sort_pos = Column("SORT_POS", Integer, default=0)
@@ -91,6 +90,14 @@ class TaskGroup(Base):
         comment="Optional source template used to instantiate this task group.",
         info={"label": "Task Group Template"},
     )
+    name = Column(
+        "NAME",
+        String(128),
+        nullable=False,
+        default="",
+        comment="Display name of the task group.",
+        info={"label": "Name"},
+    )
     episode_id = Column(
         "EPISODE_ID",
         Integer,
@@ -107,13 +114,6 @@ class TaskGroup(Base):
         nullable=True,
         comment="Optional transplant phase (`CODE.TPL_PHASE`), only allowed when episode is set.",
         info={"label": "TPL Phase"},
-    )
-    done = Column(
-        "DONE",
-        Boolean,
-        default=False,
-        comment="Completion state of the task group.",
-        info={"label": "Done"},
     )
     changed_by = Column(
         "CHANGED_BY",
@@ -155,9 +155,8 @@ class Task(Base):
     task_group_id = Column("TASK_GROUP_ID", Integer, ForeignKey("TASK_GROUP.ID"), nullable=False, index=True)
     description = Column("DESCRIPTION", String(512), default="")
     priority_id = Column("PRIORITY", Integer, ForeignKey("CODE.ID"), nullable=False)
-    must = Column("MUST", Boolean, default=False)
     assigned_to_id = Column("ASSIGNED_TO", Integer, ForeignKey("USER.ID"), nullable=True)
-    until = Column("UNTIL", Date, nullable=True)
+    until = Column("UNTIL", Date, nullable=False)
     status_id = Column("STATUS", Integer, ForeignKey("CODE.ID"), nullable=False)
     closed_at = Column("CLOSED_AT", Date, nullable=True)
     closed_by_id = Column("CLOSED_BY", Integer, ForeignKey("USER.ID"), nullable=True)

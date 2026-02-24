@@ -7,6 +7,10 @@ This module re-exports them to keep existing imports stable.
 from .model import (
     Absence,
     Catalogue,
+    Colloqium,
+    ColloqiumAgenda,
+    ColloqiumTask,
+    ColloqiumType,
     Code,
     ContactInfo,
     Diagnosis,
@@ -28,6 +32,10 @@ apply_entity_metadata_defaults()
 __all__ = [
     "Code",
     "Catalogue",
+    "ColloqiumType",
+    "Colloqium",
+    "ColloqiumAgenda",
+    "ColloqiumTask",
     "User",
     "Patient",
     "Absence",

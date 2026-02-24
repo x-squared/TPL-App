@@ -4,6 +4,10 @@ from . import (
     absences,
     auth,
     catalogues,
+    colloqium_agendas,
+    colloqium_tasks,
+    colloqium_types,
+    colloqiums,
     codes,
     contact_infos,
     diagnoses,
@@ -32,6 +36,10 @@ def register_routers(app: FastAPI) -> None:
     app.include_router(codes.router, prefix="/api")
     app.include_router(catalogues.router, prefix="/api")
     app.include_router(users.router, prefix="/api")
+    app.include_router(colloqium_types.router, prefix="/api")
+    app.include_router(colloqiums.router, prefix="/api")
+    app.include_router(colloqium_agendas.router, prefix="/api")
+    app.include_router(colloqium_tasks.router, prefix="/api")
     app.include_router(task_group_templates.router, prefix="/api")
     app.include_router(task_groups.router, prefix="/api")
     app.include_router(task_templates.router, prefix="/api")

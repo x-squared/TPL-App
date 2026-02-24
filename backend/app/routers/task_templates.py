@@ -64,7 +64,6 @@ def create_task_template(
         task_group_template_id=payload.task_group_template_id,
         description=payload.description,
         priority_id=priority.id,
-        is_must=payload.is_must,
         due_days_default=payload.due_days_default,
         is_active=payload.is_active,
         sort_pos=payload.sort_pos,

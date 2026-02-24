@@ -78,6 +78,35 @@ def _validate_links(
         raise HTTPException(status_code=422, detail="tpl_phase_id is required when template has tpl_phase_id")
 
 
+def _resolve_task_group_name(
+    *,
+    db: Session,
+    task_group_template_id: int | None,
+    name: str | None,
+    episode_id: int | None,
+    tpl_phase_id: int | None,
+) -> str:
+    trimmed = (name or "").strip()
+    if trimmed:
+        return trimmed
+    if task_group_template_id is None:
+        organ_label = "no organ"
+        if episode_id is not None:
+            episode = db.query(Episode).filter(Episode.id == episode_id).first()
+            if episode and episode.organ_id is not None:
+                organ = db.query(Code).filter(Code.id == episode.organ_id, Code.type == "ORGAN").first()
+                if organ:
+                    organ_label = organ.name_default
+        phase_label = "no phase"
+        if tpl_phase_id is not None:
+            phase = db.query(Code).filter(Code.id == tpl_phase_id, Code.type == "TPL_PHASE").first()
+            if phase:
+                phase_label = phase.name_default
+        return f"Other tasks ({organ_label}, {phase_label})"
+    template = db.query(TaskGroupTemplate).filter(TaskGroupTemplate.id == task_group_template_id).first()
+    return template.name if template else ""
+
+
 @router.get("/", response_model=list[TaskGroupResponse])
 def list_task_groups(
     patient_id: int | None = None,
@@ -101,6 +130,15 @@ def create_task_group(
     db: Session = Depends(get_db),
     current_user: User = Depends(get_current_user),
 ):
+    payload_data = payload.model_dump()
+    resolved_name = _resolve_task_group_name(
+        db=db,
+        task_group_template_id=payload_data.get("task_group_template_id"),
+        name=payload_data.get("name"),
+        episode_id=payload_data.get("episode_id"),
+        tpl_phase_id=payload_data.get("tpl_phase_id"),
+    )
+    payload_data["name"] = resolved_name
     _validate_links(
         patient_id=payload.patient_id,
         task_group_template_id=payload.task_group_template_id,
@@ -108,7 +146,7 @@ def create_task_group(
         tpl_phase_id=payload.tpl_phase_id,
         db=db,
     )
-    tg = TaskGroup(**payload.model_dump(), changed_by=current_user.id)
+    tg = TaskGroup(**payload_data, changed_by=current_user.id)
     db.add(tg)
     db.commit()
     db.refresh(tg)
@@ -147,6 +185,8 @@ def update_task_group(
         tpl_phase_id=tpl_phase_id,
         db=db,
     )
+    if "name" in update_data:
+        update_data["name"] = (update_data["name"] or "").strip()
     for key, value in update_data.items():
         setattr(tg, key, value)
     tg.changed_by = current_user.id

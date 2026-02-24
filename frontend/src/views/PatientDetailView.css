@@ -242,30 +242,15 @@
 
 /* ── Contact table in detail ── */
 
-.detail-contact-table {
-  width: 100%;
-  border-collapse: collapse;
-}
-
 .detail-contact-table th {
   padding: 0.35rem 0.75rem;
   border-bottom: 1px solid #555;
-  font-size: 0.75rem;
-  color: #6f768a;
-  text-transform: uppercase;
-  letter-spacing: 0.03em;
-  font-weight: 500;
-  text-align: left;
+  color: #222;
 }
 
 .detail-contact-table td {
   padding: 0.35rem 0.75rem;
   border-bottom: 1px solid #333;
-  font-size: 0.9rem;
-}
-
-.detail-contact-table tr:hover {
-  background: rgba(124, 138, 255, 0.1);
 }
 
 .detail-ci-main {
@@ -274,12 +259,12 @@
 }
 
 .detail-ci-type {
-  color: #aaa;
+  color: #222;
   width: 6rem;
 }
 
 .detail-ci-comment {
-  color: #888;
+  color: #222;
   font-size: 0.85rem;
 }
 
@@ -446,7 +431,7 @@
 }
 
 .detail-empty {
-  color: #666;
+  color: #222;
   font-style: italic;
   font-size: 0.85rem;
 }

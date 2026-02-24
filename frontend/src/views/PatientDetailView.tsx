@@ -4,6 +4,7 @@ import { formatValue, validateValue, getConfig, isCatalogueDatatype, getCatalogu
 import EpisodesTab from './patient-tabs/EpisodesTab';
 import MedicalDataTab from './patient-tabs/MedicalDataTab';
 import PatientTab from './patient-tabs/PatientTab';
+import TasksTab from './patient-tabs/TasksTab';
 import './PatientDetailView.css';
 
 function formatDate(iso: string | null): string {
@@ -21,7 +22,7 @@ interface Props {
   onBack: () => void;
 }
 
-type Tab = 'patient' | 'medical' | 'episodes';
+type Tab = 'patient' | 'medical' | 'episodes' | 'tasks';
 
 export default function PatientDetailView({ patientId, onBack }: Props) {
   const [patient, setPatient] = useState<Patient | null>(null);
@@ -326,15 +327,20 @@ export default function PatientDetailView({ patientId, onBack }: Props) {
 
   const handleAddAllMv = async () => {
     if (!patient || mvTemplates.length === 0) return;
+    const organFlagByKey: Record<
+      string,
+      'use_kidney' | 'use_liver' | 'use_heart' | 'use_lung' | 'use_donor'
+    > = {
+      KIDNEY: 'use_kidney',
+      LIVER: 'use_liver',
+      HEART: 'use_heart',
+      LUNG: 'use_lung',
+      DONOR: 'use_donor',
+    };
     const templateMatchesOrgan = (tpl: MedicalValueTemplate, organKey: string) => {
-      switch (organKey) {
-        case 'kidney': return tpl.use_kidney;
-        case 'liver': return tpl.use_liver;
-        case 'heart': return tpl.use_heart;
-        case 'lung': return tpl.use_lung;
-        case 'donor': return tpl.use_donor;
-        default: return false;
-      }
+      const flag = organFlagByKey[organKey];
+      if (!flag) return false;
+      return Boolean(tpl[flag]);
     };
     const existingTplIds = new Set(patient.medical_values?.map((mv) => mv.medical_value_template_id).filter(Boolean));
     const openOrganKeys = new Set(
@@ -342,10 +348,8 @@ export default function PatientDetailView({ patientId, onBack }: Props) {
         .filter((ep) => !ep.closed)
         .map((ep) => ep.organ?.key ?? organCodes.find((c) => c.id === ep.organ_id)?.key ?? '')
         .filter((key) => key !== '')
-        .map((key) => key.toLowerCase())
     );
     const eligible = mvTemplates.filter((tpl) => {
-      if (tpl.use_base) return true;
       for (const organKey of openOrganKeys) {
         if (templateMatchesOrgan(tpl, organKey)) return true;
       }
@@ -655,6 +659,7 @@ export default function PatientDetailView({ patientId, onBack }: Props) {
         <button className={`detail-tab ${tab === 'patient' ? 'active' : ''}`} onClick={() => setTab('patient')}>Patient</button>
         <button className={`detail-tab ${tab === 'episodes' ? 'active' : ''}`} onClick={() => setTab('episodes')}>Episodes</button>
         <button className={`detail-tab ${tab === 'medical' ? 'active' : ''}`} onClick={() => setTab('medical')}>Medical Data</button>
+        <button className={`detail-tab ${tab === 'tasks' ? 'active' : ''}`} onClick={() => setTab('tasks')}>Tasks</button>
       </nav>
 
       {tab === 'patient' && (
@@ -803,6 +808,10 @@ export default function PatientDetailView({ patientId, onBack }: Props) {
           datatypeCodes={datatypeCodes}
           handleAddMv={handleAddMv}
         />
+      )}
+
+      {tab === 'tasks' && (
+        <TasksTab patientId={patient.id} />
       )}
     </div>
   );

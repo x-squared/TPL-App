@@ -54,7 +54,6 @@ export interface MedicalValueTemplate {
   datatype: Code | null;
   name_default: string;
   pos: number;
-  use_base: boolean;
   use_liver: boolean;
   use_kidney: boolean;
   use_heart: boolean;

@@ -162,6 +162,10 @@
   background: rgba(124, 138, 255, 0.1);
 }
 
+.row-selected-for-tasks {
+  background: rgba(124, 138, 255, 0.1);
+}
+
 .patients-table-wrap {
   overflow-x: auto;
 }
@@ -186,31 +190,24 @@
 .contact-section h4 {
   margin: 0 0 0.5rem;
   font-size: 0.85rem;
-  color: #6f768a;
+  color: #222;
   text-transform: uppercase;
   letter-spacing: 0.04em;
 }
 
 .contact-table {
-  width: 100%;
-  border-collapse: collapse;
   margin-bottom: 0.25rem;
 }
 
 .contact-table th,
 .contact-table td {
-  text-align: left;
   padding: 0.35rem 0.75rem;
   border-bottom: 1px solid #ccc;
   color: #222;
 }
 
 .contact-table th {
-  color: #6f768a;
-  font-weight: 500;
-  font-size: 0.8rem;
-  text-transform: uppercase;
-  letter-spacing: 0.03em;
+  color: #222;
 }
 
 .contact-table tbody tr:hover {
@@ -229,7 +226,7 @@
   text-transform: uppercase;
   letter-spacing: 0.03em;
   background: #a0aaf0;
-  color: #2a2a4a;
+  color: #222;
   padding: 0.1rem 0.3rem;
   border-radius: 3px;
 }
@@ -237,7 +234,7 @@
 .contact-empty {
   margin: 0;
   font-size: 0.85rem;
-  color: #666;
+  color: #222;
   font-style: italic;
 }
 
@@ -247,4 +244,28 @@
   color: #5a6abf;
   margin-right: 0.4rem;
   letter-spacing: 0.02em;
+}
+
+.patients-tasks-section {
+  margin-top: 4rem;
+}
+
+.patients-tasks-selection-hint {
+  margin: 0;
+  font-size: 0.85rem;
+  color: #666;
+}
+
+.patients-clear-selection-btn {
+  border: 1px solid #888;
+  background: transparent;
+  color: #444;
+  border-radius: 4px;
+  padding: 0.2rem 0.55rem;
+  font-size: 0.8rem;
+  cursor: pointer;
+}
+
+.patients-clear-selection-btn:hover {
+  background: #ececf4;
 }

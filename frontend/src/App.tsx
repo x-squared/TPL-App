@@ -7,6 +7,7 @@ import {
   type AppUser,
 } from './api';
 import './App.css';
+import './styles/TableStyles.css';
 import PatientDetailView from './views/PatientDetailView';
 import PatientsView from './views/PatientsView';
 
@@ -104,10 +105,10 @@ function App() {
           <button
             className={`nav-item ${page === 'patients' ? 'active' : ''}`}
             onClick={() => { setPage('patients'); setSelectedPatientId(null); }}
-            title="Patients"
+            title="Recipients"
           >
             <span className="nav-icon">{'\u2695'}</span>
-            {sidebarOpen && <span className="nav-label">Patients</span>}
+            {sidebarOpen && <span className="nav-label">Recipients</span>}
           </button>
         </nav>
 

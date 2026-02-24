@@ -50,7 +50,6 @@ class TaskTemplateBase(BaseModel):
     task_group_template_id: int
     description: str
     priority_id: int | None = None
-    is_must: bool = False
     due_days_default: int | None = None
     is_active: bool = True
     sort_pos: int = 0
@@ -64,7 +63,6 @@ class TaskTemplateUpdate(BaseModel):
     task_group_template_id: int | None = None
     description: str | None = None
     priority_id: int | None = None
-    is_must: bool | None = None
     due_days_default: int | None = None
     is_active: bool | None = None
     sort_pos: int | None = None
@@ -92,9 +90,9 @@ class TaskGroupTemplateInstantiateRequest(BaseModel):
 class TaskGroupBase(BaseModel):
     patient_id: int
     task_group_template_id: int | None = None
+    name: str = ""
     episode_id: int | None = None
     tpl_phase_id: int | None = None
-    done: bool = False
 
 
 class TaskGroupCreate(TaskGroupBase):
@@ -108,9 +106,9 @@ class TaskGroupCreate(TaskGroupBase):
 class TaskGroupUpdate(BaseModel):
     patient_id: int | None = None
     task_group_template_id: int | None = None
+    name: str | None = None
     episode_id: int | None = None
     tpl_phase_id: int | None = None
-    done: bool | None = None
 
 
 class TaskGroupResponse(TaskGroupBase):
@@ -128,9 +126,8 @@ class TaskBase(BaseModel):
     task_group_id: int
     description: str = ""
     priority_id: int | None = None
-    must: bool = False
     assigned_to_id: int | None = None
-    until: date | None = None
+    until: date
     status_id: int | None = None
     closed_at: date | None = None
     closed_by_id: int | None = None
@@ -145,7 +142,6 @@ class TaskUpdate(BaseModel):
     task_group_id: int | None = None
     description: str | None = None
     priority_id: int | None = None
-    must: bool | None = None
     assigned_to_id: int | None = None
     until: date | None = None
     status_id: int | None = None
