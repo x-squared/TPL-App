@@ -1,5 +1,5 @@
 import { useEffect, useState } from 'react';
-import { api, type Code, type Patient, type PatientCreate } from '../api';
+import { api, type Code, type Patient, type PatientCreate, type PatientListItem } from '../api';
 import './PatientsView.css';
 
 function formatDate(iso: string | null): string {
@@ -31,7 +31,9 @@ interface Props {
 }
 
 export default function PatientsView({ onSelectPatient }: Props) {
-  const [patients, setPatients] = useState<Patient[]>([]);
+  const [patients, setPatients] = useState<PatientListItem[]>([]);
+  const [patientDetails, setPatientDetails] = useState<Record<number, Patient>>({});
+  const [loadingDetails, setLoadingDetails] = useState<Record<number, boolean>>({});
   const [loading, setLoading] = useState(true);
 
   const [filterPid, setFilterPid] = useState('');
@@ -71,14 +73,31 @@ export default function PatientsView({ onSelectPatient }: Props) {
     }
   };
 
+  const ensurePatientDetails = async (id: number) => {
+    if (patientDetails[id] || loadingDetails[id]) return;
+    setLoadingDetails((prev) => ({ ...prev, [id]: true }));
+    try {
+      const detail = await api.getPatient(id);
+      setPatientDetails((prev) => ({ ...prev, [id]: detail }));
+    } finally {
+      setLoadingDetails((prev) => ({ ...prev, [id]: false }));
+    }
+  };
+
   const toggleContacts = (id: number) => {
     setExpandedContacts(expandedContacts === id ? null : id);
     setExpandedEpisodes(null);
+    if (expandedContacts !== id) {
+      void ensurePatientDetails(id);
+    }
   };
 
   const toggleEpisodes = (id: number) => {
     setExpandedEpisodes(expandedEpisodes === id ? null : id);
     setExpandedContacts(null);
+    if (expandedEpisodes !== id) {
+      void ensurePatientDetails(id);
+    }
   };
 
   const handleCreatePatient = async () => {
@@ -112,13 +131,14 @@ export default function PatientsView({ onSelectPatient }: Props) {
     }
     if (filterBloodType && p.blood_type_id !== Number(filterBloodType)) return false;
     if (filterOrgan || filterOpenOnly) {
-      const episodes = p.episodes ?? [];
-      const relevant = episodes.filter((ep) => {
-        if (filterOpenOnly && ep.closed) return false;
-        if (filterOrgan && ep.organ_id !== Number(filterOrgan)) return false;
-        return true;
-      });
-      if (relevant.length === 0) return false;
+      const organId = filterOrgan ? Number(filterOrgan) : null;
+      if (filterOpenOnly && organId !== null) {
+        if (!p.open_episode_organ_ids.includes(organId)) return false;
+      } else if (filterOpenOnly) {
+        if (p.open_episode_count === 0) return false;
+      } else if (organId !== null) {
+        if (!p.episode_organ_ids.includes(organId)) return false;
+      }
     }
     return true;
   });
@@ -245,26 +265,21 @@ export default function PatientsView({ onSelectPatient }: Props) {
                   <td>{p.blood_type?.name_default || '–'}</td>
                   <td>{p.ahv_nr || '–'}</td>
                   <td>
-                    {(() => {
-                      const open = (p.episodes ?? []).filter((ep) => !ep.closed).sort((a, b) => (a.status?.pos ?? 999) - (b.status?.pos ?? 999));
-                      return (
-                        <>
-                          {open.length > 0 && (
-                            <span className="ep-open-indicators">
-                              {open.map((ep) => ep.organ?.name_default?.substring(0, 2) ?? '??').join(' | ')}
-                            </span>
-                          )}
-                          <button className="link-btn" onClick={() => toggleEpisodes(p.id)}>
-                            {open.length} {expandedEpisodes === p.id ? '▲' : '▼'}
-                          </button>
-                        </>
-                      );
-                    })()}
+                    <>
+                      {p.open_episode_count > 0 && (
+                        <span className="ep-open-indicators">
+                          {p.open_episode_indicators.join(' | ')}
+                        </span>
+                      )}
+                      <button className="link-btn" onClick={() => toggleEpisodes(p.id)}>
+                        {p.open_episode_count} {expandedEpisodes === p.id ? '▲' : '▼'}
+                      </button>
+                    </>
                   </td>
                   <td>{p.resp_coord?.name || '–'}</td>
                   <td>
                     <button className="link-btn" onClick={() => toggleContacts(p.id)}>
-                      {p.contact_infos?.length ?? 0} {expandedContacts === p.id ? '▲' : '▼'}
+                      {p.contact_info_count ?? 0} {expandedContacts === p.id ? '▲' : '▼'}
                     </button>
                   </td>
                   <td>{p.lang || '–'}</td>
@@ -274,10 +289,12 @@ export default function PatientsView({ onSelectPatient }: Props) {
                   <tr key={`${p.id}-contacts`} className="contact-row">
                     <td colSpan={11}>
                       <div className="contact-section">
-                        {p.contact_infos && p.contact_infos.length > 0 ? (
+                        {loadingDetails[p.id] ? (
+                          <p className="contact-empty">Loading contact information...</p>
+                        ) : patientDetails[p.id]?.contact_infos && patientDetails[p.id].contact_infos.length > 0 ? (
                           <table className="contact-table">
                             <tbody>
-                              {[...p.contact_infos].sort((a, b) => (a.pos ?? 0) - (b.pos ?? 0)).map((ci) => (
+                              {[...patientDetails[p.id].contact_infos].sort((a, b) => (a.pos ?? 0) - (b.pos ?? 0)).map((ci) => (
                                 <tr key={ci.id}>
                                   <td className="contact-main-cell">
                                     {ci.main && <span className="main-badge">Main</span>}
@@ -300,7 +317,9 @@ export default function PatientsView({ onSelectPatient }: Props) {
                   <tr key={`${p.id}-episodes`} className="contact-row">
                     <td colSpan={11}>
                       <div className="contact-section">
-                        {p.episodes && p.episodes.length > 0 ? (
+                        {loadingDetails[p.id] ? (
+                          <p className="contact-empty">Loading episodes...</p>
+                        ) : patientDetails[p.id]?.episodes && patientDetails[p.id].episodes.length > 0 ? (
                           <table className="contact-table">
                             <thead>
                               <tr>
@@ -313,7 +332,7 @@ export default function PatientsView({ onSelectPatient }: Props) {
                               </tr>
                             </thead>
                             <tbody>
-                              {[...p.episodes].sort((a, b) => (a.status?.pos ?? 999) - (b.status?.pos ?? 999)).map((ep) => (
+                              {[...patientDetails[p.id].episodes].sort((a, b) => (a.status?.pos ?? 999) - (b.status?.pos ?? 999)).map((ep) => (
                                 <tr key={ep.id}>
                                   <td>{ep.organ?.name_default ?? '–'}</td>
                                   <td>{ep.status?.name_default ?? '–'}</td>

@@ -1,0 +1,31 @@
+---
+description: Require entity and attribute documentation metadata on SQLAlchemy models
+globs: backend/app/models.py
+alwaysApply: false
+---
+
+# Entity Documentation and Metadata
+
+For every SQLAlchemy entity in `backend/app/models.py`:
+
+- Add a short class docstring that explains the entity purpose in business terms.
+- Ensure every column has:
+  - a human-readable label in `Column.info["label"]`
+  - a column comment in `Column.comment`
+
+## Preferred pattern
+
+Use automatic defaults for all mapped columns and allow manual overrides:
+
+```python
+def _apply_entity_metadata_defaults() -> None:
+    for mapper in Base.registry.mappers:
+        for column in mapper.local_table.columns:
+            column.info.setdefault("label", "<Human Label>")
+            if not column.comment:
+                column.comment = "<Attribute explanation>"
+```
+
+- Keep explicit values when already provided (do not overwrite maintainers' text).
+- When adding new entities or new columns, ensure this metadata remains present.
+- Do not remove existing class docstrings, labels, or comments.

@@ -237,6 +237,27 @@ export interface Patient {
   updated_at: string | null;
 }
 
+export interface PatientListItem {
+  id: number;
+  pid: string;
+  first_name: string;
+  name: string;
+  date_of_birth: string | null;
+  date_of_death: string | null;
+  ahv_nr: string;
+  lang: string;
+  blood_type_id: number | null;
+  blood_type: Code | null;
+  resp_coord_id: number | null;
+  resp_coord: AppUser | null;
+  translate: boolean;
+  contact_info_count: number;
+  open_episode_count: number;
+  open_episode_indicators: string[];
+  episode_organ_ids: number[];
+  open_episode_organ_ids: number[];
+}
+
 export interface PatientCreate {
   pid: string;
   first_name: string;
@@ -263,7 +284,7 @@ export interface PatientUpdate {
 /* ── API methods ── */
 
 export const patientsApi = {
-  listPatients: () => request<Patient[]>('/patients/'),
+  listPatients: () => request<PatientListItem[]>('/patients/'),
   getPatient: (id: number) => request<Patient>(`/patients/${id}`),
   createPatient: (data: PatientCreate) =>
     request<Patient>('/patients/', { method: 'POST', body: JSON.stringify(data) }),

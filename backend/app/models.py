@@ -5,32 +5,145 @@ from sqlalchemy.sql import func
 from .database import Base
 
 
+def _to_human_label(attr_name: str) -> str:
+    """Convert attribute name to human-readable label."""
+    label = attr_name.replace("_", " ").strip().title()
+    label = label.replace(" Id", " ID").replace(" Nr", " Nr.")
+    return label
+
+
+def _apply_entity_metadata_defaults() -> None:
+    """Add default label/comment metadata for all mapped columns."""
+    for mapper in Base.registry.mappers:
+        cls = mapper.class_
+        for column in mapper.local_table.columns:
+            attr_name = column.key
+            if column.info is None:
+                column.info = {}
+            column.info.setdefault("label", _to_human_label(attr_name))
+            if not column.comment:
+                column.comment = f"{_to_human_label(attr_name)} ({cls.__name__})."
+
 
 class Code(Base):
+    """Reference code table for typed key/value dictionaries."""
+
     __tablename__ = "CODE"
     __table_args__ = (UniqueConstraint("TYPE", "KEY"),)
 
-    id = Column("ID", Integer, primary_key=True, index=True)
-    type = Column("TYPE", String, nullable=False, index=True)
-    key = Column("KEY", String, nullable=False)
-    pos = Column("POS", Integer, nullable=False)
-    ext_sys = Column("EXT_SYS", String(24), default="")
-    ext_key = Column("EXT_KEY", String, default="")
-    name_default = Column("NAME_DEFAULT", String, default="")
+    id = Column(
+        "ID",
+        Integer,
+        primary_key=True,
+        index=True,
+        comment="Technical primary key of the code entry.",
+        info={"label": "ID"},
+    )
+    type = Column(
+        "TYPE",
+        String,
+        nullable=False,
+        index=True,
+        comment="Logical code namespace (e.g. DATATYPE, ROLE, ORGAN).",
+        info={"label": "Type"},
+    )
+    key = Column(
+        "KEY",
+        String,
+        nullable=False,
+        comment="Stable technical key unique within a type.",
+        info={"label": "Key"},
+    )
+    pos = Column(
+        "POS",
+        Integer,
+        nullable=False,
+        comment="Display/sort order inside one code type.",
+        info={"label": "Position"},
+    )
+    ext_sys = Column(
+        "EXT_SYS",
+        String(24),
+        default="",
+        comment="Optional external source system identifier.",
+        info={"label": "External System"},
+    )
+    ext_key = Column(
+        "EXT_KEY",
+        String,
+        default="",
+        comment="Optional key of this code in an external system.",
+        info={"label": "External Key"},
+    )
+    name_default = Column(
+        "NAME_DEFAULT",
+        String,
+        default="",
+        comment="Default display name for the code entry.",
+        info={"label": "Name"},
+    )
 
 class Catalogue(Base):
+    """Reference catalogue table for structured, maintainable value lists."""
+
     __tablename__ = "CATALOGUE"
     __table_args__ = (UniqueConstraint("TYPE", "KEY"),)
 
-    id = Column("ID", Integer, primary_key=True, index=True)
-    type = Column("TYPE", String, nullable=False, index=True)
-    key = Column("KEY", String, nullable=False)
-    pos = Column("POS", Integer, nullable=False)
-    ext_sys = Column("EXT_SYS", String(24), default="")
-    ext_key = Column("EXT_KEY", String, default="")
-    name_default = Column("NAME_DEFAULT", String, default="")
+    id = Column(
+        "ID",
+        Integer,
+        primary_key=True,
+        index=True,
+        comment="Technical primary key of the catalogue entry.",
+        info={"label": "ID"},
+    )
+    type = Column(
+        "TYPE",
+        String,
+        nullable=False,
+        index=True,
+        comment="Logical catalogue namespace (e.g. LANGUAGE, DIAGNOSIS, BLOOD_TYPE).",
+        info={"label": "Type"},
+    )
+    key = Column(
+        "KEY",
+        String,
+        nullable=False,
+        comment="Stable technical key unique within a catalogue type.",
+        info={"label": "Key"},
+    )
+    pos = Column(
+        "POS",
+        Integer,
+        nullable=False,
+        comment="Display/sort order inside one catalogue type.",
+        info={"label": "Position"},
+    )
+    ext_sys = Column(
+        "EXT_SYS",
+        String(24),
+        default="",
+        comment="Optional external source system identifier.",
+        info={"label": "External System"},
+    )
+    ext_key = Column(
+        "EXT_KEY",
+        String,
+        default="",
+        comment="Optional key of this catalogue entry in an external system.",
+        info={"label": "External Key"},
+    )
+    name_default = Column(
+        "NAME_DEFAULT",
+        String,
+        default="",
+        comment="Default display name for the catalogue entry.",
+        info={"label": "Name"},
+    )
 
 class User(Base):
+    """Application user used for authentication, role assignment, and auditing."""
+
     __tablename__ = "USER"
 
     id = Column("ID", Integer, primary_key=True, index=True)
@@ -42,6 +155,8 @@ class User(Base):
 
 
 class Patient(Base):
+    """Core patient entity with demographic, language, and linked clinical data."""
+
     __tablename__ = "PATIENT"
 
     id = Column("ID", Integer, primary_key=True, index=True)
@@ -70,6 +185,8 @@ class Patient(Base):
 
 
 class Absence(Base):
+    """Date interval where the patient is marked as absent."""
+
     __tablename__ = "ABSENCE"
 
     id = Column("ID", Integer, primary_key=True, index=True)
@@ -86,6 +203,8 @@ class Absence(Base):
 
 
 class Diagnosis(Base):
+    """Patient diagnosis linked to diagnosis catalogue entries."""
+
     __tablename__ = "DIAGNOSIS"
 
     id = Column("ID", Integer, primary_key=True, index=True)
@@ -102,6 +221,8 @@ class Diagnosis(Base):
 
 
 class ContactInfo(Base):
+    """Patient contact channel row including type, value, and sort position."""
+
     __tablename__ = "CONTACT_INFO"
 
     id = Column("ID", Integer, primary_key=True, index=True)
@@ -120,6 +241,8 @@ class ContactInfo(Base):
     changed_by_user = relationship("User")
 
 class MedicalValueTemplate(Base):
+    """Template definition for medical values and organ applicability flags."""
+
     __tablename__ = "MEDICAL_VALUE_TEMPLATE"
 
     id = Column("ID", Integer, primary_key=True, index=True)
@@ -138,6 +261,8 @@ class MedicalValueTemplate(Base):
     datatype = relationship("Code")
 
 class MedicalValue(Base):
+    """Patient-specific medical value instance created from template or custom input."""
+
     __tablename__ = "MEDICAL_VALUE"
 
     id = Column("ID", Integer, primary_key=True, index=True)
@@ -159,6 +284,8 @@ class MedicalValue(Base):
 
 
 class Episode(Base):
+    """Patient episode covering evaluation, listing, transplantation and follow-up."""
+
     __tablename__ = "EPISODE"
 
     id = Column("ID", Integer, primary_key=True, index=True)
@@ -195,6 +322,9 @@ class Episode(Base):
     organ = relationship("Code", foreign_keys=[organ_id])
     status = relationship("Code", foreign_keys=[status_id])
     changed_by_user = relationship("User")
+
+
+_apply_entity_metadata_defaults()
 
 
 

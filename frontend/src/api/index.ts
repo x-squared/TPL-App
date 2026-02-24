@@ -8,7 +8,7 @@ export type {
   Diagnosis, DiagnosisCreate, DiagnosisUpdate,
   MedicalValue, MedicalValueCreate, MedicalValueUpdate,
   Episode, EpisodeCreate, EpisodeUpdate,
-  Patient, PatientCreate, PatientUpdate,
+  Patient, PatientListItem, PatientCreate, PatientUpdate,
 } from './patients';
 
 import { authApi, codesApi, medicalValueTemplatesApi, usersApi } from './core';

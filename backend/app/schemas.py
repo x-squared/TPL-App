@@ -373,3 +373,26 @@ class PatientResponse(PatientBase):
     updated_at: datetime | None = None
 
 
+class PatientListResponse(BaseModel):
+    model_config = ConfigDict(from_attributes=True)
+
+    id: int
+    pid: str
+    first_name: str
+    name: str
+    date_of_birth: date | None = None
+    date_of_death: date | None = None
+    ahv_nr: str = ""
+    lang: str = ""
+    blood_type_id: int | None = None
+    blood_type: CatalogueResponse | None = None
+    resp_coord_id: int | None = None
+    resp_coord: UserResponse | None = None
+    translate: bool = False
+    contact_info_count: int = 0
+    open_episode_count: int = 0
+    open_episode_indicators: list[str] = []
+    episode_organ_ids: list[int] = []
+    open_episode_organ_ids: list[int] = []
+
+

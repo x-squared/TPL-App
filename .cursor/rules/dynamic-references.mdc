@@ -1,0 +1,37 @@
+---
+description: Dynamic references with patient base ownership and optional episode linkage
+alwaysApply: true
+---
+
+# Dynamic References Convention
+
+Keyword triggers for this rule:
+- **dynamic references**
+- **entity dynamically references either a patient or an episode, where episode references the same patient**
+
+When an entity may reference `PATIENT` and optionally `EPISODE`, and `EPISODE` belongs to a `PATIENT`, use this strategy by default:
+
+1. `patient_id` is required.
+2. `episode_id` is optional.
+3. If `episode_id` is set, enforce that the referenced episode belongs to `patient_id`.
+4. Add explicit SQLAlchemy relationships for both FKs.
+5. In Pydantic `Create`/`Update`, validate the same consistency rule.
+6. In router create/update handlers, enforce and return clear 422 errors if violated.
+
+## SQLAlchemy pattern
+
+```python
+patient_id = Column("PATIENT_ID", Integer, ForeignKey("PATIENT.ID"), nullable=False)
+episode_id = Column("EPISODE_ID", Integer, ForeignKey("EPISODE.ID"), nullable=True)
+```
+
+## Pydantic validation pattern
+
+- `Create`: require `patient_id`; `episode_id` may be omitted.
+- `Create/Update`: if `episode_id` is provided, ensure `episode.patient_id == patient_id`.
+
+## Do not use by default
+
+- Avoid `target_type + target_id` polymorphic references unless explicitly requested.
+- Avoid exactly-one-owner XOR in this specific hierarchical case (`PATIENT` + `EPISODE`).
+- Prefer real foreign keys and hierarchical consistency checks for integrity and queryability.
