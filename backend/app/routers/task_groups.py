@@ -3,7 +3,7 @@ from sqlalchemy.orm import Session, joinedload
 
 from ..auth import get_current_user
 from ..database import get_db
-from ..models import Code, Episode, Patient, TaskGroup, TaskGroupTemplate, User
+from ..models import Code, ColloqiumAgenda, Episode, Patient, TaskGroup, TaskGroupTemplate, User
 from ..schemas import TaskGroupCreate, TaskGroupResponse, TaskGroupUpdate
 
 router = APIRouter(prefix="/task-groups", tags=["task-groups"])
@@ -21,6 +21,7 @@ def _validate_links(
     patient_id: int,
     task_group_template_id: int | None,
     episode_id: int | None,
+    colloqium_agenda_id: int | None,
     tpl_phase_id: int | None,
     db: Session,
 ) -> None:
@@ -38,6 +39,20 @@ def _validate_links(
             raise HTTPException(
                 status_code=422,
                 detail="episode_id must reference an episode that belongs to patient_id",
+            )
+    if colloqium_agenda_id is not None:
+        agenda = db.query(ColloqiumAgenda).filter(ColloqiumAgenda.id == colloqium_agenda_id).first()
+        if not agenda:
+            raise HTTPException(status_code=422, detail="colloqium_agenda_id references unknown COLLOQIUM_AGENDA")
+        if episode_id is None:
+            raise HTTPException(
+                status_code=422,
+                detail="episode_id is required when colloqium_agenda_id is set",
+            )
+        if agenda.episode_id != episode_id:
+            raise HTTPException(
+                status_code=422,
+                detail="episode_id must match COLLOQIUM_AGENDA.episode_id",
             )
     if tpl_phase_id is not None:
         if episode_id is None:
@@ -139,11 +154,16 @@ def create_task_group(
         tpl_phase_id=payload_data.get("tpl_phase_id"),
     )
     payload_data["name"] = resolved_name
+    if payload_data.get("colloqium_agenda_id") is not None and payload_data.get("episode_id") is None:
+        agenda = db.query(ColloqiumAgenda).filter(ColloqiumAgenda.id == payload_data["colloqium_agenda_id"]).first()
+        if agenda:
+            payload_data["episode_id"] = agenda.episode_id
     _validate_links(
-        patient_id=payload.patient_id,
-        task_group_template_id=payload.task_group_template_id,
-        episode_id=payload.episode_id,
-        tpl_phase_id=payload.tpl_phase_id,
+        patient_id=payload_data["patient_id"],
+        task_group_template_id=payload_data.get("task_group_template_id"),
+        episode_id=payload_data.get("episode_id"),
+        colloqium_agenda_id=payload_data.get("colloqium_agenda_id"),
+        tpl_phase_id=payload_data.get("tpl_phase_id"),
         db=db,
     )
     tg = TaskGroup(**payload_data, changed_by=current_user.id)
@@ -177,11 +197,18 @@ def update_task_group(
     patient_id = update_data.get("patient_id", tg.patient_id)
     task_group_template_id = update_data.get("task_group_template_id", tg.task_group_template_id)
     episode_id = update_data.get("episode_id", tg.episode_id)
+    colloqium_agenda_id = update_data.get("colloqium_agenda_id", tg.colloqium_agenda_id)
     tpl_phase_id = update_data.get("tpl_phase_id", tg.tpl_phase_id)
+    if colloqium_agenda_id is not None and episode_id is None:
+        agenda = db.query(ColloqiumAgenda).filter(ColloqiumAgenda.id == colloqium_agenda_id).first()
+        if agenda:
+            episode_id = agenda.episode_id
+            update_data["episode_id"] = episode_id
     _validate_links(
         patient_id=patient_id,
         task_group_template_id=task_group_template_id,
         episode_id=episode_id,
+        colloqium_agenda_id=colloqium_agenda_id,
         tpl_phase_id=tpl_phase_id,
         db=db,
     )

@@ -107,6 +107,15 @@ class TaskGroup(Base):
         comment="Optional episode context; if set it must belong to the same patient.",
         info={"label": "Episode"},
     )
+    colloqium_agenda_id = Column(
+        "COLLOQIUM_AGENDA_ID",
+        Integer,
+        ForeignKey("COLLOQIUM_AGENDA.ID"),
+        nullable=True,
+        index=True,
+        comment="Optional colloqium agenda origin for this task group.",
+        info={"label": "Colloqium Agenda"},
+    )
     tpl_phase_id = Column(
         "TPL_PHASE_ID",
         Integer,
@@ -141,6 +150,7 @@ class TaskGroup(Base):
     patient = relationship("Patient", back_populates="task_groups")
     task_group_template = relationship("TaskGroupTemplate", back_populates="task_groups")
     episode = relationship("Episode", back_populates="task_groups")
+    colloqium_agenda = relationship("ColloqiumAgenda")
     tpl_phase = relationship("Code", foreign_keys=[tpl_phase_id])
     changed_by_user = relationship("User", foreign_keys=[changed_by])
     tasks = relationship("Task", back_populates="task_group", cascade="all, delete-orphan")

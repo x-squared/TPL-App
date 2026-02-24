@@ -1,4 +1,4 @@
-from .colloqium import Colloqium, ColloqiumAgenda, ColloqiumTask, ColloqiumType
+from .colloqium import Colloqium, ColloqiumAgenda, ColloqiumType
 from .episode import Episode
 from .medical import MedicalValue, MedicalValueTemplate
 from .patient import Absence, ContactInfo, Diagnosis, Patient
@@ -20,7 +20,6 @@ __all__ = [
     "ColloqiumType",
     "Colloqium",
     "ColloqiumAgenda",
-    "ColloqiumTask",
     "TaskGroupTemplate",
     "TaskTemplate",
     "TaskGroup",

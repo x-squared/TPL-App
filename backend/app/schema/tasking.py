@@ -92,6 +92,7 @@ class TaskGroupBase(BaseModel):
     task_group_template_id: int | None = None
     name: str = ""
     episode_id: int | None = None
+    colloqium_agenda_id: int | None = None
     tpl_phase_id: int | None = None
 
 
@@ -108,6 +109,7 @@ class TaskGroupUpdate(BaseModel):
     task_group_template_id: int | None = None
     name: str | None = None
     episode_id: int | None = None
+    colloqium_agenda_id: int | None = None
     tpl_phase_id: int | None = None
 
 
