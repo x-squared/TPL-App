@@ -3,7 +3,7 @@ from sqlalchemy.orm import Session, joinedload
 
 from ..auth import get_current_user
 from ..database import get_db
-from ..models import Code, Episode, Patient, TaskGroup, User
+from ..models import Code, Episode, Patient, TaskGroup, TaskGroupTemplate, User
 from ..schemas import TaskGroupCreate, TaskGroupResponse, TaskGroupUpdate
 
 router = APIRouter(prefix="/task-groups", tags=["task-groups"])
@@ -19,11 +19,17 @@ def _get_patient_or_404(patient_id: int, db: Session) -> Patient:
 def _validate_links(
     *,
     patient_id: int,
+    task_group_template_id: int | None,
     episode_id: int | None,
     tpl_phase_id: int | None,
     db: Session,
 ) -> None:
     _get_patient_or_404(patient_id, db)
+    template = None
+    if task_group_template_id is not None:
+        template = db.query(TaskGroupTemplate).filter(TaskGroupTemplate.id == task_group_template_id).first()
+        if not template:
+            raise HTTPException(status_code=422, detail="task_group_template_id references unknown TASK_GROUP_TEMPLATE")
     if episode_id is not None:
         episode = db.query(Episode).filter(Episode.id == episode_id).first()
         if not episode:
@@ -49,6 +55,27 @@ def _validate_links(
                 status_code=422,
                 detail="tpl_phase_id must reference CODE with type TPL_PHASE",
             )
+    if template is None:
+        return
+
+    template_scope = db.query(Code).filter(Code.id == template.scope_id, Code.type == "TASK_SCOPE").first()
+    if not template_scope:
+        raise HTTPException(status_code=422, detail="Template scope_id must reference CODE with type TASK_SCOPE")
+    if template_scope.key == "EPISODE" and episode_id is None:
+        raise HTTPException(status_code=422, detail="episode_id is required for templates with TASK_SCOPE.EPISODE")
+    if template.organ_id is not None:
+        if episode_id is None:
+            raise HTTPException(status_code=422, detail="episode_id is required when template has organ_id")
+        episode = db.query(Episode).filter(Episode.id == episode_id).first()
+        if not episode or episode.organ_id != template.organ_id:
+            raise HTTPException(status_code=422, detail="episode organ must match template organ_id")
+    if template.tpl_phase_id is not None:
+        if episode_id is None:
+            raise HTTPException(status_code=422, detail="episode_id is required when template has tpl_phase_id")
+        if tpl_phase_id is not None and tpl_phase_id != template.tpl_phase_id:
+            raise HTTPException(status_code=422, detail="tpl_phase_id must match template tpl_phase_id")
+    if tpl_phase_id is None and template.tpl_phase_id is not None:
+        raise HTTPException(status_code=422, detail="tpl_phase_id is required when template has tpl_phase_id")
 
 
 @router.get("/", response_model=list[TaskGroupResponse])
@@ -76,6 +103,7 @@ def create_task_group(
 ):
     _validate_links(
         patient_id=payload.patient_id,
+        task_group_template_id=payload.task_group_template_id,
         episode_id=payload.episode_id,
         tpl_phase_id=payload.tpl_phase_id,
         db=db,
@@ -109,10 +137,12 @@ def update_task_group(
     if "episode_id" in update_data and update_data["episode_id"] is None and "tpl_phase_id" not in update_data:
         update_data["tpl_phase_id"] = None
     patient_id = update_data.get("patient_id", tg.patient_id)
+    task_group_template_id = update_data.get("task_group_template_id", tg.task_group_template_id)
     episode_id = update_data.get("episode_id", tg.episode_id)
     tpl_phase_id = update_data.get("tpl_phase_id", tg.tpl_phase_id)
     _validate_links(
         patient_id=patient_id,
+        task_group_template_id=task_group_template_id,
         episode_id=episode_id,
         tpl_phase_id=tpl_phase_id,
         db=db,

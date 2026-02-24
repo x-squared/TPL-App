@@ -28,8 +28,8 @@ ALL = ALL + ROLES
 
 # --- PRIORITY ----
 PRIORITY = [
-    {"type": "PRIORITY", "key": "NORMAL", "pos": 1, "ext_sys": "", "ext_key": "", "name_default": "Normal"},
-    {"type": "PRIORITY", "key": "MEDIUM", "pos": 2, "ext_sys": "", "ext_key": "", "name_default": "Mittel"},
+    {"type": "PRIORITY", "key": "LOW", "pos": 1, "ext_sys": "", "ext_key": "", "name_default": "Niedrig"},
+    {"type": "PRIORITY", "key": "NORMAL", "pos": 2, "ext_sys": "", "ext_key": "", "name_default": "Normal"},
     {"type": "PRIORITY", "key": "HIGH", "pos": 3, "ext_sys": "", "ext_key": "", "name_default": "Hoch"},
 ]
 
@@ -43,6 +43,15 @@ TASK_STATUS = [
 ]
 
 ALL = ALL + TASK_STATUS
+
+# --- TASK_SCOPE ----
+TASK_SCOPE = [
+    {"type": "TASK_SCOPE", "key": "ALL", "pos": 1, "ext_sys": "", "ext_key": "", "name_default": "Alle"},
+    {"type": "TASK_SCOPE", "key": "PATIENT", "pos": 2, "ext_sys": "", "ext_key": "", "name_default": "Patient"},
+    {"type": "TASK_SCOPE", "key": "EPISODE", "pos": 3, "ext_sys": "", "ext_key": "", "name_default": "Episode"},
+]
+
+ALL = ALL + TASK_SCOPE
 
 # ---- CONTACT ----
 CONTACT = [

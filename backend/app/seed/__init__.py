@@ -1,6 +1,17 @@
 from sqlalchemy.orm import Session
 
-from ..models import Catalogue, Code, ContactInfo, MedicalValueTemplate, Patient, Task, TaskGroup, User
+from ..models import (
+    Catalogue,
+    Code,
+    ContactInfo,
+    MedicalValueTemplate,
+    Patient,
+    Task,
+    TaskGroup,
+    TaskGroupTemplate,
+    TaskTemplate,
+    User,
+)
 
 
 def sync_codes(db: Session) -> None:
@@ -95,6 +106,7 @@ def sync_tasks(db: Session) -> None:
         raw = dict(entry)
         seed_key = raw.pop("seed_key")
         patient_pid = raw.pop("patient_pid")
+        task_group_template_key = raw.pop("task_group_template_key", None)
         tpl_phase_key = raw.pop("tpl_phase_key", None)
 
         patient = db.query(Patient).filter(Patient.pid == patient_pid).first()
@@ -112,8 +124,20 @@ def sync_tasks(db: Session) -> None:
                 continue
             tpl_phase_id = tpl_phase.id
 
+        task_group_template_id = None
+        if task_group_template_key:
+            task_group_template = (
+                db.query(TaskGroupTemplate)
+                .filter(TaskGroupTemplate.key == task_group_template_key)
+                .first()
+            )
+            if not task_group_template:
+                continue
+            task_group_template_id = task_group_template.id
+
         task_group = TaskGroup(
             patient_id=patient.id,
+            task_group_template_id=task_group_template_id,
             tpl_phase_id=tpl_phase_id,
             **raw,
         )
@@ -163,6 +187,74 @@ def sync_tasks(db: Session) -> None:
                 status_id=status.id,
                 assigned_to_id=assigned_to_id,
                 closed_by_id=closed_by_id,
+                **raw,
+            )
+        )
+
+    db.commit()
+
+
+def sync_task_templates(db: Session) -> None:
+    """Replace all TASK_GROUP_TEMPLATE and TASK_TEMPLATE rows with seed data."""
+    from .task_templates_data import TASK_GROUP_TEMPLATES, TASK_TEMPLATES
+
+    db.query(TaskTemplate).delete()
+    db.query(TaskGroupTemplate).delete()
+    db.flush()
+
+    created_group_templates: dict[str, TaskGroupTemplate] = {}
+    for entry in TASK_GROUP_TEMPLATES:
+        raw = dict(entry)
+        scope_key = raw.pop("scope_key")
+        organ_key = raw.pop("organ_key", None)
+        tpl_phase_key = raw.pop("tpl_phase_key", None)
+
+        scope = db.query(Code).filter(Code.type == "TASK_SCOPE", Code.key == scope_key).first()
+        if not scope:
+            continue
+
+        organ_id = None
+        if organ_key:
+            organ = db.query(Code).filter(Code.type == "ORGAN", Code.key == organ_key).first()
+            if not organ:
+                continue
+            organ_id = organ.id
+
+        tpl_phase_id = None
+        if tpl_phase_key:
+            tpl_phase = db.query(Code).filter(Code.type == "TPL_PHASE", Code.key == tpl_phase_key).first()
+            if not tpl_phase:
+                continue
+            tpl_phase_id = tpl_phase.id
+
+        key = raw["key"]
+        template = TaskGroupTemplate(
+            scope_id=scope.id,
+            organ_id=organ_id,
+            tpl_phase_id=tpl_phase_id,
+            **raw,
+        )
+        db.add(template)
+        db.flush()
+        created_group_templates[key] = template
+
+    for entry in TASK_TEMPLATES:
+        raw = dict(entry)
+        task_group_template_key = raw.pop("task_group_template_key")
+        priority_key = raw.pop("priority_key")
+
+        task_group_template = created_group_templates.get(task_group_template_key)
+        if not task_group_template:
+            continue
+
+        priority = db.query(Code).filter(Code.type == "PRIORITY", Code.key == priority_key).first()
+        if not priority:
+            continue
+
+        db.add(
+            TaskTemplate(
+                task_group_template_id=task_group_template.id,
+                priority_id=priority.id,
                 **raw,
             )
         )

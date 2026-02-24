@@ -6,6 +6,7 @@ TASK_GROUPS = [
     {
         "seed_key": "HANS_TEST_BASE",
         "patient_pid": "4711",
+        "task_group_template_key": "HANS_TEST_BASE_TEMPLATE",
         "episode_id": None,
         "tpl_phase_key": None,
         "done": False,

@@ -4,8 +4,16 @@ from fastapi import FastAPI
 from fastapi.middleware.cors import CORSMiddleware
 
 from .database import Base, SessionLocal, engine
-from .routers import absences, auth, catalogues, codes, contact_infos, diagnoses, episodes, medical_data, medical_values, patients, task_groups, tasks, users
-from .seed import sync_catalogues, sync_codes, sync_medical_value_templates, sync_patients, sync_tasks, sync_users
+from .routers import register_routers
+from .seed import (
+    sync_catalogues,
+    sync_codes,
+    sync_medical_value_templates,
+    sync_patients,
+    sync_task_templates,
+    sync_tasks,
+    sync_users,
+)
 
 
 @asynccontextmanager
@@ -18,6 +26,7 @@ async def lifespan(app: FastAPI):
         sync_users(db)
         sync_patients(db)
         sync_medical_value_templates(db)
+        sync_task_templates(db)
         sync_tasks(db)
     finally:
         db.close()
@@ -34,19 +43,7 @@ app.add_middleware(
     allow_headers=["*"],
 )
 
-app.include_router(auth.router, prefix="/api")
-app.include_router(patients.router, prefix="/api")
-app.include_router(contact_infos.router, prefix="/api")
-app.include_router(absences.router, prefix="/api")
-app.include_router(diagnoses.router, prefix="/api")
-app.include_router(episodes.router, prefix="/api")
-app.include_router(medical_data.router, prefix="/api")
-app.include_router(medical_values.router, prefix="/api")
-app.include_router(codes.router, prefix="/api")
-app.include_router(catalogues.router, prefix="/api")
-app.include_router(users.router, prefix="/api")
-app.include_router(task_groups.router, prefix="/api")
-app.include_router(tasks.router, prefix="/api")
+register_routers(app)
 
 
 @app.get("/api/health")

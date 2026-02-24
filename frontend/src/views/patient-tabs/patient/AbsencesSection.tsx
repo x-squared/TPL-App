@@ -1,0 +1,143 @@
+import type { PatientTabProps } from './types';
+
+type AbsencesSectionProps = Pick<
+  PatientTabProps,
+  | 'addingAbsence'
+  | 'setAddingAbsence'
+  | 'sortedAbsences'
+  | 'editingAbId'
+  | 'abEditForm'
+  | 'setAbEditForm'
+  | 'abSaving'
+  | 'handleSaveAb'
+  | 'cancelEditingAb'
+  | 'startEditingAb'
+  | 'confirmDeleteAbId'
+  | 'setConfirmDeleteAbId'
+  | 'handleDeleteAbsence'
+  | 'abForm'
+  | 'setAbForm'
+  | 'handleAddAbsence'
+  | 'formatDate'
+>;
+
+export default function AbsencesSection({
+  addingAbsence,
+  setAddingAbsence,
+  sortedAbsences,
+  editingAbId,
+  abEditForm,
+  setAbEditForm,
+  abSaving,
+  handleSaveAb,
+  cancelEditingAb,
+  startEditingAb,
+  confirmDeleteAbId,
+  setConfirmDeleteAbId,
+  handleDeleteAbsence,
+  abForm,
+  setAbForm,
+  handleAddAbsence,
+  formatDate,
+}: AbsencesSectionProps) {
+  return (
+    <section className="detail-section">
+      <div className="detail-section-heading">
+        <h2>Absences</h2>
+        {!addingAbsence && (
+          <button className="ci-add-btn" onClick={() => setAddingAbsence(true)}>+ Add</button>
+        )}
+      </div>
+      {sortedAbsences.length > 0 ? (
+        <table className="detail-contact-table">
+          <tbody>
+            {sortedAbsences.map((ab) => (
+              editingAbId === ab.id ? (
+                <tr key={ab.id} className="ci-editing-row">
+                  <td className="ab-date">
+                    <input
+                      className="detail-input ci-inline-input"
+                      type="date"
+                      value={abEditForm.start ?? ''}
+                      onChange={(e) => setAbEditForm((f) => ({ ...f, start: e.target.value }))}
+                    />
+                  </td>
+                  <td className="ab-date">
+                    <input
+                      className="detail-input ci-inline-input"
+                      type="date"
+                      value={abEditForm.end ?? ''}
+                      onChange={(e) => setAbEditForm((f) => ({ ...f, end: e.target.value }))}
+                    />
+                  </td>
+                  <td className="ab-comment">
+                    <input
+                      className="detail-input ci-inline-input"
+                      value={abEditForm.comment ?? ''}
+                      onChange={(e) => setAbEditForm((f) => ({ ...f, comment: e.target.value }))}
+                    />
+                  </td>
+                  <td className="detail-ci-actions">
+                    <button className="ci-save-inline" onClick={handleSaveAb} disabled={abSaving || !abEditForm.start || !abEditForm.end || abEditForm.end < abEditForm.start}>✓</button>
+                    <button className="ci-cancel-inline" onClick={cancelEditingAb} disabled={abSaving}>✕</button>
+                  </td>
+                </tr>
+              ) : (
+                <tr key={ab.id} onDoubleClick={() => startEditingAb(ab)}>
+                  <td className="ab-date">{formatDate(ab.start)}</td>
+                  <td className="ab-date">{formatDate(ab.end)}</td>
+                  <td className="ab-comment">{ab.comment || ''}</td>
+                  <td className="detail-ci-actions">
+                    {confirmDeleteAbId === ab.id ? (
+                      <span className="ci-confirm">
+                        <span className="ci-confirm-text">Delete?</span>
+                        <button className="ci-confirm-yes" onClick={() => handleDeleteAbsence(ab.id)}>Yes</button>
+                        <button className="ci-confirm-no" onClick={() => setConfirmDeleteAbId(null)}>No</button>
+                      </span>
+                    ) : (
+                      <>
+                        <button className="ci-edit-inline" onClick={() => startEditingAb(ab)} title="Edit">✎</button>
+                        <button className="ci-delete-btn" onClick={() => setConfirmDeleteAbId(ab.id)} title="Delete">×</button>
+                      </>
+                    )}
+                  </td>
+                </tr>
+              )
+            ))}
+          </tbody>
+        </table>
+      ) : (
+        <p className="detail-empty">No absences.</p>
+      )}
+
+      {addingAbsence && (
+        <div className="ci-add-form">
+          <input
+            className="detail-input"
+            type="date"
+            value={abForm.start}
+            onChange={(e) => setAbForm((f) => ({ ...f, start: e.target.value }))}
+          />
+          <input
+            className="detail-input"
+            type="date"
+            value={abForm.end}
+            onChange={(e) => setAbForm((f) => ({ ...f, end: e.target.value }))}
+          />
+          <input
+            className="detail-input"
+            placeholder="Comment"
+            value={abForm.comment}
+            onChange={(e) => setAbForm((f) => ({ ...f, comment: e.target.value }))}
+          />
+          <div className="ci-add-actions">
+            <button className="save-btn" onClick={handleAddAbsence} disabled={abSaving || !abForm.start || !abForm.end || abForm.end < abForm.start}>
+              {abSaving ? 'Saving...' : 'Save'}
+            </button>
+            <button className="cancel-btn" onClick={() => setAddingAbsence(false)} disabled={abSaving}>Cancel</button>
+          </div>
+        </div>
+      )}
+    </section>
+  );
+}
