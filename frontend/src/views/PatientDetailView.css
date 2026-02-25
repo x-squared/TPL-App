@@ -224,6 +224,41 @@
   padding-right: 0.5rem !important;
 }
 
+.diag-main {
+  width: 4.5rem;
+  padding-right: 0.5rem !important;
+}
+
+.main-badge {
+  display: inline-block;
+  background: #e8edf9;
+  color: #33436b;
+  border: 1px solid #a9b8df;
+  border-radius: 10px;
+  padding: 0.05rem 0.38rem;
+  font-size: 0.72rem;
+  font-weight: 600;
+  line-height: 1.2;
+}
+
+.diag-main-badge {
+  display: inline-block;
+  background: #33436b;
+  color: #f4f7ff;
+  border: 1px solid #1f2f53;
+  border-radius: 10px;
+  padding: 0.05rem 0.4rem;
+  font-size: 0.72rem;
+  font-weight: 600;
+  line-height: 1.2;
+}
+
+.diag-main-hint {
+  font-size: 0.82rem;
+  color: #666;
+  margin-left: 0.25rem;
+}
+
 .detail-ci-type {
   color: #222;
   width: 6rem;

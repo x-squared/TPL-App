@@ -1,4 +1,4 @@
-from sqlalchemy import Column, DateTime, ForeignKey, Integer
+from sqlalchemy import Column, DateTime, ForeignKey, Integer, String
 from sqlalchemy.orm import relationship
 from sqlalchemy.sql import func
 
@@ -49,6 +49,13 @@ class CoordinationTimeLog(Base):
         nullable=True,
         comment="End timestamp of the time log interval.",
         info={"label": "End"},
+    )
+    comment = Column(
+        "COMMENT",
+        String(1024),
+        default="",
+        comment="Comment entered for this time log interval.",
+        info={"label": "Comment"},
     )
     changed_by_id = Column(
         "CHANGED_BY",

@@ -1,4 +1,5 @@
 import type { Code, Episode, EpisodeCreate, EpisodeUpdate } from '../../../api';
+import InlineDeleteActions from '../../layout/InlineDeleteActions';
 
 interface EpisodeTableProps {
   patientEpisodes: Episode[];
@@ -116,18 +117,13 @@ export default function EpisodeTable({
                   <td>{ep.closed ? 'Yes' : 'No'}</td>
                   <td>{ep.fup_recipient_card_done ? (ep.fup_recipient_card_date ? formatDate(ep.fup_recipient_card_date) : 'Yes') : 'No'}</td>
                   <td className="detail-ci-actions">
-                    {confirmDeleteEpId === ep.id ? (
-                      <span className="ci-confirm">
-                        <span className="ci-confirm-text">Delete?</span>
-                        <button className="ci-confirm-yes" onClick={() => handleDeleteEpisode(ep.id)}>Yes</button>
-                        <button className="ci-confirm-no" onClick={() => setConfirmDeleteEpId(null)}>No</button>
-                      </span>
-                    ) : (
-                      <>
-                        <button className="ci-edit-inline" onClick={() => startEditingEp(ep)} title="Edit">✎</button>
-                        <button className="ci-delete-btn" onClick={() => setConfirmDeleteEpId(ep.id)} title="Delete">×</button>
-                      </>
-                    )}
+                    <InlineDeleteActions
+                      confirming={confirmDeleteEpId === ep.id}
+                      onEdit={() => startEditingEp(ep)}
+                      onRequestDelete={() => setConfirmDeleteEpId(ep.id)}
+                      onConfirmDelete={() => handleDeleteEpisode(ep.id)}
+                      onCancelDelete={() => setConfirmDeleteEpId(null)}
+                    />
                   </td>
                 </tr>
               )

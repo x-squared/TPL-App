@@ -14,6 +14,7 @@ from .coordination_procurement_pancreas import CoordinationProcurementPancreas
 from .coordination_time_log import CoordinationTimeLog
 from .coordination_origin import CoordinationOrigin
 from .episode import Episode
+from .favorite import Favorite
 from .medical import MedicalValue, MedicalValueTemplate
 from .patient import Absence, ContactInfo, Diagnosis, Patient
 from .reference import Catalogue, Code
@@ -31,6 +32,7 @@ __all__ = [
     "MedicalValueTemplate",
     "MedicalValue",
     "Episode",
+    "Favorite",
     "ColloqiumType",
     "Colloqium",
     "ColloqiumAgenda",

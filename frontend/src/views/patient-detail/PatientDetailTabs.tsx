@@ -132,7 +132,7 @@ export interface PatientDiagnosesModel {
   setDiagEditForm: React.Dispatch<React.SetStateAction<DiagnosisUpdate>>;
   handleSaveDiag: () => Promise<void>;
   cancelEditingDiag: () => void;
-  startEditingDiag: (d: { id: number; catalogue_id: number; comment: string }) => void;
+  startEditingDiag: (d: { id: number; catalogue_id: number; comment: string; is_main: boolean }) => void;
   confirmDeleteDiagId: number | null;
   setConfirmDeleteDiagId: React.Dispatch<React.SetStateAction<number | null>>;
   handleDeleteDiag: (id: number) => Promise<void>;
@@ -183,6 +183,7 @@ export interface PatientDetailTabsProps {
   patient: Patient;
   formatDate: (iso: string | null) => string;
   refreshPatient: () => Promise<void>;
+  initialEpisodeId?: number | null;
   core: PatientCoreModel;
   contacts: PatientContactsModel;
   absences: PatientAbsencesModel;
@@ -192,7 +193,20 @@ export interface PatientDetailTabsProps {
 }
 
 export default function PatientDetailTabs(props: PatientDetailTabsProps) {
-  const { tab, setTab, patient, formatDate, refreshPatient, core, contacts, absences, episodes, diagnoses, medicalValues } = props;
+  const {
+    tab,
+    setTab,
+    patient,
+    formatDate,
+    refreshPatient,
+    initialEpisodeId,
+    core,
+    contacts,
+    absences,
+    episodes,
+    diagnoses,
+    medicalValues,
+  } = props;
   return (
     <>
       <nav className="detail-tabs">
@@ -217,6 +231,7 @@ export default function PatientDetailTabs(props: PatientDetailTabsProps) {
           formatDate={formatDate}
           refreshPatient={refreshPatient}
           episodes={episodes}
+          initialSelectedEpisodeId={initialEpisodeId ?? null}
         />
       )}
       {tab === 'medical' && (

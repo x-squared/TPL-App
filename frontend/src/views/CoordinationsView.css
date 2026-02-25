@@ -1,0 +1,179 @@
+.coord-time-strip {
+  border: 1px solid #8e93a8;
+  border-radius: 8px;
+  padding: 0.9rem;
+  margin: 1.1rem 0 1.25rem;
+}
+
+.coord-time-strip.stopped {
+  background: transparent;
+}
+
+.coord-time-strip.running {
+  background: #fde8e8;
+  border-color: #d49393;
+}
+
+.coord-time-strip-head {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 0.8rem;
+}
+
+.coord-time-controls {
+  display: flex;
+  gap: 0.5rem;
+  margin-left: auto;
+}
+
+.coord-time-btn {
+  min-width: 5.8rem;
+  font-weight: 600;
+}
+
+.coord-time-clock {
+  font-size: 1rem;
+  font-weight: 700;
+  letter-spacing: 0.02em;
+  line-height: 1.2;
+}
+
+.coord-time-stop-editor {
+  margin-top: 0.75rem;
+}
+
+.coord-time-comment {
+  min-height: 4.5rem;
+}
+
+.coord-time-editor {
+  display: grid;
+  grid-template-columns: minmax(9rem, 11rem) minmax(12rem, 14rem) minmax(12rem, 14rem) minmax(12rem, 1fr) auto;
+  gap: 0.5rem;
+  align-items: center;
+  margin-bottom: 0.75rem;
+}
+
+.coord-time-user-input {
+  max-width: 11rem;
+}
+
+.coord-time-datetime-input {
+  max-width: 14rem;
+}
+
+.coord-time-actions {
+  white-space: nowrap;
+  text-align: right;
+}
+
+.coord-time-totals {
+  margin-bottom: 0.75rem;
+  padding: 0.65rem;
+  border: 1px solid #c8cbe0;
+  border-radius: 6px;
+  background: #f6f7fc;
+}
+
+.coord-time-total-list {
+  margin-top: 0.4rem;
+  display: grid;
+  gap: 0.35rem;
+}
+
+.coord-time-total-row {
+  display: flex;
+  justify-content: space-between;
+  gap: 0.8rem;
+}
+
+.coord-comment-field {
+  margin-top: 0.9rem;
+}
+
+.coord-comment-input {
+  min-height: 2.8rem;
+  max-height: 2.8rem;
+  resize: none;
+}
+
+.coord-comment-value {
+  min-height: 2.8rem;
+  white-space: pre-wrap;
+}
+
+.coord-comment-input,
+.coord-comment-value {
+  border-left: 2px solid #222;
+  padding-left: 0.55rem;
+}
+
+.coord-protocol-overview {
+  display: grid;
+  gap: 0.8rem;
+}
+
+.coord-protocol-organ-box {
+  border: 1px solid #222;
+  border-radius: 6px;
+  padding: 0.6rem 0.75rem 0.7rem;
+}
+
+.coord-protocol-organ-box legend {
+  padding: 0 0.35rem;
+  font-weight: 600;
+}
+
+.coord-protocol-entry + .coord-protocol-entry {
+  margin-top: 0.7rem;
+  padding-top: 0.7rem;
+  border-top: 1px dashed #b7b7b7;
+}
+
+.coord-protocol-entry-actions {
+  display: flex;
+  justify-content: flex-end;
+  margin-bottom: 0.15rem;
+}
+
+.coord-protocol-open-btn {
+  border: 1px solid #c7cbdb;
+  background: #f4f5fa;
+  color: #5a6178;
+  border-radius: 999px;
+  padding: 0.08rem 0.5rem;
+  font-size: 0.72rem;
+  font-weight: 500;
+}
+
+.coord-protocol-open-btn:hover:not(:disabled) {
+  background: #e9ecf6;
+  border-color: #adb7d2;
+  color: #3f4660;
+}
+
+.coord-protocol-open-btn:disabled {
+  opacity: 0.5;
+  cursor: default;
+}
+
+.coord-protocol-entry-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(12rem, 1fr));
+  gap: 0.55rem 0.8rem;
+}
+
+.coord-protocol-badge {
+  display: inline-block;
+  margin-left: 0.45rem;
+  padding: 0.05rem 0.4rem;
+  border: 1px solid #2f6f45;
+  border-radius: 999px;
+  background: #e8f6ec;
+  color: #1f5132;
+  font-size: 0.7rem;
+  font-weight: 600;
+  letter-spacing: 0.01em;
+  vertical-align: middle;
+}

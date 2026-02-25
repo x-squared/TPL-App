@@ -3,10 +3,10 @@ import { api, type AppUser, type Code, type Patient, type PatientUpdate } from '
 import type { PatientDetailTab } from '../PatientDetailTabs';
 import type { PatientFormState } from '../PatientDetailTabs';
 
-export function usePatientCore(patientId: number) {
+export function usePatientCore(patientId: number, initialTab: PatientDetailTab = 'patient') {
   const [patient, setPatient] = useState<Patient | null>(null);
   const [loading, setLoading] = useState(true);
-  const [tab, setTab] = useState<PatientDetailTab>('patient');
+  const [tab, setTab] = useState<PatientDetailTab>(initialTab);
   const [editing, setEditing] = useState(false);
   const [saving, setSaving] = useState(false);
   const [languages, setLanguages] = useState<Code[]>([]);
@@ -39,6 +39,10 @@ export function usePatientCore(patientId: number) {
     api.listCatalogues('BLOOD_TYPE').then(setBloodTypes);
     api.listUsers('KOORD').then(setCoordUsers);
   }, [patientId]);
+
+  useEffect(() => {
+    setTab(initialTab);
+  }, [initialTab, patientId]);
 
   const startEditing = () => {
     if (!patient) return;

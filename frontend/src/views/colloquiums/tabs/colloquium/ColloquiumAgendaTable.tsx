@@ -1,4 +1,7 @@
+import { useState } from 'react';
 import type { ColloqiumAgenda, PatientListItem } from '../../../../api';
+import { formatEpisodeDisplayName } from '../../../layout/episodeDisplay';
+import InlineDeleteActions from '../../../layout/InlineDeleteActions';
 
 function formatDate(iso: string | null): string {
   if (!iso) return '–';
@@ -61,6 +64,7 @@ export default function ColloquiumAgendaTable({
   onEditFormChange,
   selectedEpisodeLabel,
 }: Props) {
+  const [confirmDeleteAgendaId, setConfirmDeleteAgendaId] = useState<number | null>(null);
   const hasRows = agendas.length > 0;
   const hasEpisodeSelection = (editingForm.episode_ids?.length ?? 0) > 0 || Boolean(editingForm.episode_id);
   const selectedPreview = selectedEpisodePreviews.length === 1 ? selectedEpisodePreviews[0] : null;
@@ -102,7 +106,11 @@ export default function ColloquiumAgendaTable({
                       {selectedEpisodeLabel}
                     </button>
                   ) : (
-                    (agenda.episode?.fall_nr || `#${agenda.episode_id}`)
+                    formatEpisodeDisplayName({
+                      patientName: `${patient?.first_name ?? ''} ${patient?.name ?? ''}`.trim(),
+                      organName: agenda.episode?.organ?.name_default,
+                      startDate: agenda.episode?.start ?? null,
+                    })
                   )}
                 </td>
                 <td>{patient?.name ?? '–'}</td>
@@ -147,18 +155,17 @@ export default function ColloquiumAgendaTable({
                 </td>
                 <td className="detail-ci-actions">
                   {!isEditing ? (
-                    <>
-                      <button className="ci-edit-inline" onClick={() => onStartEdit(agenda)} title="Edit" aria-label="Edit">✎</button>
-                      <button
-                        className="ci-delete-btn"
-                        onClick={() => onDelete(agenda.id)}
-                        disabled={deletingAgendaId === agenda.id}
-                        title="Delete"
-                        aria-label="Delete"
-                      >
-                        {deletingAgendaId === agenda.id ? '…' : '✕'}
-                      </button>
-                    </>
+                    <InlineDeleteActions
+                      confirming={confirmDeleteAgendaId === agenda.id}
+                      onEdit={() => onStartEdit(agenda)}
+                      onRequestDelete={() => setConfirmDeleteAgendaId(agenda.id)}
+                      onConfirmDelete={() => {
+                        onDelete(agenda.id);
+                        setConfirmDeleteAgendaId(null);
+                      }}
+                      onCancelDelete={() => setConfirmDeleteAgendaId(null)}
+                      deleting={deletingAgendaId === agenda.id}
+                    />
                   ) : (
                     <>
                       <button className="ci-save-inline" onClick={onSave} disabled={savingAgenda || !hasEpisodeSelection} title="Save" aria-label="Save">✓</button>

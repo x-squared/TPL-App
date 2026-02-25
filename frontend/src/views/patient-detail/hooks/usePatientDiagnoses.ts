@@ -5,7 +5,7 @@ export function usePatientDiagnoses(patientId: number, patient: Patient | null, 
   const [diagCodes, setDiagCodes] = useState<Code[]>([]);
   const [addingDiag, setAddingDiag] = useState(false);
   const [diagSaving, setDiagSaving] = useState(false);
-  const [diagForm, setDiagForm] = useState<DiagnosisCreate>({ catalogue_id: 0, comment: '' });
+  const [diagForm, setDiagForm] = useState<DiagnosisCreate>({ catalogue_id: 0, comment: '', is_main: false });
   const [confirmDeleteDiagId, setConfirmDeleteDiagId] = useState<number | null>(null);
   const [editingDiagId, setEditingDiagId] = useState<number | null>(null);
   const [diagEditForm, setDiagEditForm] = useState<DiagnosisUpdate>({});
@@ -13,9 +13,15 @@ export function usePatientDiagnoses(patientId: number, patient: Patient | null, 
   useEffect(() => {
     api.listCatalogues('DIAGNOSIS').then((codes) => {
       setDiagCodes(codes);
-      if (codes.length > 0) setDiagForm((f) => ({ ...f, catalogue_id: codes[0].id }));
+      if (codes.length > 0) {
+        setDiagForm((f) => ({
+          ...f,
+          catalogue_id: codes[0].id,
+          is_main: patient?.diagnoses?.length ? f.is_main ?? false : true,
+        }));
+      }
     });
-  }, [patientId]);
+  }, [patient?.diagnoses?.length, patientId]);
 
   const handleAddDiag = async () => {
     if (!patient || !diagForm.catalogue_id) return;
@@ -23,7 +29,7 @@ export function usePatientDiagnoses(patientId: number, patient: Patient | null, 
     try {
       await api.createDiagnosis(patient.id, diagForm);
       await refreshPatient();
-      setDiagForm({ catalogue_id: diagCodes[0]?.id ?? 0, comment: '' });
+      setDiagForm({ catalogue_id: diagCodes[0]?.id ?? 0, comment: '', is_main: false });
       setAddingDiag(false);
     } finally {
       setDiagSaving(false);
@@ -37,9 +43,9 @@ export function usePatientDiagnoses(patientId: number, patient: Patient | null, 
     await refreshPatient();
   };
 
-  const startEditingDiag = (d: { id: number; catalogue_id: number; comment: string }) => {
+  const startEditingDiag = (d: { id: number; catalogue_id: number; comment: string; is_main: boolean }) => {
     setEditingDiagId(d.id);
-    setDiagEditForm({ catalogue_id: d.catalogue_id, comment: d.comment });
+    setDiagEditForm({ catalogue_id: d.catalogue_id, comment: d.comment, is_main: d.is_main });
     setConfirmDeleteDiagId(null);
   };
 

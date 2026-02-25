@@ -30,6 +30,21 @@
   margin: 0;
 }
 
+.ui-heading-title-with-favorite {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.45rem;
+  flex: 1;
+}
+
+.ui-heading-title-with-favorite h1 {
+  margin: 0;
+}
+
+.ui-detail-heading .patients-add-actions {
+  margin-left: auto;
+}
+
 .ui-back-btn {
   background: transparent;
   border: none;
@@ -42,6 +57,34 @@
 
 .ui-back-btn:hover {
   text-decoration: underline;
+}
+
+.ui-favorite-btn {
+  margin-left: 0;
+  background: transparent;
+  border: 1px solid #c2c7d8;
+  color: #949aab;
+  border-radius: 999px;
+  font-size: 1.08rem;
+  line-height: 1;
+  padding: 0.1rem 0.5rem 0.16rem;
+}
+
+.ui-favorite-btn:hover:not(:disabled) {
+  color: #636a7f;
+  border-color: #aab2ca;
+  background: #f1f3fa;
+}
+
+.ui-favorite-btn.active {
+  color: #4d5363;
+  border-color: #7f879e;
+  background: #dde1eb;
+}
+
+.ui-favorite-btn:disabled {
+  opacity: 0.55;
+  cursor: default;
 }
 
 .ui-filter-bar {
@@ -74,4 +117,9 @@
   text-transform: uppercase;
   letter-spacing: 0.04em;
   font-family: inherit;
+}
+
+.detail-section-heading .ui-heading-title-with-favorite h2,
+.detail-section-heading .ui-heading-title-with-favorite h3 {
+  flex: 0 0 auto;
 }

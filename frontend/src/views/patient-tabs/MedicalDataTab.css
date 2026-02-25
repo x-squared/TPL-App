@@ -14,6 +14,10 @@
   width: 6rem;
 }
 
+.medical-values-section {
+  margin-top: 1.9rem;
+}
+
 .mv-mode-toggle {
   display: flex;
   gap: 0;

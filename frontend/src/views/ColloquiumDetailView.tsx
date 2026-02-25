@@ -1,4 +1,6 @@
 import ColloquiumDetailTabs from './colloquiums/detail/ColloquiumDetailTabs';
+import FavoriteButton from './layout/FavoriteButton';
+import { useFavoriteToggle } from './layout/useFavoriteToggle';
 import { useColloquiumDetailViewModel } from './colloquiums/detail/useColloquiumDetailViewModel';
 import './layout/PanelLayout.css';
 import './PatientDetailView.css';
@@ -13,6 +15,11 @@ interface Props {
 
 export default function ColloquiumDetailView({ colloqiumId, onBack, standalone = false }: Props) {
   const model = useColloquiumDetailViewModel(colloqiumId);
+  const colloquiumFavorite = useFavoriteToggle(model.colloqium ? {
+    favorite_type_key: 'COLLOQUIUM',
+    colloqium_id: model.colloqium.id,
+    name: `${model.colloqium.colloqium_type?.name ?? 'Colloquium'} (${model.colloqium.date})`,
+  } : null);
 
   const openDetachedProtocol = () => {
     const url = `${window.location.origin}${window.location.pathname}?protocol=${colloqiumId}`;
@@ -28,6 +35,14 @@ export default function ColloquiumDetailView({ colloqiumId, onBack, standalone =
       onBack={onBack}
       standalone={standalone}
       onOpenDetachedProtocol={openDetachedProtocol}
+      favoriteControl={(
+        <FavoriteButton
+          active={colloquiumFavorite.isFavorite}
+          disabled={colloquiumFavorite.loading || colloquiumFavorite.saving}
+          onClick={() => void colloquiumFavorite.toggle()}
+          title={colloquiumFavorite.isFavorite ? 'Remove colloquium from favorites' : 'Add colloquium to favorites'}
+        />
+      )}
       draftName={model.draftName}
       draftDate={model.draftDate}
       draftParticipants={model.draftParticipants}

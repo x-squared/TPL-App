@@ -105,18 +105,21 @@ class CoordinationTimeLogBase(BaseModel):
     user_id: int
     start: datetime | None = None
     end: datetime | None = None
+    comment: str = ""
 
 
 class CoordinationTimeLogCreate(BaseModel):
     user_id: int
     start: datetime | None = None
     end: datetime | None = None
+    comment: str = ""
 
 
 class CoordinationTimeLogUpdate(BaseModel):
     user_id: int | None = None
     start: datetime | None = None
     end: datetime | None = None
+    comment: str | None = None
 
 
 class CoordinationTimeLogResponse(CoordinationTimeLogBase):

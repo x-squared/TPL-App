@@ -1,6 +1,7 @@
 import type { Colloqium, ColloqiumAgenda, PatientListItem } from '../../../../api';
 import ColloquiumAgendaTable from './ColloquiumAgendaTable';
 import EpisodePickerDialog from './EpisodePickerDialog';
+import EditableSectionHeader from '../../../layout/EditableSectionHeader';
 
 interface EpisodeChoice {
   episodeId: number;
@@ -125,19 +126,15 @@ export default function ColloquiumDetailSection({
 
   return (
     <section className="detail-section colloquiums-detail-section">
-      <div className="detail-section-heading">
-        <h2>Colloquium Details</h2>
-        {!generalEditing ? (
-          <button className="edit-btn" onClick={onStartGeneralEditing}>Edit</button>
-        ) : (
-          <div className="edit-actions">
-            <button className="save-btn" onClick={onSaveGeneralDetails} disabled={savingGeneral || !generalDirty}>
-              {savingGeneral ? 'Saving...' : 'Save'}
-            </button>
-            <button className="cancel-btn" onClick={onCancelGeneralEditing} disabled={savingGeneral}>Cancel</button>
-          </div>
-        )}
-      </div>
+      <EditableSectionHeader
+        title="Colloquium Details"
+        editing={generalEditing}
+        saving={savingGeneral}
+        dirty={generalDirty}
+        onEdit={onStartGeneralEditing}
+        onSave={onSaveGeneralDetails}
+        onCancel={onCancelGeneralEditing}
+      />
       <div className="detail-grid">
         <div className="detail-field">
           <span className="detail-label">Name</span>

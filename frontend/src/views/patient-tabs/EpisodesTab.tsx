@@ -1,5 +1,8 @@
 import { useEffect, useMemo, useState } from 'react';
 import { api, type ColloqiumAgenda, type ColloqiumType } from '../../api';
+import { formatEpisodeFavoriteName } from '../layout/episodeDisplay';
+import FavoriteButton from '../layout/FavoriteButton';
+import { useFavoriteToggle } from '../layout/useFavoriteToggle';
 import EpisodeDetailGrid from './episodes/EpisodeDetailGrid';
 import EpisodeColloquiumSection from './episodes/EpisodeColloquiumSection';
 import EpisodeMetaSection from './episodes/EpisodeMetaSection';
@@ -15,6 +18,7 @@ export default function EpisodesTab(props: EpisodesTabProps) {
     formatDate,
     refreshPatient,
     episodes,
+    initialSelectedEpisodeId,
   } = props;
 
   const episodeDetailTabs: readonly EpisodeDetailTab[] = [
@@ -49,6 +53,18 @@ export default function EpisodesTab(props: EpisodesTabProps) {
 
   const sortedEpisodes = [...(patient.episodes ?? [])].sort((a, b) => (a.status?.pos ?? 999) - (b.status?.pos ?? 999));
   const selectedEpisode = sortedEpisodes.find((ep) => ep.id === selectedEpisodeId) ?? null;
+  const episodeFavorite = useFavoriteToggle(selectedEpisode ? {
+    favorite_type_key: 'EPISODE',
+    episode_id: selectedEpisode.id,
+    patient_id: patient.id,
+    name: formatEpisodeFavoriteName({
+      fullName: `${patient.first_name} ${patient.name}`.trim(),
+      birthDate: patient.date_of_birth,
+      pid: patient.pid,
+      organName: selectedEpisode.organ?.name_default ?? 'Episode',
+      startDate: selectedEpisode.start,
+    }),
+  } : null);
   const selectableColloqiumTypes = useMemo(() => {
     const selectedOrganId = selectedEpisode?.organ_id ?? -1;
     return [...assignTypes].sort((a, b) => {
@@ -147,6 +163,14 @@ export default function EpisodesTab(props: EpisodesTabProps) {
   };
 
   useEffect(() => {
+    if (initialSelectedEpisodeId == null) return;
+    const exists = sortedEpisodes.some((ep) => ep.id === initialSelectedEpisodeId);
+    setSelectedEpisodeId(exists ? initialSelectedEpisodeId : null);
+    setActiveEpisodeTab('Evaluation');
+    setEditingDetailTab(null);
+  }, [initialSelectedEpisodeId, patient.id, sortedEpisodes]);
+
+  useEffect(() => {
     if (!selectedEpisodeId) {
       setEpisodeColloqiumAgendas([]);
       return;
@@ -243,6 +267,14 @@ export default function EpisodesTab(props: EpisodesTabProps) {
             startEditingEpisodeMeta={startEditingEpisodeMeta}
             handleSaveEpisodeMeta={handleSaveEpisodeMeta}
             setEditingEpisodeMeta={setEditingEpisodeMeta}
+            favoriteControl={(
+              <FavoriteButton
+                active={episodeFavorite.isFavorite}
+                disabled={episodeFavorite.loading || episodeFavorite.saving}
+                onClick={() => void episodeFavorite.toggle()}
+                title={episodeFavorite.isFavorite ? 'Remove episode from favorites' : 'Add episode to favorites'}
+              />
+            )}
           />
 
           <EpisodeProcessTabs

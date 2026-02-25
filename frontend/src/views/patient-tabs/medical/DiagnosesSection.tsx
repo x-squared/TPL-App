@@ -1,5 +1,7 @@
+import { useMemo } from 'react';
 import type { Patient } from '../../../api';
 import type { PatientDiagnosesModel } from '../../patient-detail/PatientDetailTabs';
+import InlineDeleteActions from '../../layout/InlineDeleteActions';
 
 type DiagnosesSectionProps = {
   patient: Patient;
@@ -26,6 +28,20 @@ export default function DiagnosesSection({
   handleDeleteDiag,
   formatDate,
 }: DiagnosesSectionProps) {
+  const hasDiagnoses = Boolean(patient.diagnoses && patient.diagnoses.length > 0);
+  const sortedDiagnoses = useMemo(() => {
+    return [...(patient.diagnoses ?? [])].sort((a, b) => {
+      if ((a.is_main ?? false) !== (b.is_main ?? false)) {
+        return (a.is_main ?? false) ? -1 : 1;
+      }
+      const aLabel = a.catalogue?.name_default ?? a.catalogue?.key ?? '';
+      const bLabel = b.catalogue?.name_default ?? b.catalogue?.key ?? '';
+      const byLabel = aLabel.localeCompare(bLabel, undefined, { sensitivity: 'base' });
+      if (byLabel !== 0) return byLabel;
+      return a.id - b.id;
+    });
+  }, [patient.diagnoses]);
+
   return (
     <section className="detail-section" style={{ marginTop: '1.5rem' }}>
       <div className="detail-section-heading">
@@ -34,12 +50,30 @@ export default function DiagnosesSection({
           <button className="ci-add-btn" onClick={() => setAddingDiag(true)}>+ Add</button>
         )}
       </div>
-      {patient.diagnoses && patient.diagnoses.length > 0 ? (
-        <table className="detail-contact-table">
+      {hasDiagnoses ? (
+        <table className="detail-contact-table diagnosis-table">
+          <thead>
+            <tr>
+              <th>Main</th>
+              <th>Diagnosis</th>
+              <th>Comment</th>
+              <th>Date</th>
+              <th></th>
+            </tr>
+          </thead>
           <tbody>
-            {patient.diagnoses.map((d) => (
+            {sortedDiagnoses.map((d) => (
               editingDiagId === d.id ? (
                 <tr key={d.id} className="ci-editing-row">
+                  <td className="diag-main">
+                    <label className="detail-checkbox">
+                      <input
+                        type="checkbox"
+                        checked={diagEditForm.is_main ?? false}
+                        onChange={(e) => setDiagEditForm((f) => ({ ...f, is_main: e.target.checked }))}
+                      />
+                    </label>
+                  </td>
                   <td className="diag-code">
                     <select
                       className="detail-input ci-inline-input"
@@ -65,23 +99,33 @@ export default function DiagnosesSection({
                   </td>
                 </tr>
               ) : (
-                <tr key={d.id} onDoubleClick={() => startEditingDiag({ id: d.id, catalogue_id: d.catalogue_id, comment: d.comment ?? '' })}>
+                <tr
+                  key={d.id}
+                  onDoubleClick={() =>
+                    startEditingDiag({ id: d.id, catalogue_id: d.catalogue_id, comment: d.comment ?? '', is_main: d.is_main ?? false })
+                  }
+                >
+                  <td className="diag-main">
+                    {d.is_main && <span className="diag-main-badge">Main</span>}
+                  </td>
                   <td className="diag-code">{d.catalogue ? `${d.catalogue.key} – ${d.catalogue.name_default}` : '–'}</td>
                   <td className="diag-comment">{d.comment || ''}</td>
                   <td className="diag-date">{formatDate(d.updated_at ?? d.created_at)}</td>
                   <td className="detail-ci-actions">
-                    {confirmDeleteDiagId === d.id ? (
-                      <span className="ci-confirm">
-                        <span className="ci-confirm-text">Delete?</span>
-                        <button className="ci-confirm-yes" onClick={() => handleDeleteDiag(d.id)}>Yes</button>
-                        <button className="ci-confirm-no" onClick={() => setConfirmDeleteDiagId(null)}>No</button>
-                      </span>
-                    ) : (
-                      <>
-                        <button className="ci-edit-inline" onClick={() => startEditingDiag({ id: d.id, catalogue_id: d.catalogue_id, comment: d.comment ?? '' })} title="Edit">✎</button>
-                        <button className="ci-delete-btn" onClick={() => setConfirmDeleteDiagId(d.id)} title="Delete">×</button>
-                      </>
-                    )}
+                    <InlineDeleteActions
+                      confirming={confirmDeleteDiagId === d.id}
+                      onEdit={() =>
+                        startEditingDiag({
+                          id: d.id,
+                          catalogue_id: d.catalogue_id,
+                          comment: d.comment ?? '',
+                          is_main: d.is_main ?? false,
+                        })
+                      }
+                      onRequestDelete={() => setConfirmDeleteDiagId(d.id)}
+                      onConfirmDelete={() => handleDeleteDiag(d.id)}
+                      onCancelDelete={() => setConfirmDeleteDiagId(null)}
+                    />
                   </td>
                 </tr>
               )
@@ -109,6 +153,18 @@ export default function DiagnosesSection({
             value={diagForm.comment}
             onChange={(e) => setDiagForm((f) => ({ ...f, comment: e.target.value }))}
           />
+          <label className="detail-checkbox ci-main-check">
+            <input
+              type="checkbox"
+              checked={diagForm.is_main ?? false}
+              onChange={(e) => setDiagForm((f) => ({ ...f, is_main: e.target.checked }))}
+              disabled={!hasDiagnoses}
+            />
+            Main
+          </label>
+          {!hasDiagnoses && (
+            <span className="diag-main-hint">First diagnosis is always main.</span>
+          )}
           <div className="ci-add-actions">
             <button className="save-btn" onClick={handleAddDiag} disabled={diagSaving || !diagForm.catalogue_id}>
               {diagSaving ? 'Saving...' : 'Save'}

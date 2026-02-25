@@ -1,4 +1,5 @@
 import type { PatientContactsModel } from '../../patient-detail/PatientDetailTabs';
+import InlineDeleteActions from '../../layout/InlineDeleteActions';
 
 type ContactsSectionProps = PatientContactsModel;
 
@@ -98,18 +99,13 @@ export default function ContactsSection({
                   <td className="detail-ci-data">{ci.data}</td>
                   <td className="detail-ci-comment">{ci.comment || ''}</td>
                   <td className="detail-ci-actions">
-                    {confirmDeleteId === ci.id ? (
-                      <span className="ci-confirm">
-                        <span className="ci-confirm-text">Delete?</span>
-                        <button className="ci-confirm-yes" onClick={() => handleDeleteContact(ci.id)}>Yes</button>
-                        <button className="ci-confirm-no" onClick={() => setConfirmDeleteId(null)}>No</button>
-                      </span>
-                    ) : (
-                      <>
-                        <button className="ci-edit-inline" onClick={() => startEditingCi(ci)} title="Edit">✎</button>
-                        <button className="ci-delete-btn" onClick={() => setConfirmDeleteId(ci.id)} title="Delete">×</button>
-                      </>
-                    )}
+                    <InlineDeleteActions
+                      confirming={confirmDeleteId === ci.id}
+                      onEdit={() => startEditingCi(ci)}
+                      onRequestDelete={() => setConfirmDeleteId(ci.id)}
+                      onConfirmDelete={() => handleDeleteContact(ci.id)}
+                      onCancelDelete={() => setConfirmDeleteId(null)}
+                    />
                   </td>
                 </tr>
               )

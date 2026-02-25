@@ -128,4 +128,14 @@ DEATH_KIND = [
 
 ALL = ALL + DEATH_KIND
 
+# --- FAVORITE_TYPE ----
+FAVORITE_TYPE = [
+    {"type": "FAVORITE_TYPE", "key": "PATIENT", "pos": 1, "ext_sys": "", "ext_key": "", "name_default": "Patient"},
+    {"type": "FAVORITE_TYPE", "key": "EPISODE", "pos": 2, "ext_sys": "", "ext_key": "", "name_default": "Episode"},
+    {"type": "FAVORITE_TYPE", "key": "COLLOQUIUM", "pos": 3, "ext_sys": "", "ext_key": "", "name_default": "Colloquium"},
+    {"type": "FAVORITE_TYPE", "key": "COORDINATION", "pos": 4, "ext_sys": "", "ext_key": "", "name_default": "Coordination"},
+]
+
+ALL = ALL + FAVORITE_TYPE
+
 # ---- Done ----

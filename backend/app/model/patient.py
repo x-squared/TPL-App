@@ -242,6 +242,14 @@ class Diagnosis(Base):
         comment="Optional diagnosis note.",
         info={"label": "Comment"},
     )
+    is_main = Column(
+        "IS_MAIN",
+        Boolean,
+        default=False,
+        nullable=False,
+        comment="Whether this diagnosis is flagged as the main diagnosis.",
+        info={"label": "Main"},
+    )
     changed_by_id = Column(
         "CHANGED_BY",
         Integer,

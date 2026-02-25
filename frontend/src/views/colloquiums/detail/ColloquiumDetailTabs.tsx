@@ -14,6 +14,7 @@ interface Props {
   onBack: () => void;
   standalone: boolean;
   onOpenDetachedProtocol: () => void;
+  favoriteControl?: React.ReactNode;
   draftName: string;
   draftDate: string;
   draftParticipants: string;
@@ -91,6 +92,7 @@ export default function ColloquiumDetailTabs({
   onBack,
   standalone,
   onOpenDetachedProtocol,
+  favoriteControl,
   draftName,
   draftDate,
   draftParticipants,
@@ -134,7 +136,10 @@ export default function ColloquiumDetailTabs({
         <button className="ui-back-btn" onClick={onBack} title="Back to list">
           &larr;
         </button>
-        <h1>Colloquium</h1>
+        <div className="ui-heading-title-with-favorite">
+          <h1>Colloquium</h1>
+          {favoriteControl}
+        </div>
         <div className="patients-add-actions">
           {!standalone && (
             <button className="patients-cancel-btn" onClick={onOpenDetachedProtocol}>

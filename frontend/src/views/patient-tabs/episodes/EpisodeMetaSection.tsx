@@ -10,6 +10,7 @@ interface EpisodeMetaSectionProps {
   startEditingEpisodeMeta: () => void;
   handleSaveEpisodeMeta: () => void;
   setEditingEpisodeMeta: React.Dispatch<React.SetStateAction<boolean>>;
+  favoriteControl?: React.ReactNode;
 }
 
 export default function EpisodeMetaSection({
@@ -21,11 +22,15 @@ export default function EpisodeMetaSection({
   startEditingEpisodeMeta,
   handleSaveEpisodeMeta,
   setEditingEpisodeMeta,
+  favoriteControl,
 }: EpisodeMetaSectionProps) {
   return (
     <>
       <div className="detail-section-heading">
-        <h2>Episode {selectedEpisode.organ?.name_default ?? '–'}</h2>
+        <div className="ui-heading-title-with-favorite">
+          <h2>Episode {selectedEpisode.organ?.name_default ?? '–'}</h2>
+          {favoriteControl}
+        </div>
         {editingEpisodeMeta ? (
           <div className="edit-actions">
             <button

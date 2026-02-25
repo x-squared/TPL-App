@@ -95,6 +95,7 @@ from .coordination import (
     CoordinationResponse,
     CoordinationUpdate,
 )
+from .favorite import FavoriteBase, FavoriteCreate, FavoriteResponse
 from .patient import PatientBase, PatientCreate, PatientListResponse, PatientResponse, PatientUpdate
 from .reference import (
     CatalogueBase,

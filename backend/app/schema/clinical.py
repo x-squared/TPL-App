@@ -75,16 +75,19 @@ class DiagnosisBase(BaseModel):
     patient_id: int
     catalogue_id: int
     comment: str = ""
+    is_main: bool = False
 
 
 class DiagnosisCreate(BaseModel):
     catalogue_id: int
     comment: str = ""
+    is_main: bool = False
 
 
 class DiagnosisUpdate(BaseModel):
     catalogue_id: int | None = None
     comment: str | None = None
+    is_main: bool | None = None
 
 
 class DiagnosisResponse(DiagnosisBase):

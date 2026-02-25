@@ -25,6 +25,7 @@ from . import (
     contact_infos,
     diagnoses,
     episodes,
+    favorites,
     medical_data,
     medical_values,
     patients,
@@ -44,6 +45,7 @@ def register_routers(app: FastAPI) -> None:
     app.include_router(absences.router, prefix="/api")
     app.include_router(diagnoses.router, prefix="/api")
     app.include_router(episodes.router, prefix="/api")
+    app.include_router(favorites.router, prefix="/api")
     app.include_router(medical_data.router, prefix="/api")
     app.include_router(medical_values.router, prefix="/api")
     app.include_router(codes.router, prefix="/api")

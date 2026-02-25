@@ -1,0 +1,32 @@
+import { request } from './core';
+
+export type FavoriteTypeKey = 'PATIENT' | 'EPISODE' | 'COLLOQUIUM' | 'COORDINATION';
+
+export interface Favorite {
+  id: number;
+  user_id: number;
+  favorite_type_key: FavoriteTypeKey;
+  name: string;
+  patient_id: number | null;
+  episode_id: number | null;
+  colloqium_id: number | null;
+  coordination_id: number | null;
+  created_at: string;
+  updated_at: string | null;
+}
+
+export interface FavoriteCreate {
+  favorite_type_key: FavoriteTypeKey;
+  name?: string;
+  patient_id?: number | null;
+  episode_id?: number | null;
+  colloqium_id?: number | null;
+  coordination_id?: number | null;
+}
+
+export const favoritesApi = {
+  listFavorites: () => request<Favorite[]>('/favorites/'),
+  createFavorite: (data: FavoriteCreate) =>
+    request<Favorite>('/favorites/', { method: 'POST', body: JSON.stringify(data) }),
+  deleteFavorite: (id: number) => request<void>(`/favorites/${id}`, { method: 'DELETE' }),
+};

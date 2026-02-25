@@ -1,5 +1,6 @@
 import { useEffect, useMemo, useState } from 'react';
 import { api, type ColloqiumAgenda, type Patient, type PatientListItem } from '../../../../api';
+import { formatEpisodeDisplayName } from '../../../layout/episodeDisplay';
 import type { AgendaDraft } from '../../tabs/protocol/ColloquiumProtocolTab';
 import type { AgendaEditForm, EpisodeChoice, EpisodePreview, PickerRow } from '../colloquiumDetailViewModelTypes';
 
@@ -99,13 +100,6 @@ export function useColloquiumAgendaManager(colloqiumId: number, organId: number 
     return () => window.clearTimeout(timeoutId);
   }, [agendas, agendaDrafts]);
 
-  const selectedEpisodeLabel = (() => {
-    if (agendaForm.episode_ids.length > 1) return `${agendaForm.episode_ids.length} episodes selected`;
-    if (!agendaForm.episode_id) return 'Select episode';
-    const fromAgenda = agendas.find((a) => a.episode_id === agendaForm.episode_id);
-    return fromAgenda?.episode?.fall_nr || `Episode #${agendaForm.episode_id}`;
-  })();
-
   const episodePreviewById = useMemo(() => {
     const map: Record<number, EpisodePreview> = {};
     agendas.forEach((agenda) => {
@@ -150,6 +144,18 @@ export function useColloquiumAgendaManager(colloqiumId: number, organId: number 
       .map((id) => episodePreviewById[id])
       .filter((item): item is EpisodePreview => Boolean(item));
   }, [agendaForm.episode_id, agendaForm.episode_ids, episodePreviewById]);
+
+  const selectedEpisodeLabel = (() => {
+    if (agendaForm.episode_ids.length > 1) return `${agendaForm.episode_ids.length} episodes selected`;
+    if (!agendaForm.episode_id) return 'Select episode';
+    const preview = episodePreviewById[agendaForm.episode_id];
+    if (!preview) return `Episode #${agendaForm.episode_id}`;
+    return formatEpisodeDisplayName({
+      patientName: `${preview.patientFirstName} ${preview.patientName}`.trim(),
+      organName: preview.organName,
+      startDate: preview.start,
+    });
+  })();
 
   const pickerNonSelectableEpisodeIds = useMemo(() => {
     const currentEditedAgenda = editingAgendaId && editingAgendaId > 0

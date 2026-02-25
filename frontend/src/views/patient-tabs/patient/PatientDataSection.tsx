@@ -1,5 +1,6 @@
 import type { Patient } from '../../../api';
 import type { PatientCoreModel } from '../../patient-detail/PatientDetailTabs';
+import EditableSectionHeader from '../../layout/EditableSectionHeader';
 
 type PatientDataSectionProps = {
   patient: Patient;
@@ -38,19 +39,14 @@ export default function PatientDataSection({
 }: PatientDataSectionProps) {
   return (
     <section className="detail-section">
-      <div className="detail-section-heading">
-        <h2>Basic data</h2>
-        {!editing ? (
-          <button className="edit-btn" onClick={startEditing}>Edit</button>
-        ) : (
-          <div className="edit-actions">
-            <button className="save-btn" onClick={handleSave} disabled={saving}>
-              {saving ? 'Saving...' : 'Save'}
-            </button>
-            <button className="cancel-btn" onClick={cancelEditing} disabled={saving}>Cancel</button>
-          </div>
-        )}
-      </div>
+      <EditableSectionHeader
+        title="Basic data"
+        editing={editing}
+        saving={saving}
+        onEdit={startEditing}
+        onSave={handleSave}
+        onCancel={cancelEditing}
+      />
       <div className="detail-grid">
         <div className="detail-field">
           <span className="detail-label">PID</span>

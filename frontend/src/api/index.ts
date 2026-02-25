@@ -23,11 +23,29 @@ export type {
   ColloqiumUpdate,
   ColloqiumType,
 } from './colloqiums';
+export { coordinationsApi } from './coordinations';
+export type {
+  Coordination,
+  CoordinationCreate,
+  CoordinationUpdate,
+  CoordinationDonor,
+  CoordinationDonorUpsert,
+  CoordinationOrigin,
+  CoordinationOriginUpsert,
+  CoordinationTimeLog,
+  CoordinationTimeLogCreate,
+  CoordinationTimeLogUpdate,
+  CoordinationEpisode,
+} from './coordinations';
+export { favoritesApi } from './favorites';
+export type { Favorite, FavoriteCreate, FavoriteTypeKey } from './favorites';
 
 import { authApi, codesApi, medicalValueTemplatesApi, usersApi } from './core';
 import { patientsApi } from './patients';
 import { tasksApi } from './tasks';
 import { colloqiumsApi } from './colloqiums';
+import { coordinationsApi } from './coordinations';
+import { favoritesApi } from './favorites';
 
 export const api = {
   ...authApi,
@@ -37,4 +55,6 @@ export const api = {
   ...patientsApi,
   ...tasksApi,
   ...colloqiumsApi,
+  ...coordinationsApi,
+  ...favoritesApi,
 };

@@ -48,6 +48,8 @@
 .app-layout {
   display: flex;
   min-height: 100vh;
+  height: 100vh;
+  overflow: hidden;
 }
 
 /* ── Sidebar ── */
@@ -58,9 +60,11 @@
   background: #16162a;
   border-right: 1px solid #2a2a40;
   transition: width 0.2s ease;
-  position: relative;
+  position: sticky;
+  top: 0;
   flex: 0 0 auto;
   flex-shrink: 0;
+  height: 100vh;
 }
 
 .sidebar.open {
@@ -235,6 +239,8 @@
   min-width: 0;
   padding: 2rem;
   max-width: 1200px;
+  height: 100vh;
+  overflow-y: auto;
 }
 
 .app-standalone .main-content {

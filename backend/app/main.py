@@ -2,6 +2,7 @@ from contextlib import asynccontextmanager
 
 from fastapi import FastAPI
 from fastapi.middleware.cors import CORSMiddleware
+from sqlalchemy import text
 
 from .database import Base, SessionLocal, engine
 from .routers import register_routers
@@ -17,9 +18,18 @@ from .seed import (
 )
 
 
+def ensure_diagnosis_is_main_column() -> None:
+    with engine.begin() as conn:
+        columns = conn.execute(text("PRAGMA table_info('DIAGNOSIS')")).mappings().all()
+        has_is_main = any(column["name"] == "IS_MAIN" for column in columns)
+        if not has_is_main:
+            conn.execute(text("ALTER TABLE DIAGNOSIS ADD COLUMN IS_MAIN BOOLEAN NOT NULL DEFAULT 0"))
+
+
 @asynccontextmanager
 async def lifespan(app: FastAPI):
     Base.metadata.create_all(bind=engine)
+    ensure_diagnosis_is_main_column()
     db = SessionLocal()
     try:
         sync_codes(db)

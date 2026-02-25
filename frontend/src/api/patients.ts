@@ -66,6 +66,7 @@ export interface Diagnosis {
   catalogue_id: number;
   catalogue: Code | null;
   comment: string;
+  is_main: boolean;
   changed_by_id: number | null;
   changed_by_user: AppUser | null;
   created_at: string;
@@ -75,11 +76,13 @@ export interface Diagnosis {
 export interface DiagnosisCreate {
   catalogue_id: number;
   comment?: string;
+  is_main?: boolean;
 }
 
 export interface DiagnosisUpdate {
   catalogue_id?: number;
   comment?: string;
+  is_main?: boolean;
 }
 
 /* ── Medical Value ── */

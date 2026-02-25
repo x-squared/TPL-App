@@ -1,4 +1,5 @@
 import type { PatientAbsencesModel } from '../../patient-detail/PatientDetailTabs';
+import InlineDeleteActions from '../../layout/InlineDeleteActions';
 
 type AbsencesSectionProps = PatientAbsencesModel & {
   formatDate: (iso: string | null) => string;
@@ -71,18 +72,13 @@ export default function AbsencesSection({
                   <td className="ab-date">{formatDate(ab.end)}</td>
                   <td className="ab-comment">{ab.comment || ''}</td>
                   <td className="detail-ci-actions">
-                    {confirmDeleteAbId === ab.id ? (
-                      <span className="ci-confirm">
-                        <span className="ci-confirm-text">Delete?</span>
-                        <button className="ci-confirm-yes" onClick={() => handleDeleteAbsence(ab.id)}>Yes</button>
-                        <button className="ci-confirm-no" onClick={() => setConfirmDeleteAbId(null)}>No</button>
-                      </span>
-                    ) : (
-                      <>
-                        <button className="ci-edit-inline" onClick={() => startEditingAb(ab)} title="Edit">✎</button>
-                        <button className="ci-delete-btn" onClick={() => setConfirmDeleteAbId(ab.id)} title="Delete">×</button>
-                      </>
-                    )}
+                    <InlineDeleteActions
+                      confirming={confirmDeleteAbId === ab.id}
+                      onEdit={() => startEditingAb(ab)}
+                      onRequestDelete={() => setConfirmDeleteAbId(ab.id)}
+                      onConfirmDelete={() => handleDeleteAbsence(ab.id)}
+                      onCancelDelete={() => setConfirmDeleteAbId(null)}
+                    />
                   </td>
                 </tr>
               )

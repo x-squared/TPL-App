@@ -16,6 +16,13 @@ def _get_patient_or_404(patient_id: int, db: Session) -> Patient:
     return patient
 
 
+def _clear_other_main_diagnoses(patient_id: int, db: Session, keep_id: int | None = None) -> None:
+    query = db.query(Diagnosis).filter(Diagnosis.patient_id == patient_id, Diagnosis.is_main.is_(True))
+    if keep_id is not None:
+        query = query.filter(Diagnosis.id != keep_id)
+    query.update({Diagnosis.is_main: False}, synchronize_session=False)
+
+
 @router.get("/", response_model=list[DiagnosisResponse])
 def list_diagnoses(patient_id: int, db: Session = Depends(get_db)):
     _get_patient_or_404(patient_id, db)
@@ -35,9 +42,21 @@ def create_diagnosis(
     current_user: User = Depends(get_current_user),
 ):
     _get_patient_or_404(patient_id, db)
+    has_existing = (
+        db.query(Diagnosis.id)
+        .filter(Diagnosis.patient_id == patient_id)
+        .first()
+        is not None
+    )
+    payload_data = payload.model_dump()
+    if not has_existing:
+        # First diagnosis for a patient must always be the main diagnosis.
+        payload_data["is_main"] = True
+    if payload_data.get("is_main"):
+        _clear_other_main_diagnoses(patient_id, db)
     diagnosis = Diagnosis(
         patient_id=patient_id,
-        **payload.model_dump(),
+        **payload_data,
         changed_by_id=current_user.id,
     )
     db.add(diagnosis)
@@ -61,6 +80,8 @@ def update_diagnosis(
     )
     if not diagnosis:
         raise HTTPException(status_code=404, detail="Diagnosis not found")
+    if payload.is_main is True:
+        _clear_other_main_diagnoses(patient_id, db, keep_id=diagnosis.id)
     for key, value in payload.model_dump(exclude_unset=True).items():
         setattr(diagnosis, key, value)
     diagnosis.changed_by_id = current_user.id

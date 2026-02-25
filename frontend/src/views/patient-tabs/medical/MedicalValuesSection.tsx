@@ -1,4 +1,5 @@
 import type { PatientMedicalValuesModel } from '../../patient-detail/PatientDetailTabs';
+import InlineDeleteActions from '../../layout/InlineDeleteActions';
 
 type MedicalValuesSectionProps = PatientMedicalValuesModel & {
   formatDate: (iso: string | null) => string;
@@ -44,7 +45,7 @@ export default function MedicalValuesSection({
   handleAddMv,
 }: MedicalValuesSectionProps) {
   return (
-    <section className="detail-section">
+    <section className="detail-section medical-values-section">
       <div className="detail-section-heading">
         <h2>Medical Values</h2>
         {!addingMv && (
@@ -217,18 +218,13 @@ export default function MedicalValuesSection({
                   <td className="mv-renew-date">{formatDate(mv.renew_date)}</td>
                   <td className="diag-date">{formatDate(mv.updated_at ?? mv.created_at)}</td>
                   <td className="detail-ci-actions">
-                    {confirmDeleteMvId === mv.id ? (
-                      <span className="ci-confirm">
-                        <span className="ci-confirm-text">Delete?</span>
-                        <button className="ci-confirm-yes" onClick={() => handleDeleteMv(mv.id)}>Yes</button>
-                        <button className="ci-confirm-no" onClick={() => setConfirmDeleteMvId(null)}>No</button>
-                      </span>
-                    ) : (
-                      <>
-                        <button className="ci-edit-inline" onClick={() => startEditingMv({ id: mv.id, medical_value_template_id: mv.medical_value_template_id, name: mv.name, value: mv.value, renew_date: mv.renew_date })} title="Edit">✎</button>
-                        <button className="ci-delete-btn" onClick={() => setConfirmDeleteMvId(mv.id)} title="Delete">×</button>
-                      </>
-                    )}
+                    <InlineDeleteActions
+                      confirming={confirmDeleteMvId === mv.id}
+                      onEdit={() => startEditingMv({ id: mv.id, medical_value_template_id: mv.medical_value_template_id, name: mv.name, value: mv.value, renew_date: mv.renew_date })}
+                      onRequestDelete={() => setConfirmDeleteMvId(mv.id)}
+                      onConfirmDelete={() => handleDeleteMv(mv.id)}
+                      onCancelDelete={() => setConfirmDeleteMvId(null)}
+                    />
                   </td>
                 </tr>
               )

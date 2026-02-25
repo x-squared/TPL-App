@@ -15,4 +15,5 @@ export interface EpisodesTabProps {
   formatDate: (iso: string | null) => string;
   refreshPatient: () => Promise<void>;
   episodes: PatientEpisodesModel;
+  initialSelectedEpisodeId?: number | null;
 }

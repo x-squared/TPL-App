@@ -1,0 +1,116 @@
+import { useCallback, useEffect, useMemo, useState } from 'react';
+import { api, type Code, type Favorite, type Patient } from '../../api';
+import { formatEpisodeFavoriteName } from '../layout/episodeDisplay';
+
+const fallbackTypeLabels: Record<string, string> = {
+  PATIENT: 'Patient',
+  EPISODE: 'Episode',
+  COLLOQUIUM: 'Colloquium',
+  COORDINATION: 'Coordination',
+};
+
+export function useMyWorkViewModel() {
+  const [loading, setLoading] = useState(true);
+  const [favorites, setFavorites] = useState<Favorite[]>([]);
+  const [favoriteTypes, setFavoriteTypes] = useState<Code[]>([]);
+  const [error, setError] = useState('');
+  const [deletingFavoriteId, setDeletingFavoriteId] = useState<number | null>(null);
+  const [episodeFavoriteNames, setEpisodeFavoriteNames] = useState<Record<number, string>>({});
+
+  const load = useCallback(async () => {
+    setLoading(true);
+    setError('');
+    try {
+      const [favoriteRows, typeCodes] = await Promise.all([
+        api.listFavorites(),
+        api.listCodes('FAVORITE_TYPE'),
+      ]);
+      setFavorites(favoriteRows);
+      setFavoriteTypes(typeCodes);
+      const episodeFavorites = favoriteRows.filter(
+        (row) => row.favorite_type_key === 'EPISODE' && row.patient_id != null && row.episode_id != null,
+      );
+      if (episodeFavorites.length > 0) {
+        const patientIds = [...new Set(
+          episodeFavorites.map((row) => row.patient_id).filter((id): id is number => typeof id === 'number'),
+        )];
+        const patientEntries = await Promise.all(
+          patientIds.map(async (id) => {
+            try {
+              const patient = await api.getPatient(id);
+              return [id, patient] as const;
+            } catch {
+              return null;
+            }
+          }),
+        );
+        const patientsById: Record<number, Patient> = {};
+        for (const entry of patientEntries) {
+          if (!entry) continue;
+          patientsById[entry[0]] = entry[1];
+        }
+        const namesByFavoriteId: Record<number, string> = {};
+        for (const row of episodeFavorites) {
+          const patient = row.patient_id != null ? patientsById[row.patient_id] : undefined;
+          const episode = patient?.episodes?.find((ep) => ep.id === row.episode_id);
+          if (!patient || !episode) continue;
+          namesByFavoriteId[row.id] = formatEpisodeFavoriteName({
+            fullName: `${patient.first_name} ${patient.name}`.trim(),
+            birthDate: patient.date_of_birth,
+            pid: patient.pid,
+            organName: episode.organ?.name_default ?? null,
+            startDate: episode.start,
+          });
+        }
+        setEpisodeFavoriteNames(namesByFavoriteId);
+      } else {
+        setEpisodeFavoriteNames({});
+      }
+    } catch (err) {
+      setError(err instanceof Error ? err.message : 'Failed to load favorites');
+    } finally {
+      setLoading(false);
+    }
+  }, []);
+
+  useEffect(() => {
+    void load();
+  }, [load]);
+
+  const typeLabels = useMemo(() => {
+    const map: Record<string, string> = { ...fallbackTypeLabels };
+    for (const code of favoriteTypes) {
+      map[code.key] = code.name_default;
+    }
+    return map;
+  }, [favoriteTypes]);
+
+  const deleteFavorite = useCallback(async (id: number) => {
+    setDeletingFavoriteId(id);
+    try {
+      await api.deleteFavorite(id);
+      setFavorites((prev) => prev.filter((item) => item.id !== id));
+      setEpisodeFavoriteNames((prev) => {
+        if (!(id in prev)) return prev;
+        const next = { ...prev };
+        delete next[id];
+        return next;
+      });
+    } catch (err) {
+      setError(err instanceof Error ? err.message : 'Failed to delete favorite');
+    } finally {
+      setDeletingFavoriteId(null);
+    }
+  }, []);
+
+  return {
+    loading,
+    error,
+    favorites,
+    typeLabels,
+    deletingFavoriteId,
+    episodeFavoriteNames,
+    deleteFavorite,
+    refresh: load,
+  };
+}

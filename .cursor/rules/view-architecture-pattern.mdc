@@ -21,6 +21,22 @@ For any new complex view (like patients or colloquiums), follow this structure b
   - Reuse existing shared class patterns before introducing new classes.
   - Prefer extending shared classes over duplicating style blocks across views.
   - Avoid inline styles except for truly dynamic values that cannot be expressed cleanly via classes.
+- **Shared rendering utilities**:
+  - Centralize repeated display formatting logic (for example dates/times, empty placeholders, labels) in shared utilities under `frontend/src/views/layout/` (or another shared location) instead of duplicating inline logic in components.
+  - For date rendering in view output, use shared formatters (for example `dateFormat.ts`) and keep formatting consistent across list/detail/header sections.
+  - Do not use ad-hoc `toLocaleDateString()`/manual slicing in components when a shared formatter exists.
+- **Editable panel standard**:
+  - For data sections in detail views, default to explicit **Edit / Save / Cancel** behavior.
+  - Fields are read-only until Edit is clicked; Cancel restores the original data.
+  - Save is section-scoped and disabled when there are no changes.
+  - Reuse shared panel controls (for example `EditableSectionHeader`) instead of duplicating heading/action markup.
+  - Exceptions (autosave/inline editing) must be explicitly requested.
+- **Table add/delete consistency**:
+  - In table sections, use consistent add button styling (`ci-add-btn`) and placement (in the section heading, right aligned).
+  - For table-managed records, default to inline add/edit rows in the table (instead of detached editors), unless a different UX is explicitly requested.
+  - Destructive row deletes must require explicit confirmation before execution.
+  - Reuse shared row-action components (for example `InlineDeleteActions`) for edit/delete/confirm UI instead of duplicating per-table markup.
+  - Keep confirmation wording and Yes/No controls consistent across tables.
 - **Behavior preservation**: Refactors must not change UX logic unless explicitly requested.
 - **Validation**: After refactors, run frontend build/typecheck and fix all issues before finishing.
 

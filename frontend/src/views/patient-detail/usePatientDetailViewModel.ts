@@ -1,3 +1,4 @@
+import type { PatientDetailTab } from './PatientDetailTabs';
 import type { PatientDetailTabsProps } from './PatientDetailTabs';
 import { usePatientAbsences } from './hooks/usePatientAbsences';
 import { usePatientContacts } from './hooks/usePatientContacts';
@@ -7,8 +8,12 @@ import { usePatientEpisodes } from './hooks/usePatientEpisodes';
 import { usePatientMedicalValues } from './hooks/usePatientMedicalValues';
 import { formatDate } from './patientDetailUtils';
 
-export function usePatientDetailViewModel(patientId: number) {
-  const core = usePatientCore(patientId);
+export function usePatientDetailViewModel(
+  patientId: number,
+  initialTab?: PatientDetailTab,
+  initialEpisodeId: number | null = null,
+) {
+  const core = usePatientCore(patientId, initialTab);
   const contacts = usePatientContacts(patientId, core.patient, core.refreshPatient);
   const absences = usePatientAbsences(core.patient, core.refreshPatient);
   const diagnoses = usePatientDiagnoses(patientId, core.patient, core.refreshPatient);
@@ -27,6 +32,7 @@ export function usePatientDetailViewModel(patientId: number) {
       patient: core.patient,
       formatDate,
       refreshPatient: core.refreshPatient,
+      initialEpisodeId,
       core: {
         editing: core.editing,
         startEditing: core.startEditing,
