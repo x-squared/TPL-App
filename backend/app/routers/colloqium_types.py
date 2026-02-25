@@ -36,7 +36,7 @@ def create_colloqium_type(
     current_user: User = Depends(get_current_user),
 ):
     _validate_organ_or_422(db=db, organ_id=payload.organ_id)
-    item = ColloqiumType(**payload.model_dump(), changed_by=current_user.id)
+    item = ColloqiumType(**payload.model_dump(), changed_by_id=current_user.id)
     db.add(item)
     db.commit()
     return (
@@ -62,7 +62,7 @@ def update_colloqium_type(
         _validate_organ_or_422(db=db, organ_id=data["organ_id"])
     for key, value in data.items():
         setattr(item, key, value)
-    item.changed_by = current_user.id
+    item.changed_by_id = current_user.id
     db.commit()
     return (
         db.query(ColloqiumType)

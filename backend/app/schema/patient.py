@@ -11,7 +11,7 @@ from .clinical import (
     EpisodeResponse,
     MedicalValueResponse,
 )
-from .reference import CatalogueResponse, UserResponse
+from .reference import CatalogueResponse, CodeResponse, UserResponse
 
 
 class PatientBase(BaseModel):
@@ -22,6 +22,7 @@ class PatientBase(BaseModel):
     date_of_death: date | None = None
     ahv_nr: str = ""
     lang: str = ""
+    sex_id: int | None = None
     blood_type_id: int | None = None
     resp_coord_id: int | None = None
     translate: bool = False
@@ -39,6 +40,7 @@ class PatientUpdate(BaseModel):
     date_of_death: date | None = None
     ahv_nr: str | None = None
     lang: str | None = None
+    sex_id: int | None = None
     blood_type_id: int | None = None
     resp_coord_id: int | None = None
     translate: bool | None = None
@@ -48,6 +50,7 @@ class PatientResponse(PatientBase):
     model_config = ConfigDict(from_attributes=True)
 
     id: int
+    sex: CodeResponse | None = None
     blood_type: CatalogueResponse | None = None
     resp_coord: UserResponse | None = None
     contact_infos: list[ContactInfoResponse] = []
@@ -55,7 +58,7 @@ class PatientResponse(PatientBase):
     diagnoses: list[DiagnosisResponse] = []
     medical_values: list[MedicalValueResponse] = []
     episodes: list[EpisodeResponse] = []
-    changed_by: int | None = None
+    changed_by_id: int | None = None
     changed_by_user: UserResponse | None = None
     created_at: datetime
     updated_at: datetime | None = None
@@ -72,6 +75,8 @@ class PatientListResponse(BaseModel):
     date_of_death: date | None = None
     ahv_nr: str = ""
     lang: str = ""
+    sex_id: int | None = None
+    sex: CodeResponse | None = None
     blood_type_id: int | None = None
     blood_type: CatalogueResponse | None = None
     resp_coord_id: int | None = None

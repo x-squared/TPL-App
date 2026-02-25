@@ -51,6 +51,15 @@ DIAGNOSIS = [
 
 ALL = ALL + DIAGNOSIS
 
+# ---- DIAGNOSIS_DONOR ----
+DIAGNOSIS_DONOR = [
+    {"type": "DIAGNOSIS_DONOR", "key": "DCD", "pos": 1, "ext_sys": "", "ext_key": "DCD", "name_default": "DCD"},
+    {"type": "DIAGNOSIS_DONOR", "key": "CTR", "pos": 2, "ext_sys": "", "ext_key": "CTR", "name_default": "CTR"},
+    {"type": "DIAGNOSIS_DONOR", "key": "CHE", "pos": 3, "ext_sys": "", "ext_key": "CHE", "name_default": "CHE"},
+]
+
+ALL = ALL + DIAGNOSIS_DONOR
+
 # --- BLOOD TYPE ----
 BLOOD_TYPE = [
     {"type": "BLOOD_TYPE", "key": "O", "pos": 1, "ext_sys": "", "ext_key": "", "name_default": "O"},
@@ -64,5 +73,75 @@ BLOOD_TYPE = [
 ]
 
 ALL = ALL + BLOOD_TYPE
+
+# ---- HOSPITAL ----
+HOSPITAL = [
+    {"type": "HOSPITAL", "key": "USZ", "pos": 1, "ext_sys": "", "ext_key": "USZ", "name_default": "Universitätsspital Zürich"},
+    {"type": "HOSPITAL", "key": "INSEL", "pos": 2, "ext_sys": "", "ext_key": "INSEL", "name_default": "Inselspital Bern"},
+    {"type": "HOSPITAL", "key": "CHUV", "pos": 3, "ext_sys": "", "ext_key": "CHUV", "name_default": "CHUV Lausanne"},
+    {"type": "HOSPITAL", "key": "HUG", "pos": 4, "ext_sys": "", "ext_key": "HUG", "name_default": "HUG Genève"},
+]
+
+ALL = ALL + HOSPITAL
+
+# ---- PROCUREMENT_EFFECT ----
+PROCUREMENT_EFFECT = [
+    {
+        "type": "PROCUREMENT_EFFECT",
+        "key": "1",
+        "pos": 1,
+        "ext_sys": "",
+        "ext_key": "1",
+        "name_default": "Procured and transplanted",
+    },
+    {
+        "type": "PROCUREMENT_EFFECT",
+        "key": "2",
+        "pos": 2,
+        "ext_sys": "",
+        "ext_key": "2",
+        "name_default": "Procured, not transplanted",
+    },
+    {
+        "type": "PROCUREMENT_EFFECT",
+        "key": "3",
+        "pos": 3,
+        "ext_sys": "",
+        "ext_key": "3",
+        "name_default": "Not procured",
+    },
+]
+
+ALL = ALL + PROCUREMENT_EFFECT
+
+# ---- ORGAN_REJECTION_SEQUEL ----
+ORGAN_REJECTION_SEQUEL = [
+    {
+        "type": "ORGAN_REJECTION_SEQUEL",
+        "key": "DISCARDED",
+        "pos": 1,
+        "ext_sys": "",
+        "ext_key": "DISCARDED",
+        "name_default": "Discarded",
+    },
+    {
+        "type": "ORGAN_REJECTION_SEQUEL",
+        "key": "RESEARCH",
+        "pos": 2,
+        "ext_sys": "",
+        "ext_key": "RESEARCH",
+        "name_default": "Used for research",
+    },
+    {
+        "type": "ORGAN_REJECTION_SEQUEL",
+        "key": "TRAINING",
+        "pos": 3,
+        "ext_sys": "",
+        "ext_key": "TRAINING",
+        "name_default": "Used for training",
+    },
+]
+
+ALL = ALL + ORGAN_REJECTION_SEQUEL
 
 # ---- Done ----

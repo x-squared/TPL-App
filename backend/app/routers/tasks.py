@@ -132,7 +132,7 @@ def create_task(
         closed_at=closed_at,
         closed_by_id=closed_by_id,
         comment=payload.comment,
-        changed_by=current_user.id,
+        changed_by_id=current_user.id,
     )
     db.add(task)
     db.commit()
@@ -192,7 +192,7 @@ def update_task(
     if not _is_closed_status_key(status_key):
         task.closed_at = None
         task.closed_by_id = None
-    task.changed_by = current_user.id
+    task.changed_by_id = current_user.id
     db.commit()
     return (
         db.query(Task)

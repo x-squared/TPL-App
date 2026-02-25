@@ -23,7 +23,7 @@ class Code(Base):
         nullable=False,
         index=True,
         comment="Logical code namespace (e.g. DATATYPE, ROLE, ORGAN).",
-        info={"label": "Type"},
+        info={"label": "Code Type"},
     )
     key = Column(
         "KEY",
@@ -82,7 +82,7 @@ class Catalogue(Base):
         nullable=False,
         index=True,
         comment="Logical catalogue namespace (e.g. LANGUAGE, DIAGNOSIS, BLOOD_TYPE).",
-        info={"label": "Type"},
+        info={"label": "Catalogue Type"},
     )
     key = Column(
         "KEY",

@@ -6,9 +6,10 @@ export interface TaskGroup {
   task_group_template_id: number | null;
   name: string;
   episode_id: number | null;
+  colloqium_agenda_id: number | null;
   tpl_phase_id: number | null;
   tpl_phase: Code | null;
-  changed_by: number | null;
+  changed_by_id: number | null;
   changed_by_user: AppUser | null;
   created_at: string;
   updated_at: string | null;
@@ -29,7 +30,7 @@ export interface Task {
   closed_by_id: number | null;
   closed_by: AppUser | null;
   comment: string;
-  changed_by: number | null;
+  changed_by_id: number | null;
   changed_by_user: AppUser | null;
   closed: boolean;
   created_at: string;
@@ -59,6 +60,7 @@ export interface TaskCreate {
 export interface TaskGroupListParams {
   patient_id?: number;
   episode_id?: number;
+  colloqium_agenda_id?: number;
 }
 
 export interface TaskGroupCreate {
@@ -66,6 +68,7 @@ export interface TaskGroupCreate {
   task_group_template_id?: number | null;
   name?: string;
   episode_id?: number | null;
+  colloqium_agenda_id?: number | null;
   tpl_phase_id?: number | null;
 }
 
@@ -74,6 +77,7 @@ export interface TaskGroupUpdate {
   task_group_template_id?: number | null;
   name?: string;
   episode_id?: number | null;
+  colloqium_agenda_id?: number | null;
   tpl_phase_id?: number | null;
 }
 
@@ -87,6 +91,7 @@ export const tasksApi = {
     const query = new URLSearchParams();
     if (params?.patient_id !== undefined) query.set('patient_id', String(params.patient_id));
     if (params?.episode_id !== undefined) query.set('episode_id', String(params.episode_id));
+    if (params?.colloqium_agenda_id !== undefined) query.set('colloqium_agenda_id', String(params.colloqium_agenda_id));
     return request<TaskGroup[]>(`/task-groups/${query.toString() ? `?${query.toString()}` : ''}`);
   },
   createTaskGroup: (data: TaskGroupCreate) =>

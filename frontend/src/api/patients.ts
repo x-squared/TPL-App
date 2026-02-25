@@ -11,7 +11,7 @@ export interface ContactInfo {
   comment: string;
   main: boolean;
   pos: number;
-  changed_by: number | null;
+  changed_by_id: number | null;
   changed_by_user: AppUser | null;
   created_at: string;
   updated_at: string | null;
@@ -40,7 +40,7 @@ export interface Absence {
   start: string;
   end: string;
   comment: string;
-  changed_by: number | null;
+  changed_by_id: number | null;
   changed_by_user: AppUser | null;
   created_at: string;
   updated_at: string | null;
@@ -66,7 +66,7 @@ export interface Diagnosis {
   catalogue_id: number;
   catalogue: Code | null;
   comment: string;
-  changed_by: number | null;
+  changed_by_id: number | null;
   changed_by_user: AppUser | null;
   created_at: string;
   updated_at: string | null;
@@ -95,7 +95,7 @@ export interface MedicalValue {
   pos: number;
   value: string;
   renew_date: string | null;
-  changed_by: number | null;
+  changed_by_id: number | null;
   changed_by_user: AppUser | null;
   created_at: string;
   updated_at: string | null;
@@ -150,7 +150,7 @@ export interface Episode {
   tpl_date: string | null;
   fup_recipient_card_done: boolean;
   fup_recipient_card_date: string | null;
-  changed_by: number | null;
+  changed_by_id: number | null;
   changed_by_user: AppUser | null;
   created_at: string;
   updated_at: string | null;
@@ -221,6 +221,8 @@ export interface Patient {
   date_of_death: string | null;
   ahv_nr: string;
   lang: string;
+  sex_id: number | null;
+  sex: Code | null;
   blood_type_id: number | null;
   blood_type: Code | null;
   resp_coord_id: number | null;
@@ -231,7 +233,7 @@ export interface Patient {
   diagnoses: Diagnosis[];
   medical_values: MedicalValue[];
   episodes: Episode[];
-  changed_by: number | null;
+  changed_by_id: number | null;
   changed_by_user: AppUser | null;
   created_at: string;
   updated_at: string | null;
@@ -246,6 +248,8 @@ export interface PatientListItem {
   date_of_death: string | null;
   ahv_nr: string;
   lang: string;
+  sex_id: number | null;
+  sex: Code | null;
   blood_type_id: number | null;
   blood_type: Code | null;
   resp_coord_id: number | null;
@@ -276,6 +280,7 @@ export interface PatientUpdate {
   date_of_death?: string | null;
   ahv_nr?: string;
   lang?: string;
+  sex_id?: number | null;
   blood_type_id?: number | null;
   resp_coord_id?: number | null;
   translate?: boolean;

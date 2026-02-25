@@ -38,7 +38,7 @@ export default function EpisodeDetailGrid({
               <input
                 className="detail-input"
                 type={isDateField(key) ? 'date' : 'text'}
-                value={detailForm[key] ?? ''}
+                value={String(detailForm[key] ?? '')}
                 onChange={(e) =>
                   setDetailForm((f) => ({
                     ...f,

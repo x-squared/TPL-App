@@ -5,12 +5,10 @@
 }
 
 .diag-comment {
-  color: #aaa;
   font-size: 0.85rem;
 }
 
 .diag-date {
-  color: #888;
   font-size: 0.8rem;
   white-space: nowrap;
   width: 6rem;
@@ -65,7 +63,6 @@
 .mv-pos {
   width: 2rem;
   text-align: center;
-  color: #888;
   font-size: 0.8rem;
 }
 
@@ -82,7 +79,6 @@
 }
 
 .mv-datatype {
-  color: #aaa;
   font-size: 0.85rem;
   white-space: nowrap;
   width: 6rem;

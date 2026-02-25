@@ -4,6 +4,8 @@ import type { Episode, Task, TaskGroup } from '../../api';
 export interface TaskBoardCriteria {
   patientId?: number;
   episodeId?: number | null;
+  colloqiumAgendaId?: number | null;
+  colloqiumId?: number | null;
   tplPhaseId?: number | null;
   extraParams?: Record<string, string | number | boolean | null | undefined>;
 }
@@ -14,6 +16,12 @@ export interface TaskBoardProps {
   onAddClick?: () => void;
   maxTableHeight?: number | string;
   headerMeta?: ReactNode;
+  hideFilters?: boolean;
+  showGroupHeadingsDefault?: boolean;
+  includeClosedTasks?: boolean;
+  autoCreateToken?: number;
+  onAutoCreateSaved?: () => void;
+  onAutoCreateDiscarded?: () => void;
 }
 
 export interface TaskReferenceContext {

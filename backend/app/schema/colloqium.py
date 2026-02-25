@@ -29,7 +29,7 @@ class ColloqiumTypeResponse(ColloqiumTypeBase):
 
     id: int
     organ: CodeResponse | None = None
-    changed_by: int | None = None
+    changed_by_id: int | None = None
     changed_by_user: UserResponse | None = None
     created_at: datetime
     updated_at: datetime | None = None
@@ -56,7 +56,7 @@ class ColloqiumResponse(ColloqiumBase):
 
     id: int
     colloqium_type: ColloqiumTypeResponse | None = None
-    changed_by: int | None = None
+    changed_by_id: int | None = None
     changed_by_user: UserResponse | None = None
     created_at: datetime
     updated_at: datetime | None = None
@@ -88,7 +88,7 @@ class ColloqiumAgendaResponse(ColloqiumAgendaBase):
     id: int
     colloqium: ColloqiumResponse | None = None
     episode: EpisodeResponse | None = None
-    changed_by: int | None = None
+    changed_by_id: int | None = None
     changed_by_user: UserResponse | None = None
     created_at: datetime
     updated_at: datetime | None = None

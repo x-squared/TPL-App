@@ -63,6 +63,15 @@ CONTACT = [
 
 ALL = ALL + CONTACT
 
+# --- SEX ----
+SEX = [
+    {"type": "SEX", "key": "F", "pos": 1, "ext_sys": "", "ext_key": "", "name_default": "Female"},
+    {"type": "SEX", "key": "M", "pos": 2, "ext_sys": "", "ext_key": "", "name_default": "Male"},
+    {"type": "SEX", "key": "X", "pos": 3, "ext_sys": "", "ext_key": "", "name_default": "Other"},
+]
+
+ALL = ALL + SEX
+
 # --- ORGAN ---
 
 ORGAN = [
@@ -73,6 +82,8 @@ ORGAN = [
     {"type": "ORGAN", "key": "LUNG", "pos": 5, "ext_sys": "", "ext_key": "", "name_default": "Lunge"},
     {"type": "ORGAN", "key": "HEART", "pos": 6, "ext_sys": "", "ext_key": "", "name_default": "Herz"},
     {"type": "ORGAN", "key": "INTESTINE", "pos": 7, "ext_sys": "", "ext_key": "", "name_default": "Dünndarm"},
+    {"type": "ORGAN", "key": "VESSELS", "pos": 8, "ext_sys": "", "ext_key": "", "name_default": "Vessels"},
+    {"type": "ORGAN", "key": "HEART_VALVE", "pos": 9, "ext_sys": "", "ext_key": "", "name_default": "Heart valve"},
 ]
 
 ALL = ALL + ORGAN
@@ -101,5 +112,20 @@ TPL_STATUS = [
 ]
 
 ALL = ALL + TPL_STATUS
+
+# --- COORDINATION_STATUS ----
+COORDINATION_STATUS = [
+    {"type": "COORDINATION_STATUS", "key": "OPEN", "pos": 1, "ext_sys": "", "ext_key": "", "name_default": "Open"},
+]
+
+ALL = ALL + COORDINATION_STATUS
+
+# --- DEATH_KIND ----
+DEATH_KIND = [
+    {"type": "DEATH_KIND", "key": "DCD", "pos": 1, "ext_sys": "", "ext_key": "", "name_default": "DCD"},
+    {"type": "DEATH_KIND", "key": "DBD", "pos": 2, "ext_sys": "", "ext_key": "", "name_default": "DBD"},
+]
+
+ALL = ALL + DEATH_KIND
 
 # ---- Done ----

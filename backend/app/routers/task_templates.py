@@ -67,7 +67,7 @@ def create_task_template(
         due_days_default=payload.due_days_default,
         is_active=payload.is_active,
         sort_pos=payload.sort_pos,
-        changed_by=current_user.id,
+        changed_by_id=current_user.id,
     )
     db.add(template)
     db.commit()
@@ -100,7 +100,7 @@ def update_task_template(
         _get_code_or_422(db=db, code_id=data["priority_id"], code_type="PRIORITY", field_name="priority_id")
     for key, value in data.items():
         setattr(template, key, value)
-    template.changed_by = current_user.id
+    template.changed_by_id = current_user.id
     db.commit()
     return (
         db.query(TaskTemplate)

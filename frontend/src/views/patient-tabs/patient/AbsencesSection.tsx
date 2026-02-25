@@ -1,25 +1,8 @@
-import type { PatientTabProps } from './types';
+import type { PatientAbsencesModel } from '../../patient-detail/PatientDetailTabs';
 
-type AbsencesSectionProps = Pick<
-  PatientTabProps,
-  | 'addingAbsence'
-  | 'setAddingAbsence'
-  | 'sortedAbsences'
-  | 'editingAbId'
-  | 'abEditForm'
-  | 'setAbEditForm'
-  | 'abSaving'
-  | 'handleSaveAb'
-  | 'cancelEditingAb'
-  | 'startEditingAb'
-  | 'confirmDeleteAbId'
-  | 'setConfirmDeleteAbId'
-  | 'handleDeleteAbsence'
-  | 'abForm'
-  | 'setAbForm'
-  | 'handleAddAbsence'
-  | 'formatDate'
->;
+type AbsencesSectionProps = PatientAbsencesModel & {
+  formatDate: (iso: string | null) => string;
+};
 
 export default function AbsencesSection({
   addingAbsence,

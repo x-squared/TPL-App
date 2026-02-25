@@ -3,7 +3,11 @@ from sqlalchemy.orm import Session
 from ..models import (
     Catalogue,
     Code,
+    Colloqium,
+    ColloqiumAgenda,
+    ColloqiumType,
     ContactInfo,
+    Episode,
     MedicalValueTemplate,
     Patient,
     Task,
@@ -37,8 +41,10 @@ def sync_catalogues(db: Session) -> None:
 def sync_patients(db: Session) -> None:
     """Replace all PATIENT and CONTACT_INFO rows with seed data on every startup."""
     from .contact_infos_data import ALL as contact_records
+    from .episodes_data import ALL as episode_records
     from .patients_data import ALL as patient_records
 
+    db.query(Episode).delete()
     db.query(ContactInfo).delete()
     db.query(Patient).delete()
     for entry in patient_records:
@@ -55,6 +61,26 @@ def sync_patients(db: Session) -> None:
         )
         if patient and code:
             db.add(ContactInfo(patient_id=patient.id, type_id=code.id, **raw))
+
+    for entry in episode_records:
+        raw = dict(entry)
+        patient = db.query(Patient).filter(Patient.pid == raw.pop("patient_pid")).first()
+        organ = db.query(Code).filter(Code.type == "ORGAN", Code.key == raw.pop("organ_key")).first()
+        status_key = raw.pop("status_key", None)
+        status = (
+            db.query(Code).filter(Code.type == "TPL_STATUS", Code.key == status_key).first()
+            if status_key
+            else None
+        )
+        if patient and organ:
+            db.add(
+                Episode(
+                    patient_id=patient.id,
+                    organ_id=organ.id,
+                    status_id=status.id if status else None,
+                    **raw,
+                )
+            )
     db.commit()
 
 
@@ -90,6 +116,38 @@ def sync_users(db: Session) -> None:
             .first()
         )
         db.add(User(role_id=role.id if role else None, **raw))
+    db.commit()
+
+
+def sync_colloqiums(db: Session) -> None:
+    """Replace all COLLOQIUM_TYPE and COLLOQIUM rows with seed data on every startup."""
+    from .colloqium_types_data import ALL as colloqium_type_records
+    from .colloqiums_data import ALL as colloqium_records
+
+    db.query(ColloqiumAgenda).delete()
+    db.query(Colloqium).delete()
+    db.query(ColloqiumType).delete()
+    db.flush()
+
+    created_types: dict[str, ColloqiumType] = {}
+    for entry in colloqium_type_records:
+        raw = dict(entry)
+        organ = db.query(Code).filter(Code.type == "ORGAN", Code.key == raw.pop("organ_key")).first()
+        if not organ:
+            continue
+        item = ColloqiumType(organ_id=organ.id, **raw)
+        db.add(item)
+        db.flush()
+        created_types[item.name] = item
+
+    for entry in colloqium_records:
+        raw = dict(entry)
+        type_name = raw.pop("type_name")
+        colloqium_type = created_types.get(type_name)
+        if not colloqium_type:
+            continue
+        db.add(Colloqium(colloqium_type_id=colloqium_type.id, **raw))
+
     db.commit()
 
 

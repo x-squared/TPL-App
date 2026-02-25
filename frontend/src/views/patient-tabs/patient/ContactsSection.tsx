@@ -1,30 +1,6 @@
-import type { PatientTabProps } from './types';
+import type { PatientContactsModel } from '../../patient-detail/PatientDetailTabs';
 
-type ContactsSectionProps = Pick<
-  PatientTabProps,
-  | 'addingContact'
-  | 'setAddingContact'
-  | 'sortedContactInfos'
-  | 'editingCiId'
-  | 'ciEditForm'
-  | 'setCiEditForm'
-  | 'ciSaving'
-  | 'handleSaveCi'
-  | 'cancelEditingCi'
-  | 'ciDragId'
-  | 'ciDragOverId'
-  | 'setCiDragId'
-  | 'setCiDragOverId'
-  | 'handleCiDrop'
-  | 'startEditingCi'
-  | 'confirmDeleteId'
-  | 'setConfirmDeleteId'
-  | 'handleDeleteContact'
-  | 'contactTypes'
-  | 'ciForm'
-  | 'setCiForm'
-  | 'handleAddContact'
->;
+type ContactsSectionProps = PatientContactsModel;
 
 export default function ContactsSection({
   addingContact,

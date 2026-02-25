@@ -39,7 +39,7 @@ def create_absence(
     absence = Absence(
         patient_id=patient_id,
         **payload.model_dump(),
-        changed_by=current_user.id,
+        changed_by_id=current_user.id,
     )
     db.add(absence)
     db.commit()
@@ -64,7 +64,7 @@ def update_absence(
         raise HTTPException(status_code=404, detail="Absence not found")
     for key, value in payload.model_dump(exclude_unset=True).items():
         setattr(absence, key, value)
-    absence.changed_by = current_user.id
+    absence.changed_by_id = current_user.id
     db.commit()
     db.refresh(absence)
     return absence

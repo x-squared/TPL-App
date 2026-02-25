@@ -1,0 +1,19 @@
+---
+description: Keep editable view layout, editing flow, and table styling consistent across frontend
+globs: frontend/src/**/*.{ts,tsx,css}
+alwaysApply: false
+---
+
+# UI Editing Consistency
+
+Use one consistent pattern for editable views unless a feature explicitly requires different behavior.
+
+- **Layout**: Reuse shared section structure/classes (`detail-section`, `detail-section-heading`, `detail-grid`, `detail-field`, `detail-label`, `detail-value`, `detail-input`) instead of creating parallel local variants.
+- **Edit flow**: Read-only by default; enter edit mode only via `Edit`; in edit mode show `Save` + `Cancel`; cancel restores last persisted values.
+- **Save logic**: Do not introduce implicit autosave for top-level/general fields unless explicitly requested. Explicit save is default.
+- **Autosave scope**: If autosave is requested, limit it to the specifically requested sub-section only.
+- **Buttons**: Reuse existing shared button classes (`edit-btn`, `save-btn`, `cancel-btn`, `ci-add-btn`) and match placement used in recipient views.
+- **Tables**: Use shared table classes (`data-table`, existing table wrappers) and keep default table text color/style consistent; avoid local visual overrides unless required.
+- **Styles**: Prefer shared/global styles in common files for repeated patterns; keep view CSS for truly view-specific rules only.
+
+When updating one editable view, check sibling views for divergence and align to this standard where safe.

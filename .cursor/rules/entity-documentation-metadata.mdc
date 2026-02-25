@@ -1,17 +1,27 @@
 ---
 description: Require entity and attribute documentation metadata on SQLAlchemy models
-globs: backend/app/models.py
+globs: backend/app/model/**/*.py
 alwaysApply: false
 ---
 
 # Entity Documentation and Metadata
 
-For every SQLAlchemy entity in `backend/app/models.py`:
+For every SQLAlchemy entity in `backend/app/model/**/*.py`:
 
 - Add a short class docstring that explains the entity purpose in business terms.
 - Ensure every column has:
   - a human-readable label in `Column.info["label"]`
   - a column comment in `Column.comment`
+
+## Column layout rule
+
+- Keep each `Column(...)` declaration in a two-part layout:
+  - first part: technical definition (name, type, key/nullable/default/FK/index/etc.)
+  - second part: documentation metadata (`comment` and `info`)
+- Put `comment` and `info` after all technical arguments.
+- Prefer explicit FK labels over generic labels:
+  - use domain-qualified labels like `Contact Type`, `Task Status`, `User Role`
+  - avoid ambiguous single-word labels like `Type`, `Status`, or `Role` when they refer to references.
 
 ## Preferred pattern
 

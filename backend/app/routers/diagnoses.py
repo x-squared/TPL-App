@@ -38,7 +38,7 @@ def create_diagnosis(
     diagnosis = Diagnosis(
         patient_id=patient_id,
         **payload.model_dump(),
-        changed_by=current_user.id,
+        changed_by_id=current_user.id,
     )
     db.add(diagnosis)
     db.commit()
@@ -63,7 +63,7 @@ def update_diagnosis(
         raise HTTPException(status_code=404, detail="Diagnosis not found")
     for key, value in payload.model_dump(exclude_unset=True).items():
         setattr(diagnosis, key, value)
-    diagnosis.changed_by = current_user.id
+    diagnosis.changed_by_id = current_user.id
     db.commit()
     db.refresh(diagnosis)
     return diagnosis

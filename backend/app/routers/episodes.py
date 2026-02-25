@@ -42,7 +42,7 @@ def create_episode(
     episode = Episode(
         patient_id=patient_id,
         **payload.model_dump(),
-        changed_by=current_user.id,
+        changed_by_id=current_user.id,
     )
     db.add(episode)
     db.commit()
@@ -78,7 +78,7 @@ def update_episode(
         setattr(episode, key, value)
     if episode.closed and not episode.end:
         raise HTTPException(status_code=422, detail="closed can only be true if end date is set")
-    episode.changed_by = current_user.id
+    episode.changed_by_id = current_user.id
     db.commit()
     return (
         db.query(Episode)

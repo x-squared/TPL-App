@@ -7,6 +7,7 @@ from .database import Base, SessionLocal, engine
 from .routers import register_routers
 from .seed import (
     sync_catalogues,
+    sync_colloqiums,
     sync_codes,
     sync_medical_value_templates,
     sync_patients,
@@ -24,6 +25,7 @@ async def lifespan(app: FastAPI):
         sync_codes(db)
         sync_catalogues(db)
         sync_users(db)
+        sync_colloqiums(db)
         sync_patients(db)
         sync_medical_value_templates(db)
         sync_task_templates(db)

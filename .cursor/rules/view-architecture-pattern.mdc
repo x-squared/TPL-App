@@ -1,0 +1,27 @@
+---
+description: Structure complex frontend views with thin containers and composed view-model hooks
+alwaysApply: true
+---
+
+# Complex View Architecture Pattern
+
+For any new complex view (like patients or colloquiums), follow this structure by default:
+
+- **Thin container view**: The top-level `*View.tsx` should mostly render layout/header and pass grouped models to tabs/sections.
+- **Composed view-model hook**: Put behavior in `use*ViewModel.ts` that composes focused hooks (`use*Core`, `use*Section`, etc.).
+- **Focused hooks**: One hook per concern (core entity loading, contacts, episodes, diagnoses, medical values, agenda, sync), each with clear inputs/outputs.
+- **Grouped props, not flat prop lists**: Pass grouped models (`core`, `contacts`, `episodes`, `medicalValues`, ...) into tab components instead of dozens of flat props.
+- **Typed contracts**: Define and export explicit model interfaces used across tabs/sections; avoid `any`.
+- **File placement**: Keep new files in feature subdirectories under `frontend/src/views/<feature>/...` (e.g. `hooks/`, `tabs/`, `types/`, `utils/`).
+- **CSS architecture**:
+  - Keep shared/reusable styling in central files (for example shared layout/table/style files).
+  - Keep feature CSS in `frontend/src/views/<feature>/...` and scope it to feature-specific behavior only.
+  - Always create universally applicable styles where useful.
+  - If an existing style pattern is already accepted across views, prefer promoting it to a shared/global style instead of re-implementing it locally.
+  - Reuse existing shared class patterns before introducing new classes.
+  - Prefer extending shared classes over duplicating style blocks across views.
+  - Avoid inline styles except for truly dynamic values that cannot be expressed cleanly via classes.
+- **Behavior preservation**: Refactors must not change UX logic unless explicitly requested.
+- **Validation**: After refactors, run frontend build/typecheck and fix all issues before finishing.
+
+Use this pattern for all upcoming complex views unless the user asks for a different architecture.

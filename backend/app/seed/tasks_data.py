@@ -10,7 +10,7 @@ TASK_GROUPS = [
         "name": "Test Base Group",
         "episode_id": None,
         "tpl_phase_key": None,
-        "changed_by": 1,
+        "changed_by_id": 1,
     },
 ]
 
@@ -27,7 +27,7 @@ TASKS = [
         "closed_at": None,
         "closed_by_ext_id": None,
         "comment": "",
-        "changed_by": 1,
+        "changed_by_id": 1,
     },
     {
         "task_group_seed_key": "TEST_BASE",
@@ -39,7 +39,7 @@ TASKS = [
         "closed_at": None,
         "closed_by_ext_id": None,
         "comment": "",
-        "changed_by": 1,
+        "changed_by_id": 1,
     },
     {
         "task_group_seed_key": "TEST_BASE",
@@ -51,6 +51,6 @@ TASKS = [
         "closed_at": None,
         "closed_by_ext_id": None,
         "comment": "",
-        "changed_by": 1,
+        "changed_by_id": 1,
     },
 ]

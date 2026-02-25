@@ -1,6 +1,7 @@
-import { useState } from 'react';
-import { api } from '../../api';
+import { useEffect, useMemo, useState } from 'react';
+import { api, type ColloqiumAgenda, type ColloqiumType } from '../../api';
 import EpisodeDetailGrid from './episodes/EpisodeDetailGrid';
+import EpisodeColloquiumSection from './episodes/EpisodeColloquiumSection';
 import EpisodeMetaSection from './episodes/EpisodeMetaSection';
 import EpisodeProcessTabs from './episodes/EpisodeProcessTabs';
 import EpisodeTable from './episodes/EpisodeTable';
@@ -11,25 +12,9 @@ import './EpisodesTab.css';
 export default function EpisodesTab(props: EpisodesTabProps) {
   const {
     patient,
-    addingEpisode,
-    setAddingEpisode,
-    editingEpId,
-    epEditForm,
-    setEpEditForm,
-    epSaving,
-    handleSaveEp,
-    cancelEditingEp,
-    startEditingEp,
-    confirmDeleteEpId,
-    setConfirmDeleteEpId,
-    handleDeleteEpisode,
-    organCodes,
-    tplStatusCodes,
-    epForm,
-    setEpForm,
-    handleAddEpisode,
     formatDate,
     refreshPatient,
+    episodes,
   } = props;
 
   const episodeDetailTabs: readonly EpisodeDetailTab[] = [
@@ -47,6 +32,14 @@ export default function EpisodesTab(props: EpisodesTabProps) {
   const [detailSaveError, setDetailSaveError] = useState('');
   const [editingEpisodeMeta, setEditingEpisodeMeta] = useState(false);
   const [episodeMetaForm, setEpisodeMetaForm] = useState({ comment: '', cave: '' });
+  const [episodeColloqiumAgendas, setEpisodeColloqiumAgendas] = useState<ColloqiumAgenda[]>([]);
+  const [loadingEpisodeColloqiums, setLoadingEpisodeColloqiums] = useState(false);
+  const [assignDialogOpen, setAssignDialogOpen] = useState(false);
+  const [assigningColloqium, setAssigningColloqium] = useState(false);
+  const [assignError, setAssignError] = useState('');
+  const [assignTypes, setAssignTypes] = useState<ColloqiumType[]>([]);
+  const [assignTypeId, setAssignTypeId] = useState<number | null>(null);
+  const [assignDate, setAssignDate] = useState(() => new Date().toISOString().slice(0, 10));
 
   const evalKeys = ['eval_start', 'eval_end', 'eval_assigned_to', 'eval_stat', 'eval_register_date', 'eval_excluded', 'eval_non_list_sent'] as const;
   const listKeys = ['list_start', 'list_end', 'list_rs_nr', 'list_reason_delist', 'list_expl_delist', 'list_delist_sent'] as const;
@@ -56,6 +49,15 @@ export default function EpisodesTab(props: EpisodesTabProps) {
 
   const sortedEpisodes = [...(patient.episodes ?? [])].sort((a, b) => (a.status?.pos ?? 999) - (b.status?.pos ?? 999));
   const selectedEpisode = sortedEpisodes.find((ep) => ep.id === selectedEpisodeId) ?? null;
+  const selectableColloqiumTypes = useMemo(() => {
+    const selectedOrganId = selectedEpisode?.organ_id ?? -1;
+    return [...assignTypes].sort((a, b) => {
+      const aRelevant = a.organ_id === selectedOrganId ? 0 : 1;
+      const bRelevant = b.organ_id === selectedOrganId ? 0 : 1;
+      if (aRelevant !== bRelevant) return aRelevant - bRelevant;
+      return a.name.localeCompare(b.name);
+    });
+  }, [assignTypes, selectedEpisode?.organ_id]);
 
   const evalEntries = selectedEpisode ? evalKeys.map((key) => [key, selectedEpisode[key] ?? null] as const) : [];
   const listEntries = selectedEpisode ? listKeys.map((key) => [key, selectedEpisode[key] ?? null] as const) : [];
@@ -134,35 +136,93 @@ export default function EpisodesTab(props: EpisodesTabProps) {
     }
   };
 
+  const reloadEpisodeColloqiums = async (episodeId: number) => {
+    setLoadingEpisodeColloqiums(true);
+    try {
+      const rows = await api.listColloqiumAgendas({ episodeId });
+      setEpisodeColloqiumAgendas(rows);
+    } finally {
+      setLoadingEpisodeColloqiums(false);
+    }
+  };
+
+  useEffect(() => {
+    if (!selectedEpisodeId) {
+      setEpisodeColloqiumAgendas([]);
+      return;
+    }
+    void reloadEpisodeColloqiums(selectedEpisodeId);
+  }, [selectedEpisodeId]);
+
+  const openAssignDialog = async () => {
+    if (!selectedEpisode) return;
+    setAssignError('');
+    setAssignDialogOpen(true);
+    const types = await api.listColloqiumTypes();
+    setAssignTypes(types);
+    const eligible = types.filter((type) => type.organ_id === selectedEpisode.organ_id);
+    setAssignTypeId(eligible.length === 1 ? eligible[0].id : null);
+  };
+
+  const handleAssignEpisodeToColloqium = async () => {
+    if (!selectedEpisode || !assignTypeId || !assignDate) return;
+    setAssignError('');
+    setAssigningColloqium(true);
+    try {
+      const allColloqiums = await api.listColloqiums();
+      const selectedType = assignTypes.find((type) => type.id === assignTypeId);
+      let target = allColloqiums.find(
+        (item) => item.colloqium_type_id === assignTypeId && item.date === assignDate,
+      );
+      if (!target) {
+        target = await api.createColloqium({
+          colloqium_type_id: assignTypeId,
+          date: assignDate,
+          participants: selectedType?.participants ?? '',
+        });
+      }
+      await api.createColloqiumAgenda({
+        colloqium_id: target.id,
+        episode_id: selectedEpisode.id,
+      });
+      await reloadEpisodeColloqiums(selectedEpisode.id);
+      setAssignDialogOpen(false);
+    } catch (err) {
+      setAssignError(err instanceof Error ? err.message : 'Could not assign episode to colloquium.');
+    } finally {
+      setAssigningColloqium(false);
+    }
+  };
+
   return (
     <section className="detail-section" style={{ marginTop: '1.5rem' }}>
       <div className="detail-section-heading">
         <h2>Episodes</h2>
-        {!addingEpisode && (
-          <button className="ci-add-btn" onClick={() => setAddingEpisode(true)}>+ Add</button>
+        {!episodes.addingEpisode && (
+          <button className="ci-add-btn" onClick={() => episodes.setAddingEpisode(true)}>+ Add</button>
         )}
       </div>
 
       <EpisodeTable
         patientEpisodes={patient.episodes ?? []}
         sortedEpisodes={sortedEpisodes}
-        addingEpisode={addingEpisode}
-        setAddingEpisode={setAddingEpisode}
-        editingEpId={editingEpId}
-        epEditForm={epEditForm}
-        setEpEditForm={setEpEditForm}
-        epSaving={epSaving}
-        handleSaveEp={handleSaveEp}
-        cancelEditingEp={cancelEditingEp}
-        startEditingEp={startEditingEp}
-        confirmDeleteEpId={confirmDeleteEpId}
-        setConfirmDeleteEpId={setConfirmDeleteEpId}
-        handleDeleteEpisode={handleDeleteEpisode}
-        organCodes={organCodes}
-        tplStatusCodes={tplStatusCodes}
-        epForm={epForm}
-        setEpForm={setEpForm}
-        handleAddEpisode={handleAddEpisode}
+        addingEpisode={episodes.addingEpisode}
+        setAddingEpisode={episodes.setAddingEpisode}
+        editingEpId={episodes.editingEpId}
+        epEditForm={episodes.epEditForm}
+        setEpEditForm={episodes.setEpEditForm}
+        epSaving={episodes.epSaving}
+        handleSaveEp={episodes.handleSaveEp}
+        cancelEditingEp={episodes.cancelEditingEp}
+        startEditingEp={episodes.startEditingEp}
+        confirmDeleteEpId={episodes.confirmDeleteEpId}
+        setConfirmDeleteEpId={episodes.setConfirmDeleteEpId}
+        handleDeleteEpisode={episodes.handleDeleteEpisode}
+        organCodes={episodes.organCodes}
+        tplStatusCodes={episodes.tplStatusCodes}
+        epForm={episodes.epForm}
+        setEpForm={episodes.setEpForm}
+        handleAddEpisode={episodes.handleAddEpisode}
         formatDate={formatDate}
         selectedEpisodeId={selectedEpisodeId}
         onSelectEpisode={(id) => {
@@ -247,6 +307,23 @@ export default function EpisodesTab(props: EpisodesTabProps) {
               formatDate={formatDate}
             />
           )}
+
+          <EpisodeColloquiumSection
+            loadingEpisodeColloqiums={loadingEpisodeColloqiums}
+            episodeColloqiumAgendas={episodeColloqiumAgendas}
+            onOpenAssignDialog={openAssignDialog}
+            formatDate={formatDate}
+            assignDialogOpen={assignDialogOpen}
+            assigningColloqium={assigningColloqium}
+            assignError={assignError}
+            selectableColloqiumTypes={selectableColloqiumTypes}
+            assignTypeId={assignTypeId}
+            setAssignTypeId={setAssignTypeId}
+            assignDate={assignDate}
+            setAssignDate={setAssignDate}
+            onAssign={handleAssignEpisodeToColloqium}
+            onCloseAssignDialog={() => setAssignDialogOpen(false)}
+          />
         </section>
       )}
     </section>

@@ -1,26 +1,10 @@
-import type { MedicalDataTabProps } from './types';
+import type { Patient } from '../../../api';
+import type { PatientDiagnosesModel } from '../../patient-detail/PatientDetailTabs';
 
-type DiagnosesSectionProps = Pick<
-  MedicalDataTabProps,
-  | 'patient'
-  | 'addingDiag'
-  | 'setAddingDiag'
-  | 'diagCodes'
-  | 'diagForm'
-  | 'setDiagForm'
-  | 'diagSaving'
-  | 'handleAddDiag'
-  | 'editingDiagId'
-  | 'diagEditForm'
-  | 'setDiagEditForm'
-  | 'handleSaveDiag'
-  | 'cancelEditingDiag'
-  | 'startEditingDiag'
-  | 'confirmDeleteDiagId'
-  | 'setConfirmDeleteDiagId'
-  | 'handleDeleteDiag'
-  | 'formatDate'
->;
+type DiagnosesSectionProps = {
+  patient: Patient;
+  formatDate: (iso: string | null) => string;
+} & PatientDiagnosesModel;
 
 export default function DiagnosesSection({
   patient,

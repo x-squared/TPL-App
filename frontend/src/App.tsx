@@ -8,12 +8,19 @@ import {
 } from './api';
 import './App.css';
 import './styles/TableStyles.css';
+import ColloquiumDetailView from './views/ColloquiumDetailView';
+import ColloquiumsView from './views/ColloquiumsView';
 import PatientDetailView from './views/PatientDetailView';
 import PatientsView from './views/PatientsView';
 
-type Page = 'patients';
+type Page = 'patients' | 'colloquiums';
 
 function App() {
+  const protocolParam = new URLSearchParams(window.location.search).get('protocol');
+  const standaloneProtocolId = protocolParam && !Number.isNaN(Number(protocolParam))
+    ? Number(protocolParam)
+    : null;
+
   const [user, setUser] = useState<AppUser | null>(null);
   const [authLoading, setAuthLoading] = useState(true);
   const [extId, setExtId] = useState('TKOORD');
@@ -21,6 +28,7 @@ function App() {
 
   const [page, setPage] = useState<Page>('patients');
   const [selectedPatientId, setSelectedPatientId] = useState<number | null>(null);
+  const [selectedColloqiumId, setSelectedColloqiumId] = useState<number | null>(null);
   const [sidebarOpen, setSidebarOpen] = useState(true);
   const [userMenuOpen, setUserMenuOpen] = useState(false);
 
@@ -87,6 +95,20 @@ function App() {
   }
 
   /* ── Main app ── */
+  if (standaloneProtocolId !== null) {
+    return (
+      <div className="app-layout app-standalone">
+        <main className="main-content">
+          <ColloquiumDetailView
+            colloqiumId={standaloneProtocolId}
+            onBack={() => window.close()}
+            standalone
+          />
+        </main>
+      </div>
+    );
+  }
+
   return (
     <div className="app-layout">
       <aside className={`sidebar ${sidebarOpen ? 'open' : 'collapsed'}`}>
@@ -104,11 +126,19 @@ function App() {
         <nav className="sidebar-nav">
           <button
             className={`nav-item ${page === 'patients' ? 'active' : ''}`}
-            onClick={() => { setPage('patients'); setSelectedPatientId(null); }}
+            onClick={() => { setPage('patients'); setSelectedPatientId(null); setSelectedColloqiumId(null); }}
             title="Recipients"
           >
             <span className="nav-icon">{'\u2695'}</span>
             {sidebarOpen && <span className="nav-label">Recipients</span>}
+          </button>
+          <button
+            className={`nav-item ${page === 'colloquiums' ? 'active' : ''}`}
+            onClick={() => { setPage('colloquiums'); setSelectedPatientId(null); }}
+            title="Colloquiums"
+          >
+            <span className="nav-icon">{'\u{1F4CB}'}</span>
+            {sidebarOpen && <span className="nav-label">Colloquiums</span>}
           </button>
         </nav>
 
@@ -145,6 +175,15 @@ function App() {
           <PatientDetailView
             patientId={selectedPatientId}
             onBack={() => setSelectedPatientId(null)}
+          />
+        )}
+        {page === 'colloquiums' && selectedColloqiumId === null && (
+          <ColloquiumsView onOpenColloqium={(id) => setSelectedColloqiumId(id)} />
+        )}
+        {page === 'colloquiums' && selectedColloqiumId !== null && (
+          <ColloquiumDetailView
+            colloqiumId={selectedColloqiumId}
+            onBack={() => setSelectedColloqiumId(null)}
           />
         )}
       </main>

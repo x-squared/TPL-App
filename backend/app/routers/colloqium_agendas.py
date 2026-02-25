@@ -3,7 +3,7 @@ from sqlalchemy.orm import Session, joinedload
 
 from ..auth import get_current_user
 from ..database import get_db
-from ..models import Colloqium, ColloqiumAgenda, Episode, User
+from ..models import Colloqium, ColloqiumAgenda, ColloqiumType, Episode, User
 from ..schemas import (
     ColloqiumAgendaCreate,
     ColloqiumAgendaResponse,
@@ -25,18 +25,44 @@ def _validate_episode_or_422(*, db: Session, episode_id: int) -> None:
         raise HTTPException(status_code=422, detail="episode_id references unknown EPISODE")
 
 
+def _validate_unique_episode_link_or_422(
+    *,
+    db: Session,
+    colloqium_id: int,
+    episode_id: int,
+    exclude_agenda_id: int | None = None,
+) -> None:
+    query = db.query(ColloqiumAgenda).filter(
+        ColloqiumAgenda.colloqium_id == colloqium_id,
+        ColloqiumAgenda.episode_id == episode_id,
+    )
+    if exclude_agenda_id is not None:
+        query = query.filter(ColloqiumAgenda.id != exclude_agenda_id)
+    existing = query.first()
+    if existing:
+        raise HTTPException(
+            status_code=422,
+            detail="episode is already linked in this colloqium agenda",
+        )
+
+
 @router.get("/", response_model=list[ColloqiumAgendaResponse])
 def list_colloqium_agendas(
     colloqium_id: int | None = None,
+    episode_id: int | None = None,
     db: Session = Depends(get_db),
 ):
     query = db.query(ColloqiumAgenda).options(
-        joinedload(ColloqiumAgenda.colloqium),
+        joinedload(ColloqiumAgenda.colloqium)
+        .joinedload(Colloqium.colloqium_type)
+        .joinedload(ColloqiumType.organ),
         joinedload(ColloqiumAgenda.episode),
         joinedload(ColloqiumAgenda.changed_by_user),
     )
     if colloqium_id is not None:
         query = query.filter(ColloqiumAgenda.colloqium_id == colloqium_id)
+    if episode_id is not None:
+        query = query.filter(ColloqiumAgenda.episode_id == episode_id)
     return query.order_by(ColloqiumAgenda.id.asc()).all()
 
 
@@ -48,7 +74,12 @@ def create_colloqium_agenda(
 ):
     _validate_colloqium_or_422(db=db, colloqium_id=payload.colloqium_id)
     _validate_episode_or_422(db=db, episode_id=payload.episode_id)
-    item = ColloqiumAgenda(**payload.model_dump(), changed_by=current_user.id)
+    _validate_unique_episode_link_or_422(
+        db=db,
+        colloqium_id=payload.colloqium_id,
+        episode_id=payload.episode_id,
+    )
+    item = ColloqiumAgenda(**payload.model_dump(), changed_by_id=current_user.id)
     db.add(item)
     db.commit()
     return (
@@ -78,9 +109,17 @@ def update_colloqium_agenda(
         _validate_colloqium_or_422(db=db, colloqium_id=data["colloqium_id"])
     if "episode_id" in data:
         _validate_episode_or_422(db=db, episode_id=data["episode_id"])
+    target_colloqium_id = data["colloqium_id"] if "colloqium_id" in data else item.colloqium_id
+    target_episode_id = data["episode_id"] if "episode_id" in data else item.episode_id
+    _validate_unique_episode_link_or_422(
+        db=db,
+        colloqium_id=target_colloqium_id,
+        episode_id=target_episode_id,
+        exclude_agenda_id=item.id,
+    )
     for key, value in data.items():
         setattr(item, key, value)
-    item.changed_by = current_user.id
+    item.changed_by_id = current_user.id
     db.commit()
     return (
         db.query(ColloqiumAgenda)

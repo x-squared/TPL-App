@@ -65,7 +65,7 @@ class MedicalValueResponse(MedicalValueBase):
     id: int
     medical_value_template: MedicalValueTemplateResponse | None = None
     datatype: CodeResponse | None = None
-    changed_by: int | None = None
+    changed_by_id: int | None = None
     changed_by_user: UserResponse | None = None
     created_at: datetime
     updated_at: datetime | None = None
@@ -92,7 +92,7 @@ class DiagnosisResponse(DiagnosisBase):
 
     id: int
     catalogue: CatalogueResponse | None = None
-    changed_by: int | None = None
+    changed_by_id: int | None = None
     changed_by_user: UserResponse | None = None
     created_at: datetime
     updated_at: datetime | None = None
@@ -133,7 +133,7 @@ class AbsenceResponse(AbsenceBase):
     model_config = ConfigDict(from_attributes=True)
 
     id: int
-    changed_by: int | None = None
+    changed_by_id: int | None = None
     changed_by_user: UserResponse | None = None
     created_at: datetime
     updated_at: datetime | None = None
@@ -168,7 +168,7 @@ class ContactInfoResponse(ContactInfoBase):
 
     id: int
     type: CodeResponse | None = None
-    changed_by: int | None = None
+    changed_by_id: int | None = None
     changed_by_user: UserResponse | None = None
     created_at: datetime
     updated_at: datetime | None = None
@@ -268,7 +268,7 @@ class EpisodeResponse(EpisodeBase):
     id: int
     organ: CodeResponse | None = None
     status: CodeResponse | None = None
-    changed_by: int | None = None
+    changed_by_id: int | None = None
     changed_by_user: UserResponse | None = None
     created_at: datetime
     updated_at: datetime | None = None

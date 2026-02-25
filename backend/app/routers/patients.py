@@ -15,6 +15,7 @@ def list_patients(skip: int = 0, limit: int = 100, db: Session = Depends(get_db)
         db.query(Patient)
         .options(
             joinedload(Patient.changed_by_user),
+            joinedload(Patient.sex),
             joinedload(Patient.blood_type),
             joinedload(Patient.resp_coord),
             subqueryload(Patient.contact_infos),
@@ -42,6 +43,8 @@ def list_patients(skip: int = 0, limit: int = 100, db: Session = Depends(get_db)
                 date_of_death=p.date_of_death,
                 ahv_nr=p.ahv_nr,
                 lang=p.lang,
+                sex_id=p.sex_id,
+                sex=p.sex,
                 blood_type_id=p.blood_type_id,
                 blood_type=p.blood_type,
                 resp_coord_id=p.resp_coord_id,
@@ -72,6 +75,7 @@ def get_patient(patient_id: int, db: Session = Depends(get_db)):
         db.query(Patient)
         .options(
             joinedload(Patient.changed_by_user),
+            joinedload(Patient.sex),
             joinedload(Patient.blood_type),
             joinedload(Patient.resp_coord),
             subqueryload(Patient.contact_infos).joinedload(ContactInfo.type),
@@ -100,7 +104,7 @@ def create_patient(
     db: Session = Depends(get_db),
     current_user: User = Depends(get_current_user),
 ):
-    patient = Patient(**payload.model_dump(), changed_by=current_user.id)
+    patient = Patient(**payload.model_dump(), changed_by_id=current_user.id)
     db.add(patient)
     db.commit()
     db.refresh(patient)
@@ -119,12 +123,13 @@ def update_patient(
         raise HTTPException(status_code=404, detail="Patient not found")
     for key, value in payload.model_dump(exclude_unset=True).items():
         setattr(patient, key, value)
-    patient.changed_by = current_user.id
+    patient.changed_by_id = current_user.id
     db.commit()
     return (
         db.query(Patient)
         .options(
             joinedload(Patient.changed_by_user),
+            joinedload(Patient.sex),
             joinedload(Patient.blood_type),
             joinedload(Patient.resp_coord),
             subqueryload(Patient.contact_infos).joinedload(ContactInfo.type),

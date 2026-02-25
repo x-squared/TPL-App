@@ -9,20 +9,20 @@ alwaysApply: false
 Every new entity (SQLAlchemy model) must include these audit columns:
 
 ```python
-changed_by = Column("CHANGED_BY", Integer, ForeignKey("USER.ID"), nullable=True)
+changed_by_id = Column("CHANGED_BY", Integer, ForeignKey("USER.ID"), nullable=True)
 created_at = Column("CREATED_AT", DateTime(timezone=True), server_default=func.now())
 updated_at = Column("UPDATED_AT", DateTime(timezone=True), onupdate=func.now())
 
 changed_by_user = relationship("User")
 ```
 
-- The corresponding Pydantic `*Response` schema must include `changed_by`, `changed_by_user`, `created_at`, and `updated_at`.
-- Create/update API endpoints must accept `current_user` via `Depends(get_current_user)` and set `changed_by = current_user.id`.
+- The corresponding Pydantic `*Response` schema must include `changed_by_id`, `changed_by_user`, `created_at`, and `updated_at`.
+- Create/update API endpoints must accept `current_user` via `Depends(get_current_user)` and set `changed_by_id = current_user.id`.
 
 ## Seed Data
 
-All seed data must set `changed_by` to the SYSTEM user (fixed `id=1`):
+All seed data must set `changed_by_id` to the SYSTEM user (fixed `id=1`):
 
 ```python
-{"type": "EXAMPLE", "key": "X", "pos": 1, ..., "changed_by": 1}
+{"type": "EXAMPLE", "key": "X", "pos": 1, ..., "changed_by_id": 1}
 ```

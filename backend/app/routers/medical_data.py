@@ -42,7 +42,7 @@ def create_medical_value(
     mv = MedicalValue(
         patient_id=patient_id,
         **payload.model_dump(),
-        changed_by=current_user.id,
+        changed_by_id=current_user.id,
     )
     db.add(mv)
     db.commit()
@@ -67,7 +67,7 @@ def update_medical_value(
         raise HTTPException(status_code=404, detail="Medical value not found")
     for key, value in payload.model_dump(exclude_unset=True).items():
         setattr(mv, key, value)
-    mv.changed_by = current_user.id
+    mv.changed_by_id = current_user.id
     db.commit()
     db.refresh(mv)
     return mv

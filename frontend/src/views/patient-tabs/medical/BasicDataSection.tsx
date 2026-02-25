@@ -1,8 +1,11 @@
-import type { MedicalDataTabProps } from './types';
+import type { Patient } from '../../../api';
+import type { PatientCoreModel } from '../../patient-detail/PatientDetailTabs';
 
-type BasicDataSectionProps = Pick<
-  MedicalDataTabProps,
-  'patient' | 'editing' | 'startEditing' | 'saving' | 'handleSave' | 'cancelEditing' | 'form' | 'setForm' | 'bloodTypes'
+type BasicDataSectionProps = {
+  patient: Patient;
+} & Pick<
+  PatientCoreModel,
+  'editing' | 'startEditing' | 'saving' | 'handleSave' | 'cancelEditing' | 'form' | 'setForm' | 'bloodTypes'
 >;
 
 export default function BasicDataSection({

@@ -126,6 +126,7 @@ def _resolve_task_group_name(
 def list_task_groups(
     patient_id: int | None = None,
     episode_id: int | None = None,
+    colloqium_agenda_id: int | None = None,
     db: Session = Depends(get_db),
 ):
     query = db.query(TaskGroup).options(
@@ -136,6 +137,8 @@ def list_task_groups(
         query = query.filter(TaskGroup.patient_id == patient_id)
     if episode_id is not None:
         query = query.filter(TaskGroup.episode_id == episode_id)
+    if colloqium_agenda_id is not None:
+        query = query.filter(TaskGroup.colloqium_agenda_id == colloqium_agenda_id)
     return query.all()
 
 
@@ -166,7 +169,7 @@ def create_task_group(
         tpl_phase_id=payload_data.get("tpl_phase_id"),
         db=db,
     )
-    tg = TaskGroup(**payload_data, changed_by=current_user.id)
+    tg = TaskGroup(**payload_data, changed_by_id=current_user.id)
     db.add(tg)
     db.commit()
     db.refresh(tg)
@@ -216,7 +219,7 @@ def update_task_group(
         update_data["name"] = (update_data["name"] or "").strip()
     for key, value in update_data.items():
         setattr(tg, key, value)
-    tg.changed_by = current_user.id
+    tg.changed_by_id = current_user.id
     db.commit()
     return (
         db.query(TaskGroup)

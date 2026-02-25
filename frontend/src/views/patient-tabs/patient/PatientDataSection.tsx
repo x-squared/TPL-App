@@ -1,23 +1,56 @@
-import type { PatientTabProps } from './types';
+import type { Patient } from '../../../api';
+import type { PatientCoreModel } from '../../patient-detail/PatientDetailTabs';
 
-type PatientDataSectionProps = Pick<
-  PatientTabProps,
-  'patient' | 'editing' | 'form' | 'setForm' | 'setField' | 'formatDate' | 'languages' | 'bloodTypes' | 'coordUsers'
+type PatientDataSectionProps = {
+  patient: Patient;
+  formatDate: (iso: string | null) => string;
+} & Pick<
+  PatientCoreModel,
+  | 'editing'
+  | 'startEditing'
+  | 'saving'
+  | 'handleSave'
+  | 'cancelEditing'
+  | 'form'
+  | 'setForm'
+  | 'setField'
+  | 'languages'
+  | 'sexCodes'
+  | 'bloodTypes'
+  | 'coordUsers'
 >;
 
 export default function PatientDataSection({
   patient,
   editing,
+  startEditing,
+  saving,
+  handleSave,
+  cancelEditing,
   form,
   setForm,
   setField,
   formatDate,
   languages,
+  sexCodes,
   bloodTypes,
   coordUsers,
 }: PatientDataSectionProps) {
   return (
     <section className="detail-section">
+      <div className="detail-section-heading">
+        <h2>Basic data</h2>
+        {!editing ? (
+          <button className="edit-btn" onClick={startEditing}>Edit</button>
+        ) : (
+          <div className="edit-actions">
+            <button className="save-btn" onClick={handleSave} disabled={saving}>
+              {saving ? 'Saving...' : 'Save'}
+            </button>
+            <button className="cancel-btn" onClick={cancelEditing} disabled={saving}>Cancel</button>
+          </div>
+        )}
+      </div>
       <div className="detail-grid">
         <div className="detail-field">
           <span className="detail-label">PID</span>
@@ -108,6 +141,23 @@ export default function PatientDataSection({
             )
           ) : (
             <span className="detail-value">{patient.lang || '–'}</span>
+          )}
+        </div>
+        <div className="detail-field">
+          <span className="detail-label">Sex</span>
+          {editing ? (
+            <select
+              className="detail-input"
+              value={form.sex_id ?? ''}
+              onChange={(e) => setForm((f) => ({ ...f, sex_id: e.target.value ? Number(e.target.value) : null }))}
+            >
+              <option value="">–</option>
+              {sexCodes.map((sex) => (
+                <option key={sex.id} value={sex.id}>{sex.name_default}</option>
+              ))}
+            </select>
+          ) : (
+            <span className="detail-value">{patient.sex?.name_default ?? '–'}</span>
           )}
         </div>
         <div className="detail-field">

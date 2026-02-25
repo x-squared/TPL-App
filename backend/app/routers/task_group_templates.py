@@ -76,7 +76,7 @@ def create_task_group_template(
     existing = db.query(TaskGroupTemplate).filter(TaskGroupTemplate.key == payload.key).first()
     if existing:
         raise HTTPException(status_code=422, detail="key already exists")
-    template = TaskGroupTemplate(**payload.model_dump(), changed_by=current_user.id)
+    template = TaskGroupTemplate(**payload.model_dump(), changed_by_id=current_user.id)
     db.add(template)
     db.commit()
     return (
@@ -113,7 +113,7 @@ def update_task_group_template(
     _validate_template_links(db=db, scope_id=scope_id, organ_id=organ_id, tpl_phase_id=tpl_phase_id)
     for key, value in data.items():
         setattr(template, key, value)
-    template.changed_by = current_user.id
+    template.changed_by_id = current_user.id
     db.commit()
     return (
         db.query(TaskGroupTemplate)
@@ -205,7 +205,7 @@ def instantiate_task_group_template(
         name=template.name,
         episode_id=payload.episode_id,
         tpl_phase_id=effective_tpl_phase_id,
-        changed_by=current_user.id,
+        changed_by_id=current_user.id,
     )
     db.add(task_group)
     db.flush()
@@ -237,7 +237,7 @@ def instantiate_task_group_template(
                 closed_at=None,
                 closed_by_id=None,
                 comment="",
-                changed_by=current_user.id,
+                changed_by_id=current_user.id,
             )
         )
 

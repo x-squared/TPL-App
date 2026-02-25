@@ -5,144 +5,81 @@ import MedicalValuesSection from './medical/MedicalValuesSection';
 import type { MedicalDataTabProps } from './medical/types';
 
 export default function MedicalDataTab(props: MedicalDataTabProps) {
-  const {
-    patient,
-    editing,
-    startEditing,
-    saving,
-    handleSave,
-    cancelEditing,
-    form,
-    setForm,
-    bloodTypes,
-    addingDiag,
-    setAddingDiag,
-    diagCodes,
-    diagForm,
-    setDiagForm,
-    diagSaving,
-    handleAddDiag,
-    editingDiagId,
-    diagEditForm,
-    setDiagEditForm,
-    handleSaveDiag,
-    cancelEditingDiag,
-    startEditingDiag,
-    confirmDeleteDiagId,
-    setConfirmDeleteDiagId,
-    handleDeleteDiag,
-    formatDate,
-    addingMv,
-    setAddingMv,
-    handleAddAllMv,
-    mvSaving,
-    sortedMedicalValues,
-    toggleMvSort,
-    mvSortIndicator,
-    editingMvId,
-    mvEditForm,
-    setMvEditForm,
-    mvTemplates,
-    renderValueInput,
-    resolveDt,
-    handleSaveMv,
-    cancelEditingMv,
-    validateValue,
-    confirmDeleteMvId,
-    setConfirmDeleteMvId,
-    handleDeleteMv,
-    startEditingMv,
-    mvSortKey,
-    mvSortAsc,
-    mvDragId,
-    mvDragOverId,
-    setMvDragId,
-    setMvDragOverId,
-    handleMvDrop,
-    formatValue,
-    catalogueCache,
-    getCatalogueType,
-    mvAddMode,
-    setMvAddMode,
-    mvForm,
-    setMvForm,
-    datatypeCodes,
-    handleAddMv,
-  } = props;
+  const { patient, formatDate, core, diagnoses, medicalValues } = props;
 
   return (
     <>
       <BasicDataSection
         patient={patient}
-        editing={editing}
-        startEditing={startEditing}
-        saving={saving}
-        handleSave={handleSave}
-        cancelEditing={cancelEditing}
-        form={form}
-        setForm={setForm}
-        bloodTypes={bloodTypes}
+        editing={core.editing}
+        startEditing={core.startEditing}
+        saving={core.saving}
+        handleSave={core.handleSave}
+        cancelEditing={core.cancelEditing}
+        form={core.form}
+        setForm={core.setForm}
+        bloodTypes={core.bloodTypes}
       />
 
       <DiagnosesSection
         patient={patient}
-        addingDiag={addingDiag}
-        setAddingDiag={setAddingDiag}
-        diagCodes={diagCodes}
-        diagForm={diagForm}
-        setDiagForm={setDiagForm}
-        diagSaving={diagSaving}
-        handleAddDiag={handleAddDiag}
-        editingDiagId={editingDiagId}
-        diagEditForm={diagEditForm}
-        setDiagEditForm={setDiagEditForm}
-        handleSaveDiag={handleSaveDiag}
-        cancelEditingDiag={cancelEditingDiag}
-        startEditingDiag={startEditingDiag}
-        confirmDeleteDiagId={confirmDeleteDiagId}
-        setConfirmDeleteDiagId={setConfirmDeleteDiagId}
-        handleDeleteDiag={handleDeleteDiag}
+        addingDiag={diagnoses.addingDiag}
+        setAddingDiag={diagnoses.setAddingDiag}
+        diagCodes={diagnoses.diagCodes}
+        diagForm={diagnoses.diagForm}
+        setDiagForm={diagnoses.setDiagForm}
+        diagSaving={diagnoses.diagSaving}
+        handleAddDiag={diagnoses.handleAddDiag}
+        editingDiagId={diagnoses.editingDiagId}
+        diagEditForm={diagnoses.diagEditForm}
+        setDiagEditForm={diagnoses.setDiagEditForm}
+        handleSaveDiag={diagnoses.handleSaveDiag}
+        cancelEditingDiag={diagnoses.cancelEditingDiag}
+        startEditingDiag={diagnoses.startEditingDiag}
+        confirmDeleteDiagId={diagnoses.confirmDeleteDiagId}
+        setConfirmDeleteDiagId={diagnoses.setConfirmDeleteDiagId}
+        handleDeleteDiag={diagnoses.handleDeleteDiag}
         formatDate={formatDate}
       />
 
       <MedicalValuesSection
-        addingMv={addingMv}
-        setAddingMv={setAddingMv}
-        handleAddAllMv={handleAddAllMv}
-        mvSaving={mvSaving}
-        sortedMedicalValues={sortedMedicalValues}
-        toggleMvSort={toggleMvSort}
-        mvSortIndicator={mvSortIndicator}
-        editingMvId={editingMvId}
-        mvEditForm={mvEditForm}
-        setMvEditForm={setMvEditForm}
-        mvTemplates={mvTemplates}
-        renderValueInput={renderValueInput}
-        resolveDt={resolveDt}
-        handleSaveMv={handleSaveMv}
-        cancelEditingMv={cancelEditingMv}
-        validateValue={validateValue}
-        confirmDeleteMvId={confirmDeleteMvId}
-        setConfirmDeleteMvId={setConfirmDeleteMvId}
-        handleDeleteMv={handleDeleteMv}
-        startEditingMv={startEditingMv}
-        mvSortKey={mvSortKey}
-        mvSortAsc={mvSortAsc}
-        mvDragId={mvDragId}
-        mvDragOverId={mvDragOverId}
-        setMvDragId={setMvDragId}
-        setMvDragOverId={setMvDragOverId}
-        handleMvDrop={handleMvDrop}
-        formatValue={formatValue}
+        addingMv={medicalValues.addingMv}
+        setAddingMv={medicalValues.setAddingMv}
+        handleAddAllMv={medicalValues.handleAddAllMv}
+        mvSaving={medicalValues.mvSaving}
+        sortedMedicalValues={medicalValues.sortedMedicalValues}
+        toggleMvSort={medicalValues.toggleMvSort}
+        mvSortIndicator={medicalValues.mvSortIndicator}
+        editingMvId={medicalValues.editingMvId}
+        mvEditForm={medicalValues.mvEditForm}
+        setMvEditForm={medicalValues.setMvEditForm}
+        mvTemplates={medicalValues.mvTemplates}
+        renderValueInput={medicalValues.renderValueInput}
+        resolveDt={medicalValues.resolveDt}
+        handleSaveMv={medicalValues.handleSaveMv}
+        cancelEditingMv={medicalValues.cancelEditingMv}
+        validateValue={medicalValues.validateValue}
+        confirmDeleteMvId={medicalValues.confirmDeleteMvId}
+        setConfirmDeleteMvId={medicalValues.setConfirmDeleteMvId}
+        handleDeleteMv={medicalValues.handleDeleteMv}
+        startEditingMv={medicalValues.startEditingMv}
+        mvSortKey={medicalValues.mvSortKey}
+        mvSortAsc={medicalValues.mvSortAsc}
+        mvDragId={medicalValues.mvDragId}
+        mvDragOverId={medicalValues.mvDragOverId}
+        setMvDragId={medicalValues.setMvDragId}
+        setMvDragOverId={medicalValues.setMvDragOverId}
+        handleMvDrop={medicalValues.handleMvDrop}
+        formatValue={medicalValues.formatValue}
         formatDate={formatDate}
-        catalogueCache={catalogueCache}
-        getCatalogueType={getCatalogueType}
-        mvAddMode={mvAddMode}
-        setMvAddMode={setMvAddMode}
-        mvForm={mvForm}
-        setMvForm={setMvForm}
-        datatypeCodes={datatypeCodes}
-        handleAddMv={handleAddMv}
+        catalogueCache={medicalValues.catalogueCache}
+        getCatalogueType={medicalValues.getCatalogueType}
+        mvAddMode={medicalValues.mvAddMode}
+        setMvAddMode={medicalValues.setMvAddMode}
+        mvForm={medicalValues.mvForm}
+        setMvForm={medicalValues.setMvForm}
+        datatypeCodes={medicalValues.datatypeCodes}
+        handleAddMv={medicalValues.handleAddMv}
       />
     </>
   );

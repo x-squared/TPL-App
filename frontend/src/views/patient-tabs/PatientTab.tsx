@@ -5,131 +5,71 @@ import PatientDataSection from './patient/PatientDataSection';
 import type { PatientTabProps } from './patient/types';
 
 export default function PatientTab(props: PatientTabProps) {
-  const {
-    patient,
-    editing,
-    startEditing,
-    saving,
-    handleSave,
-    cancelEditing,
-    form,
-    setForm,
-    setField,
-    formatDate,
-    languages,
-    bloodTypes,
-    coordUsers,
-    addingContact,
-    setAddingContact,
-    sortedContactInfos,
-    editingCiId,
-    ciEditForm,
-    setCiEditForm,
-    ciSaving,
-    handleSaveCi,
-    cancelEditingCi,
-    ciDragId,
-    ciDragOverId,
-    setCiDragId,
-    setCiDragOverId,
-    handleCiDrop,
-    startEditingCi,
-    confirmDeleteId,
-    setConfirmDeleteId,
-    handleDeleteContact,
-    contactTypes,
-    ciForm,
-    setCiForm,
-    handleAddContact,
-    addingAbsence,
-    setAddingAbsence,
-    sortedAbsences,
-    editingAbId,
-    abEditForm,
-    setAbEditForm,
-    abSaving,
-    handleSaveAb,
-    cancelEditingAb,
-    startEditingAb,
-    confirmDeleteAbId,
-    setConfirmDeleteAbId,
-    handleDeleteAbsence,
-    abForm,
-    setAbForm,
-    handleAddAbsence,
-  } = props;
+  const { patient, formatDate, core, contacts, absences } = props;
 
   return (
-    <>
-      <div className="detail-tab-toolbar">
-        {!editing ? (
-          <button className="edit-btn" onClick={startEditing}>Edit</button>
-        ) : (
-          <div className="edit-actions">
-            <button className="save-btn" onClick={handleSave} disabled={saving}>
-              {saving ? 'Saving...' : 'Save'}
-            </button>
-            <button className="cancel-btn" onClick={cancelEditing} disabled={saving}>Cancel</button>
-          </div>
-        )}
-      </div>
-
+    <div className="detail-tab-content">
       <PatientDataSection
         patient={patient}
-        editing={editing}
-        form={form}
-        setForm={setForm}
-        setField={setField}
+        editing={core.editing}
+        startEditing={core.startEditing}
+        saving={core.saving}
+        handleSave={core.handleSave}
+        cancelEditing={core.cancelEditing}
+        form={core.form}
+        setForm={core.setForm}
+        setField={core.setField}
         formatDate={formatDate}
-        languages={languages}
-        bloodTypes={bloodTypes}
-        coordUsers={coordUsers}
+        languages={core.languages}
+        sexCodes={core.sexCodes}
+        bloodTypes={core.bloodTypes}
+        coordUsers={core.coordUsers}
       />
 
       <ContactsSection
-        addingContact={addingContact}
-        setAddingContact={setAddingContact}
-        sortedContactInfos={sortedContactInfos}
-        editingCiId={editingCiId}
-        ciEditForm={ciEditForm}
-        setCiEditForm={setCiEditForm}
-        ciSaving={ciSaving}
-        handleSaveCi={handleSaveCi}
-        cancelEditingCi={cancelEditingCi}
-        ciDragId={ciDragId}
-        ciDragOverId={ciDragOverId}
-        setCiDragId={setCiDragId}
-        setCiDragOverId={setCiDragOverId}
-        handleCiDrop={handleCiDrop}
-        startEditingCi={startEditingCi}
-        confirmDeleteId={confirmDeleteId}
-        setConfirmDeleteId={setConfirmDeleteId}
-        handleDeleteContact={handleDeleteContact}
-        contactTypes={contactTypes}
-        ciForm={ciForm}
-        setCiForm={setCiForm}
-        handleAddContact={handleAddContact}
+        addingContact={contacts.addingContact}
+        setAddingContact={contacts.setAddingContact}
+        sortedContactInfos={contacts.sortedContactInfos}
+        editingCiId={contacts.editingCiId}
+        ciEditForm={contacts.ciEditForm}
+        setCiEditForm={contacts.setCiEditForm}
+        ciSaving={contacts.ciSaving}
+        handleSaveCi={contacts.handleSaveCi}
+        cancelEditingCi={contacts.cancelEditingCi}
+        ciDragId={contacts.ciDragId}
+        ciDragOverId={contacts.ciDragOverId}
+        setCiDragId={contacts.setCiDragId}
+        setCiDragOverId={contacts.setCiDragOverId}
+        handleCiDrop={contacts.handleCiDrop}
+        startEditingCi={contacts.startEditingCi}
+        confirmDeleteId={contacts.confirmDeleteId}
+        setConfirmDeleteId={contacts.setConfirmDeleteId}
+        handleDeleteContact={contacts.handleDeleteContact}
+        contactTypes={contacts.contactTypes}
+        ciForm={contacts.ciForm}
+        setCiForm={contacts.setCiForm}
+        handleAddContact={contacts.handleAddContact}
       />
 
       <AbsencesSection
-        addingAbsence={addingAbsence}
-        setAddingAbsence={setAddingAbsence}
-        sortedAbsences={sortedAbsences}
-        editingAbId={editingAbId}
-        abEditForm={abEditForm}
-        setAbEditForm={setAbEditForm}
-        abSaving={abSaving}
-        handleSaveAb={handleSaveAb}
-        cancelEditingAb={cancelEditingAb}
-        startEditingAb={startEditingAb}
-        confirmDeleteAbId={confirmDeleteAbId}
-        setConfirmDeleteAbId={setConfirmDeleteAbId}
-        handleDeleteAbsence={handleDeleteAbsence}
-        abForm={abForm}
-        setAbForm={setAbForm}
-        handleAddAbsence={handleAddAbsence}
+        addingAbsence={absences.addingAbsence}
+        setAddingAbsence={absences.setAddingAbsence}
+        sortedAbsences={absences.sortedAbsences}
+        editingAbId={absences.editingAbId}
+        abEditForm={absences.abEditForm}
+        setAbEditForm={absences.setAbEditForm}
+        abSaving={absences.abSaving}
+        handleSaveAb={absences.handleSaveAb}
+        cancelEditingAb={absences.cancelEditingAb}
+        startEditingAb={absences.startEditingAb}
+        confirmDeleteAbId={absences.confirmDeleteAbId}
+        setConfirmDeleteAbId={absences.setConfirmDeleteAbId}
+        handleDeleteAbsence={absences.handleDeleteAbsence}
+        abForm={absences.abForm}
+        setAbForm={absences.setAbForm}
+        handleAddAbsence={absences.handleAddAbsence}
         formatDate={formatDate}
       />
-    </>
+    </div>
   );
 }

@@ -55,12 +55,20 @@ export default function useTaskBoardData(criteria: TaskBoardCriteria, statusKeys
         const groupsWithPhase = criteria.tplPhaseId == null
           ? groups
           : groups.filter((group) => group.tpl_phase_id === criteria.tplPhaseId);
+        const groupsWithContext = (() => {
+          if (criteria.colloqiumAgendaId == null) return groupsWithPhase;
+          const exact = groupsWithPhase.filter((group) => group.colloqium_agenda_id === criteria.colloqiumAgendaId);
+          if (exact.length > 0) return exact;
+          // Legacy fallback: tasks created before proper colloquium agenda linking.
+          return groupsWithPhase.filter((group) =>
+            group.colloqium_agenda_id == null && group.task_group_template_id == null);
+        })();
 
-        const patientIds = [...new Set(groupsWithPhase.map((group) => group.patient_id))];
+        const patientIds = [...new Set(groupsWithContext.map((group) => group.patient_id))];
         const patientDetails = await Promise.all(patientIds.map((id) => api.getPatient(id)));
 
         const tasksPerGroup = await Promise.all(
-          groupsWithPhase.map(async (group) => ({
+          groupsWithContext.map(async (group) => ({
             groupId: group.id,
             tasks: await api.listTasks({
               task_group_id: group.id,
@@ -96,7 +104,7 @@ export default function useTaskBoardData(criteria: TaskBoardCriteria, statusKeys
         setState({
           loading: false,
           error: '',
-          taskGroups: groupsWithPhase,
+          taskGroups: groupsWithContext,
           tasksByGroup: nextTasksByGroup,
           episodesById: nextEpisodesById,
           organCodes: organs,
@@ -118,7 +126,7 @@ export default function useTaskBoardData(criteria: TaskBoardCriteria, statusKeys
     return () => {
       cancelled = true;
     };
-  }, [criteria.patientId, criteria.episodeId, criteria.tplPhaseId, statusKeysToLoad, reloadToken]);
+  }, [criteria.patientId, criteria.episodeId, criteria.colloqiumAgendaId, criteria.tplPhaseId, statusKeysToLoad, reloadToken]);
 
   return {
     ...state,

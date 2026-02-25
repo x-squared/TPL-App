@@ -1,4 +1,5 @@
 from fastapi import APIRouter, Depends, HTTPException
+from sqlalchemy.exc import IntegrityError
 from sqlalchemy.orm import Session, joinedload
 
 from ..auth import get_current_user
@@ -35,9 +36,16 @@ def create_colloqium(
     current_user: User = Depends(get_current_user),
 ):
     _validate_colloqium_type_or_422(db=db, colloqium_type_id=payload.colloqium_type_id)
-    item = Colloqium(**payload.model_dump(), changed_by=current_user.id)
+    item = Colloqium(**payload.model_dump(), changed_by_id=current_user.id)
     db.add(item)
-    db.commit()
+    try:
+        db.commit()
+    except IntegrityError:
+        db.rollback()
+        raise HTTPException(
+            status_code=422,
+            detail="colloqium with same colloqium_type_id and date already exists",
+        ) from None
     return (
         db.query(Colloqium)
         .options(
@@ -64,8 +72,15 @@ def update_colloqium(
         _validate_colloqium_type_or_422(db=db, colloqium_type_id=data["colloqium_type_id"])
     for key, value in data.items():
         setattr(item, key, value)
-    item.changed_by = current_user.id
-    db.commit()
+    item.changed_by_id = current_user.id
+    try:
+        db.commit()
+    except IntegrityError:
+        db.rollback()
+        raise HTTPException(
+            status_code=422,
+            detail="colloqium with same colloqium_type_id and date already exists",
+        ) from None
     return (
         db.query(Colloqium)
         .options(

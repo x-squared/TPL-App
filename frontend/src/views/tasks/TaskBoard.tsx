@@ -1,4 +1,4 @@
-import { useEffect, useMemo, useState } from 'react';
+import { useEffect, useMemo, useRef, useState } from 'react';
 import { api, type Task, type TaskCreate, type TaskGroup, type TaskUpdate } from '../../api';
 import '../layout/PanelLayout.css';
 import './TaskBoard.css';
@@ -29,13 +29,22 @@ export default function TaskBoard({
   onAddClick = () => undefined,
   maxTableHeight = 420,
   headerMeta,
+  hideFilters = false,
+  showGroupHeadingsDefault = true,
+  includeClosedTasks = false,
+  autoCreateToken,
+  onAutoCreateSaved,
+  onAutoCreateDiscarded,
 }: TaskBoardProps) {
+  const [effectiveColloqiumAgendaId, setEffectiveColloqiumAgendaId] = useState<number | null>(
+    criteria.colloqiumAgendaId ?? null,
+  );
   const [organFilterId, setOrganFilterId] = useState<number | 'ALL'>('ALL');
   const [assignedToFilterId, setAssignedToFilterId] = useState<number | 'ALL'>('ALL');
   const [dueBefore, setDueBefore] = useState('');
-  const [showDoneTasks, setShowDoneTasks] = useState(false);
-  const [showCancelledTasks, setShowCancelledTasks] = useState(false);
-  const [showGroupHeadings, setShowGroupHeadings] = useState(true);
+  const [showDoneTasks, setShowDoneTasks] = useState(includeClosedTasks);
+  const [showCancelledTasks, setShowCancelledTasks] = useState(includeClosedTasks);
+  const [showGroupHeadings, setShowGroupHeadings] = useState(showGroupHeadingsDefault);
   const [actionState, setActionState] = useState<TaskActionState | null>(null);
   const [actionComment, setActionComment] = useState('');
   const [actionSaving, setActionSaving] = useState(false);
@@ -50,6 +59,12 @@ export default function TaskBoard({
   const [createSaving, setCreateSaving] = useState(false);
   const [panelAddSaving, setPanelAddSaving] = useState(false);
   const [preferredTopGroupId, setPreferredTopGroupId] = useState<number | null>(null);
+  const [autoCreatedTaskId, setAutoCreatedTaskId] = useState<number | null>(null);
+  const prevAutoCreateTokenRef = useRef<number | undefined>(autoCreateToken);
+
+  useEffect(() => {
+    setEffectiveColloqiumAgendaId(criteria.colloqiumAgendaId ?? null);
+  }, [criteria.colloqiumAgendaId, criteria.episodeId, criteria.colloqiumId, criteria.patientId]);
 
   const isGroupClosed = (taskGroup: TaskGroup): boolean => {
     const state = computeGroupState(tasksByGroup[taskGroup.id] ?? []);
@@ -58,14 +73,23 @@ export default function TaskBoard({
 
   useEffect(() => {
     setPreferredTopGroupId(null);
-  }, [criteria.patientId, criteria.episodeId, criteria.tplPhaseId]);
+  }, [criteria.patientId, criteria.episodeId, effectiveColloqiumAgendaId, criteria.tplPhaseId]);
 
   const statusKeysToLoad = useMemo(() => {
+    if (includeClosedTasks) return ['PENDING', 'COMPLETED', 'CANCELLED'];
     const keys = ['PENDING'];
     if (showDoneTasks) keys.push('COMPLETED');
     if (showCancelledTasks) keys.push('CANCELLED');
     return keys;
-  }, [showDoneTasks, showCancelledTasks]);
+  }, [includeClosedTasks, showDoneTasks, showCancelledTasks]);
+
+  const effectiveCriteria = useMemo(
+    () => ({
+      ...criteria,
+      colloqiumAgendaId: effectiveColloqiumAgendaId,
+    }),
+    [criteria, effectiveColloqiumAgendaId],
+  );
 
   const {
     loading,
@@ -78,7 +102,7 @@ export default function TaskBoard({
     taskStatusByKey,
     allUsers,
     reload,
-  } = useTaskBoardData(criteria, statusKeysToLoad);
+  } = useTaskBoardData(effectiveCriteria, statusKeysToLoad);
 
   const assignedToOptions = useMemo(() => {
     const options = new Map<number, string>();
@@ -244,6 +268,7 @@ export default function TaskBoard({
   const findContextManagedGroup = (groups: TaskGroup[]): TaskGroup | null => {
     if (!criteria.patientId) return null;
     const contextEpisodeId = criteria.episodeId ?? null;
+    const contextColloqiumAgendaId = effectiveColloqiumAgendaId;
     const contextPhaseId = contextEpisodeId != null ? (criteria.tplPhaseId ?? null) : null;
     const matches = groups.filter((group) =>
       group.patient_id === criteria.patientId
@@ -251,8 +276,11 @@ export default function TaskBoard({
       && (group.episode_id ?? null) === contextEpisodeId
       && (group.tpl_phase_id ?? null) === contextPhaseId
       && !isGroupClosed(group));
-    if (matches.length === 0) return null;
-    return [...matches].sort((a, b) => a.id - b.id)[0];
+    const exact = matches.filter((group) => (group.colloqium_agenda_id ?? null) === contextColloqiumAgendaId);
+    const fallbackUnlinked = matches.filter((group) => group.colloqium_agenda_id == null);
+    const candidates = exact.length > 0 ? exact : fallbackUnlinked;
+    if (candidates.length === 0) return null;
+    return [...candidates].sort((a, b) => a.id - b.id)[0];
   };
 
   const buildDefaultTaskDescription = (taskGroup: TaskGroup) => {
@@ -262,22 +290,58 @@ export default function TaskBoard({
     return parts.join(' · ');
   };
 
-  const createTaskFromPanelContext = async () => {
+  const createTaskFromPanelContext = async (source: 'manual' | 'auto' = 'manual') => {
     if (panelAddSaving) return;
-    if (!criteria.patientId) {
+    const contextPatientId = criteria.patientId;
+    if (!contextPatientId) {
       return;
     }
 
     setPanelAddSaving(true);
     try {
+      const resolveCurrentColloqiumAgendaId = async (): Promise<number | null> => {
+        if (criteria.colloqiumId == null || criteria.episodeId == null) return effectiveColloqiumAgendaId;
+        const agendas = await api.listColloqiumAgendas({ episodeId: criteria.episodeId });
+        const matching = agendas
+          .filter((agenda) => agenda.colloqium_id === criteria.colloqiumId)
+          .sort((a, b) => a.id - b.id)[0];
+        const resolved = matching?.id ?? null;
+        setEffectiveColloqiumAgendaId(resolved);
+        return resolved;
+      };
+      const tryCreateContextGroup = async (colloqiumAgendaId: number | null): Promise<TaskGroup> => api.createTaskGroup({
+        patient_id: contextPatientId,
+        task_group_template_id: null,
+        episode_id: criteria.episodeId ?? null,
+        colloqium_agenda_id: colloqiumAgendaId,
+        tpl_phase_id: criteria.episodeId != null ? (criteria.tplPhaseId ?? null) : null,
+      });
       let taskGroup = findContextManagedGroup(taskGroups);
+      if (taskGroup && taskGroup.colloqium_agenda_id == null && effectiveColloqiumAgendaId != null) {
+        try {
+          taskGroup = await api.updateTaskGroup(taskGroup.id, { colloqium_agenda_id: effectiveColloqiumAgendaId });
+        } catch {
+          const resolvedAgendaId = await resolveCurrentColloqiumAgendaId();
+          if (resolvedAgendaId != null) {
+            taskGroup = await api.updateTaskGroup(taskGroup.id, { colloqium_agenda_id: resolvedAgendaId });
+          }
+        }
+      }
       if (!taskGroup) {
-        taskGroup = await api.createTaskGroup({
-          patient_id: criteria.patientId,
-          task_group_template_id: null,
-          episode_id: criteria.episodeId ?? null,
-          tpl_phase_id: criteria.episodeId != null ? (criteria.tplPhaseId ?? null) : null,
-        });
+        const initialAgendaId = effectiveColloqiumAgendaId;
+        try {
+          taskGroup = await tryCreateContextGroup(initialAgendaId);
+        } catch (err) {
+          const message = err instanceof Error ? err.message : '';
+          const isAgendaLinkError = message.includes('API 422')
+            && (
+              message.includes('colloqium_agenda_id references unknown COLLOQIUM_AGENDA')
+              || message.includes('episode_id must match COLLOQIUM_AGENDA.episode_id')
+            );
+          if (!isAgendaLinkError) throw err;
+          const resolvedAgendaId = await resolveCurrentColloqiumAgendaId();
+          taskGroup = await tryCreateContextGroup(resolvedAgendaId);
+        }
       }
       setPreferredTopGroupId(taskGroup.id);
       const createPayload = (groupId: number, description: string): TaskCreate => ({
@@ -294,12 +358,20 @@ export default function TaskBoard({
         const isClosedGroupError = message.includes('API 422')
           && message.includes('completed/discarded task group');
         if (!isClosedGroupError) throw err;
-        const replacementGroup = await api.createTaskGroup({
-          patient_id: criteria.patientId,
-          task_group_template_id: null,
-          episode_id: criteria.episodeId ?? null,
-          tpl_phase_id: criteria.episodeId != null ? (criteria.tplPhaseId ?? null) : null,
-        });
+        let replacementGroup: TaskGroup;
+        try {
+          replacementGroup = await tryCreateContextGroup(effectiveColloqiumAgendaId);
+        } catch (retryErr) {
+          const retryMessage = retryErr instanceof Error ? retryErr.message : '';
+          const isAgendaLinkError = retryMessage.includes('API 422')
+            && (
+              retryMessage.includes('colloqium_agenda_id references unknown COLLOQIUM_AGENDA')
+              || retryMessage.includes('episode_id must match COLLOQIUM_AGENDA.episode_id')
+            );
+          if (!isAgendaLinkError) throw retryErr;
+          const resolvedAgendaId = await resolveCurrentColloqiumAgendaId();
+          replacementGroup = await tryCreateContextGroup(resolvedAgendaId);
+        }
         setPreferredTopGroupId(replacementGroup.id);
         createdTask = await api.createTask(createPayload(replacementGroup.id, buildDefaultTaskDescription(replacementGroup)));
       }
@@ -307,6 +379,7 @@ export default function TaskBoard({
       setActionComment('');
       setCreatingGroupId(null);
       setCreateForm(null);
+      setAutoCreatedTaskId(source === 'auto' ? createdTask.id : null);
       setEditingTaskId(createdTask.id);
       setEditForm({
         description: createdTask.description ?? '',
@@ -322,6 +395,40 @@ export default function TaskBoard({
     }
   };
 
+  const handleCancelEditTask = async () => {
+    if (editingTaskId == null) {
+      cancelEditTask();
+      return;
+    }
+    if (autoCreatedTaskId !== editingTaskId) {
+      cancelEditTask();
+      return;
+    }
+    try {
+      const cancelled = taskStatusByKey.CANCELLED;
+      if (cancelled) {
+        await api.updateTask(editingTaskId, { status_id: cancelled.id, comment: '' });
+      }
+      setAutoCreatedTaskId(null);
+      cancelEditTask();
+      reload();
+      onAutoCreateDiscarded?.();
+    } catch {
+      cancelEditTask();
+    }
+  };
+
+  useEffect(() => {
+    if (autoCreateToken === undefined || autoCreateToken === null) {
+      prevAutoCreateTokenRef.current = autoCreateToken;
+      return;
+    }
+    if (prevAutoCreateTokenRef.current === autoCreateToken) return;
+    prevAutoCreateTokenRef.current = autoCreateToken;
+    void createTaskFromPanelContext('auto');
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [autoCreateToken]);
+
   const saveEditTask = async (taskId: number) => {
     if (!editForm) return;
     setEditSaving(true);
@@ -334,6 +441,10 @@ export default function TaskBoard({
         comment: editForm.comment,
       };
       await api.updateTask(taskId, payload);
+      if (autoCreatedTaskId === taskId) {
+        setAutoCreatedTaskId(null);
+        onAutoCreateSaved?.();
+      }
       cancelEditTask();
       reload();
     } finally {
@@ -395,7 +506,9 @@ export default function TaskBoard({
         </div>
         <button
           className="ci-add-btn"
-          onClick={createTaskFromPanelContext}
+          onClick={() => {
+            void createTaskFromPanelContext('manual');
+          }}
           disabled={panelAddSaving || !criteria.patientId}
           title={criteria.patientId ? 'Add task from current context' : 'Select a patient to add a task'}
           aria-label="Add task from current context"
@@ -404,22 +517,24 @@ export default function TaskBoard({
         </button>
       </div>
 
-      <TaskBoardFilters
-        organFilterId={organFilterId}
-        setOrganFilterId={setOrganFilterId}
-        assignedToFilterId={assignedToFilterId}
-        setAssignedToFilterId={setAssignedToFilterId}
-        dueBefore={dueBefore}
-        setDueBefore={setDueBefore}
-        showDoneTasks={showDoneTasks}
-        setShowDoneTasks={setShowDoneTasks}
-        showCancelledTasks={showCancelledTasks}
-        setShowCancelledTasks={setShowCancelledTasks}
-        showGroupHeadings={showGroupHeadings}
-        setShowGroupHeadings={setShowGroupHeadings}
-        organOptions={organOptions}
-        assignedToOptions={assignedToOptions}
-      />
+      {!hideFilters && (
+        <TaskBoardFilters
+          organFilterId={organFilterId}
+          setOrganFilterId={setOrganFilterId}
+          assignedToFilterId={assignedToFilterId}
+          setAssignedToFilterId={setAssignedToFilterId}
+          dueBefore={dueBefore}
+          setDueBefore={setDueBefore}
+          showDoneTasks={showDoneTasks}
+          setShowDoneTasks={setShowDoneTasks}
+          showCancelledTasks={showCancelledTasks}
+          setShowCancelledTasks={setShowCancelledTasks}
+          showGroupHeadings={showGroupHeadings}
+          setShowGroupHeadings={setShowGroupHeadings}
+          organOptions={organOptions}
+          assignedToOptions={assignedToOptions}
+        />
+      )}
 
       {loading && <p className="status">Loading tasks...</p>}
       {!loading && error && <p className="status">{error}</p>}
@@ -434,7 +549,9 @@ export default function TaskBoard({
           setEditForm={setEditForm}
           editSaving={editSaving}
           onSaveEdit={saveEditTask}
-          onCancelEdit={cancelEditTask}
+          onCancelEdit={() => {
+            void handleCancelEditTask();
+          }}
           onStartComplete={(task) => startTaskAction(task, 'complete')}
           onStartDiscard={(task) => startTaskAction(task, 'discard')}
           onStartEdit={startEditTask}

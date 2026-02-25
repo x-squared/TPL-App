@@ -45,7 +45,7 @@ def create_contact_info(
         patient_id=patient_id,
         **payload.model_dump(),
         pos=max_pos + 1,
-        changed_by=current_user.id,
+        changed_by_id=current_user.id,
     )
     db.add(ci)
     db.commit()
@@ -70,7 +70,7 @@ def update_contact_info(
         raise HTTPException(status_code=404, detail="Contact info not found")
     for key, value in payload.model_dump(exclude_unset=True).items():
         setattr(ci, key, value)
-    ci.changed_by = current_user.id
+    ci.changed_by_id = current_user.id
     db.commit()
     db.refresh(ci)
     return ci
