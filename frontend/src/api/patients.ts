@@ -1,4 +1,4 @@
-import { request, type AppUser, type Code, type MedicalValueTemplate } from './core';
+import { request, type AppUser, type Code, type MedicalValueGroup, type MedicalValueTemplate } from './core';
 
 /* ── Contact Info ── */
 
@@ -94,6 +94,8 @@ export interface MedicalValue {
   medical_value_template: MedicalValueTemplate | null;
   datatype_id: number | null;
   datatype: Code | null;
+  medical_value_group_id: number | null;
+  medical_value_group: MedicalValueGroup | null;
   name: string;
   pos: number;
   value: string;
@@ -107,6 +109,7 @@ export interface MedicalValue {
 export interface MedicalValueCreate {
   medical_value_template_id?: number | null;
   datatype_id?: number | null;
+  medical_value_group_id?: number | null;
   name?: string;
   pos?: number;
   value?: string;
@@ -114,8 +117,9 @@ export interface MedicalValueCreate {
 }
 
 export interface MedicalValueUpdate {
-  medical_value_template_id?: number;
+  medical_value_template_id?: number | null;
   datatype_id?: number | null;
+  medical_value_group_id?: number | null;
   name?: string;
   pos?: number;
   value?: string;
@@ -129,6 +133,9 @@ export interface Episode {
   patient_id: number;
   organ_id: number;
   organ: Code | null;
+  organ_ids: number[];
+  organs: Code[];
+  episode_organs: EpisodeOrgan[];
   start: string | null;
   end: string | null;
   fall_nr: string;
@@ -159,8 +166,36 @@ export interface Episode {
   updated_at: string | null;
 }
 
-export interface EpisodeCreate {
+export interface EpisodeOrgan {
+  id: number;
+  episode_id: number;
   organ_id: number;
+  organ: Code | null;
+  date_added: string | null;
+  comment: string;
+  is_active: boolean;
+  date_inactivated: string | null;
+  reason_activation_change: string;
+}
+
+export interface EpisodeOrganCreate {
+  organ_id: number;
+  date_added?: string | null;
+  comment?: string;
+  reason_activation_change?: string;
+}
+
+export interface EpisodeOrganUpdate {
+  date_added?: string | null;
+  comment?: string;
+  is_active?: boolean;
+  date_inactivated?: string | null;
+  reason_activation_change?: string;
+}
+
+export interface EpisodeCreate {
+  organ_id?: number | null;
+  organ_ids?: number[];
   start?: string | null;
   end?: string | null;
   fall_nr?: string;
@@ -188,6 +223,7 @@ export interface EpisodeCreate {
 
 export interface EpisodeUpdate {
   organ_id?: number;
+  organ_ids?: number[];
   start?: string | null;
   end?: string | null;
   fall_nr?: string;
@@ -370,6 +406,21 @@ export const patientsApi = {
     }),
   updateEpisode: (patientId: number, episodeId: number, data: EpisodeUpdate) =>
     request<Episode>(`/patients/${patientId}/episodes/${episodeId}`, {
+      method: 'PATCH',
+      body: JSON.stringify(data),
+    }),
+  addEpisodeOrgan: (patientId: number, episodeId: number, data: EpisodeOrganCreate) =>
+    request<Episode>(`/patients/${patientId}/episodes/${episodeId}/organs`, {
+      method: 'POST',
+      body: JSON.stringify(data),
+    }),
+  updateEpisodeOrgan: (
+    patientId: number,
+    episodeId: number,
+    episodeOrganId: number,
+    data: EpisodeOrganUpdate,
+  ) =>
+    request<EpisodeOrgan>(`/patients/${patientId}/episodes/${episodeId}/organs/${episodeOrganId}`, {
       method: 'PATCH',
       body: JSON.stringify(data),
     }),

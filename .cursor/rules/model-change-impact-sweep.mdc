@@ -1,0 +1,35 @@
+---
+description: When data model changes, update all dependent layers
+alwaysApply: true
+---
+
+# Data Model Impact Sweep
+
+When adding/changing/removing entities, attributes, relations, or cardinalities:
+
+1. Perform an explicit impact sweep before finishing.
+2. Update all affected layers, not just the changed model.
+
+## Required updates (minimum)
+
+- **Persistence + startup**
+  - SQLAlchemy models, relationships, compatibility properties, startup/migration behavior.
+- **Seed system (chiefly required)**
+  - `backend/app/seed/__init__.py` loaders and all relevant datasets in `backend/app/seed/datasets/**`.
+  - Ensure new relation tables are populated correctly (not only legacy columns).
+- **Report Builder (chiefly required)**
+  - `backend/app/routers/reports.py` source fields/joins/query loading.
+  - `frontend/src/features/reports/**` behavior if metadata shape changed.
+  - `doc/report-builder-manual.md` when report semantics/metadata changed.
+
+## Also check and fix when impacted
+
+- API schemas/contracts and routers (`backend/app/schema/**`, `backend/app/routers/**`)
+- Frontend API typings + consumers (`frontend/src/api/**`, affected views/hooks)
+- Derived naming/rendering logic (favorites, table labels, detail headers)
+- Filtering/sorting/business logic using old cardinality assumptions
+- Tests/specs/manuals that rely on previous model shape
+
+## Completion gate
+
+Before final response, verify changed flows (compile/build/lints and targeted runtime checks) and state what dependent systems were updated.

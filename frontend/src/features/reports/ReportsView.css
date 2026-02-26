@@ -15,6 +15,14 @@
   margin-bottom: 1rem;
 }
 
+.reports-subheading {
+  margin-bottom: 0.35rem;
+}
+
+.reports-subheading h3 {
+  margin: 0;
+}
+
 .reports-checkbox-grid {
   display: grid;
   grid-template-columns: repeat(auto-fit, minmax(170px, 1fr));
@@ -61,4 +69,21 @@
 
 .reports-results {
   margin-top: 0.35rem;
+}
+
+.reports-results-heading-left {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.6rem;
+  flex: 1;
+}
+
+.reports-results-heading-left h2 {
+  flex: 0 0 auto;
+}
+
+.reports-results-actions {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.45rem;
 }

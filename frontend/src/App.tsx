@@ -13,18 +13,24 @@ import ColloquiumDetailView from './views/ColloquiumDetailView';
 import ColloquiumsView from './views/ColloquiumsView';
 import CoordinationDetailView from './views/CoordinationDetailView';
 import CoordinationsView from './views/CoordinationsView';
+import DonationsView from './views/DonationsView';
+import E2ETestsView from './views/E2ETestsView';
 import MyWorkView from './views/MyWorkView';
 import PatientDetailView from './views/PatientDetailView';
 import PatientsView from './views/PatientsView';
 import ReportsView from './views/ReportsView';
 import type { PatientDetailTab } from './views/patient-detail/PatientDetailTabs';
 
-type Page = 'my-work' | 'patients' | 'colloquiums' | 'coordinations' | 'reports';
+type Page = 'my-work' | 'patients' | 'donations' | 'colloquiums' | 'coordinations' | 'reports' | 'e2e-tests';
 
 function App() {
   const protocolParam = new URLSearchParams(window.location.search).get('protocol');
+  const coordinationProtocolParam = new URLSearchParams(window.location.search).get('coordination_protocol');
   const standaloneProtocolId = protocolParam && !Number.isNaN(Number(protocolParam))
     ? Number(protocolParam)
+    : null;
+  const standaloneCoordinationProtocolId = coordinationProtocolParam && !Number.isNaN(Number(coordinationProtocolParam))
+    ? Number(coordinationProtocolParam)
     : null;
 
   const [user, setUser] = useState<AppUser | null>(null);
@@ -40,6 +46,7 @@ function App() {
   const [patientInitialEpisodeId, setPatientInitialEpisodeId] = useState<number | null>(null);
   const [sidebarOpen, setSidebarOpen] = useState(true);
   const [userMenuOpen, setUserMenuOpen] = useState(false);
+  const [devToolsEnabled, setDevToolsEnabled] = useState(false);
 
   useEffect(() => {
     const token = getToken();
@@ -52,6 +59,21 @@ function App() {
       setAuthLoading(false);
     }
   }, []);
+
+  useEffect(() => {
+    api.getHealth()
+      .then((health) => {
+        const env = (health.env ?? '').toUpperCase();
+        setDevToolsEnabled(Boolean(health.dev_tools_enabled) || env === 'DEV' || env === 'TEST');
+      })
+      .catch(() => setDevToolsEnabled(false));
+  }, []);
+
+  useEffect(() => {
+    if (!devToolsEnabled && page === 'e2e-tests') {
+      setPage('patients');
+    }
+  }, [devToolsEnabled, page]);
 
   const handleLogin = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -156,6 +178,20 @@ function App() {
       </div>
     );
   }
+  if (standaloneCoordinationProtocolId !== null) {
+    return (
+      <div className="app-layout app-standalone">
+        <main className="main-content">
+          <CoordinationDetailView
+            coordinationId={standaloneCoordinationProtocolId}
+            onBack={() => window.close()}
+            onOpenPatientEpisode={() => undefined}
+            initialTab="protocol"
+          />
+        </main>
+      </div>
+    );
+  }
 
   return (
     <div className="app-layout">
@@ -203,6 +239,21 @@ function App() {
             {sidebarOpen && <span className="nav-label">Recipients</span>}
           </button>
           <button
+            className={`nav-item ${page === 'donations' ? 'active' : ''}`}
+            onClick={() => {
+              setPage('donations');
+              setSelectedPatientId(null);
+              setSelectedColloqiumId(null);
+              setSelectedCoordinationId(null);
+              setPatientInitialTab(undefined);
+              setPatientInitialEpisodeId(null);
+            }}
+            title="Donations"
+          >
+            <span className="nav-icon">{'\u25C8'}</span>
+            {sidebarOpen && <span className="nav-label">Donations</span>}
+          </button>
+          <button
             className={`nav-item ${page === 'colloquiums' ? 'active' : ''}`}
             onClick={() => {
               setPage('colloquiums');
@@ -245,6 +296,30 @@ function App() {
             <span className="nav-icon">{'\u25A4'}</span>
             {sidebarOpen && <span className="nav-label">Reports</span>}
           </button>
+          {devToolsEnabled && (
+            <>
+              <div className="nav-divider-dev" aria-hidden="true">
+                <span className="nav-divider-line" />
+                {sidebarOpen && <span className="nav-divider-label">DEV</span>}
+                <span className="nav-divider-line" />
+              </div>
+              <button
+                className={`nav-item ${page === 'e2e-tests' ? 'active' : ''}`}
+                onClick={() => {
+                  setPage('e2e-tests');
+                  setSelectedPatientId(null);
+                  setSelectedColloqiumId(null);
+                  setSelectedCoordinationId(null);
+                  setPatientInitialTab(undefined);
+                  setPatientInitialEpisodeId(null);
+                }}
+                title="E2E Tests"
+              >
+                <span className="nav-icon">{'\u2699'}</span>
+                {sidebarOpen && <span className="nav-label">E2E Tests</span>}
+              </button>
+            </>
+          )}
         </nav>
 
         <div className="sidebar-bottom">
@@ -305,6 +380,7 @@ function App() {
             }}
           />
         )}
+        {page === 'donations' && <DonationsView />}
         {page === 'colloquiums' && selectedColloqiumId === null && (
           <ColloquiumsView onOpenColloqium={(id) => setSelectedColloqiumId(id)} />
         )}
@@ -339,6 +415,7 @@ function App() {
           />
         )}
         {page === 'reports' && <ReportsView />}
+        {page === 'e2e-tests' && devToolsEnabled && <E2ETestsView />}
       </main>
     </div>
   );

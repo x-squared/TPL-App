@@ -13,10 +13,17 @@ from .clinical import (
     DiagnosisUpdate,
     EpisodeBase,
     EpisodeCreate,
+    EpisodeOrganBase,
+    EpisodeOrganCreate,
+    EpisodeOrganResponse,
+    EpisodeOrganUpdate,
     EpisodeResponse,
     EpisodeUpdate,
     MedicalValueBase,
     MedicalValueCreate,
+    MedicalValueGroupBase,
+    MedicalValueGroupResponse,
+    MedicalValueGroupUpdate,
     MedicalValueResponse,
     MedicalValueTemplateBase,
     MedicalValueTemplateCreate,
@@ -96,6 +103,13 @@ from .coordination import (
     CoordinationUpdate,
 )
 from .favorite import FavoriteBase, FavoriteCreate, FavoriteResponse
+from .e2e_tests import (
+    E2ETestMetadataResponse,
+    E2ETestRunRequest,
+    E2ETestRunResponse,
+    E2ETestRunnerKey,
+    E2ETestRunnerOption,
+)
 from .patient import PatientBase, PatientCreate, PatientListResponse, PatientResponse, PatientUpdate
 from .report import (
     ReportColumnResponse,
@@ -103,6 +117,7 @@ from .report import (
     ReportExecuteResponse,
     ReportFieldOption,
     ReportFilterInput,
+    ReportJoinOption,
     ReportMetadataResponse,
     ReportSourceOption,
     ReportSortInput,

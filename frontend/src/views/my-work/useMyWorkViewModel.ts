@@ -1,6 +1,6 @@
 import { useCallback, useEffect, useMemo, useState } from 'react';
 import { api, type Code, type Favorite, type Patient } from '../../api';
-import { formatEpisodeFavoriteName } from '../layout/episodeDisplay';
+import { formatEpisodeFavoriteName, formatOrganNames } from '../layout/episodeDisplay';
 
 const fallbackTypeLabels: Record<string, string> = {
   PATIENT: 'Patient',
@@ -58,7 +58,7 @@ export function useMyWorkViewModel() {
             fullName: `${patient.first_name} ${patient.name}`.trim(),
             birthDate: patient.date_of_birth,
             pid: patient.pid,
-            organName: episode.organ?.name_default ?? null,
+            organName: formatOrganNames(episode.organs, episode.organ?.name_default ?? null),
             startDate: episode.start,
           });
         }

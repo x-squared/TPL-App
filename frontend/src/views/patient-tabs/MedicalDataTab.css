@@ -100,3 +100,22 @@
   white-space: nowrap;
   width: 7rem;
 }
+
+.mv-group-block + .mv-group-block {
+  margin-top: 1rem;
+}
+
+.mv-group-heading {
+  margin: 0.2rem 0 0.35rem;
+}
+
+.mv-group-heading h3 {
+  font-size: 0.86rem !important;
+  letter-spacing: 0.02em !important;
+}
+
+.mv-group-renew-read {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.35rem;
+}

@@ -1,5 +1,6 @@
 from fastapi import APIRouter, Depends, HTTPException
-from sqlalchemy.orm import Session, joinedload
+from sqlalchemy import or_
+from sqlalchemy.orm import Session, aliased, joinedload
 
 from ..auth import get_current_user
 from ..database import get_db
@@ -14,6 +15,15 @@ def _get_patient_or_404(patient_id: int, db: Session) -> Patient:
     if not patient:
         raise HTTPException(status_code=404, detail="Patient not found")
     return patient
+
+
+def _episode_organ_ids(episode: Episode) -> list[int]:
+    organ_ids = [organ.id for organ in (episode.organs or []) if organ and organ.id is not None]
+    if organ_ids:
+        return list(dict.fromkeys(organ_ids))
+    if episode.organ_id is not None:
+        return [episode.organ_id]
+    return []
 
 
 def _validate_links(
@@ -82,7 +92,7 @@ def _validate_links(
         if episode_id is None:
             raise HTTPException(status_code=422, detail="episode_id is required when template has organ_id")
         episode = db.query(Episode).filter(Episode.id == episode_id).first()
-        if not episode or episode.organ_id != template.organ_id:
+        if not episode or template.organ_id not in _episode_organ_ids(episode):
             raise HTTPException(status_code=422, detail="episode organ must match template organ_id")
     if template.tpl_phase_id is not None:
         if episode_id is None:
@@ -108,10 +118,16 @@ def _resolve_task_group_name(
         organ_label = "no organ"
         if episode_id is not None:
             episode = db.query(Episode).filter(Episode.id == episode_id).first()
-            if episode and episode.organ_id is not None:
-                organ = db.query(Code).filter(Code.id == episode.organ_id, Code.type == "ORGAN").first()
-                if organ:
-                    organ_label = organ.name_default
+            if episode:
+                organ_ids = _episode_organ_ids(episode)
+                if organ_ids:
+                    organ_names = [
+                        code.name_default
+                        for code in db.query(Code).filter(Code.type == "ORGAN", Code.id.in_(organ_ids)).all()
+                        if code and code.name_default
+                    ]
+                    if organ_names:
+                        organ_label = " + ".join(dict.fromkeys(organ_names))
         phase_label = "no phase"
         if tpl_phase_id is not None:
             phase = db.query(Code).filter(Code.id == tpl_phase_id, Code.type == "TPL_PHASE").first()
@@ -129,17 +145,36 @@ def list_task_groups(
     colloqium_agenda_id: int | None = None,
     db: Session = Depends(get_db),
 ):
+    episode_direct = aliased(Episode)
+    episode_via_agenda = aliased(Episode)
     query = db.query(TaskGroup).options(
         joinedload(TaskGroup.tpl_phase),
         joinedload(TaskGroup.changed_by_user),
     )
+    query = (
+        query
+        .outerjoin(episode_direct, TaskGroup.episode_id == episode_direct.id)
+        .outerjoin(ColloqiumAgenda, TaskGroup.colloqium_agenda_id == ColloqiumAgenda.id)
+        .outerjoin(episode_via_agenda, ColloqiumAgenda.episode_id == episode_via_agenda.id)
+    )
     if patient_id is not None:
-        query = query.filter(TaskGroup.patient_id == patient_id)
+        query = query.filter(
+            or_(
+                TaskGroup.patient_id == patient_id,
+                episode_direct.patient_id == patient_id,
+                episode_via_agenda.patient_id == patient_id,
+            )
+        )
     if episode_id is not None:
-        query = query.filter(TaskGroup.episode_id == episode_id)
+        query = query.filter(
+            or_(
+                TaskGroup.episode_id == episode_id,
+                ColloqiumAgenda.episode_id == episode_id,
+            )
+        )
     if colloqium_agenda_id is not None:
         query = query.filter(TaskGroup.colloqium_agenda_id == colloqium_agenda_id)
-    return query.all()
+    return query.distinct().all()
 
 
 @router.post("/", response_model=TaskGroupResponse, status_code=201)

@@ -9,7 +9,9 @@ from ..models import (
     ColloqiumType,
     ContactInfo,
     Episode,
+    EpisodeOrgan,
     MedicalValueTemplate,
+    MedicalValueGroup,
     Patient,
     Task,
     TaskGroup,
@@ -22,7 +24,7 @@ from .profiles import resolve_seed_categories
 
 
 def sync_codes(db: Session) -> None:
-    """Replace all CODE rows with the data defined in codes_data.py on every startup."""
+    """Replace all CODE rows with the core dataset definitions."""
     from .datasets.core.codes import RECORDS as code_records
 
     db.query(Code).delete()
@@ -32,7 +34,7 @@ def sync_codes(db: Session) -> None:
 
 
 def sync_catalogues(db: Session) -> None:
-    """Replace all CATALOGUE rows with the data defined in catalogues_data.py on every startup."""
+    """Replace all CATALOGUE rows with the core dataset definitions."""
     from .datasets.core.catalogues import RECORDS as catalogue_records
 
     db.query(Catalogue).delete()
@@ -43,18 +45,17 @@ def sync_catalogues(db: Session) -> None:
 
 def sync_patients(db: Session) -> None:
     """Replace all PATIENT and CONTACT_INFO rows with seed data on every startup."""
-    from .datasets.sample.contact_infos import RECORDS as contact_records
-    from .datasets.sample.episodes import RECORDS as episode_records
-    from .datasets.sample.patients import RECORDS as patient_records
+    from .datasets.sample.patient_cases import CONTACT_INFOS, EPISODES, PATIENTS
 
+    db.query(EpisodeOrgan).delete()
     db.query(Episode).delete()
     db.query(ContactInfo).delete()
     db.query(Patient).delete()
-    for entry in patient_records:
+    for entry in PATIENTS:
         db.add(Patient(**entry))
     db.flush()
 
-    for entry in contact_records:
+    for entry in CONTACT_INFOS:
         raw = dict(entry)
         patient = db.query(Patient).filter(Patient.pid == raw.pop("patient_pid")).first()
         code = (
@@ -65,43 +66,93 @@ def sync_patients(db: Session) -> None:
         if patient and code:
             db.add(ContactInfo(patient_id=patient.id, type_id=code.id, **raw))
 
-    for entry in episode_records:
+    for entry in EPISODES:
         raw = dict(entry)
         patient = db.query(Patient).filter(Patient.pid == raw.pop("patient_pid")).first()
-        organ = db.query(Code).filter(Code.type == "ORGAN", Code.key == raw.pop("organ_key")).first()
+        organ_keys = raw.pop("organ_keys", [])
+        organ_ids: list[int] = []
+        for organ_key in organ_keys:
+            organ = db.query(Code).filter(Code.type == "ORGAN", Code.key == organ_key).first()
+            if organ:
+                organ_ids.append(organ.id)
+        organ_ids = list(dict.fromkeys(organ_ids))
         status_key = raw.pop("status_key", None)
         status = (
             db.query(Code).filter(Code.type == "TPL_STATUS", Code.key == status_key).first()
             if status_key
             else None
         )
-        if patient and organ:
-            db.add(
-                Episode(
-                    patient_id=patient.id,
-                    organ_id=organ.id,
-                    status_id=status.id if status else None,
-                    **raw,
-                )
+        if patient and organ_ids:
+            episode = Episode(
+                patient_id=patient.id,
+                organ_id=organ_ids[0],
+                status_id=status.id if status else None,
+                **raw,
             )
+            db.add(episode)
+            db.flush()
+            for organ_id in organ_ids:
+                db.add(
+                    EpisodeOrgan(
+                        episode_id=episode.id,
+                        organ_id=organ_id,
+                        date_added=episode.start,
+                        is_active=True,
+                    )
+                )
     db.commit()
 
 
 def sync_medical_value_templates(db: Session) -> None:
     """Replace all MEDICAL_VALUE_TEMPLATE rows with seed data on every startup."""
     from .datasets.core.medical_value_templates import RECORDS as mv_records
+    group_by_key = {
+        row.key: row.id
+        for row in db.query(MedicalValueGroup).all()
+    }
+
+    def infer_group_key(raw_entry: dict[str, Any]) -> str:
+        explicit = raw_entry.get("medical_value_group_key")
+        if isinstance(explicit, str) and explicit:
+            return explicit
+        name = str(raw_entry.get("name_default", "")).lower()
+        cardio_tokens = ("cardio", "ekg", "ecg", "echo", "lvef", "nyha")
+        if any(token in name for token in cardio_tokens):
+            return "CARDIOLOGY"
+        use_liver = bool(raw_entry.get("use_liver"))
+        use_kidney = bool(raw_entry.get("use_kidney"))
+        use_heart = bool(raw_entry.get("use_heart"))
+        use_lung = bool(raw_entry.get("use_lung"))
+        use_donor = bool(raw_entry.get("use_donor"))
+        if use_donor and not (use_liver or use_kidney or use_heart or use_lung):
+            return "DONOR"
+        if not (use_liver and use_kidney and use_heart and use_lung and use_donor):
+            return "ORGAN_SPECIFIC"
+        return "GENERAL"
 
     db.query(MedicalValueTemplate).delete()
     for entry in mv_records:
         raw = dict(entry)
         datatype_key = raw.pop("datatype_key")
+        group_key = infer_group_key(raw)
+        group_id = group_by_key.get(group_key) or group_by_key.get("UNGROUPED")
         code = (
             db.query(Code)
             .filter(Code.type == "DATATYPE", Code.key == datatype_key)
             .first()
         )
         if code:
-            db.add(MedicalValueTemplate(datatype_id=code.id, **raw))
+            db.add(MedicalValueTemplate(datatype_id=code.id, medical_value_group_id=group_id, **raw))
+    db.commit()
+
+
+def sync_medical_value_groups(db: Session) -> None:
+    """Replace all MEDICAL_VALUE_GROUP rows with core group definitions."""
+    from .datasets.core.medical_value_groups import RECORDS as group_records
+
+    db.query(MedicalValueGroup).delete()
+    for entry in group_records:
+        db.add(MedicalValueGroup(**entry))
     db.commit()
 
 
@@ -149,25 +200,17 @@ def sync_users(db: Session) -> None:
 
 
 def sync_colloqiums(db: Session) -> None:
-    """Replace all COLLOQIUM_TYPE and COLLOQIUM rows with seed data on every startup."""
-    from .datasets.sample.colloqium_types import RECORDS as colloqium_type_records
+    """Replace all COLLOQIUM rows with sample seed data."""
     from .datasets.sample.colloqiums import RECORDS as colloqium_records
 
     db.query(ColloqiumAgenda).delete()
     db.query(Colloqium).delete()
-    db.query(ColloqiumType).delete()
     db.flush()
 
-    created_types: dict[str, ColloqiumType] = {}
-    for entry in colloqium_type_records:
-        raw = dict(entry)
-        organ = db.query(Code).filter(Code.type == "ORGAN", Code.key == raw.pop("organ_key")).first()
-        if not organ:
-            continue
-        item = ColloqiumType(organ_id=organ.id, **raw)
-        db.add(item)
-        db.flush()
-        created_types[item.name] = item
+    created_types: dict[str, ColloqiumType] = {
+        row.name: row
+        for row in db.query(ColloqiumType).all()
+    }
 
     for entry in colloqium_records:
         raw = dict(entry)
@@ -180,9 +223,28 @@ def sync_colloqiums(db: Session) -> None:
     db.commit()
 
 
+def sync_colloqium_types_core(db: Session) -> None:
+    """Load production-safe colloquium type definitions."""
+    from .datasets.core.colloqium_types import RECORDS as colloqium_type_records
+
+    db.query(ColloqiumAgenda).delete()
+    db.query(Colloqium).delete()
+    db.query(ColloqiumType).delete()
+    db.flush()
+
+    for entry in colloqium_type_records:
+        raw = dict(entry)
+        organ = db.query(Code).filter(Code.type == "ORGAN", Code.key == raw.pop("organ_key")).first()
+        if not organ:
+            continue
+        item = ColloqiumType(organ_id=organ.id, **raw)
+        db.add(item)
+    db.commit()
+
+
 def sync_tasks(db: Session) -> None:
     """Replace all TASK_GROUP and TASK rows with seed data on every startup."""
-    from .datasets.sample.tasks import TASK_GROUPS, TASKS
+    from .datasets.sample.patient_cases import TASK_GROUPS, TASKS
 
     db.query(Task).delete()
     db.query(TaskGroup).delete()
@@ -283,7 +345,7 @@ def sync_tasks(db: Session) -> None:
 
 def sync_task_templates(db: Session) -> None:
     """Replace all TASK_GROUP_TEMPLATE and TASK_TEMPLATE rows with seed data."""
-    from .datasets.core.task_templates import TASK_GROUP_TEMPLATES, TASK_TEMPLATES
+    from .datasets.sample.task_templates import TASK_GROUP_TEMPLATES, TASK_TEMPLATES
 
     db.query(TaskTemplate).delete()
     db.query(TaskGroupTemplate).delete()
@@ -371,22 +433,34 @@ def get_seed_jobs() -> tuple[SeedJob, ...]:
             loader=sync_users_core,
         ),
         SeedJob(
+            key="core.colloqium_types",
+            category="core",
+            description="Load colloquium type definitions",
+            loader=sync_colloqium_types_core,
+        ),
+        SeedJob(
+            key="core.medical_value_groups",
+            category="core",
+            description="Load medical value groups",
+            loader=sync_medical_value_groups,
+        ),
+        SeedJob(
             key="core.medical_value_templates",
             category="core",
             description="Load medical value templates",
             loader=sync_medical_value_templates,
         ),
         SeedJob(
-            key="core.task_templates",
-            category="core",
-            description="Load task templates",
-            loader=sync_task_templates,
-        ),
-        SeedJob(
             key="sample.users",
             category="sample",
             description="Load demo users",
             loader=sync_users_sample,
+        ),
+        SeedJob(
+            key="sample.task_templates",
+            category="sample",
+            description="Load demo task templates",
+            loader=sync_task_templates,
         ),
         SeedJob(
             key="sample.colloqiums",

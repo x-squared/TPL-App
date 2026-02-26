@@ -1,6 +1,7 @@
 import React from 'react';
 import type { Patient, PatientListItem } from '../../api';
 import { formatDate } from './patientsViewUtils';
+import { formatOrganNames } from '../layout/episodeDisplay';
 
 interface Props {
   filteredPatients: PatientListItem[];
@@ -139,7 +140,7 @@ export default function PatientsTable({
                           <tbody>
                             {[...patientDetails[p.id].episodes].sort((a, b) => (a.status?.pos ?? 999) - (b.status?.pos ?? 999)).map((ep) => (
                               <tr key={ep.id}>
-                                <td>{ep.organ?.name_default ?? '–'}</td>
+                                <td>{formatOrganNames(ep.organs, ep.organ?.name_default ?? null)}</td>
                                 <td>{ep.status?.name_default ?? '–'}</td>
                                 <td>{formatDate(ep.start)}</td>
                                 <td>{formatDate(ep.end)}</td>

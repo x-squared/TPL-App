@@ -5,8 +5,10 @@ Full-stack web application with a **FastAPI** backend, **React + TypeScript** fr
 ## Documentation
 
 - Start here: `doc/setup-manual.md`
+- CLI cookbook / Quarto usage: `doc/diy-manual.qmd`
 - Server operations: `doc/server-manual.md`
 - Client operations: `doc/client-manual.md`
+- Report builder usage and internals: `doc/report-builder-manual.md`
 - Seeding and environments: `doc/seeding-manual.md`
 - Specification authoring: `doc/specification-manual.md`
 - Test execution and reports: `doc/test-manual.md`

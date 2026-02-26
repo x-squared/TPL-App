@@ -1,5 +1,5 @@
-export { getToken, setToken, clearToken, authApi, codesApi, medicalValueTemplatesApi, usersApi } from './core';
-export type { AppUser, Code, MedicalValueTemplate } from './core';
+export { getToken, setToken, clearToken, authApi, codesApi, medicalValueTemplatesApi, medicalValueGroupsApi, usersApi } from './core';
+export type { AppUser, Code, HealthInfo, MedicalValueTemplate, MedicalValueGroup, MedicalValueGroupUpdate } from './core';
 
 export { patientsApi } from './patients';
 export type {
@@ -7,7 +7,7 @@ export type {
   Absence, AbsenceCreate, AbsenceUpdate,
   Diagnosis, DiagnosisCreate, DiagnosisUpdate,
   MedicalValue, MedicalValueCreate, MedicalValueUpdate,
-  Episode, EpisodeCreate, EpisodeUpdate,
+  Episode, EpisodeCreate, EpisodeUpdate, EpisodeOrgan, EpisodeOrganCreate, EpisodeOrganUpdate,
   Patient, PatientListItem, PatientCreate, PatientUpdate,
 } from './patients';
 export { tasksApi } from './tasks';
@@ -46,6 +46,7 @@ export type {
   ReportOperatorKey,
   ReportSortDirection,
   ReportFieldOption,
+  ReportJoinOption,
   ReportSourceOption,
   ReportMetadataResponse,
   ReportFilterInput,
@@ -54,19 +55,29 @@ export type {
   ReportColumn,
   ReportExecuteResponse,
 } from './reports';
+export { e2eTestsApi } from './e2eTests';
+export type {
+  E2ETestRunnerKey,
+  E2ETestRunnerOption,
+  E2ETestMetadataResponse,
+  E2ETestRunRequest,
+  E2ETestRunResponse,
+} from './e2eTests';
 
-import { authApi, codesApi, medicalValueTemplatesApi, usersApi } from './core';
+import { authApi, codesApi, medicalValueTemplatesApi, medicalValueGroupsApi, usersApi } from './core';
 import { patientsApi } from './patients';
 import { tasksApi } from './tasks';
 import { colloqiumsApi } from './colloqiums';
 import { coordinationsApi } from './coordinations';
 import { favoritesApi } from './favorites';
 import { reportsApi } from './reports';
+import { e2eTestsApi } from './e2eTests';
 
 export const api = {
   ...authApi,
   ...codesApi,
   ...medicalValueTemplatesApi,
+  ...medicalValueGroupsApi,
   ...usersApi,
   ...patientsApi,
   ...tasksApi,
@@ -74,4 +85,5 @@ export const api = {
   ...coordinationsApi,
   ...favoritesApi,
   ...reportsApi,
+  ...e2eTestsApi,
 };

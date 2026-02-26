@@ -1,0 +1,28 @@
+---
+description: Keep manuals in sync with meaningful project changes
+alwaysApply: true
+---
+
+# Manual Maintenance Rule
+
+After implementing changes, always evaluate whether any manual in `doc/` should be updated.
+
+- **Update manuals when reasonably indicated**:
+  - Behavior, workflows, commands, environment setup, test flow, reporting flow, or architecture usage changed.
+  - New feature requires user/developer instructions to use correctly.
+  - Existing manual content would become misleading without an update.
+  - External interface architecture, integration flows, adapter/client conventions, or interface operations changed.
+
+- **Do not force manual edits when likely unrelated**:
+  - If a change clearly does not affect documented topics, skip manual edits.
+  - Judge relevance using manual titles and scope (for example: setup, server, client, seeding, specification, test).
+
+- **When updating manuals**:
+  - Keep updates concise and consistent with existing wording.
+  - Prefer editing the most relevant manual(s) over duplicating text across many manuals.
+  - Add cross-links when a change spans multiple manuals.
+  - For external interface changes, `doc/interface-manual.md` is the primary manual and must be checked first.
+  - If interface changes alter runtime/env/operator behavior, also update `doc/server-manual.md`.
+
+- **Before finishing**:
+  - State briefly whether manuals were updated or intentionally left unchanged, and why.

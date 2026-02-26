@@ -15,5 +15,5 @@ TEST = [
 ]
 
 # ---- all colloqium types combined ----
-ALL = TEST
+RECORDS = TEST
 

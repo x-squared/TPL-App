@@ -159,6 +159,38 @@
   text-overflow: ellipsis;
 }
 
+.nav-divider-dev {
+  display: flex;
+  align-items: center;
+  gap: 0.45rem;
+  margin: 0.55rem 0 0.3rem;
+  padding: 0 0.2rem;
+}
+
+.nav-divider-line {
+  height: 1px;
+  background: rgba(255, 255, 255, 0.55);
+  flex: 1;
+  min-width: 0;
+}
+
+.nav-divider-label {
+  font-size: 0.67rem;
+  letter-spacing: 0.08em;
+  color: rgba(255, 255, 255, 0.75);
+  text-transform: uppercase;
+}
+
+.sidebar.collapsed .nav-divider-dev {
+  justify-content: center;
+  margin: 0.55rem 0 0.45rem;
+}
+
+.sidebar.collapsed .nav-divider-dev .nav-divider-line {
+  width: 1rem;
+  flex: 0 0 auto;
+}
+
 /* ── Sidebar bottom / user ── */
 
 .sidebar-bottom {

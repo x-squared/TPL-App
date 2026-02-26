@@ -1,4 +1,5 @@
 import type { Task } from '../../api';
+import { formatTaskEpisodeReference, formatTaskPatientReference } from '../layout/episodeDisplay';
 import type {
   TaskBoardRow,
   TaskGroupState,
@@ -10,19 +11,35 @@ import type {
 const defaultReferenceRenderers: TaskReferenceRenderer[] = [
   {
     id: 'patient',
-    buildSegment: ({ group }) => ({
-      key: `patient-${group.patient_id}`,
-      label: `P#${group.patient_id}`,
-    }),
+    buildSegment: ({ group, patient }) => {
+      if (group.episode_id != null) return null;
+      return {
+        key: `patient-${group.patient_id}`,
+        label: formatTaskPatientReference({
+          patientId: group.patient_id,
+          fullName: patient ? `${patient.first_name} ${patient.name}`.trim() : null,
+          birthDate: patient?.date_of_birth,
+          pid: patient?.pid,
+        }),
+        kind: 'patient',
+      };
+    },
   },
   {
     id: 'episode',
-    buildSegment: ({ group, episode }) => {
+    buildSegment: ({ group, patient, episode }) => {
       if (!group.episode_id) return null;
-      const organ = episode?.organ?.name_default ? ` (${episode.organ.name_default})` : '';
       return {
         key: `episode-${group.episode_id}`,
-        label: `E#${group.episode_id}${organ}`,
+        label: formatTaskEpisodeReference({
+          episodeId: group.episode_id,
+          fullName: patient ? `${patient.first_name} ${patient.name}`.trim() : null,
+          birthDate: patient?.date_of_birth,
+          pid: patient?.pid,
+          organName: episode?.organ?.name_default,
+          startDate: episode?.start,
+        }),
+        kind: 'episode',
       };
     },
   },
@@ -33,6 +50,7 @@ const defaultReferenceRenderers: TaskReferenceRenderer[] = [
       return {
         key: `phase-${group.tpl_phase.id}`,
         label: `Phase: ${group.tpl_phase.name_default}`,
+        kind: 'phase',
       };
     },
   },

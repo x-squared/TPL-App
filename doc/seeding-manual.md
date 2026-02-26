@@ -8,7 +8,7 @@ We distinguish between:
 
 - **Core seed data**: part of the database definition (reference and baseline data)
 - **Sample seed data**: demonstration data for non-production usage
-- **Test seed data**: deterministic data for automated tests (profile ready, datasets can be added over time)
+- **Test seed data**: deterministic data for automated tests (profile ready; currently no dedicated `test.*` jobs)
 
 This prevents demo data from accidentally being loaded in production.
 
@@ -40,29 +40,34 @@ Each seed job has:
 ### Core
 
 Loaded for all environments by default.
+Includes baseline users: `SYSTEM`, `SAMPLE`, `QATEST_TKOORD`, `QATEST_TARZT`, `QATEST_SYSTEM`.
 
 Examples in current registry:
 
 - `core.codes`
 - `core.catalogues`
-- `core.users` (system-safe baseline user seed)
+- `core.users` (baseline users, including SAMPLE and QATEST_*)
+- `core.colloqium_types`
 - `core.medical_value_templates`
-- `core.task_templates`
 
 ### Sample
 
 Loaded for DEV by default, intended for demos only.
+Sample records are authored with `changed_by_id=2` (`SAMPLE` user).
+Patient-centric sample data is intentionally bundled in one file: `backend/app/seed/datasets/sample/patient_cases.py`.
 
 Examples in current registry:
 
 - `sample.users`
+- `sample.task_templates`
 - `sample.colloqiums`
 - `sample.patients`
 - `sample.tasks`
 
 ### Test
 
-Profile support already exists (`TEST -> core + test`), ready for dedicated test jobs.
+Loaded for TEST by default and intended for deterministic test fixtures.
+Profile support is active; dedicated `test.*` jobs can be added as needed.
 
 ## Environment Switches
 

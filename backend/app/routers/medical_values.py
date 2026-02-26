@@ -12,7 +12,10 @@ router = APIRouter(prefix="/medical-value-templates", tags=["medical-value-templ
 def list_medical_value_templates(db: Session = Depends(get_db)):
     return (
         db.query(MedicalValueTemplate)
-        .options(joinedload(MedicalValueTemplate.datatype))
+        .options(
+            joinedload(MedicalValueTemplate.datatype),
+            joinedload(MedicalValueTemplate.medical_value_group),
+        )
         .order_by(MedicalValueTemplate.pos)
         .all()
     )
@@ -22,7 +25,10 @@ def list_medical_value_templates(db: Session = Depends(get_db)):
 def get_medical_value_template(template_id: int, db: Session = Depends(get_db)):
     mv = (
         db.query(MedicalValueTemplate)
-        .options(joinedload(MedicalValueTemplate.datatype))
+        .options(
+            joinedload(MedicalValueTemplate.datatype),
+            joinedload(MedicalValueTemplate.medical_value_group),
+        )
         .filter(MedicalValueTemplate.id == template_id)
         .first()
     )

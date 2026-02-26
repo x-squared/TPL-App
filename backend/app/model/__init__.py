@@ -13,9 +13,9 @@ from .coordination_procurement_liver import CoordinationProcurementLiver
 from .coordination_procurement_pancreas import CoordinationProcurementPancreas
 from .coordination_time_log import CoordinationTimeLog
 from .coordination_origin import CoordinationOrigin
-from .episode import Episode
+from .episode import Episode, EpisodeOrgan
 from .favorite import Favorite
-from .medical import MedicalValue, MedicalValueTemplate
+from .medical import MedicalValue, MedicalValueGroup, MedicalValueTemplate
 from .patient import Absence, ContactInfo, Diagnosis, Patient
 from .reference import Catalogue, Code
 from .tasks import Task, TaskGroup, TaskGroupTemplate, TaskTemplate
@@ -30,8 +30,10 @@ __all__ = [
     "Diagnosis",
     "ContactInfo",
     "MedicalValueTemplate",
+    "MedicalValueGroup",
     "MedicalValue",
     "Episode",
+    "EpisodeOrgan",
     "Favorite",
     "ColloqiumType",
     "Colloqium",

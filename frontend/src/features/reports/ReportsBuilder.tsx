@@ -1,5 +1,6 @@
 import type { ReportExecuteResponse } from '../../api';
 import { useReportsViewModel } from './useReportsViewModel';
+import { exportReportResultAsCsv } from './reportExport';
 
 type Model = ReturnType<typeof useReportsViewModel>;
 
@@ -32,18 +33,14 @@ function ReportsResultTable({ result }: { result: ReportExecuteResponse | null }
 }
 
 export default function ReportsBuilder({ model }: { model: Model }) {
+  const allFieldKeys = model.sourceFields.map((field) => field.key);
+  const allSelected = allFieldKeys.length > 0 && allFieldKeys.every((key) => model.selectedFields.includes(key));
+
   return (
     <>
       <section className="detail-section ui-panel-section">
         <div className="detail-section-heading">
           <h2>Query Builder</h2>
-          <button
-            className="ci-add-btn"
-            onClick={() => void model.runReport()}
-            disabled={model.running || !model.selectedSource || model.selectedFields.length === 0}
-          >
-            {model.running ? 'Running...' : 'Run report'}
-          </button>
         </div>
 
         <div className="reports-grid">
@@ -75,8 +72,39 @@ export default function ReportsBuilder({ model }: { model: Model }) {
           </label>
         </div>
 
+        {model.joinOptions.length > 0 ? (
+          <div className="reports-field-list">
+            <p className="detail-label">Joins</p>
+            <div className="reports-checkbox-grid">
+              {model.joinOptions.map((join) => (
+                <label key={join.key} className="reports-checkbox">
+                  <input
+                    type="checkbox"
+                    checked={model.selectedJoins.includes(join.key)}
+                    onChange={(e) => {
+                      model.setSelectedJoins((prev) =>
+                        e.target.checked ? [...prev, join.key] : prev.filter((key) => key !== join.key),
+                      );
+                    }}
+                  />
+                  <span>{join.label}</span>
+                </label>
+              ))}
+            </div>
+          </div>
+        ) : null}
+
         <div className="reports-field-list">
-          <p className="detail-label">Columns</p>
+          <div className="detail-section-heading reports-subheading">
+            <h3>Columns</h3>
+            <button
+              className="ci-add-btn"
+              onClick={() => model.setSelectedFields(allSelected ? [] : allFieldKeys)}
+              disabled={allFieldKeys.length === 0}
+            >
+              {allSelected ? 'Deselect all' : 'Select all'}
+            </button>
+          </div>
           <div className="reports-checkbox-grid">
             {model.sourceFields.map((field) => (
               <label key={field.key} className="reports-checkbox">
@@ -151,8 +179,29 @@ export default function ReportsBuilder({ model }: { model: Model }) {
 
       <section className="detail-section ui-panel-section">
         <div className="detail-section-heading">
-          <h2>Results</h2>
-          <span className="status">{model.result ? `${model.result.row_count} row(s)` : 'No run yet'}</span>
+          <div className="reports-results-heading-left">
+            <h2>Results</h2>
+            <span className="status">{model.result ? `${model.result.row_count} row(s)` : 'No run yet'}</span>
+          </div>
+          <div className="reports-results-actions">
+            <button
+              className="ci-add-btn"
+              onClick={() => {
+                if (!model.result || model.result.row_count === 0) return;
+                exportReportResultAsCsv(model.result);
+              }}
+              disabled={!model.result || model.result.row_count === 0}
+            >
+              Export CSV
+            </button>
+            <button
+              className="ci-add-btn"
+              onClick={() => void model.runReport()}
+              disabled={model.running || !model.selectedSource || model.selectedFields.length === 0}
+            >
+              {model.running ? 'Running...' : 'Run report'}
+            </button>
+          </div>
         </div>
         <ReportsResultTable result={model.result} />
       </section>

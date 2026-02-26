@@ -1,0 +1,17 @@
+---
+description: Default to DEV mode for server/client startup unless user overrides
+alwaysApply: true
+---
+
+# DEV Startup Default
+
+When the user asks to start, restart, run, or bring up backend and/or frontend services:
+
+- Default to **DEV mode** unless the user explicitly asks for another environment/profile.
+- Backend default:
+  - `TPL_ENV=DEV`
+  - start backend with the local DEV startup command.
+- Frontend default:
+  - start the Vite dev server (`npm run dev`).
+
+If the user specifies an alternative (for example `PROD`, `TEST`, `CORE_TEST`, or custom env vars), follow the user instruction exactly and do not enforce DEV defaults.

@@ -5,13 +5,46 @@
   margin: 1.1rem 0 1.25rem;
 }
 
+.coord-panel-wrap {
+  border-radius: 8px;
+  padding: 0.2rem 0.35rem 0.5rem;
+}
+
+.coord-panel-wrap-protocol {
+  transition: background-color 0.2s ease;
+  padding: 0.55rem 0.65rem 0.85rem;
+}
+
+.coord-panel-wrap-protocol .detail-tabs {
+  margin-bottom: 0.4rem;
+}
+
+.coord-panel-wrap-protocol .coord-panel-content {
+  margin-top: 0.25rem;
+}
+
+.coord-panel-wrap-protocol .detail-section.ui-panel-section {
+  margin-top: 0.8rem;
+}
+
+.coord-top-strip-row {
+  display: flex;
+  gap: 0.75rem;
+  align-items: stretch;
+}
+
+.coord-top-strip-row .coord-time-strip {
+  flex: 1 1 auto;
+}
+
 .coord-time-strip.stopped {
   background: transparent;
 }
 
 .coord-time-strip.running {
   background: #fde8e8;
-  border-color: #d49393;
+  border-color: #8b2f2f;
+  border-width: 2px;
 }
 
 .coord-time-strip-head {
@@ -19,6 +52,31 @@
   align-items: center;
   justify-content: space-between;
   gap: 0.8rem;
+}
+
+.coord-protocol-color-box {
+  flex: 0 0 14rem !important;
+  margin-right: 0;
+}
+
+.coord-protocol-color-options {
+  display: flex;
+  gap: 0.45rem;
+  margin-top: 0.75rem;
+}
+
+.coord-protocol-color-dot {
+  width: 1.35rem;
+  height: 1.35rem;
+  border-radius: 999px;
+  border: 1px solid #9aa1bb;
+  cursor: pointer;
+  box-shadow: inset 0 0 0 1px rgba(255, 255, 255, 0.7);
+}
+
+.coord-protocol-color-dot.active {
+  border-color: #353b56;
+  box-shadow: 0 0 0 2px rgba(53, 59, 86, 0.2);
 }
 
 .coord-time-controls {

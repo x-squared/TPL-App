@@ -1,5 +1,14 @@
-import { createElement, useEffect, useState } from 'react';
-import { api, type Code, type MedicalValueCreate, type MedicalValueTemplate, type MedicalValueUpdate, type Patient } from '../../../api';
+import { createElement, useEffect, useMemo, useState } from 'react';
+import {
+  api,
+  type Code,
+  type MedicalValue,
+  type MedicalValueCreate,
+  type MedicalValueGroup,
+  type MedicalValueTemplate,
+  type MedicalValueUpdate,
+  type Patient,
+} from '../../../api';
 import { formatValue, getCatalogueType, getConfig, isCatalogueDatatype, validateValue } from '../../../utils/datatypeFramework';
 
 export function usePatientMedicalValues(
@@ -9,6 +18,7 @@ export function usePatientMedicalValues(
   organCodes: Code[],
 ) {
   const [mvTemplates, setMvTemplates] = useState<MedicalValueTemplate[]>([]);
+  const [medicalValueGroups, setMedicalValueGroups] = useState<MedicalValueGroup[]>([]);
   const [datatypeCodes, setDatatypeCodes] = useState<Code[]>([]);
   const [addingMv, setAddingMv] = useState(false);
   const [mvAddMode, setMvAddMode] = useState<'template' | 'custom'>('template');
@@ -27,6 +37,8 @@ export function usePatientMedicalValues(
   const [mvSortAsc, setMvSortAsc] = useState(true);
   const [mvDragId, setMvDragId] = useState<number | null>(null);
   const [mvDragOverId, setMvDragOverId] = useState<number | null>(null);
+  const [editingGroupRenewId, setEditingGroupRenewId] = useState<number | null>(null);
+  const [groupRenewDraft, setGroupRenewDraft] = useState('');
 
   useEffect(() => {
     api.listMedicalValueTemplates().then((templates) => {
@@ -39,6 +51,7 @@ export function usePatientMedicalValues(
         }));
       }
     });
+    api.listMedicalValueGroups().then(setMedicalValueGroups);
     api.listCodes('DATATYPE').then((codes) => {
       setDatatypeCodes(codes);
       codes.filter(isCatalogueDatatype).forEach((dt) => {
@@ -52,12 +65,42 @@ export function usePatientMedicalValues(
     });
   }, [patientId]);
 
+  const userCapturedGroupId = useMemo(
+    () => medicalValueGroups.find((group) => group.key === 'USER_CAPTURED')?.id ?? null,
+    [medicalValueGroups],
+  );
+
+  const resolveMvGroup = (mv: MedicalValue): MedicalValueGroup | null => {
+    const byValueId = mv.medical_value_group_id ?? mv.medical_value_group?.id ?? null;
+    if (byValueId != null) {
+      return medicalValueGroups.find((group) => group.id === byValueId) ?? mv.medical_value_group ?? null;
+    }
+    const templateGroupId = mv.medical_value_template?.medical_value_group_id ?? mv.medical_value_template?.medical_value_group?.id ?? null;
+    if (templateGroupId != null) {
+      return medicalValueGroups.find((group) => group.id === templateGroupId) ?? mv.medical_value_template?.medical_value_group ?? null;
+    }
+    return medicalValueGroups.find((group) => group.key === 'UNGROUPED') ?? null;
+  };
+
   const resetMvForm = () => {
     if (mvAddMode === 'template') {
       const first = mvTemplates[0];
-      setMvForm({ medical_value_template_id: first?.id ?? null, name: first?.name_default ?? '', value: '', renew_date: '' });
+      setMvForm({
+        medical_value_template_id: first?.id ?? null,
+        medical_value_group_id: first?.medical_value_group_id ?? null,
+        name: first?.name_default ?? '',
+        value: '',
+        renew_date: '',
+      });
     } else {
-      setMvForm({ medical_value_template_id: null, datatype_id: datatypeCodes[0]?.id ?? null, name: '', value: '', renew_date: '' });
+      setMvForm({
+        medical_value_template_id: null,
+        datatype_id: datatypeCodes[0]?.id ?? null,
+        medical_value_group_id: userCapturedGroupId,
+        name: '',
+        value: '',
+        renew_date: '',
+      });
     }
   };
 
@@ -82,7 +125,12 @@ export function usePatientMedicalValues(
     const openOrganKeys = new Set(
       (patient.episodes ?? [])
         .filter((ep) => !ep.closed)
-        .map((ep) => ep.organ?.key ?? organCodes.find((c) => c.id === ep.organ_id)?.key ?? '')
+        .flatMap((ep) => {
+          const multi = (ep.organs ?? []).map((organ) => organ.key).filter((key): key is string => Boolean(key));
+          if (multi.length > 0) return multi;
+          const single = ep.organ?.key ?? organCodes.find((c) => c.id === ep.organ_id)?.key ?? '';
+          return single ? [single] : [];
+        })
         .filter((key) => key !== '')
     );
     const eligible = mvTemplates.filter((tpl) => {
@@ -122,6 +170,7 @@ export function usePatientMedicalValues(
         await api.createMedicalValue(patient.id, {
           medical_value_template_id: mvForm.medical_value_template_id,
           datatype_id: tpl?.datatype_id ?? null,
+          medical_value_group_id: tpl?.medical_value_group_id ?? mvForm.medical_value_group_id ?? null,
           name: tpl?.name_default ?? '',
           pos: tpl?.pos ?? 0,
           value: mvForm.value,
@@ -131,6 +180,7 @@ export function usePatientMedicalValues(
         await api.createMedicalValue(patient.id, {
           medical_value_template_id: null,
           datatype_id: mvForm.datatype_id,
+          medical_value_group_id: mvForm.medical_value_group_id ?? userCapturedGroupId,
           name: mvForm.name,
           value: mvForm.value,
           renew_date: mvForm.renew_date || null,
@@ -151,9 +201,22 @@ export function usePatientMedicalValues(
     await refreshPatient();
   };
 
-  const startEditingMv = (mv: { id: number; medical_value_template_id: number; name: string; value: string; renew_date: string | null }) => {
+  const startEditingMv = (mv: {
+    id: number;
+    medical_value_template_id: number | null;
+    medical_value_group_id?: number | null;
+    name: string;
+    value: string;
+    renew_date: string | null;
+  }) => {
     setEditingMvId(mv.id);
-    setMvEditForm({ medical_value_template_id: mv.medical_value_template_id, name: mv.name, value: mv.value, renew_date: mv.renew_date });
+    setMvEditForm({
+      medical_value_template_id: mv.medical_value_template_id,
+      medical_value_group_id: mv.medical_value_group_id ?? null,
+      name: mv.name,
+      value: mv.value,
+      renew_date: mv.renew_date,
+    });
     setConfirmDeleteMvId(null);
   };
 
@@ -169,6 +232,7 @@ export function usePatientMedicalValues(
       await api.updateMedicalValue(patient.id, editingMvId, {
         ...mvEditForm,
         datatype_id: tpl?.datatype_id ?? undefined,
+        medical_value_group_id: tpl?.medical_value_group_id ?? mvEditForm.medical_value_group_id ?? userCapturedGroupId,
       });
       setEditingMvId(null);
       await refreshPatient();
@@ -256,6 +320,45 @@ export function usePatientMedicalValues(
     })
     : [];
 
+  const groupedMedicalValues = useMemo(() => {
+    const byId = new Map<number, { group: MedicalValueGroup; values: MedicalValue[] }>();
+    for (const group of medicalValueGroups) {
+      byId.set(group.id, { group, values: [] });
+    }
+    const fallback = medicalValueGroups.find((group) => group.key === 'UNGROUPED') ?? null;
+    for (const mv of sortedMedicalValues) {
+      const group = resolveMvGroup(mv) ?? fallback;
+      if (!group) continue;
+      if (!byId.has(group.id)) byId.set(group.id, { group, values: [] });
+      byId.get(group.id)?.values.push(mv);
+    }
+    return [...byId.values()]
+      .filter((entry) => entry.values.length > 0 || entry.group.key === 'USER_CAPTURED')
+      .sort((a, b) => (a.group.pos ?? 0) - (b.group.pos ?? 0) || a.group.name_default.localeCompare(b.group.name_default));
+  }, [medicalValueGroups, sortedMedicalValues]);
+
+  const startEditingGroupRenew = (group: MedicalValueGroup) => {
+    setEditingGroupRenewId(group.id);
+    setGroupRenewDraft(group.renew_date ?? '');
+  };
+
+  const cancelEditingGroupRenew = () => {
+    setEditingGroupRenewId(null);
+    setGroupRenewDraft('');
+  };
+
+  const saveGroupRenewDate = async (groupId: number) => {
+    setMvSaving(true);
+    try {
+      await api.updateMedicalValueGroup(groupId, { renew_date: groupRenewDraft || null });
+      const refreshed = await api.listMedicalValueGroups();
+      setMedicalValueGroups(refreshed);
+      cancelEditingGroupRenew();
+    } finally {
+      setMvSaving(false);
+    }
+  };
+
   const handleMvDrop = async (targetId: number) => {
     if (!patient || mvDragId === null || mvDragId === targetId) {
       setMvDragId(null);
@@ -265,6 +368,15 @@ export function usePatientMedicalValues(
     const ordered = [...sortedMedicalValues];
     const fromIdx = ordered.findIndex((mv) => mv.id === mvDragId);
     const toIdx = ordered.findIndex((mv) => mv.id === targetId);
+    const fromItem = ordered[fromIdx];
+    const targetItem = ordered[toIdx];
+    const fromGroupId = resolveMvGroup(fromItem)?.id ?? null;
+    const targetGroupId = resolveMvGroup(targetItem)?.id ?? null;
+    if (fromGroupId !== targetGroupId) {
+      setMvDragId(null);
+      setMvDragOverId(null);
+      return;
+    }
     if (fromIdx === -1 || toIdx === -1) {
       setMvDragId(null);
       setMvDragOverId(null);
@@ -313,6 +425,11 @@ export function usePatientMedicalValues(
     setMvDragId,
     setMvDragOverId,
     sortedMedicalValues,
+    groupedMedicalValues,
+    medicalValueGroups,
+    editingGroupRenewId,
+    groupRenewDraft,
+    setGroupRenewDraft,
     handleAddAllMv,
     handleAddMv,
     handleDeleteMv,
@@ -324,6 +441,9 @@ export function usePatientMedicalValues(
     toggleMvSort,
     mvSortIndicator,
     handleMvDrop,
+    startEditingGroupRenew,
+    cancelEditingGroupRenew,
+    saveGroupRenewDate,
     validateValue,
     formatValue,
     getCatalogueType,

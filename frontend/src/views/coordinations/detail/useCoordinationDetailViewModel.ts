@@ -35,9 +35,12 @@ const toInputDateTime = (value: string | null): string => {
 
 const toIsoOrNull = (value: string): string | null => (value ? new Date(value).toISOString() : null);
 
-export function useCoordinationDetailViewModel(coordinationId: number) {
+export function useCoordinationDetailViewModel(
+  coordinationId: number,
+  initialTab: CoordinationDetailTab = 'coordination',
+) {
   const [loading, setLoading] = useState(true);
-  const [tab, setTab] = useState<CoordinationDetailTab>('coordination');
+  const [tab, setTab] = useState<CoordinationDetailTab>(initialTab);
   const [coordination, setCoordination] = useState<Coordination | null>(null);
   const [donor, setDonor] = useState<CoordinationDonor | null>(null);
   const [origin, setOrigin] = useState<CoordinationOrigin | null>(null);

@@ -1,0 +1,40 @@
+---
+description: Backend-first architecture for external interfaces and integrations
+alwaysApply: true
+---
+
+# External Interfaces Architecture
+
+When implementing external interfaces, place them as feature modules under `backend/app/features/` and keep routers thin.
+
+## Placement and module shape
+
+- Create one module per external system: `backend/app/features/interfaces/<interface_key>/`.
+- Use this default structure:
+  - `contracts.py` (typed request/response DTOs for the external system)
+  - `client.py` (transport only: auth, HTTP calls, retries, timeouts)
+  - `mapper.py` (map external payloads <-> internal model/schema)
+  - `service.py` (orchestration/business flow, idempotency, conflict handling)
+  - `errors.py` (integration-specific exception types)
+  - `config.py` (interface-specific env/config parsing)
+- Keep shared utilities in `backend/app/features/interfaces/shared/` only when reused by 2+ interfaces.
+
+## Boundary rules
+
+- Routers (`backend/app/routers/**`) must not call external endpoints directly; call feature services.
+- SQLAlchemy models and external payload shapes must not be coupled directly; always map via `mapper.py`.
+- Do not leak raw external field names into internal API responses by default.
+- Keep side-effecting sync/import/export logic in `service.py`, not in routers or models.
+
+## API and workflow conventions
+
+- If an interface needs API endpoints, create a dedicated router (for example `backend/app/routers/<interface_key>_interface.py`) and register it in `backend/app/routers/registry.py`.
+- Prefer explicit operations: `preview`, `validate`, `import`, `export`, `sync-status` over opaque “do-all” endpoints.
+- Use idempotency keys/checks for repeatable imports where possible.
+
+## Config and observability
+
+- All interface config must come from `backend/app/config.py` (or interface `config.py` consumed from it), never hardcoded secrets.
+- Add structured logs around request, response status, mapping, and persistence steps.
+- Write at least one contract-level test for mapping + one integration-flow test for service behavior.
+

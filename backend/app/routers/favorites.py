@@ -33,7 +33,11 @@ def _derive_name(payload: FavoriteCreate, db: Session) -> str:
                 patient_name = f"{full_name} ({birthday}), {pid}"
             else:
                 patient_name = "Unknown patient (–), –"
-            organ = episode.organ.name_default if episode.organ else "Unknown organ"
+            organ_names = [organ.name_default for organ in (episode.organs or []) if organ and organ.name_default]
+            if organ_names:
+                organ = " + ".join(dict.fromkeys(organ_names))
+            else:
+                organ = episode.organ.name_default if episode.organ else "Unknown organ"
             start = _format_date_dd_mm_yyyy(episode.start)
             return f"{patient_name}, {organ}, {start}"
     if payload.favorite_type_key == "COLLOQUIUM" and payload.colloqium_id is not None:

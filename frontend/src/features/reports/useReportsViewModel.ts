@@ -18,6 +18,7 @@ export function useReportsViewModel() {
   const [error, setError] = useState('');
   const [sources, setSources] = useState<ReportSourceOption[]>([]);
   const [selectedSourceKey, setSelectedSourceKey] = useState<string>('');
+  const [selectedJoins, setSelectedJoins] = useState<string[]>([]);
   const [selectedFields, setSelectedFields] = useState<string[]>([]);
   const [filters, setFilters] = useState<FilterDraft[]>([]);
   const [result, setResult] = useState<ReportExecuteResponse | null>(null);
@@ -28,7 +29,15 @@ export function useReportsViewModel() {
     [selectedSourceKey, sources],
   );
 
-  const sourceFields = selectedSource?.fields ?? [];
+  const joinOptions = selectedSource?.joins ?? [];
+
+  const sourceFields = useMemo(() => {
+    if (!selectedSource) return [];
+    const activeJoinFields = joinOptions
+      .filter((join) => selectedJoins.includes(join.key))
+      .flatMap((join) => join.fields);
+    return [...selectedSource.fields, ...activeJoinFields];
+  }, [joinOptions, selectedJoins, selectedSource]);
 
   const loadMetadata = useCallback(async () => {
     setLoading(true);
@@ -54,15 +63,20 @@ export function useReportsViewModel() {
 
   useEffect(() => {
     if (!selectedSource) return;
+    setSelectedJoins((prev) => prev.filter((joinKey) => selectedSource.joins.some((join) => join.key === joinKey)));
+  }, [selectedSource]);
+
+  useEffect(() => {
+    if (!selectedSource) return;
     setSelectedFields((prev) => {
-      const valid = prev.filter((key) => selectedSource.fields.some((field) => field.key === key));
+      const valid = prev.filter((key) => sourceFields.some((field) => field.key === key));
       if (valid.length > 0) return valid;
-      return selectedSource.fields.slice(0, Math.min(5, selectedSource.fields.length)).map((field) => field.key);
+      return sourceFields.slice(0, Math.min(5, sourceFields.length)).map((field) => field.key);
     });
     setFilters((prev) =>
-      prev.filter((item) => selectedSource.fields.some((field) => field.key === item.field)),
+      prev.filter((item) => sourceFields.some((field) => field.key === item.field)),
     );
-  }, [selectedSource]);
+  }, [selectedSource, sourceFields]);
 
   const getField = useCallback(
     (fieldKey: string): ReportFieldOption | null => sourceFields.find((item) => item.key === fieldKey) ?? null,
@@ -70,8 +84,8 @@ export function useReportsViewModel() {
   );
 
   const addFilter = useCallback(() => {
-    if (!selectedSource || selectedSource.fields.length === 0) return;
-    const firstField = selectedSource.fields[0];
+    if (!selectedSource || sourceFields.length === 0) return;
+    const firstField = sourceFields[0];
     const firstOp: ReportOperatorKey = firstField.operators[0] ?? 'eq';
     setFilters((prev) => [
       ...prev,
@@ -82,7 +96,7 @@ export function useReportsViewModel() {
         value: '',
       },
     ]);
-  }, [selectedSource]);
+  }, [selectedSource, sourceFields]);
 
   const updateFilter = useCallback(
     (id: number, patch: Partial<FilterDraft>) => {
@@ -115,6 +129,7 @@ export function useReportsViewModel() {
       const response = await api.executeReport({
         source: selectedSource.key,
         select: selectedFields,
+        joins: selectedJoins,
         filters: filters
           .filter((item) => item.value.trim().length > 0)
           .map(({ field, operator, value }) => ({ field, operator, value })),
@@ -127,7 +142,7 @@ export function useReportsViewModel() {
     } finally {
       setRunning(false);
     }
-  }, [filters, limit, selectedFields, selectedSource]);
+  }, [filters, limit, selectedFields, selectedJoins, selectedSource]);
 
   return {
     loading,
@@ -137,6 +152,9 @@ export function useReportsViewModel() {
     selectedSource,
     selectedSourceKey,
     setSelectedSourceKey,
+    joinOptions,
+    selectedJoins,
+    setSelectedJoins,
     sourceFields,
     selectedFields,
     setSelectedFields,

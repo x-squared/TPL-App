@@ -48,6 +48,8 @@ export default function MedicalDataTab(props: MedicalDataTabProps) {
         handleAddAllMv={medicalValues.handleAddAllMv}
         mvSaving={medicalValues.mvSaving}
         sortedMedicalValues={medicalValues.sortedMedicalValues}
+        groupedMedicalValues={medicalValues.groupedMedicalValues}
+        medicalValueGroups={medicalValues.medicalValueGroups}
         toggleMvSort={medicalValues.toggleMvSort}
         mvSortIndicator={medicalValues.mvSortIndicator}
         editingMvId={medicalValues.editingMvId}
@@ -80,6 +82,12 @@ export default function MedicalDataTab(props: MedicalDataTabProps) {
         setMvForm={medicalValues.setMvForm}
         datatypeCodes={medicalValues.datatypeCodes}
         handleAddMv={medicalValues.handleAddMv}
+        editingGroupRenewId={medicalValues.editingGroupRenewId}
+        groupRenewDraft={medicalValues.groupRenewDraft}
+        setGroupRenewDraft={medicalValues.setGroupRenewDraft}
+        startEditingGroupRenew={medicalValues.startEditingGroupRenew}
+        cancelEditingGroupRenew={medicalValues.cancelEditingGroupRenew}
+        saveGroupRenewDate={medicalValues.saveGroupRenewDate}
       />
     </>
   );

@@ -17,10 +17,17 @@ class ReportFieldOption(BaseModel):
     operators: list[ReportOperatorKey]
 
 
+class ReportJoinOption(BaseModel):
+    key: str
+    label: str
+    fields: list[ReportFieldOption]
+
+
 class ReportSourceOption(BaseModel):
     key: ReportSourceKey
     label: str
     fields: list[ReportFieldOption]
+    joins: list[ReportJoinOption] = []
 
 
 class ReportMetadataResponse(BaseModel):
@@ -41,6 +48,7 @@ class ReportSortInput(BaseModel):
 class ReportExecuteRequest(BaseModel):
     source: ReportSourceKey
     select: list[str]
+    joins: list[str] = []
     filters: list[ReportFilterInput] = []
     sort: list[ReportSortInput] = []
     limit: int = 200

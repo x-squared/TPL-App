@@ -1,5 +1,5 @@
 import { useCallback, useEffect, useState } from 'react';
-import { api, type Code, type Episode, type Task, type TaskGroup } from '../../api';
+import { api, type Code, type Episode, type Patient, type Task, type TaskGroup } from '../../api';
 import type { TaskBoardCriteria } from './taskBoardTypes';
 
 interface TaskBoardDataState {
@@ -7,6 +7,7 @@ interface TaskBoardDataState {
   error: string;
   taskGroups: TaskGroup[];
   tasksByGroup: Record<number, Task[]>;
+  patientsById: Record<number, Patient>;
   episodesById: Record<number, Episode>;
   organCodes: Code[];
   priorityCodes: Code[];
@@ -19,6 +20,7 @@ const initialState: TaskBoardDataState = {
   error: '',
   taskGroups: [],
   tasksByGroup: {},
+  patientsById: {},
   episodesById: {},
   organCodes: [],
   priorityCodes: [],
@@ -84,6 +86,11 @@ export default function useTaskBoardData(criteria: TaskBoardCriteria, statusKeys
           nextTasksByGroup[groupId] = tasks;
         });
 
+        const nextPatientsById: Record<number, Patient> = {};
+        patientDetails.forEach((patient) => {
+          nextPatientsById[patient.id] = patient;
+        });
+
         const nextEpisodesById: Record<number, Episode> = {};
         patientDetails.forEach((patient) => {
           (patient.episodes ?? []).forEach((ep) => {
@@ -106,6 +113,7 @@ export default function useTaskBoardData(criteria: TaskBoardCriteria, statusKeys
           error: '',
           taskGroups: groupsWithContext,
           tasksByGroup: nextTasksByGroup,
+          patientsById: nextPatientsById,
           episodesById: nextEpisodesById,
           organCodes: organs,
           priorityCodes: priorities,

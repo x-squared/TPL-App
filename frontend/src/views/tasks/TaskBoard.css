@@ -161,6 +161,43 @@
   text-align: left;
 }
 
+.task-ref-list {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.25rem;
+  align-items: center;
+}
+
+.task-ref-chip {
+  display: inline-block;
+  border: 1px solid #8b93aa;
+  border-radius: 999px;
+  padding: 0.08rem 0.45rem;
+  font-size: 0.72rem;
+  line-height: 1.25;
+  color: #1b2233;
+  background: #f3f5fa;
+  max-width: 24rem;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.task-ref-chip--patient {
+  background: #eef4ff;
+  border-color: #9bb0e0;
+}
+
+.task-ref-chip--episode {
+  background: #eefaf4;
+  border-color: #9ec7b3;
+}
+
+.task-ref-chip--phase {
+  background: #fbf3ec;
+  border-color: #d9b79d;
+}
+
 .task-board-task-row.is-done,
 .task-board-task-row.is-cancelled {
   opacity: 0.55;

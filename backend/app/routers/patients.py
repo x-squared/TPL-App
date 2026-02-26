@@ -9,6 +9,15 @@ from ..schemas import PatientCreate, PatientListResponse, PatientResponse, Patie
 router = APIRouter(prefix="/patients", tags=["patients"])
 
 
+def _episode_organ_ids(episode: Episode) -> list[int]:
+    organ_ids = [organ.id for organ in (episode.organs or []) if organ and organ.id is not None]
+    if organ_ids:
+        return list(dict.fromkeys(organ_ids))
+    if episode.organ_id is not None:
+        return [episode.organ_id]
+    return []
+
+
 @router.get("/", response_model=list[PatientListResponse])
 def list_patients(skip: int = 0, limit: int = 100, db: Session = Depends(get_db)):
     patients = (
@@ -20,6 +29,7 @@ def list_patients(skip: int = 0, limit: int = 100, db: Session = Depends(get_db)
             joinedload(Patient.resp_coord),
             subqueryload(Patient.contact_infos),
             subqueryload(Patient.episodes).joinedload(Episode.organ),
+            subqueryload(Patient.episodes).subqueryload(Episode.organs),
             subqueryload(Patient.episodes).joinedload(Episode.status),
         )
         .offset(skip)
@@ -53,16 +63,24 @@ def list_patients(skip: int = 0, limit: int = 100, db: Session = Depends(get_db)
                 contact_info_count=len(p.contact_infos or []),
                 open_episode_count=len(open_episodes),
                 open_episode_indicators=[
-                    ((ep.organ.name_default[:2] if ep.organ and ep.organ.name_default else "??"))
+                    (
+                        "/".join(
+                            (organ.name_default[:2] if organ and organ.name_default else "??")
+                            for organ in (ep.organs or ([ep.organ] if ep.organ else []))
+                        )
+                        or "??"
+                    )
                     for ep in open_episodes
                 ],
                 episode_organ_ids=[
-                    ep.organ_id for ep in episodes if ep.organ_id is not None
+                    organ_id
+                    for ep in episodes
+                    for organ_id in _episode_organ_ids(ep)
                 ],
                 open_episode_organ_ids=[
-                    ep.organ_id
+                    organ_id
                     for ep in open_episodes
-                    if ep.organ_id is not None
+                    for organ_id in _episode_organ_ids(ep)
                 ],
             )
         )
@@ -84,9 +102,12 @@ def get_patient(patient_id: int, db: Session = Depends(get_db)):
             subqueryload(Patient.diagnoses).joinedload(Diagnosis.catalogue),
             subqueryload(Patient.diagnoses).joinedload(Diagnosis.changed_by_user),
             subqueryload(Patient.medical_values).joinedload(MedicalValue.medical_value_template).joinedload(MedicalValueTemplate.datatype),
+            subqueryload(Patient.medical_values).joinedload(MedicalValue.medical_value_template).joinedload(MedicalValueTemplate.medical_value_group),
+            subqueryload(Patient.medical_values).joinedload(MedicalValue.medical_value_group),
             subqueryload(Patient.medical_values).joinedload(MedicalValue.datatype),
             subqueryload(Patient.medical_values).joinedload(MedicalValue.changed_by_user),
             subqueryload(Patient.episodes).joinedload(Episode.organ),
+            subqueryload(Patient.episodes).subqueryload(Episode.organs),
             subqueryload(Patient.episodes).joinedload(Episode.status),
             subqueryload(Patient.episodes).joinedload(Episode.changed_by_user),
         )
@@ -138,9 +159,12 @@ def update_patient(
             subqueryload(Patient.diagnoses).joinedload(Diagnosis.catalogue),
             subqueryload(Patient.diagnoses).joinedload(Diagnosis.changed_by_user),
             subqueryload(Patient.medical_values).joinedload(MedicalValue.medical_value_template).joinedload(MedicalValueTemplate.datatype),
+            subqueryload(Patient.medical_values).joinedload(MedicalValue.medical_value_template).joinedload(MedicalValueTemplate.medical_value_group),
+            subqueryload(Patient.medical_values).joinedload(MedicalValue.medical_value_group),
             subqueryload(Patient.medical_values).joinedload(MedicalValue.datatype),
             subqueryload(Patient.medical_values).joinedload(MedicalValue.changed_by_user),
             subqueryload(Patient.episodes).joinedload(Episode.organ),
+            subqueryload(Patient.episodes).subqueryload(Episode.organs),
             subqueryload(Patient.episodes).joinedload(Episode.status),
             subqueryload(Patient.episodes).joinedload(Episode.changed_by_user),
         )

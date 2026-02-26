@@ -1,4 +1,4 @@
-from sqlalchemy import Boolean, Column, Date, DateTime, ForeignKey, Integer, String
+from sqlalchemy import Boolean, Column, Date, DateTime, ForeignKey, Integer, String, UniqueConstraint
 from sqlalchemy.orm import relationship
 from sqlalchemy.sql import func
 
@@ -226,3 +226,98 @@ class Episode(Base):
     changed_by_user = relationship("User")
     coordination_episodes = relationship("CoordinationEpisode", back_populates="episode")
     task_groups = relationship("TaskGroup", back_populates="episode")
+    organ_links = relationship("EpisodeOrgan", back_populates="episode", cascade="all, delete-orphan")
+    organs = relationship(
+        "Code",
+        secondary="EPISODE_ORGAN",
+        primaryjoin="Episode.id == EpisodeOrgan.episode_id",
+        secondaryjoin="and_(Code.id == EpisodeOrgan.organ_id, EpisodeOrgan.is_active == True)",
+        viewonly=True,
+    )
+
+    @property
+    def organ_ids(self) -> list[int]:
+        if self.organs:
+            return [organ.id for organ in self.organs if organ and organ.id is not None]
+        if self.organ_links:
+            return []
+        if self.organ_id is not None:
+            return [self.organ_id]
+        return []
+
+    @property
+    def episode_organs(self) -> list["EpisodeOrgan"]:
+        return self.organ_links
+
+
+class EpisodeOrgan(Base):
+    """Link table mapping episodes to one or more organs."""
+
+    __tablename__ = "EPISODE_ORGAN"
+    __table_args__ = (UniqueConstraint("EPISODE_ID", "ORGAN_ID"),)
+
+    id = Column(
+        "ID",
+        Integer,
+        primary_key=True,
+        index=True,
+        comment="Technical primary key of the episode-organ link.",
+        info={"label": "ID"},
+    )
+    episode_id = Column(
+        "EPISODE_ID",
+        Integer,
+        ForeignKey("EPISODE.ID"),
+        nullable=False,
+        index=True,
+        comment="Episode reference.",
+        info={"label": "Episode"},
+    )
+    organ_id = Column(
+        "ORGAN_ID",
+        Integer,
+        ForeignKey("CODE.ID"),
+        nullable=False,
+        index=True,
+        comment="Organ reference (`CODE.ORGAN`).",
+        info={"label": "Organ"},
+    )
+    date_added = Column(
+        "DATE_ADDED",
+        Date,
+        nullable=True,
+        comment="Date when this organ was added to the episode.",
+        info={"label": "Date Added"},
+    )
+    comment = Column(
+        "COMMENT",
+        String(512),
+        default="",
+        comment="Comment for this episode-organ relation row.",
+        info={"label": "Comment"},
+    )
+    is_active = Column(
+        "IS_ACTIVE",
+        Boolean,
+        default=True,
+        nullable=False,
+        comment="Whether this organ relation is currently active for the episode.",
+        info={"label": "Is Active"},
+    )
+    date_inactivated = Column(
+        "DATE_INACTIVATED",
+        Date,
+        nullable=True,
+        comment="Date when this organ relation was inactivated.",
+        info={"label": "Date Inactivated"},
+    )
+    reason_activation_change = Column(
+        "REASON_ACTIVATION_CHANGE",
+        String(128),
+        default="",
+        comment="Reason for activation status change.",
+        info={"label": "Reason Activation Change"},
+    )
+
+    episode = relationship("Episode", back_populates="organ_links")
+    organ = relationship("Code", foreign_keys=[organ_id])

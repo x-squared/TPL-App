@@ -9,6 +9,12 @@ export interface AppUser {
   role: Code | null;
 }
 
+export interface HealthInfo {
+  status: string;
+  env?: string;
+  dev_tools_enabled?: boolean;
+}
+
 export interface Code {
   id: number;
   type: string;
@@ -59,6 +65,22 @@ export interface MedicalValueTemplate {
   use_heart: boolean;
   use_lung: boolean;
   use_donor: boolean;
+  medical_value_group_id: number | null;
+  medical_value_group: MedicalValueGroup | null;
+}
+
+export interface MedicalValueGroup {
+  id: number;
+  key: string;
+  name_default: string;
+  pos: number;
+  renew_date: string | null;
+}
+
+export interface MedicalValueGroupUpdate {
+  name_default?: string;
+  pos?: number;
+  renew_date?: string | null;
 }
 
 export const authApi = {
@@ -68,6 +90,7 @@ export const authApi = {
       body: JSON.stringify({ ext_id }),
     }),
   getMe: () => request<AppUser>('/auth/me'),
+  getHealth: () => request<HealthInfo>('/health'),
 };
 
 export const codesApi = {
@@ -80,6 +103,15 @@ export const codesApi = {
 export const medicalValueTemplatesApi = {
   listMedicalValueTemplates: () => request<MedicalValueTemplate[]>('/medical-value-templates/'),
   getMedicalValueTemplate: (id: number) => request<MedicalValueTemplate>(`/medical-value-templates/${id}`),
+};
+
+export const medicalValueGroupsApi = {
+  listMedicalValueGroups: () => request<MedicalValueGroup[]>('/medical-value-groups/'),
+  updateMedicalValueGroup: (id: number, data: MedicalValueGroupUpdate) =>
+    request<MedicalValueGroup>(`/medical-value-groups/${id}`, {
+      method: 'PATCH',
+      body: JSON.stringify(data),
+    }),
 };
 
 export const usersApi = {

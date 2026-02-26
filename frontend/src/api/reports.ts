@@ -12,10 +12,17 @@ export interface ReportFieldOption {
   operators: ReportOperatorKey[];
 }
 
+export interface ReportJoinOption {
+  key: string;
+  label: string;
+  fields: ReportFieldOption[];
+}
+
 export interface ReportSourceOption {
   key: ReportSourceKey;
   label: string;
   fields: ReportFieldOption[];
+  joins: ReportJoinOption[];
 }
 
 export interface ReportMetadataResponse {
@@ -36,6 +43,7 @@ export interface ReportSortInput {
 export interface ReportExecuteRequest {
   source: ReportSourceKey;
   select: string[];
+  joins: string[];
   filters: ReportFilterInput[];
   sort: ReportSortInput[];
   limit: number;

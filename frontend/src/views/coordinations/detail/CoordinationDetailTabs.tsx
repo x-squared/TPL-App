@@ -196,6 +196,28 @@ export default function CoordinationDetailTabs({
   const [originSaving, setOriginSaving] = useState(false);
   const [originError, setOriginError] = useState('');
   const [confirmDeleteLogId, setConfirmDeleteLogId] = useState<number | null>(null);
+  const protocolBackgroundOptions = [
+    'transparent',
+    '#fff8dc',
+    '#eaf4ff',
+    '#ecfdf3',
+    '#f6efff',
+    '#fff0f2',
+  ];
+  const [protocolBackground, setProtocolBackground] = useState<string>(protocolBackgroundOptions[0]);
+
+  useEffect(() => {
+    const mainContent = document.querySelector('.main-content') as HTMLElement | null;
+    if (!mainContent) return;
+    if (tab === 'protocol' && protocolBackground !== 'transparent') {
+      mainContent.style.backgroundColor = protocolBackground;
+    } else {
+      mainContent.style.backgroundColor = '';
+    }
+    return () => {
+      mainContent.style.backgroundColor = '';
+    };
+  }, [protocolBackground, tab]);
 
   useEffect(() => {
     if (!coreEditing) setCoreDraft(initialCoreDraft);
@@ -675,85 +697,6 @@ export default function CoordinationDetailTabs({
             {originError && <p className="status">{originError}</p>}
           </section>
 
-          <section className="detail-section ui-panel-section">
-            <div className="detail-section-heading">
-              <h2>Protocol Overview</h2>
-            </div>
-            <div className="coord-protocol-overview">
-              {protocolEntriesByOrgan.length === 0 ? (
-                <p className="detail-empty">No organs found.</p>
-              ) : (
-                protocolEntriesByOrgan.map(({ organ, entries }) => (
-                  <fieldset key={organ.id} className="coord-protocol-organ-box">
-                    <legend>{organ.name_default}</legend>
-                    {entries.length === 0 ? (
-                      <p className="detail-empty">No protocol data for this organ.</p>
-                    ) : (
-                      entries.map((entry) => (
-                        <div key={entry.id} className="coord-protocol-entry">
-                          <div className="coord-protocol-entry-actions">
-                            <button
-                              className="coord-protocol-open-btn"
-                              onClick={() => {
-                                if (entry.patientId != null && entry.episodeId != null) {
-                                  onOpenPatientEpisode(entry.patientId, entry.episodeId);
-                                }
-                              }}
-                              disabled={entry.patientId == null || entry.episodeId == null}
-                              title="Open linked episode"
-                            >
-                              Open
-                            </button>
-                          </div>
-                          <div className="coord-protocol-entry-grid">
-                            <div className="detail-field">
-                              <span className="detail-label">Recipient full name</span>
-                              <span className="detail-value">{entry.recipientName}</span>
-                            </div>
-                            <div className="detail-field">
-                              <span className="detail-label">Fallnummer</span>
-                              <span className="detail-value">{entry.fallNr}</span>
-                            </div>
-                            <div className="detail-field">
-                              <span className="detail-label">Date of birth</span>
-                              <span className="detail-value">{entry.birthDate}</span>
-                            </div>
-                            <div className="detail-field">
-                              <span className="detail-label">Diagnosis (main)</span>
-                              <span className="detail-value">{entry.mainDiagnosis}</span>
-                            </div>
-                            <div className="detail-field">
-                              <span className="detail-label">RS-nr</span>
-                              <span className="detail-value">{entry.rsNr}</span>
-                            </div>
-                            <div className="detail-field">
-                              <span className="detail-label">TPL date</span>
-                              <span className="detail-value">{entry.tplDate}</span>
-                            </div>
-                            <div className="detail-field">
-                              <span className="detail-label">Procurement team</span>
-                              <span className="detail-value">{entry.procurementTeam}</span>
-                            </div>
-                            <div className="detail-field">
-                              <span className="detail-label">Perfusion applied</span>
-                              <span className="detail-value">
-                                {entry.perfusionApplied}
-                                {entry.perfusionDone ? (
-                                  <span className="coord-protocol-badge" title="Perfusion applied">
-                                    Perfusion
-                                  </span>
-                                ) : null}
-                              </span>
-                            </div>
-                          </div>
-                        </div>
-                      ))
-                    )}
-                  </fieldset>
-                ))
-              )}
-            </div>
-          </section>
         </>
       );
     }
@@ -764,7 +707,80 @@ export default function CoordinationDetailTabs({
           <div className="detail-section-heading">
             <h2>Protocol</h2>
           </div>
-          <p className="status">Protocol content will be added in next step.</p>
+          <div className="coord-protocol-overview">
+            {protocolEntriesByOrgan.length === 0 ? (
+              <p className="detail-empty">No organs found.</p>
+            ) : (
+              protocolEntriesByOrgan.map(({ organ, entries }) => (
+                <fieldset key={organ.id} className="coord-protocol-organ-box">
+                  <legend>{organ.name_default}</legend>
+                  {entries.length === 0 ? (
+                    <p className="detail-empty">No protocol data for this organ.</p>
+                  ) : (
+                    entries.map((entry) => (
+                      <div key={entry.id} className="coord-protocol-entry">
+                        <div className="coord-protocol-entry-actions">
+                          <button
+                            className="coord-protocol-open-btn"
+                            onClick={() => {
+                              if (entry.patientId != null && entry.episodeId != null) {
+                                onOpenPatientEpisode(entry.patientId, entry.episodeId);
+                              }
+                            }}
+                            disabled={entry.patientId == null || entry.episodeId == null}
+                            title="Open linked episode"
+                          >
+                            Open
+                          </button>
+                        </div>
+                        <div className="coord-protocol-entry-grid">
+                          <div className="detail-field">
+                            <span className="detail-label">Recipient full name</span>
+                            <span className="detail-value">{entry.recipientName}</span>
+                          </div>
+                          <div className="detail-field">
+                            <span className="detail-label">Fallnummer</span>
+                            <span className="detail-value">{entry.fallNr}</span>
+                          </div>
+                          <div className="detail-field">
+                            <span className="detail-label">Date of birth</span>
+                            <span className="detail-value">{entry.birthDate}</span>
+                          </div>
+                          <div className="detail-field">
+                            <span className="detail-label">Diagnosis (main)</span>
+                            <span className="detail-value">{entry.mainDiagnosis}</span>
+                          </div>
+                          <div className="detail-field">
+                            <span className="detail-label">RS-nr</span>
+                            <span className="detail-value">{entry.rsNr}</span>
+                          </div>
+                          <div className="detail-field">
+                            <span className="detail-label">TPL date</span>
+                            <span className="detail-value">{entry.tplDate}</span>
+                          </div>
+                          <div className="detail-field">
+                            <span className="detail-label">Procurement team</span>
+                            <span className="detail-value">{entry.procurementTeam}</span>
+                          </div>
+                          <div className="detail-field">
+                            <span className="detail-label">Perfusion applied</span>
+                            <span className="detail-value">
+                              {entry.perfusionApplied}
+                              {entry.perfusionDone ? (
+                                <span className="coord-protocol-badge" title="Perfusion applied">
+                                  Perfusion
+                                </span>
+                              ) : null}
+                            </span>
+                          </div>
+                        </div>
+                      </div>
+                    ))
+                  )}
+                </fieldset>
+              ))
+            )}
+          </div>
         </section>
       );
     }
@@ -945,7 +961,10 @@ export default function CoordinationDetailTabs({
   })();
 
   return (
-    <>
+    <div
+      className={`coord-panel-wrap ${tab === 'protocol' ? 'coord-panel-wrap-protocol' : ''}`}
+      style={tab === 'protocol' && protocolBackground !== 'transparent' ? { backgroundColor: protocolBackground } : undefined}
+    >
       <nav className="detail-tabs">
         <button className={`detail-tab ${tab === 'coordination' ? 'active' : ''}`} onClick={() => setTab('coordination')}>
           Coordination
@@ -957,49 +976,73 @@ export default function CoordinationDetailTabs({
           Time Log
         </button>
       </nav>
-
-      <section className={`coord-time-strip ${running ? 'running' : 'stopped'}`}>
-        <div className="coord-time-strip-head">
-          <strong>Time Log</strong>
-          <div className="coord-time-clock">{formatElapsed(elapsedSec)}</div>
-          <div className="coord-time-controls">
-            <button
-              className={`${running ? 'cancel-btn' : 'save-btn'} coord-time-btn`}
-              onClick={onStartClock}
-              disabled={running}
-            >
-              Start
-            </button>
-            <button
-              className={`${running ? 'save-btn' : 'cancel-btn'} coord-time-btn`}
-              onClick={onRequestStopClock}
-              disabled={!running}
-            >
-              Stop
-            </button>
-          </div>
-        </div>
-        {stopDraftOpen && (
-          <div className="coord-time-stop-editor">
-            <textarea
-              className="detail-input coord-time-comment"
-              value={stopComment}
-              placeholder="Comment"
-              onChange={(e) => setStopComment(e.target.value)}
-            />
-            <div className="edit-actions">
-              <button className="save-btn" onClick={onSaveStopClock}>
-                Save Time Log
-              </button>
-              <button className="cancel-btn" onClick={onCancelStopClock}>
-                Cancel
-              </button>
+      <div
+        className="coord-panel-content"
+      >
+        <div className="coord-top-strip-row">
+          {tab === 'protocol' && (
+            <section className="coord-time-strip coord-protocol-color-box stopped">
+              <div className="coord-time-strip-head">
+                <strong>Protocol color</strong>
+              </div>
+              <div className="coord-protocol-color-options">
+                {protocolBackgroundOptions.map((color) => (
+                  <button
+                    key={color}
+                    type="button"
+                    className={`coord-protocol-color-dot ${protocolBackground === color ? 'active' : ''}`}
+                    style={{ backgroundColor: color === 'transparent' ? '#f5f5fa' : color }}
+                    onClick={() => setProtocolBackground(color)}
+                    title={color === 'transparent' ? 'Set normal background' : `Set protocol background ${color}`}
+                    aria-label={color === 'transparent' ? 'Set normal background' : `Set protocol background ${color}`}
+                  />
+                ))}
+              </div>
+            </section>
+          )}
+          <section className={`coord-time-strip ${running ? 'running' : 'stopped'}`}>
+            <div className="coord-time-strip-head">
+              <strong>Time Log</strong>
+              <div className="coord-time-clock">{formatElapsed(elapsedSec)}</div>
+              <div className="coord-time-controls">
+                <button
+                  className={`${running ? 'cancel-btn' : 'save-btn'} coord-time-btn`}
+                  onClick={onStartClock}
+                  disabled={running}
+                >
+                  Start
+                </button>
+                <button
+                  className={`${running ? 'save-btn' : 'cancel-btn'} coord-time-btn`}
+                  onClick={onRequestStopClock}
+                  disabled={!running}
+                >
+                  Stop
+                </button>
+              </div>
             </div>
-          </div>
-        )}
-      </section>
-
-      {section}
-    </>
+            {stopDraftOpen && (
+              <div className="coord-time-stop-editor">
+                <textarea
+                  className="detail-input coord-time-comment"
+                  value={stopComment}
+                  placeholder="Comment"
+                  onChange={(e) => setStopComment(e.target.value)}
+                />
+                <div className="edit-actions">
+                  <button className="save-btn" onClick={onSaveStopClock}>
+                    Save Time Log
+                  </button>
+                  <button className="cancel-btn" onClick={onCancelStopClock}>
+                    Cancel
+                  </button>
+                </div>
+              </div>
+            )}
+          </section>
+        </div>
+        {section}
+      </div>
+    </div>
   );
 }

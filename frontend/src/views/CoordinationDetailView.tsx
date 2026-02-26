@@ -3,6 +3,7 @@ import FavoriteButton from './layout/FavoriteButton';
 import { useCoordinationDetailViewModel } from './coordinations/detail/useCoordinationDetailViewModel';
 import { formatDateDdMmYyyy } from './layout/dateFormat';
 import { useFavoriteToggle } from './layout/useFavoriteToggle';
+import type { CoordinationDetailTab } from './coordinations/detail/useCoordinationDetailViewModel';
 import './layout/PanelLayout.css';
 import './PatientDetailView.css';
 import './PatientsView.css';
@@ -12,10 +13,16 @@ interface Props {
   coordinationId: number;
   onBack: () => void;
   onOpenPatientEpisode: (patientId: number, episodeId: number) => void;
+  initialTab?: CoordinationDetailTab;
 }
 
-export default function CoordinationDetailView({ coordinationId, onBack, onOpenPatientEpisode }: Props) {
-  const model = useCoordinationDetailViewModel(coordinationId);
+export default function CoordinationDetailView({
+  coordinationId,
+  onBack,
+  onOpenPatientEpisode,
+  initialTab = 'coordination',
+}: Props) {
+  const model = useCoordinationDetailViewModel(coordinationId, initialTab);
   const donorName = model.donor?.full_name?.trim() || '';
   const donorBirthDate = formatDateDdMmYyyy(model.donor?.birth_date);
   const coordinationTitle = model.coordination
@@ -30,6 +37,10 @@ export default function CoordinationDetailView({ coordinationId, onBack, onOpenP
     coordination_id: model.coordination.id,
     name: coordinationTitle,
   } : null);
+  const openDetachedProtocol = () => {
+    const url = `${window.location.origin}${window.location.pathname}?coordination_protocol=${coordinationId}`;
+    window.open(url, '_blank', 'popup=yes,width=1200,height=900');
+  };
 
   if (model.loading) return <p className="status">Loading...</p>;
   if (model.error || !model.coordination) return <p className="status">{model.error || 'Coordination not found.'}</p>;
@@ -48,6 +59,11 @@ export default function CoordinationDetailView({ coordinationId, onBack, onOpenP
             onClick={() => void coordinationFavorite.toggle()}
             title={coordinationFavorite.isFavorite ? 'Remove coordination from favorites' : 'Add coordination to favorites'}
           />
+        </div>
+        <div className="patients-add-actions">
+          <button className="patients-cancel-btn" onClick={openDetachedProtocol}>
+            Open detached protocol
+          </button>
         </div>
       </div>
       <CoordinationDetailTabs

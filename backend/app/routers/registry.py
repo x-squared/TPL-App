@@ -4,6 +4,7 @@ from . import (
     absences,
     auth,
     catalogues,
+    e2e_tests,
     colloqium_agendas,
     colloqium_types,
     colloqiums,
@@ -27,9 +28,10 @@ from . import (
     episodes,
     favorites,
     medical_data,
+    medical_value_groups,
     medical_values,
     patients,
-    reports,
+    reports_router as reports,
     task_group_templates,
     task_groups,
     task_templates,
@@ -41,6 +43,7 @@ from . import (
 def register_routers(app: FastAPI) -> None:
     """Register all API routers."""
     app.include_router(auth.router, prefix="/api")
+    app.include_router(e2e_tests.router, prefix="/api")
     app.include_router(patients.router, prefix="/api")
     app.include_router(reports.router, prefix="/api")
     app.include_router(contact_infos.router, prefix="/api")
@@ -49,6 +52,7 @@ def register_routers(app: FastAPI) -> None:
     app.include_router(episodes.router, prefix="/api")
     app.include_router(favorites.router, prefix="/api")
     app.include_router(medical_data.router, prefix="/api")
+    app.include_router(medical_value_groups.router, prefix="/api")
     app.include_router(medical_values.router, prefix="/api")
     app.include_router(codes.router, prefix="/api")
     app.include_router(catalogues.router, prefix="/api")

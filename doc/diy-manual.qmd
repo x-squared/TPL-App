@@ -1,0 +1,274 @@
+# DIY Manual
+
+Practical command cookbook for running TPL-App end-to-end from terminal cells (including Quarto).
+
+Use this from repository root unless a section says otherwise.
+
+## Quick Start (Most Used)
+
+> Note: Quarto does not open new terminals automatically. Start backend and frontend in separate terminals manually (for example Terminal A: backend, Terminal B: frontend), because both commands are long-running.
+
+### 1) Check and remove stale dev processes (recommended before start)
+
+```{bash}
+cd /Users/stephan/Workspace/TPL-App
+echo "Before cleanup:"
+lsof -i tcp:8000 || true
+lsof -i tcp:5173 || true
+
+# Graceful stop first
+lsof -ti tcp:8000 | xargs -r kill -15
+lsof -ti tcp:5173 | xargs -r kill -15
+sleep 1
+
+# If still running, force stop
+lsof -ti tcp:8000 | xargs -r kill -9
+lsof -ti tcp:5173 | xargs -r kill -9
+
+echo "After cleanup:"
+lsof -i tcp:8000 || true
+lsof -i tcp:5173 || true
+```
+
+### 2) Clean DB content but keep SQLite file (optional, quick reset)
+
+```{bash}
+cd /Users/stephan/Workspace/TPL-App/backend
+source .venv/bin/activate
+python scripts/clean_sqlite_keep_file.py
+```
+
+### 3) Start backend (includes DB initialization + seed profile handling)
+
+```{bash}
+cd backend
+source .venv/bin/activate
+export TPL_ENV=DEV
+uvicorn app.main:app --reload
+```
+
+### 4) Start frontend
+
+```{bash}
+cd frontend
+npm run dev
+```
+
+### 5) Run standard spec tests
+
+```{bash}
+cd /Users/stephan/Workspace/TPL-App
+python -m qa.spec_tools.run_specs
+```
+
+### 6) Run partner scenario tests (UI + DB)
+
+```{bash}
+cd /Users/stephan/Workspace/TPL-App
+python -m qa.spec_tools.run_partner_specs
+```
+
+### 7) Execute suggestions from latest reports
+
+```{bash}
+cd /Users/stephan/Workspace/TPL-App
+python -m qa.spec_tools.run_suggestions --report qa/reports/latest-spec-report.md
+python -m qa.spec_tools.run_suggestions --report qa/reports/latest-partner-report.md
+```
+
+------------------------------------------------------------------------
+
+## Environment Setup (One-Time)
+
+### Backend dependencies
+
+```{bash}
+cd backend
+python -m venv .venv
+source .venv/bin/activate
+pip install -r requirements.txt
+```
+
+### Frontend dependencies
+
+```{bash}
+cd frontend
+npm install
+```
+
+### Playwright browsers
+
+```{bash}
+cd frontend
+npx playwright install
+```
+
+------------------------------------------------------------------------
+
+## Runtime Configuration (Optional)
+
+### Common local defaults
+
+```{bash}
+export TPL_ENV=DEV
+export TPL_CORS_ORIGINS=http://localhost:5173
+```
+
+### Disable startup seeding
+
+```{bash}
+export TPL_SEED_ON_STARTUP=false
+```
+
+### Override seed profile
+
+```{bash}
+export TPL_SEED_PROFILE=CORE_TEST
+```
+
+------------------------------------------------------------------------
+
+## Health and Status Checks
+
+### Backend health endpoint
+
+```{bash}
+curl -s http://localhost:8000/api/health
+```
+
+### Check which process owns backend/frontend ports
+
+```{bash}
+lsof -i tcp:8000
+lsof -i tcp:5173
+```
+
+------------------------------------------------------------------------
+
+## Stop Server / Client
+
+### Gracefully stop backend (port 8000)
+
+```{bash}
+lsof -ti tcp:8000 | xargs -r kill -15
+```
+
+### Gracefully stop frontend (port 5173)
+
+```{bash}
+lsof -ti tcp:5173 | xargs -r kill -15
+```
+
+### Force stop if needed
+
+```{bash}
+lsof -ti tcp:8000 | xargs -r kill -9
+lsof -ti tcp:5173 | xargs -r kill -9
+```
+
+------------------------------------------------------------------------
+
+## Database Operations (SQLite)
+
+### DB file location
+
+-   `database/tpl_app.db`
+
+### Reset database (delete file, then recreate on next backend start)
+
+```{bash}
+cd /Users/stephan/Workspace/TPL-App
+rm -f database/tpl_app.db
+```
+
+Then restart backend:
+
+```{bash}
+cd backend
+source .venv/bin/activate
+uvicorn app.main:app --reload
+```
+
+### Clean database content but keep SQLite file
+
+```{bash}
+cd /Users/stephan/Workspace/TPL-App/backend
+source .venv/bin/activate
+python scripts/clean_sqlite_keep_file.py
+```
+
+Optional custom DB path:
+
+```{bash}
+cd /Users/stephan/Workspace/TPL-App/backend
+source .venv/bin/activate
+python scripts/clean_sqlite_keep_file.py --db /Users/stephan/Workspace/TPL-App/database/tpl_app.db
+```
+
+------------------------------------------------------------------------
+
+## Seeding Commands (Manual)
+
+```{bash}
+cd backend
+source .venv/bin/activate
+python -m app.seed list
+python -m app.seed resolve
+python -m app.seed run --env DEV
+python -m app.seed run --env PROD --profile CORE
+```
+
+------------------------------------------------------------------------
+
+## Report/Test Artifacts
+
+### View latest reports
+
+```{bash}
+cd /Users/stephan/Workspace/TPL-App
+ls -la qa/reports
+```
+
+### Remove generated artifacts (safe cleanup)
+
+```{bash}
+cd /Users/stephan/Workspace/TPL-App
+rm -rf qa/reports/*
+rm -rf qa/tests/generated/*
+rm -rf frontend/test-results/*
+rm -rf frontend/playwright-report/*
+```
+
+------------------------------------------------------------------------
+
+## Repo Cleaning (Use With Care)
+
+### Update dependencies and rebuild
+
+```{bash}
+cd frontend
+npm install
+npm run build
+```
+
+```{bash}
+cd /Users/stephan/Workspace/TPL-App
+python -m py_compile backend/app/main.py
+```
+
+### DANGER: remove untracked files and folders
+
+Only run this if you understand the impact:
+
+```{bash}
+cd /Users/stephan/Workspace/TPL-App
+git clean -fd
+```
+
+------------------------------------------------------------------------
+
+## Quarto Notes
+
+-   Quarto can run shell chunks using the `{bash}` blocks used in this file.
+-   Recommended pattern: run one section at a time, top to bottom.
+-   Keep backend/frontend in separate running terminals while executing test/report sections.

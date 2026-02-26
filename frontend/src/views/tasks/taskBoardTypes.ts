@@ -1,5 +1,5 @@
 import type { ReactNode } from 'react';
-import type { Episode, Task, TaskGroup } from '../../api';
+import type { Episode, Patient, Task, TaskGroup } from '../../api';
 
 export interface TaskBoardCriteria {
   patientId?: number;
@@ -27,12 +27,14 @@ export interface TaskBoardProps {
 export interface TaskReferenceContext {
   group: TaskGroup;
   task: Task;
+  patient: Patient | undefined;
   episode: Episode | undefined;
 }
 
 export interface TaskReferenceSegment {
   key: string;
   label: string;
+  kind?: 'patient' | 'episode' | 'phase' | 'other';
 }
 
 export interface TaskReferenceRenderer {

@@ -96,6 +96,7 @@ export default function TaskBoard({
     error,
     taskGroups,
     tasksByGroup,
+    patientsById,
     episodesById,
     organCodes,
     priorityCodes,
@@ -541,6 +542,7 @@ export default function TaskBoard({
       {!loading && !error && (
         <TaskBoardTable
           rows={rows}
+          patientsById={patientsById}
           episodesById={episodesById}
           priorityCodes={priorityCodes}
           allUserOptions={allUserOptions}

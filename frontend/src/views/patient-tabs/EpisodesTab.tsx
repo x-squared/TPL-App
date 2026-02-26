@@ -1,6 +1,6 @@
 import { useEffect, useMemo, useState } from 'react';
 import { api, type ColloqiumAgenda, type ColloqiumType } from '../../api';
-import { formatEpisodeFavoriteName } from '../layout/episodeDisplay';
+import { formatEpisodeFavoriteName, formatOrganNames } from '../layout/episodeDisplay';
 import FavoriteButton from '../layout/FavoriteButton';
 import { useFavoriteToggle } from '../layout/useFavoriteToggle';
 import EpisodeDetailGrid from './episodes/EpisodeDetailGrid';
@@ -42,6 +42,7 @@ export default function EpisodesTab(props: EpisodesTabProps) {
   const [assignDialogOpen, setAssignDialogOpen] = useState(false);
   const [assigningColloqium, setAssigningColloqium] = useState(false);
   const [assignError, setAssignError] = useState('');
+  const [organActionLoading, setOrganActionLoading] = useState(false);
   const [assignTypes, setAssignTypes] = useState<ColloqiumType[]>([]);
   const [assignTypeId, setAssignTypeId] = useState<number | null>(null);
   const [assignDate, setAssignDate] = useState(() => new Date().toISOString().slice(0, 10));
@@ -62,19 +63,21 @@ export default function EpisodesTab(props: EpisodesTabProps) {
       fullName: `${patient.first_name} ${patient.name}`.trim(),
       birthDate: patient.date_of_birth,
       pid: patient.pid,
-      organName: selectedEpisode.organ?.name_default ?? 'Episode',
+      organName: formatOrganNames(selectedEpisode.organs, selectedEpisode.organ?.name_default ?? 'Episode'),
       startDate: selectedEpisode.start,
     }),
   } : null);
   const selectableColloqiumTypes = useMemo(() => {
-    const selectedOrganId = selectedEpisode?.organ_id ?? -1;
+    const selectedOrganIds = selectedEpisode
+      ? (selectedEpisode.organ_ids?.length ? selectedEpisode.organ_ids : [selectedEpisode.organ_id]).filter((id): id is number => typeof id === 'number')
+      : [];
     return [...assignTypes].sort((a, b) => {
-      const aRelevant = a.organ_id === selectedOrganId ? 0 : 1;
-      const bRelevant = b.organ_id === selectedOrganId ? 0 : 1;
+      const aRelevant = selectedOrganIds.includes(a.organ_id) ? 0 : 1;
+      const bRelevant = selectedOrganIds.includes(b.organ_id) ? 0 : 1;
       if (aRelevant !== bRelevant) return aRelevant - bRelevant;
       return a.name.localeCompare(b.name);
     });
-  }, [assignTypes, selectedEpisode?.organ_id]);
+  }, [assignTypes, selectedEpisode]);
 
   const evalEntries = selectedEpisode ? evalKeys.map((key) => [key, selectedEpisode[key] ?? null] as const) : [];
   const listEntries = selectedEpisode ? listKeys.map((key) => [key, selectedEpisode[key] ?? null] as const) : [];
@@ -153,6 +156,47 @@ export default function EpisodesTab(props: EpisodesTabProps) {
     }
   };
 
+  const handleAddOrReactivateOrgan = async (payload: {
+    organ_id: number;
+    date_added?: string | null;
+    comment?: string;
+    reason_activation_change?: string;
+  }) => {
+    if (!selectedEpisode) return;
+    setOrganActionLoading(true);
+    setDetailSaveError('');
+    try {
+      await api.addEpisodeOrgan(patient.id, selectedEpisode.id, payload);
+      await refreshPatient();
+    } catch (err) {
+      setDetailSaveError(err instanceof Error ? err.message : 'Could not add or reactivate organ.');
+    } finally {
+      setOrganActionLoading(false);
+    }
+  };
+
+  const handleUpdateOrgan = async (
+    episodeOrganId: number,
+    payload: {
+      comment?: string;
+      is_active?: boolean;
+      date_inactivated?: string | null;
+      reason_activation_change?: string;
+    },
+  ) => {
+    if (!selectedEpisode) return;
+    setOrganActionLoading(true);
+    setDetailSaveError('');
+    try {
+      await api.updateEpisodeOrgan(patient.id, selectedEpisode.id, episodeOrganId, payload);
+      await refreshPatient();
+    } catch (err) {
+      setDetailSaveError(err instanceof Error ? err.message : 'Could not update episode organ.');
+    } finally {
+      setOrganActionLoading(false);
+    }
+  };
+
   const reloadEpisodeColloqiums = async (episodeId: number) => {
     setLoadingEpisodeColloqiums(true);
     try {
@@ -185,7 +229,8 @@ export default function EpisodesTab(props: EpisodesTabProps) {
     setAssignDialogOpen(true);
     const types = await api.listColloqiumTypes();
     setAssignTypes(types);
-    const eligible = types.filter((type) => type.organ_id === selectedEpisode.organ_id);
+    const selectedOrganIds = selectedEpisode.organ_ids?.length ? selectedEpisode.organ_ids : [selectedEpisode.organ_id];
+    const eligible = types.filter((type) => selectedOrganIds.includes(type.organ_id));
     setAssignTypeId(eligible.length === 1 ? eligible[0].id : null);
   };
 
@@ -268,6 +313,11 @@ export default function EpisodesTab(props: EpisodesTabProps) {
             startEditingEpisodeMeta={startEditingEpisodeMeta}
             handleSaveEpisodeMeta={handleSaveEpisodeMeta}
             setEditingEpisodeMeta={setEditingEpisodeMeta}
+            formatDate={formatDate}
+            organCodes={episodes.organCodes}
+            organActionLoading={organActionLoading}
+            onAddOrReactivateOrgan={handleAddOrReactivateOrgan}
+            onUpdateOrgan={handleUpdateOrgan}
             favoriteControl={(
               <FavoriteButton
                 active={episodeFavorite.isFavorite}

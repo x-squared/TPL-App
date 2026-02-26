@@ -31,6 +31,15 @@ def _get_default_code_or_422(*, db: Session, code_type: str, code_key: str, fiel
     return code
 
 
+def _episode_organ_ids(episode: Episode) -> list[int]:
+    organ_ids = [organ.id for organ in (episode.organs or []) if organ and organ.id is not None]
+    if organ_ids:
+        return list(dict.fromkeys(organ_ids))
+    if episode.organ_id is not None:
+        return [episode.organ_id]
+    return []
+
+
 def _validate_template_links(
     *,
     db: Session,
@@ -183,7 +192,7 @@ def instantiate_task_group_template(
     if template.organ_id is not None:
         if episode is None:
             raise HTTPException(status_code=422, detail="episode_id is required when template has organ_id")
-        if episode.organ_id != template.organ_id:
+        if template.organ_id not in _episode_organ_ids(episode):
             raise HTTPException(status_code=422, detail="episode organ must match template organ_id")
 
     effective_tpl_phase_id = payload.tpl_phase_id if payload.tpl_phase_id is not None else template.tpl_phase_id

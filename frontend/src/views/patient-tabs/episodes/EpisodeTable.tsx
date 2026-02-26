@@ -1,5 +1,6 @@
 import type { Code, Episode, EpisodeCreate, EpisodeUpdate } from '../../../api';
 import InlineDeleteActions from '../../layout/InlineDeleteActions';
+import { formatOrganNames } from '../../layout/episodeDisplay';
 
 interface EpisodeTableProps {
   patientEpisodes: Episode[];
@@ -108,7 +109,7 @@ export default function EpisodeTable({
                   onDoubleClick={() => startEditingEp(ep)}
                   className={selectedEpisodeId === ep.id ? 'episode-row-selected' : ''}
                 >
-                  <td>{ep.organ?.name_default ?? '–'}</td>
+                  <td>{formatOrganNames(ep.organs, ep.organ?.name_default ?? null)}</td>
                   <td>{ep.status?.name_default ?? '–'}</td>
                   <td>{formatDate(ep.start)}</td>
                   <td>{formatDate(ep.end)}</td>
@@ -136,7 +137,7 @@ export default function EpisodeTable({
 
       {addingEpisode && (
         <div className="ci-add-form">
-          <select className="detail-input" value={epForm.organ_id} onChange={(e) => setEpForm((f) => ({ ...f, organ_id: Number(e.target.value) }))}>
+          <select className="detail-input" value={epForm.organ_id ?? ''} onChange={(e) => setEpForm((f) => ({ ...f, organ_id: Number(e.target.value) }))}>
             {organCodes.map((c) => <option key={c.id} value={c.id}>{c.name_default}</option>)}
           </select>
           <select className="detail-input" value={epForm.status_id ?? ''} onChange={(e) => setEpForm((f) => ({ ...f, status_id: e.target.value ? Number(e.target.value) : null }))}>

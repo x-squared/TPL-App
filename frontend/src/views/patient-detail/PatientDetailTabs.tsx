@@ -15,6 +15,7 @@ import type {
   EpisodeUpdate,
   MedicalValue,
   MedicalValueCreate,
+  MedicalValueGroup,
   MedicalValueTemplate,
   MedicalValueUpdate,
   Patient,
@@ -144,6 +145,8 @@ export interface PatientMedicalValuesModel {
   handleAddAllMv: () => Promise<void>;
   mvSaving: boolean;
   sortedMedicalValues: MedicalValue[];
+  groupedMedicalValues: Array<{ group: MedicalValueGroup; values: MedicalValue[] }>;
+  medicalValueGroups: MedicalValueGroup[];
   toggleMvSort: (key: 'pos' | 'name' | 'renew_date') => void;
   mvSortIndicator: (key: 'pos' | 'name' | 'renew_date') => string;
   editingMvId: number | null;
@@ -158,7 +161,14 @@ export interface PatientMedicalValuesModel {
   confirmDeleteMvId: number | null;
   setConfirmDeleteMvId: React.Dispatch<React.SetStateAction<number | null>>;
   handleDeleteMv: (id: number) => Promise<void>;
-  startEditingMv: (mv: { id: number; medical_value_template_id: number; name: string; value: string; renew_date: string | null }) => void;
+  startEditingMv: (mv: {
+    id: number;
+    medical_value_template_id: number | null;
+    medical_value_group_id?: number | null;
+    name: string;
+    value: string;
+    renew_date: string | null;
+  }) => void;
   mvSortKey: 'pos' | 'name' | 'renew_date';
   mvSortAsc: boolean;
   mvDragId: number | null;
@@ -175,6 +185,12 @@ export interface PatientMedicalValuesModel {
   setMvForm: React.Dispatch<React.SetStateAction<MedicalValueCreate>>;
   datatypeCodes: Code[];
   handleAddMv: () => Promise<void>;
+  editingGroupRenewId: number | null;
+  groupRenewDraft: string;
+  setGroupRenewDraft: React.Dispatch<React.SetStateAction<string>>;
+  startEditingGroupRenew: (group: MedicalValueGroup) => void;
+  cancelEditingGroupRenew: () => void;
+  saveGroupRenewDate: (groupId: number) => Promise<void>;
 }
 
 export interface PatientDetailTabsProps {

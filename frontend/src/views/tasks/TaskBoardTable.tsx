@@ -1,4 +1,4 @@
-import type { Code, Episode, Task, TaskGroup } from '../../api';
+import type { Code, Episode, Patient, Task, TaskGroup } from '../../api';
 import TaskBoardActionForm from './TaskBoardActionForm';
 import {
   boardStateSymbol,
@@ -14,11 +14,13 @@ import type {
   TaskBoardRow,
   TaskCreateFormState,
   TaskGroupEditFormState,
+  TaskReferenceSegment,
   TaskEditFormState,
 } from './taskBoardTypes';
 
 interface TaskBoardTableProps {
   rows: TaskBoardRow[];
+  patientsById: Record<number, Patient>;
   episodesById: Record<number, Episode>;
   priorityCodes: Code[];
   allUserOptions: Array<{ id: number; name: string }>;
@@ -54,8 +56,26 @@ interface TaskBoardTableProps {
   maxTableHeight: number | string;
 }
 
+function ReferenceCell({ references }: { references: TaskReferenceSegment[] }) {
+  if (references.length === 0) return <>–</>;
+  return (
+    <div className="task-ref-list">
+      {references.map((ref) => (
+        <span
+          key={ref.key}
+          className={`task-ref-chip task-ref-chip--${ref.kind ?? 'other'}`}
+          title={ref.label}
+        >
+          {ref.label}
+        </span>
+      ))}
+    </div>
+  );
+}
+
 export default function TaskBoardTable({
   rows,
+  patientsById,
   episodesById,
   priorityCodes,
   allUserOptions,
@@ -294,8 +314,9 @@ export default function TaskBoardTable({
             }
 
             const task = row.task;
+            const patient = patientsById[row.group.patient_id];
             const episode = row.group.episode_id ? episodesById[row.group.episode_id] : undefined;
-            const references = buildTaskReferences({ group: row.group, task, episode });
+            const references = buildTaskReferences({ group: row.group, task, patient, episode });
             const done = isDoneTask(task);
             const cancelled = isCancelledTask(task);
             const rowClass = done
@@ -325,7 +346,7 @@ export default function TaskBoardTable({
                     </select>
                   ) : (task.priority?.name_default ?? task.priority?.key ?? '–')}
                 </td>
-                <td>{references.length > 0 ? references.map((ref) => ref.label).join(' · ') : '–'}</td>
+                <td><ReferenceCell references={references} /></td>
                 <td className="task-col-description">
                   {isEditing ? (
                     <input
