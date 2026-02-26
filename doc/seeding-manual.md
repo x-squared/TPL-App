@@ -1,0 +1,182 @@
+# Seeding Manual (DEV / TEST / PROD)
+
+This manual explains how seeding works in TPL-App and how to control which data is loaded per environment.
+
+## Why This Exists
+
+We distinguish between:
+
+- **Core seed data**: part of the database definition (reference and baseline data)
+- **Sample seed data**: demonstration data for non-production usage
+- **Test seed data**: deterministic data for automated tests (profile ready, datasets can be added over time)
+
+This prevents demo data from accidentally being loaded in production.
+
+## Current Architecture
+
+Seeding is implemented with:
+
+- A **seed job registry** in `backend/app/seed/__init__.py`
+- A **runner framework** in `backend/app/seed/loader.py`
+- **Environment/profile resolution** in `backend/app/seed/profiles.py`
+- **Central environment-aware app config** in `backend/app/config.py`
+- Startup integration in `backend/app/main.py`
+
+Datasets are organized by category under:
+
+- `backend/app/seed/datasets/core/`
+- `backend/app/seed/datasets/sample/`
+- `backend/app/seed/datasets/test/`
+
+Each seed job has:
+
+- `key` (unique identifier, e.g. `core.codes`)
+- `category` (`core`, `sample`, `test`)
+- `description`
+- `loader` (the Python function that writes data)
+
+## Seed Categories
+
+### Core
+
+Loaded for all environments by default.
+
+Examples in current registry:
+
+- `core.codes`
+- `core.catalogues`
+- `core.users` (system-safe baseline user seed)
+- `core.medical_value_templates`
+- `core.task_templates`
+
+### Sample
+
+Loaded for DEV by default, intended for demos only.
+
+Examples in current registry:
+
+- `sample.users`
+- `sample.colloqiums`
+- `sample.patients`
+- `sample.tasks`
+
+### Test
+
+Profile support already exists (`TEST -> core + test`), ready for dedicated test jobs.
+
+## Environment Switches
+
+Seeding is controlled by environment variables.
+
+### 1) `TPL_ENV`
+
+Allowed values:
+
+- `DEV` (default): loads `core + sample`
+- `TEST`: loads `core + test`
+- `PROD`: loads `core` only
+
+### 2) `TPL_SEED_PROFILE` (optional override)
+
+Overrides `TPL_ENV` category selection.
+
+Allowed values:
+
+- `NONE`
+- `CORE`
+- `CORE_SAMPLE`
+- `CORE_TEST`
+
+### 3) `TPL_SEED_ON_STARTUP`
+
+- `true` (default): run seeding during app startup
+- `false`: skip seeding on startup
+
+Truthy/falsey handling:
+
+- falsey values: `0`, `false`, `no` (case-insensitive)
+
+## Practical Examples
+
+### DEV with demo data (default behavior)
+
+```bash
+export TPL_ENV=DEV
+```
+
+### PROD-safe startup (no demo data)
+
+```bash
+export TPL_ENV=PROD
+```
+
+### TEST profile using explicit override
+
+```bash
+export TPL_ENV=DEV
+export TPL_SEED_PROFILE=CORE_TEST
+```
+
+### Disable startup seeding completely
+
+```bash
+export TPL_SEED_ON_STARTUP=false
+```
+
+## Manual Seed CLI
+
+You can run seeding without restarting the server via:
+
+```bash
+cd backend
+python -m app.seed <command>
+```
+
+Supported commands:
+
+- `list` - show all registered seed jobs
+- `resolve` - print resolved categories for current env/profile
+- `run` - execute seeding manually
+
+Examples:
+
+```bash
+python -m app.seed list
+python -m app.seed resolve
+python -m app.seed run --env DEV
+python -m app.seed run --env PROD --profile CORE
+```
+
+## Startup Logging
+
+On startup, the app prints a compact seed summary:
+
+- resolved environment
+- included categories
+- executed job keys
+
+This helps verify quickly that the expected profile ran.
+
+## How To Add A New Seed Job
+
+1. Implement loader function in `backend/app/seed/__init__.py` (or importable helper module).
+2. Add a `SeedJob(...)` entry in `get_seed_jobs()`.
+3. Assign correct category (`core` / `sample` / `test`).
+4. Verify dependencies by order in `get_seed_jobs()`.
+5. Start app with the relevant `TPL_ENV` and check startup log.
+
+## Conventions
+
+- Use `core.*` job keys for production-safe baseline data.
+- Use `sample.*` for demonstration-only data.
+- Use `test.*` for CI and test fixtures.
+- Keep loaders idempotent where possible for core data.
+- Keep destructive resets restricted to non-production categories.
+
+## Implemented Extensions
+
+The following extensions are now implemented:
+
+- Seed datasets are split by category under `seed/datasets/{core,sample,test}`.
+- Manual seed execution is available via `python -m app.seed ...`.
+- Environment-aware configuration is centralized in `backend/app/config.py` and used by startup and DB initialization.

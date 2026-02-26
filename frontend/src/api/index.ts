@@ -39,6 +39,21 @@ export type {
 } from './coordinations';
 export { favoritesApi } from './favorites';
 export type { Favorite, FavoriteCreate, FavoriteTypeKey } from './favorites';
+export { reportsApi } from './reports';
+export type {
+  ReportSourceKey,
+  ReportValueType,
+  ReportOperatorKey,
+  ReportSortDirection,
+  ReportFieldOption,
+  ReportSourceOption,
+  ReportMetadataResponse,
+  ReportFilterInput,
+  ReportSortInput,
+  ReportExecuteRequest,
+  ReportColumn,
+  ReportExecuteResponse,
+} from './reports';
 
 import { authApi, codesApi, medicalValueTemplatesApi, usersApi } from './core';
 import { patientsApi } from './patients';
@@ -46,6 +61,7 @@ import { tasksApi } from './tasks';
 import { colloqiumsApi } from './colloqiums';
 import { coordinationsApi } from './coordinations';
 import { favoritesApi } from './favorites';
+import { reportsApi } from './reports';
 
 export const api = {
   ...authApi,
@@ -57,4 +73,5 @@ export const api = {
   ...colloqiumsApi,
   ...coordinationsApi,
   ...favoritesApi,
+  ...reportsApi,
 };

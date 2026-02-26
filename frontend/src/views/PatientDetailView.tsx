@@ -12,10 +12,17 @@ interface Props {
   onBack: () => void;
   initialTab?: PatientDetailTab;
   initialEpisodeId?: number | null;
+  onOpenColloqium: (colloqiumId: number) => void;
 }
 
-export default function PatientDetailView({ patientId, onBack, initialTab, initialEpisodeId }: Props) {
-  const model = usePatientDetailViewModel(patientId, initialTab, initialEpisodeId ?? null);
+export default function PatientDetailView({
+  patientId,
+  onBack,
+  initialTab,
+  initialEpisodeId,
+  onOpenColloqium,
+}: Props) {
+  const model = usePatientDetailViewModel(patientId, initialTab, initialEpisodeId ?? null, onOpenColloqium);
   const patientFavorite = useFavoriteToggle(model.patient ? {
     favorite_type_key: 'PATIENT',
     patient_id: model.patient.id,

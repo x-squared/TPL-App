@@ -1,9 +1,11 @@
 from sqlalchemy import create_engine
 from sqlalchemy.orm import DeclarativeBase, sessionmaker
 
-SQLITE_URL = "sqlite:///../database/tpl_app.db"
+from .config import get_config
 
-engine = create_engine(SQLITE_URL, connect_args={"check_same_thread": False})
+cfg = get_config()
+connect_args = {"check_same_thread": False} if cfg.database_url.startswith("sqlite") else {}
+engine = create_engine(cfg.database_url, connect_args=connect_args)
 SessionLocal = sessionmaker(autocommit=False, autoflush=False, bind=engine)
 
 

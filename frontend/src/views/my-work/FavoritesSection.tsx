@@ -29,6 +29,7 @@ export default function FavoritesSection({
       <table className="detail-contact-table my-work-favorites-table">
         <thead>
           <tr>
+            <th className="open-col"></th>
             <th>Type</th>
             <th>Name</th>
             <th></th>
@@ -37,11 +38,20 @@ export default function FavoritesSection({
         <tbody>
           {favorites.length === 0 ? (
             <tr>
-              <td colSpan={3} className="detail-empty">No favorites yet.</td>
+              <td colSpan={4} className="detail-empty">No favorites yet.</td>
             </tr>
           ) : (
             favorites.map((favorite) => (
-              <tr key={favorite.id}>
+              <tr key={favorite.id} onDoubleClick={() => onOpenFavorite(favorite)}>
+                <td className="open-col">
+                  <button
+                    className="open-btn"
+                    title="Open favorite target"
+                    onClick={() => onOpenFavorite(favorite)}
+                  >
+                    &#x279C;
+                  </button>
+                </td>
                 <td>{typeLabels[favorite.favorite_type_key] ?? favorite.favorite_type_key}</td>
                 <td>
                   {favorite.favorite_type_key === 'EPISODE'
@@ -50,13 +60,6 @@ export default function FavoritesSection({
                 </td>
                 <td className="my-work-nav-cell">
                   <div className="my-work-actions">
-                    <button
-                      className="my-work-open-btn"
-                      title="Open favorite target"
-                      onClick={() => onOpenFavorite(favorite)}
-                    >
-                      ↗
-                    </button>
                     <InlineDeleteActions
                       confirming={confirmDeleteId === favorite.id}
                       deleting={deletingFavoriteId === favorite.id}

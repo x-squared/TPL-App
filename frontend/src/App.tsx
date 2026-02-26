@@ -16,9 +16,10 @@ import CoordinationsView from './views/CoordinationsView';
 import MyWorkView from './views/MyWorkView';
 import PatientDetailView from './views/PatientDetailView';
 import PatientsView from './views/PatientsView';
+import ReportsView from './views/ReportsView';
 import type { PatientDetailTab } from './views/patient-detail/PatientDetailTabs';
 
-type Page = 'my-work' | 'patients' | 'colloquiums' | 'coordinations';
+type Page = 'my-work' | 'patients' | 'colloquiums' | 'coordinations' | 'reports';
 
 function App() {
   const protocolParam = new URLSearchParams(window.location.search).get('protocol');
@@ -147,6 +148,7 @@ function App() {
         <main className="main-content">
           <ColloquiumDetailView
             colloqiumId={standaloneProtocolId}
+            onOpenEpisode={() => undefined}
             onBack={() => window.close()}
             standalone
           />
@@ -228,6 +230,21 @@ function App() {
             <span className="nav-icon">{'\u23F1'}</span>
             {sidebarOpen && <span className="nav-label">Coordinations</span>}
           </button>
+          <button
+            className={`nav-item ${page === 'reports' ? 'active' : ''}`}
+            onClick={() => {
+              setPage('reports');
+              setSelectedPatientId(null);
+              setSelectedColloqiumId(null);
+              setSelectedCoordinationId(null);
+              setPatientInitialTab(undefined);
+              setPatientInitialEpisodeId(null);
+            }}
+            title="Reports"
+          >
+            <span className="nav-icon">{'\u25A4'}</span>
+            {sidebarOpen && <span className="nav-label">Reports</span>}
+          </button>
         </nav>
 
         <div className="sidebar-bottom">
@@ -273,6 +290,14 @@ function App() {
             patientId={selectedPatientId}
             initialTab={patientInitialTab}
             initialEpisodeId={patientInitialEpisodeId}
+            onOpenColloqium={(colloqiumId) => {
+              setPage('colloquiums');
+              setSelectedCoordinationId(null);
+              setSelectedPatientId(null);
+              setPatientInitialTab(undefined);
+              setPatientInitialEpisodeId(null);
+              setSelectedColloqiumId(colloqiumId);
+            }}
             onBack={() => {
               setSelectedPatientId(null);
               setPatientInitialTab(undefined);
@@ -286,6 +311,14 @@ function App() {
         {page === 'colloquiums' && selectedColloqiumId !== null && (
           <ColloquiumDetailView
             colloqiumId={selectedColloqiumId}
+            onOpenEpisode={(patientId, episodeId) => {
+              setPage('patients');
+              setSelectedColloqiumId(null);
+              setSelectedCoordinationId(null);
+              setSelectedPatientId(patientId);
+              setPatientInitialTab('episodes');
+              setPatientInitialEpisodeId(episodeId);
+            }}
             onBack={() => setSelectedColloqiumId(null)}
           />
         )}
@@ -305,6 +338,7 @@ function App() {
             }}
           />
         )}
+        {page === 'reports' && <ReportsView />}
       </main>
     </div>
   );

@@ -73,6 +73,7 @@ interface Props {
   saveAgenda: () => void;
   deleteAgenda: (agendaId: number) => void;
   openEpisodePicker: () => void;
+  onOpenEpisode: (patientId: number, episodeId: number) => void;
   setPickerOpen: (open: boolean) => void;
   setAgendaForm: React.Dispatch<React.SetStateAction<{
     episode_id: number | null;
@@ -126,6 +127,7 @@ export default function ColloquiumDetailTabs({
   saveAgenda,
   deleteAgenda,
   openEpisodePicker,
+  onOpenEpisode,
   setPickerOpen,
   setAgendaForm,
   setAgendaDrafts,
@@ -193,6 +195,7 @@ export default function ColloquiumDetailTabs({
           onSaveAgenda={saveAgenda}
           onDeleteAgenda={deleteAgenda}
           onPickEpisode={openEpisodePicker}
+          onOpenEpisode={onOpenEpisode}
           onPickEpisodeClose={() => setPickerOpen(false)}
           onPickEpisodeConfirm={(episodeIds) => {
             const unique = [...new Set(episodeIds)];

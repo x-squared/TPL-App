@@ -37,6 +37,7 @@ interface Props {
   onCancelEdit: () => void;
   onSave: () => void;
   onDelete: (agendaId: number) => void;
+  onOpenEpisode: (patientId: number, episodeId: number) => void;
   onPickEpisode: () => void;
   onEditFormChange: (patch: Partial<{
     episode_id: number | null;
@@ -60,6 +61,7 @@ export default function ColloquiumAgendaTable({
   onCancelEdit,
   onSave,
   onDelete,
+  onOpenEpisode,
   onPickEpisode,
   onEditFormChange,
   selectedEpisodeLabel,
@@ -73,6 +75,7 @@ export default function ColloquiumAgendaTable({
       <table className="data-table">
         <thead>
           <tr>
+            <th className="open-col"></th>
             <th>Episode</th>
             <th>Name</th>
             <th>First Name</th>
@@ -90,7 +93,7 @@ export default function ColloquiumAgendaTable({
         <tbody>
           {!hasRows && editingAgendaId === null && (
             <tr>
-              <td colSpan={12}>
+              <td colSpan={13}>
                 <p className="contact-empty">No agenda entries.</p>
               </td>
             </tr>
@@ -98,8 +101,29 @@ export default function ColloquiumAgendaTable({
           {agendas.map((agenda) => {
             const isEditing = editingAgendaId === agenda.id;
             const patient = agenda.episode ? patientsById[agenda.episode.patient_id] : undefined;
+            const canOpenEpisode = !isEditing && Boolean(agenda.episode?.id && agenda.episode?.patient_id);
             return (
-              <tr key={agenda.id} className={isEditing ? 'ci-editing-row' : ''}>
+              <tr
+                key={agenda.id}
+                className={isEditing ? 'ci-editing-row' : ''}
+                onDoubleClick={() => {
+                  if (!canOpenEpisode || !agenda.episode) return;
+                  onOpenEpisode(agenda.episode.patient_id, agenda.episode.id);
+                }}
+              >
+                <td className="open-col">
+                  <button
+                    className="open-btn"
+                    onClick={() => {
+                      if (!canOpenEpisode || !agenda.episode) return;
+                      onOpenEpisode(agenda.episode.patient_id, agenda.episode.id);
+                    }}
+                    title="Open episode"
+                    disabled={!canOpenEpisode}
+                  >
+                    &#x279C;
+                  </button>
+                </td>
                 <td>
                   {isEditing ? (
                     <button className="link-btn" onClick={onPickEpisode}>
@@ -178,6 +202,11 @@ export default function ColloquiumAgendaTable({
           })}
           {editingAgendaId === 0 && (
             <tr className="ci-editing-row">
+              <td className="open-col">
+                <button className="open-btn" disabled title="Open episode">
+                  &#x279C;
+                </button>
+              </td>
               <td>
                 <button className="link-btn" onClick={onPickEpisode}>
                   {selectedEpisodeLabel}
@@ -219,7 +248,7 @@ export default function ColloquiumAgendaTable({
           )}
           {editingAgendaId === 0 && selectedEpisodePreviews.length > 1 && (
             <tr className="contact-row">
-              <td colSpan={12}>
+              <td colSpan={13}>
                 <div className="contact-section">
                   <p className="contact-empty">
                     Selected episodes:{' '}

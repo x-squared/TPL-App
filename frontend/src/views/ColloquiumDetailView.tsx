@@ -10,10 +10,16 @@ import './ColloquiumsView.css';
 interface Props {
   colloqiumId: number;
   onBack: () => void;
+  onOpenEpisode: (patientId: number, episodeId: number) => void;
   standalone?: boolean;
 }
 
-export default function ColloquiumDetailView({ colloqiumId, onBack, standalone = false }: Props) {
+export default function ColloquiumDetailView({
+  colloqiumId,
+  onBack,
+  onOpenEpisode,
+  standalone = false,
+}: Props) {
   const model = useColloquiumDetailViewModel(colloqiumId);
   const colloquiumFavorite = useFavoriteToggle(model.colloqium ? {
     favorite_type_key: 'COLLOQUIUM',
@@ -76,6 +82,7 @@ export default function ColloquiumDetailView({ colloqiumId, onBack, standalone =
       saveAgenda={model.saveAgenda}
       deleteAgenda={model.deleteAgenda}
       openEpisodePicker={model.openEpisodePicker}
+      onOpenEpisode={onOpenEpisode}
       setPickerOpen={model.setPickerOpen}
       setAgendaForm={model.setAgendaForm}
       setAgendaDrafts={model.setAgendaDrafts}

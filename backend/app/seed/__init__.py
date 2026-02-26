@@ -1,4 +1,5 @@
 from sqlalchemy.orm import Session
+from typing import Any
 
 from ..models import (
     Catalogue,
@@ -16,11 +17,13 @@ from ..models import (
     TaskTemplate,
     User,
 )
+from .loader import SeedJob, SeedRunner
+from .profiles import resolve_seed_categories
 
 
 def sync_codes(db: Session) -> None:
     """Replace all CODE rows with the data defined in codes_data.py on every startup."""
-    from .codes_data import ALL as code_records
+    from .datasets.core.codes import RECORDS as code_records
 
     db.query(Code).delete()
     for entry in code_records:
@@ -30,7 +33,7 @@ def sync_codes(db: Session) -> None:
 
 def sync_catalogues(db: Session) -> None:
     """Replace all CATALOGUE rows with the data defined in catalogues_data.py on every startup."""
-    from .catalogues_data import ALL as catalogue_records
+    from .datasets.core.catalogues import RECORDS as catalogue_records
 
     db.query(Catalogue).delete()
     for entry in catalogue_records:
@@ -40,9 +43,9 @@ def sync_catalogues(db: Session) -> None:
 
 def sync_patients(db: Session) -> None:
     """Replace all PATIENT and CONTACT_INFO rows with seed data on every startup."""
-    from .contact_infos_data import ALL as contact_records
-    from .episodes_data import ALL as episode_records
-    from .patients_data import ALL as patient_records
+    from .datasets.sample.contact_infos import RECORDS as contact_records
+    from .datasets.sample.episodes import RECORDS as episode_records
+    from .datasets.sample.patients import RECORDS as patient_records
 
     db.query(Episode).delete()
     db.query(ContactInfo).delete()
@@ -86,7 +89,7 @@ def sync_patients(db: Session) -> None:
 
 def sync_medical_value_templates(db: Session) -> None:
     """Replace all MEDICAL_VALUE_TEMPLATE rows with seed data on every startup."""
-    from .medical_values_template_data import ALL as mv_records
+    from .datasets.core.medical_value_templates import RECORDS as mv_records
 
     db.query(MedicalValueTemplate).delete()
     for entry in mv_records:
@@ -102,27 +105,53 @@ def sync_medical_value_templates(db: Session) -> None:
     db.commit()
 
 
-def sync_users(db: Session) -> None:
-    """Replace all USER rows with the data defined in users_data.py on every startup."""
-    from .users_data import ALL as user_records
+def _save_user_entry(db: Session, entry: dict[str, Any]) -> None:
+    raw = dict(entry)
+    role_key = raw.pop("role_key", "")
+    role = (
+        db.query(Code)
+        .filter(Code.type == "ROLE", Code.key == role_key)
+        .first()
+    )
+    ext_id = raw.get("ext_id")
+    if not ext_id:
+        return
+    existing = db.query(User).filter(User.ext_id == ext_id).first()
+    if existing:
+        existing.name = raw.get("name", existing.name)
+        existing.role_id = role.id if role else None
+        return
+    db.add(User(role_id=role.id if role else None, **raw))
 
-    db.query(User).delete()
+
+def sync_users_core(db: Session) -> None:
+    """Load production-safe base users (e.g. SYSTEM)."""
+    from .datasets.core.users import RECORDS as user_records
+
     for entry in user_records:
-        raw = dict(entry)
-        role_key = raw.pop("role_key", "")
-        role = (
-            db.query(Code)
-            .filter(Code.type == "ROLE", Code.key == role_key)
-            .first()
-        )
-        db.add(User(role_id=role.id if role else None, **raw))
+        _save_user_entry(db, entry)
     db.commit()
+
+
+def sync_users_sample(db: Session) -> None:
+    """Load demo users for non-production environments."""
+    from .datasets.sample.users import RECORDS as user_records
+
+    for entry in user_records:
+        _save_user_entry(db, entry)
+    db.commit()
+
+
+def sync_users(db: Session) -> None:
+    """Backward compatible full user seed load (core + sample)."""
+    sync_users_core(db)
+    sync_users_sample(db)
 
 
 def sync_colloqiums(db: Session) -> None:
     """Replace all COLLOQIUM_TYPE and COLLOQIUM rows with seed data on every startup."""
-    from .colloqium_types_data import ALL as colloqium_type_records
-    from .colloqiums_data import ALL as colloqium_records
+    from .datasets.sample.colloqium_types import RECORDS as colloqium_type_records
+    from .datasets.sample.colloqiums import RECORDS as colloqium_records
 
     db.query(ColloqiumAgenda).delete()
     db.query(Colloqium).delete()
@@ -153,7 +182,7 @@ def sync_colloqiums(db: Session) -> None:
 
 def sync_tasks(db: Session) -> None:
     """Replace all TASK_GROUP and TASK rows with seed data on every startup."""
-    from .tasks_data import TASK_GROUPS, TASKS
+    from .datasets.sample.tasks import TASK_GROUPS, TASKS
 
     db.query(Task).delete()
     db.query(TaskGroup).delete()
@@ -254,7 +283,7 @@ def sync_tasks(db: Session) -> None:
 
 def sync_task_templates(db: Session) -> None:
     """Replace all TASK_GROUP_TEMPLATE and TASK_TEMPLATE rows with seed data."""
-    from .task_templates_data import TASK_GROUP_TEMPLATES, TASK_TEMPLATES
+    from .datasets.core.task_templates import TASK_GROUP_TEMPLATES, TASK_TEMPLATES
 
     db.query(TaskTemplate).delete()
     db.query(TaskGroupTemplate).delete()
@@ -318,3 +347,79 @@ def sync_task_templates(db: Session) -> None:
         )
 
     db.commit()
+
+
+def get_seed_jobs() -> tuple[SeedJob, ...]:
+    """Seed registry used by the profile-based seed runner."""
+    return (
+        SeedJob(
+            key="core.codes",
+            category="core",
+            description="Load CODE reference data",
+            loader=sync_codes,
+        ),
+        SeedJob(
+            key="core.catalogues",
+            category="core",
+            description="Load CATALOGUE reference data",
+            loader=sync_catalogues,
+        ),
+        SeedJob(
+            key="core.users",
+            category="core",
+            description="Load core users",
+            loader=sync_users_core,
+        ),
+        SeedJob(
+            key="core.medical_value_templates",
+            category="core",
+            description="Load medical value templates",
+            loader=sync_medical_value_templates,
+        ),
+        SeedJob(
+            key="core.task_templates",
+            category="core",
+            description="Load task templates",
+            loader=sync_task_templates,
+        ),
+        SeedJob(
+            key="sample.users",
+            category="sample",
+            description="Load demo users",
+            loader=sync_users_sample,
+        ),
+        SeedJob(
+            key="sample.colloqiums",
+            category="sample",
+            description="Load demo colloquiums",
+            loader=sync_colloqiums,
+        ),
+        SeedJob(
+            key="sample.patients",
+            category="sample",
+            description="Load demo patients and episodes",
+            loader=sync_patients,
+        ),
+        SeedJob(
+            key="sample.tasks",
+            category="sample",
+            description="Load demo tasks",
+            loader=sync_tasks,
+        ),
+    )
+
+
+def run_seed_profile(db: Session, app_env: str | None, seed_profile: str | None = None) -> dict[str, Any]:
+    """
+    Run registered seed jobs based on resolved environment/profile categories.
+
+    Returns execution metadata for startup logging.
+    """
+    resolved_env, categories = resolve_seed_categories(app_env, seed_profile)
+    runner = SeedRunner(get_seed_jobs())
+    executed = runner.run(db, include_categories=categories)
+    return {
+        "environment": resolved_env,
+        "categories": list(categories),
+        "executed_jobs": executed,
+    }

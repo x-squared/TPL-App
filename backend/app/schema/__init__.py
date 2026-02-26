@@ -97,6 +97,16 @@ from .coordination import (
 )
 from .favorite import FavoriteBase, FavoriteCreate, FavoriteResponse
 from .patient import PatientBase, PatientCreate, PatientListResponse, PatientResponse, PatientUpdate
+from .report import (
+    ReportColumnResponse,
+    ReportExecuteRequest,
+    ReportExecuteResponse,
+    ReportFieldOption,
+    ReportFilterInput,
+    ReportMetadataResponse,
+    ReportSourceOption,
+    ReportSortInput,
+)
 from .reference import (
     CatalogueBase,
     CatalogueCreate,

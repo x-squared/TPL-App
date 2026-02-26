@@ -29,6 +29,7 @@ from . import (
     medical_data,
     medical_values,
     patients,
+    reports,
     task_group_templates,
     task_groups,
     task_templates,
@@ -41,6 +42,7 @@ def register_routers(app: FastAPI) -> None:
     """Register all API routers."""
     app.include_router(auth.router, prefix="/api")
     app.include_router(patients.router, prefix="/api")
+    app.include_router(reports.router, prefix="/api")
     app.include_router(contact_infos.router, prefix="/api")
     app.include_router(absences.router, prefix="/api")
     app.include_router(diagnoses.router, prefix="/api")

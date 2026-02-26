@@ -19,6 +19,7 @@ export default function EpisodesTab(props: EpisodesTabProps) {
     refreshPatient,
     episodes,
     initialSelectedEpisodeId,
+    onOpenColloqium,
   } = props;
 
   const episodeDetailTabs: readonly EpisodeDetailTab[] = [
@@ -343,6 +344,7 @@ export default function EpisodesTab(props: EpisodesTabProps) {
           <EpisodeColloquiumSection
             loadingEpisodeColloqiums={loadingEpisodeColloqiums}
             episodeColloqiumAgendas={episodeColloqiumAgendas}
+            onOpenColloqium={onOpenColloqium}
             onOpenAssignDialog={openAssignDialog}
             formatDate={formatDate}
             assignDialogOpen={assignDialogOpen}

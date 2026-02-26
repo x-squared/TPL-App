@@ -16,4 +16,5 @@ export interface EpisodesTabProps {
   refreshPatient: () => Promise<void>;
   episodes: PatientEpisodesModel;
   initialSelectedEpisodeId?: number | null;
+  onOpenColloqium: (colloqiumId: number) => void;
 }

@@ -57,6 +57,7 @@ interface Props {
   onCancelEditAgenda: () => void;
   onSaveAgenda: () => void;
   onDeleteAgenda: (agendaId: number) => void;
+  onOpenEpisode: (patientId: number, episodeId: number) => void;
   onPickEpisode: () => void;
   onPickEpisodeClose: () => void;
   onPickEpisodeConfirm: (episodeIds: number[]) => void;
@@ -102,6 +103,7 @@ export default function ColloquiumDetailSection({
   onCancelEditAgenda,
   onSaveAgenda,
   onDeleteAgenda,
+  onOpenEpisode,
   onPickEpisode,
   onPickEpisodeClose,
   onPickEpisodeConfirm,
@@ -199,6 +201,7 @@ export default function ColloquiumDetailSection({
             onCancelEdit={onCancelEditAgenda}
             onSave={onSaveAgenda}
             onDelete={onDeleteAgenda}
+            onOpenEpisode={onOpenEpisode}
             onPickEpisode={onPickEpisode}
             onEditFormChange={onAgendaFormChange}
             selectedEpisodeLabel={selectedEpisodeLabel}

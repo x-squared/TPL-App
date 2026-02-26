@@ -1,0 +1,138 @@
+# Server Manual
+
+This manual explains how to configure and start the TPL backend server.
+
+For detailed seeding behavior (core/sample/test data), see `doc/seeding-manual.md`.
+For specification-to-test workflow, see `doc/specification-manual.md`.
+
+## 1) What "server" means in this project
+
+The backend server is a FastAPI application started from:
+
+- `backend/app/main.py`
+
+By default, it uses a SQLite database at:
+
+- `database/tpl_app.db`
+
+## 2) Prerequisites
+
+- Python 3.10+ (recommended)
+- `pip`
+- Terminal access to the repository root
+
+## 3) First-time setup
+
+From project root:
+
+```bash
+cd backend
+python -m venv .venv
+source .venv/bin/activate
+pip install -r requirements.txt
+```
+
+## 4) Runtime configuration
+
+The server reads configuration from environment variables centralized in:
+
+- `backend/app/config.py`
+
+### Core environment variables
+
+- `TPL_ENV`: logical runtime environment (`DEV`, `TEST`, `PROD`)
+- `TPL_DATABASE_URL`: database connection string (default: SQLite file in `database/`)
+- `TPL_CORS_ORIGINS`: comma-separated allowed browser origins
+- `TPL_SEED_PROFILE`: optional explicit seed profile override
+- `TPL_SEED_ON_STARTUP`: enable/disable startup seeding (`true`/`false`)
+
+Seed profile semantics and allowed values are documented in:
+
+- `doc/seeding-manual.md`
+
+### Recommended defaults
+
+- Local development: `TPL_ENV=DEV`
+- Production-like run: `TPL_ENV=PROD`
+- Disable startup seeds: `TPL_SEED_ON_STARTUP=false`
+- Keep browser access default by including `http://localhost:5173` in `TPL_CORS_ORIGINS`
+
+## 5) Start the backend server
+
+From `backend/` with the virtual environment activated:
+
+```bash
+uvicorn app.main:app --reload
+```
+
+Server endpoints:
+
+- API base: `http://localhost:8000`
+- Health check: `http://localhost:8000/api/health`
+- Swagger UI: `http://localhost:8000/docs`
+
+## 6) Typical startup examples
+
+### A) Development (core + sample seed data)
+
+```bash
+export TPL_ENV=DEV
+uvicorn app.main:app --reload
+```
+
+### B) Production-safe seeding (core only)
+
+```bash
+export TPL_ENV=PROD
+uvicorn app.main:app --reload
+```
+
+### C) Start server without startup seeding
+
+```bash
+export TPL_SEED_ON_STARTUP=false
+uvicorn app.main:app --reload
+```
+
+### D) Explicit profile override
+
+```bash
+export TPL_ENV=DEV
+export TPL_SEED_PROFILE=CORE_TEST
+uvicorn app.main:app --reload
+```
+
+### E) Custom DB and CORS configuration
+
+```bash
+export TPL_DATABASE_URL=sqlite:///../database/tpl_app.db
+export TPL_CORS_ORIGINS=http://localhost:5173,http://127.0.0.1:5173
+uvicorn app.main:app --reload
+```
+
+## 7) Restarting the server
+
+If running in terminal foreground:
+
+- Stop with `Ctrl+C`
+- Start again with the same `uvicorn ...` command
+
+If running with `--reload`, code changes trigger automatic restart.
+
+## 8) Troubleshooting
+
+- **Port already in use**: stop the process using port `8000`, then restart.
+- **Unexpected seed data**: verify `TPL_ENV`, `TPL_SEED_PROFILE`, and `TPL_SEED_ON_STARTUP`.
+- **No seed changes visible**: restart the backend after changing seed files.
+- **Need to run seeds without restart**: use `python -m app.seed run ...` from `backend/`.
+- **Import/runtime errors after dependency changes**: re-run `pip install -r requirements.txt`.
+
+## 9) Operational notes
+
+- Startup creates database tables via SQLAlchemy metadata.
+- Startup also performs lightweight schema compatibility adjustments (for example, adding missing columns needed by newer code).
+- Seeding runs during startup unless disabled.
+
+For all seed design and profile details, always refer to:
+
+- `doc/seeding-manual.md`

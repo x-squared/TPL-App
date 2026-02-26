@@ -2,6 +2,15 @@
 
 Full-stack web application with a **FastAPI** backend, **React + TypeScript** frontend, and **SQLite** database.
 
+## Documentation
+
+- Start here: `doc/setup-manual.md`
+- Server operations: `doc/server-manual.md`
+- Client operations: `doc/client-manual.md`
+- Seeding and environments: `doc/seeding-manual.md`
+- Specification authoring: `doc/specification-manual.md`
+- Test execution and reports: `doc/test-manual.md`
+
 ## Project Structure
 
 ```

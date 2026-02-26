@@ -184,6 +184,7 @@ export interface PatientDetailTabsProps {
   formatDate: (iso: string | null) => string;
   refreshPatient: () => Promise<void>;
   initialEpisodeId?: number | null;
+  onOpenColloqium: (colloqiumId: number) => void;
   core: PatientCoreModel;
   contacts: PatientContactsModel;
   absences: PatientAbsencesModel;
@@ -200,6 +201,7 @@ export default function PatientDetailTabs(props: PatientDetailTabsProps) {
     formatDate,
     refreshPatient,
     initialEpisodeId,
+    onOpenColloqium,
     core,
     contacts,
     absences,
@@ -232,6 +234,7 @@ export default function PatientDetailTabs(props: PatientDetailTabsProps) {
           refreshPatient={refreshPatient}
           episodes={episodes}
           initialSelectedEpisodeId={initialEpisodeId ?? null}
+          onOpenColloqium={onOpenColloqium}
         />
       )}
       {tab === 'medical' && (

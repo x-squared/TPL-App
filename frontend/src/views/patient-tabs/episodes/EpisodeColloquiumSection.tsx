@@ -3,6 +3,7 @@ import type { ColloqiumAgenda, ColloqiumType } from '../../../api';
 interface Props {
   loadingEpisodeColloqiums: boolean;
   episodeColloqiumAgendas: ColloqiumAgenda[];
+  onOpenColloqium: (colloqiumId: number) => void;
   onOpenAssignDialog: () => void;
   formatDate: (iso: string | null) => string;
   assignDialogOpen: boolean;
@@ -20,6 +21,7 @@ interface Props {
 export default function EpisodeColloquiumSection({
   loadingEpisodeColloqiums,
   episodeColloqiumAgendas,
+  onOpenColloqium,
   onOpenAssignDialog,
   formatDate,
   assignDialogOpen,
@@ -48,6 +50,7 @@ export default function EpisodeColloquiumSection({
           <table className="detail-contact-table">
             <thead>
               <tr>
+                <th className="open-col"></th>
                 <th>Type</th>
                 <th>Name</th>
                 <th>Date</th>
@@ -55,14 +58,34 @@ export default function EpisodeColloquiumSection({
               </tr>
             </thead>
             <tbody>
-              {episodeColloqiumAgendas.map((agenda) => (
-                <tr key={agenda.id}>
-                  <td>{agenda.colloqium?.colloqium_type?.organ?.name_default ?? '–'}</td>
-                  <td>{agenda.colloqium?.colloqium_type?.name ?? '–'}</td>
-                  <td>{formatDate(agenda.colloqium?.date ?? null)}</td>
-                  <td>{agenda.colloqium?.participants ?? ''}</td>
-                </tr>
-              ))}
+              {episodeColloqiumAgendas.map((agenda) => {
+                const colloqiumId = agenda.colloqium?.id ?? null;
+                return (
+                  <tr
+                    key={agenda.id}
+                    onDoubleClick={() => {
+                      if (colloqiumId) onOpenColloqium(colloqiumId);
+                    }}
+                  >
+                    <td className="open-col">
+                      <button
+                        className="open-btn"
+                        onClick={() => {
+                          if (colloqiumId) onOpenColloqium(colloqiumId);
+                        }}
+                        title="Open colloquium"
+                        disabled={!colloqiumId}
+                      >
+                        &#x279C;
+                      </button>
+                    </td>
+                    <td>{agenda.colloqium?.colloqium_type?.organ?.name_default ?? '–'}</td>
+                    <td>{agenda.colloqium?.colloqium_type?.name ?? '–'}</td>
+                    <td>{formatDate(agenda.colloqium?.date ?? null)}</td>
+                    <td>{agenda.colloqium?.participants ?? ''}</td>
+                  </tr>
+                );
+              })}
             </tbody>
           </table>
         )}

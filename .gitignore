@@ -9,6 +9,8 @@ venv/
 # Node
 node_modules/
 dist/
+frontend/test-results/
+frontend/playwright-report/
 
 # IDE
 .vscode/
@@ -20,3 +22,7 @@ dist/
 # Env
 .env
 .env.local
+
+# Generated QA artifacts
+qa/reports/
+qa/tests/generated/

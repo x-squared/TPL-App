@@ -12,6 +12,7 @@ export function usePatientDetailViewModel(
   patientId: number,
   initialTab?: PatientDetailTab,
   initialEpisodeId: number | null = null,
+  onOpenColloqium: (colloqiumId: number) => void = () => undefined,
 ) {
   const core = usePatientCore(patientId, initialTab);
   const contacts = usePatientContacts(patientId, core.patient, core.refreshPatient);
@@ -33,6 +34,7 @@ export function usePatientDetailViewModel(
       formatDate,
       refreshPatient: core.refreshPatient,
       initialEpisodeId,
+      onOpenColloqium,
       core: {
         editing: core.editing,
         startEditing: core.startEditing,
