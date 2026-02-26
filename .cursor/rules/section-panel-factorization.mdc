@@ -1,0 +1,18 @@
+---
+description: Factor tab/detail components by section panels as the default architecture
+globs: frontend/src/views/**/*.tsx
+alwaysApply: false
+---
+
+# Section Panel Factorization
+
+Use sections as the primary demarcation line in complex view components.
+
+- **Default principle**: Each substantial `<section>` block should live in its own component file.
+- **Thin tab/container**: Tab components coordinate state, routing, and callbacks; they should not inline multiple full panel implementations.
+- **Panel cohesion**: Keep each extracted section focused on one concern (for example basic data, donor data, hospitals, protocol overview, time log).
+- **Typed panel contracts**: Define explicit props for each panel; avoid wide, untyped prop spreading.
+- **Behavior safety**: Refactoring into panels must preserve existing UX/logic unless explicitly requested otherwise.
+- **Escalation trigger**: If a tab/component starts holding several independent sections, extract panels before adding more features.
+
+This rule applies proactively to new view work and to refactors of oversized existing tabs.

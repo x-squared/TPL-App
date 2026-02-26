@@ -1,9 +1,12 @@
 import type React from 'react';
 import { useEffect, useMemo, useState } from 'react';
 import type { Code, Coordination, CoordinationDonor, CoordinationEpisode, CoordinationOrigin, Patient } from '../../../api';
-import EditableSectionHeader from '../../layout/EditableSectionHeader';
 import InlineDeleteActions from '../../layout/InlineDeleteActions';
 import { formatDateDdMmYyyy, formatDateTimeDdMmYyyy } from '../../layout/dateFormat';
+import CoordinationBasicDataSection from './CoordinationBasicDataSection';
+import CoordinationDonorDataSection from './CoordinationDonorDataSection';
+import CoordinationHospitalsSection from './CoordinationHospitalsSection';
+import CoordinationProtocolOverviewSection from './CoordinationProtocolOverviewSection';
 import type { CoordinationDetailTab } from './useCoordinationDetailViewModel';
 
 interface UserOption {
@@ -358,345 +361,81 @@ export default function CoordinationDetailTabs({
     if (tab === 'coordination') {
       return (
         <>
-          <section className="detail-section ui-panel-section">
-            <EditableSectionHeader
-              title="Basic data"
-              editing={coreEditing}
-              saving={coreSaving}
-              dirty={coreDirty}
-              onEdit={() => {
-                setCoreError('');
-                setCoreEditing(true);
-              }}
-              onSave={() => {
-                void handleSaveCore();
-              }}
-              onCancel={() => {
-                setCoreEditing(false);
-                setCoreError('');
-                setCoreDraft(initialCoreDraft);
-              }}
-            />
-            <div className="detail-grid">
-              <div className="detail-field">
-                <span className="detail-label">Status</span>
-                <span className="detail-value">{coordination.status?.name_default ?? '–'}</span>
-              </div>
-              <div className="detail-field">
-                <span className="detail-label">Start</span>
-                {coreEditing ? (
-                  <input
-                    className="detail-input"
-                    type="date"
-                    value={coreDraft.start}
-                    onChange={(e) => setCoreDraft((prev) => ({ ...prev, start: e.target.value }))}
-                  />
-                ) : (
-                  <span className="detail-value">{formatDateDdMmYyyy(coordination.start)}</span>
-                )}
-              </div>
-              <div className="detail-field">
-                <span className="detail-label">End</span>
-                {coreEditing ? (
-                  <input
-                    className="detail-input"
-                    type="date"
-                    value={coreDraft.end}
-                    onChange={(e) => setCoreDraft((prev) => ({ ...prev, end: e.target.value }))}
-                  />
-                ) : (
-                  <span className="detail-value">{formatDateDdMmYyyy(coordination.end)}</span>
-                )}
-              </div>
-              <div className="detail-field">
-                <span className="detail-label">SWTPL Nr</span>
-                {coreEditing ? (
-                  <input
-                    className="detail-input"
-                    value={coreDraft.swtpl_nr}
-                    onChange={(e) => setCoreDraft((prev) => ({ ...prev, swtpl_nr: e.target.value }))}
-                  />
-                ) : (
-                  <span className="detail-value">{coordination.swtpl_nr || '–'}</span>
-                )}
-              </div>
-              <div className="detail-field">
-                <span className="detail-label">National coordinator</span>
-                {coreEditing ? (
-                  <input
-                    className="detail-input"
-                    value={coreDraft.national_coordinator}
-                    onChange={(e) => setCoreDraft((prev) => ({ ...prev, national_coordinator: e.target.value }))}
-                  />
-                ) : (
-                  <span className="detail-value">{coordination.national_coordinator || '–'}</span>
-                )}
-              </div>
-            </div>
-            <div className="detail-field coord-comment-field">
-              <span className="detail-label">Comment</span>
-              {coreEditing ? (
-                <textarea
-                  className="detail-input coord-comment-input"
-                  value={coreDraft.comment}
-                  onChange={(e) => setCoreDraft((prev) => ({ ...prev, comment: e.target.value }))}
-                />
-              ) : (
-                <div className="detail-value coord-comment-value">{coordination.comment || '–'}</div>
-              )}
-            </div>
-            {coreError && <p className="status">{coreError}</p>}
-          </section>
+          <CoordinationBasicDataSection
+            coordination={coordination}
+            coreDraft={coreDraft}
+            setCoreDraft={setCoreDraft}
+            coreEditing={coreEditing}
+            coreSaving={coreSaving}
+            coreDirty={coreDirty}
+            coreError={coreError}
+            onEdit={() => {
+              setCoreError('');
+              setCoreEditing(true);
+            }}
+            onSave={() => {
+              void handleSaveCore();
+            }}
+            onCancel={() => {
+              setCoreEditing(false);
+              setCoreError('');
+              setCoreDraft(initialCoreDraft);
+            }}
+          />
 
-          <section className="detail-section ui-panel-section">
-            <EditableSectionHeader
-              title="Donor data"
-              editing={donorEditing}
-              saving={donorSaving}
-              dirty={donorDirty}
-              onEdit={() => {
-                setDonorError('');
-                setDonorEditing(true);
-              }}
-              onSave={() => {
-                void handleSaveDonor();
-              }}
-              onCancel={() => {
-                setDonorEditing(false);
-                setDonorError('');
-                setDonorDraft(initialDonorDraft);
-              }}
-            />
-            <div className="detail-grid">
-              <div className="detail-field">
-                <span className="detail-label">Full name</span>
-                {donorEditing ? (
-                  <input
-                    className="detail-input"
-                    value={donorDraft.full_name}
-                    onChange={(e) => setDonorDraft((prev) => ({ ...prev, full_name: e.target.value }))}
-                  />
-                ) : (
-                  <span className="detail-value">{donor?.full_name || '–'}</span>
-                )}
-              </div>
-              <div className="detail-field">
-                <span className="detail-label">Date of birth</span>
-                {donorEditing ? (
-                  <input
-                    className="detail-input"
-                    type="date"
-                    value={donorDraft.birth_date}
-                    onChange={(e) => setDonorDraft((prev) => ({ ...prev, birth_date: e.target.value }))}
-                  />
-                ) : (
-                  <span className="detail-value">{formatDateDdMmYyyy(donor?.birth_date)}</span>
-                )}
-              </div>
-              <div className="detail-field">
-                <span className="detail-label">Reason of death</span>
-                {donorEditing ? (
-                  <select
-                    className="detail-input"
-                    value={donorDraft.death_kind_id || ''}
-                    onChange={(e) =>
-                      setDonorDraft((prev) => ({ ...prev, death_kind_id: e.target.value ? Number(e.target.value) : 0 }))
-                    }
-                  >
-                    <option value="">–</option>
-                    {deathKinds.map((kind) => (
-                      <option key={kind.id} value={kind.id}>
-                        {kind.name_default}
-                      </option>
-                    ))}
-                  </select>
-                ) : (
-                  <span className="detail-value">{donor?.death_kind?.name_default ?? '–'}</span>
-                )}
-              </div>
-              <div className="detail-field">
-                <span className="detail-label">Sex</span>
-                {donorEditing ? (
-                  <select
-                    className="detail-input"
-                    value={donorDraft.sex_id ?? ''}
-                    onChange={(e) =>
-                      setDonorDraft((prev) => ({ ...prev, sex_id: e.target.value ? Number(e.target.value) : null }))
-                    }
-                  >
-                    <option value="">–</option>
-                    {sexCodes.map((sex) => (
-                      <option key={sex.id} value={sex.id}>
-                        {sex.name_default}
-                      </option>
-                    ))}
-                  </select>
-                ) : (
-                  <span className="detail-value">{sexCodes.find((s) => s.id === donor?.sex_id)?.name_default ?? '–'}</span>
-                )}
-              </div>
-              <div className="detail-field">
-                <span className="detail-label">Blood type</span>
-                {donorEditing ? (
-                  <select
-                    className="detail-input"
-                    value={donorDraft.blood_type_id ?? ''}
-                    onChange={(e) =>
-                      setDonorDraft((prev) => ({ ...prev, blood_type_id: e.target.value ? Number(e.target.value) : null }))
-                    }
-                  >
-                    <option value="">–</option>
-                    {bloodTypes.map((bt) => (
-                      <option key={bt.id} value={bt.id}>
-                        {bt.name_default}
-                      </option>
-                    ))}
-                  </select>
-                ) : (
-                  <span className="detail-value">{bloodTypes.find((bt) => bt.id === donor?.blood_type_id)?.name_default ?? '–'}</span>
-                )}
-              </div>
-              <div className="detail-field">
-                <span className="detail-label">Height (cm)</span>
-                {donorEditing ? (
-                  <input
-                    className="detail-input"
-                    type="number"
-                    value={donorDraft.height ?? ''}
-                    onChange={(e) =>
-                      setDonorDraft((prev) => ({ ...prev, height: e.target.value ? Number(e.target.value) : null }))
-                    }
-                  />
-                ) : (
-                  <span className="detail-value">{donor?.height ?? '–'}</span>
-                )}
-              </div>
-              <div className="detail-field">
-                <span className="detail-label">Weight (kg)</span>
-                {donorEditing ? (
-                  <input
-                    className="detail-input"
-                    type="number"
-                    value={donorDraft.weight ?? ''}
-                    onChange={(e) =>
-                      setDonorDraft((prev) => ({ ...prev, weight: e.target.value ? Number(e.target.value) : null }))
-                    }
-                  />
-                ) : (
-                  <span className="detail-value">{donor?.weight ?? '–'}</span>
-                )}
-              </div>
-              <div className="detail-field">
-                <span className="detail-label">Organ FO</span>
-                {donorEditing ? (
-                  <input
-                    className="detail-input"
-                    value={donorDraft.organ_fo}
-                    onChange={(e) => setDonorDraft((prev) => ({ ...prev, organ_fo: e.target.value }))}
-                  />
-                ) : (
-                  <span className="detail-value">{donor?.organ_fo || '–'}</span>
-                )}
-              </div>
-              <div className="detail-field">
-                <span className="detail-label">Diagnosis</span>
-                {donorEditing ? (
-                  <select
-                    className="detail-input"
-                    value={donorDraft.diagnosis_id ?? ''}
-                    onChange={(e) =>
-                      setDonorDraft((prev) => ({ ...prev, diagnosis_id: e.target.value ? Number(e.target.value) : null }))
-                    }
-                  >
-                    <option value="">–</option>
-                    {diagnosisDonorOptions.map((diag) => (
-                      <option key={diag.id} value={diag.id}>
-                        {diag.name_default}
-                      </option>
-                    ))}
-                  </select>
-                ) : (
-                  <span className="detail-value">
-                    {diagnosisDonorOptions.find((diag) => diag.id === donor?.diagnosis_id)?.name_default ?? '–'}
-                  </span>
-                )}
-              </div>
-            </div>
-            {donorError && <p className="status">{donorError}</p>}
-          </section>
+          <CoordinationDonorDataSection
+            donor={donor}
+            donorDraft={donorDraft}
+            setDonorDraft={setDonorDraft}
+            donorEditing={donorEditing}
+            donorSaving={donorSaving}
+            donorDirty={donorDirty}
+            donorError={donorError}
+            deathKinds={deathKinds}
+            sexCodes={sexCodes}
+            bloodTypes={bloodTypes}
+            diagnosisDonorOptions={diagnosisDonorOptions}
+            onEdit={() => {
+              setDonorError('');
+              setDonorEditing(true);
+            }}
+            onSave={() => {
+              void handleSaveDonor();
+            }}
+            onCancel={() => {
+              setDonorEditing(false);
+              setDonorError('');
+              setDonorDraft(initialDonorDraft);
+            }}
+          />
 
-          <section className="detail-section ui-panel-section">
-            <EditableSectionHeader
-              title="Hospitals"
-              editing={originEditing}
-              saving={originSaving}
-              dirty={originDirty}
-              onEdit={() => {
-                setOriginError('');
-                setOriginEditing(true);
-              }}
-              onSave={() => {
-                void handleSaveOrigin();
-              }}
-              onCancel={() => {
-                setOriginEditing(false);
-                setOriginError('');
-                setOriginDraft(initialOriginDraft);
-              }}
-            />
-            <div className="detail-grid">
-              <div className="detail-field">
-                <span className="detail-label">Detection hospital</span>
-                {originEditing ? (
-                  <select
-                    className="detail-input"
-                    value={originDraft.detection_hospital_id || ''}
-                    onChange={(e) =>
-                      setOriginDraft((prev) => ({
-                        ...prev,
-                        detection_hospital_id: e.target.value ? Number(e.target.value) : 0,
-                      }))
-                    }
-                  >
-                    <option value="">–</option>
-                    {hospitals.map((h) => (
-                      <option key={h.id} value={h.id}>
-                        {h.name_default}
-                      </option>
-                    ))}
-                  </select>
-                ) : (
-                  <span className="detail-value">{origin?.detection_hospital?.name_default ?? '–'}</span>
-                )}
-              </div>
-              <div className="detail-field">
-                <span className="detail-label">Procurement hospital</span>
-                {originEditing ? (
-                  <select
-                    className="detail-input"
-                    value={originDraft.procurement_hospital_id || ''}
-                    onChange={(e) =>
-                      setOriginDraft((prev) => ({
-                        ...prev,
-                        procurement_hospital_id: e.target.value ? Number(e.target.value) : 0,
-                      }))
-                    }
-                  >
-                    <option value="">–</option>
-                    {hospitals.map((h) => (
-                      <option key={h.id} value={h.id}>
-                        {h.name_default}
-                      </option>
-                    ))}
-                  </select>
-                ) : (
-                  <span className="detail-value">{origin?.procurement_hospital?.name_default ?? '–'}</span>
-                )}
-              </div>
-            </div>
-            {originError && <p className="status">{originError}</p>}
-          </section>
+          <CoordinationHospitalsSection
+            origin={origin}
+            originDraft={originDraft}
+            setOriginDraft={setOriginDraft}
+            originEditing={originEditing}
+            originSaving={originSaving}
+            originDirty={originDirty}
+            originError={originError}
+            hospitals={hospitals}
+            onEdit={() => {
+              setOriginError('');
+              setOriginEditing(true);
+            }}
+            onSave={() => {
+              void handleSaveOrigin();
+            }}
+            onCancel={() => {
+              setOriginEditing(false);
+              setOriginError('');
+              setOriginDraft(initialOriginDraft);
+            }}
+          />
 
+          <CoordinationProtocolOverviewSection
+            groups={protocolEntriesByOrgan}
+            onOpenPatientEpisode={onOpenPatientEpisode}
+          />
         </>
       );
     }
@@ -707,80 +446,7 @@ export default function CoordinationDetailTabs({
           <div className="detail-section-heading">
             <h2>Protocol</h2>
           </div>
-          <div className="coord-protocol-overview">
-            {protocolEntriesByOrgan.length === 0 ? (
-              <p className="detail-empty">No organs found.</p>
-            ) : (
-              protocolEntriesByOrgan.map(({ organ, entries }) => (
-                <fieldset key={organ.id} className="coord-protocol-organ-box">
-                  <legend>{organ.name_default}</legend>
-                  {entries.length === 0 ? (
-                    <p className="detail-empty">No protocol data for this organ.</p>
-                  ) : (
-                    entries.map((entry) => (
-                      <div key={entry.id} className="coord-protocol-entry">
-                        <div className="coord-protocol-entry-actions">
-                          <button
-                            className="coord-protocol-open-btn"
-                            onClick={() => {
-                              if (entry.patientId != null && entry.episodeId != null) {
-                                onOpenPatientEpisode(entry.patientId, entry.episodeId);
-                              }
-                            }}
-                            disabled={entry.patientId == null || entry.episodeId == null}
-                            title="Open linked episode"
-                          >
-                            Open
-                          </button>
-                        </div>
-                        <div className="coord-protocol-entry-grid">
-                          <div className="detail-field">
-                            <span className="detail-label">Recipient full name</span>
-                            <span className="detail-value">{entry.recipientName}</span>
-                          </div>
-                          <div className="detail-field">
-                            <span className="detail-label">Fallnummer</span>
-                            <span className="detail-value">{entry.fallNr}</span>
-                          </div>
-                          <div className="detail-field">
-                            <span className="detail-label">Date of birth</span>
-                            <span className="detail-value">{entry.birthDate}</span>
-                          </div>
-                          <div className="detail-field">
-                            <span className="detail-label">Diagnosis (main)</span>
-                            <span className="detail-value">{entry.mainDiagnosis}</span>
-                          </div>
-                          <div className="detail-field">
-                            <span className="detail-label">RS-nr</span>
-                            <span className="detail-value">{entry.rsNr}</span>
-                          </div>
-                          <div className="detail-field">
-                            <span className="detail-label">TPL date</span>
-                            <span className="detail-value">{entry.tplDate}</span>
-                          </div>
-                          <div className="detail-field">
-                            <span className="detail-label">Procurement team</span>
-                            <span className="detail-value">{entry.procurementTeam}</span>
-                          </div>
-                          <div className="detail-field">
-                            <span className="detail-label">Perfusion applied</span>
-                            <span className="detail-value">
-                              {entry.perfusionApplied}
-                              {entry.perfusionDone ? (
-                                <span className="coord-protocol-badge" title="Perfusion applied">
-                                  Perfusion
-                                </span>
-                              ) : null}
-                            </span>
-                          </div>
-                        </div>
-                      </div>
-                    ))
-                  )}
-                </fieldset>
-              ))
-            )}
-          </div>
+          <p className="detail-empty">Protocol details are shown in the Coordination tab.</p>
         </section>
       );
     }

@@ -8,6 +8,7 @@ alwaysApply: true
 For any new complex view (like patients or colloquiums), follow this structure by default:
 
 - **Thin container view**: The top-level `*View.tsx` should mostly render layout/header and pass grouped models to tabs/sections.
+- **Section-first decomposition**: In tabs/detail screens, treat each visual section (`<section ...>`) as a component boundary by default. Keep tab containers as orchestration layers and move section UI into focused child components.
 - **Composed view-model hook**: Put behavior in `use*ViewModel.ts` that composes focused hooks (`use*Core`, `use*Section`, etc.).
 - **Focused hooks**: One hook per concern (core entity loading, contacts, episodes, diagnoses, medical values, agenda, sync), each with clear inputs/outputs.
 - **Grouped props, not flat prop lists**: Pass grouped models (`core`, `contacts`, `episodes`, `medicalValues`, ...) into tab components instead of dozens of flat props.
