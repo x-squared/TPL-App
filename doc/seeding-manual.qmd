@@ -105,26 +105,26 @@ Truthy/falsey handling:
 
 ### DEV with demo data (default behavior)
 
-```bash
+```{bash}
 export TPL_ENV=DEV
 ```
 
 ### PROD-safe startup (no demo data)
 
-```bash
+```{bash}
 export TPL_ENV=PROD
 ```
 
 ### TEST profile using explicit override
 
-```bash
+```{bash}
 export TPL_ENV=DEV
 export TPL_SEED_PROFILE=CORE_TEST
 ```
 
 ### Disable startup seeding completely
 
-```bash
+```{bash}
 export TPL_SEED_ON_STARTUP=false
 ```
 
@@ -132,7 +132,7 @@ export TPL_SEED_ON_STARTUP=false
 
 You can run seeding without restarting the server via:
 
-```bash
+```{bash}
 cd backend
 python -m app.seed <command>
 ```
@@ -145,7 +145,7 @@ Supported commands:
 
 Examples:
 
-```bash
+```{bash}
 python -m app.seed list
 python -m app.seed resolve
 python -m app.seed run --env DEV

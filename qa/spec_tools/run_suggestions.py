@@ -13,9 +13,9 @@ def _execute(action_id: str, project_root: Path) -> tuple[bool, str]:
     if action_id == "CHECK_ROUTE_OR_CONTRACT":
         return True, "Manual action: review failing route implementation and spec file."
     if action_id == "START_BACKEND":
-        return True, "Manual action: start backend server as documented in doc/server-manual.md."
+        return True, "Manual action: start backend server as documented in doc/server-manual.qmd."
     if action_id == "START_FRONTEND":
-        return True, "Manual action: start frontend server as documented in doc/client-manual.md."
+        return True, "Manual action: start frontend server as documented in doc/client-manual.qmd."
     if action_id == "REVIEW_FAILURE_LOG":
         return True, "Manual action: inspect qa/reports/latest-spec-report.md and address first failing case."
     if action_id == "MAINTAIN_SPEC_COVERAGE":

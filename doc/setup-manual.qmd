@@ -4,11 +4,11 @@ This is the **start-here** manual for setting up the full TPL-App development en
 
 After this baseline setup, use the specialized manuals for details:
 
-- Server: `doc/server-manual.md`
-- Client: `doc/client-manual.md`
-- Seeding: `doc/seeding-manual.md`
-- Specification authoring: `doc/specification-manual.md`
-- Test execution and reports: `doc/test-manual.md`
+- Server: `doc/server-manual.qmd`
+- Client: `doc/client-manual.qmd`
+- Seeding: `doc/seeding-manual.qmd`
+- Specification authoring: `doc/specification-manual.qmd`
+- Test execution and reports: `doc/test-manual.qmd`
 
 ## 1) Prerequisites
 
@@ -21,14 +21,14 @@ Install on your machine:
 
 ## 2) Clone and enter project
 
-```bash
+```{bash}
 git clone <your-repo-url>
 cd TPL-App
 ```
 
 ## 3) Backend bootstrap (one-time)
 
-```bash
+```{bash}
 cd backend
 python -m venv .venv
 source .venv/bin/activate
@@ -38,7 +38,7 @@ cd ..
 
 ## 4) Frontend bootstrap (one-time)
 
-```bash
+```{bash}
 cd frontend
 npm install
 cd ..
@@ -46,7 +46,7 @@ cd ..
 
 ## 5) Playwright browser bootstrap (for partner UI tests)
 
-```bash
+```{bash}
 cd frontend
 npx playwright install
 cd ..
@@ -64,7 +64,7 @@ Important environment variables:
 
 Typical local defaults:
 
-```bash
+```{bash}
 export TPL_ENV=DEV
 export TPL_CORS_ORIGINS=http://localhost:5173
 ```
@@ -75,7 +75,7 @@ Open two terminals.
 
 ### Terminal A: backend
 
-```bash
+```{bash}
 cd backend
 source .venv/bin/activate
 uvicorn app.main:app --reload
@@ -83,7 +83,7 @@ uvicorn app.main:app --reload
 
 ### Terminal B: frontend
 
-```bash
+```{bash}
 cd frontend
 npm run dev
 ```
@@ -98,7 +98,7 @@ npm run dev
 
 From repository root:
 
-```bash
+```{bash}
 python -m qa.spec_tools.run_specs
 python -m qa.spec_tools.run_partner_specs
 ```
@@ -110,7 +110,7 @@ Then review reports:
 
 If suggestions are present:
 
-```bash
+```{bash}
 python -m qa.spec_tools.run_suggestions --report qa/reports/latest-spec-report.md
 python -m qa.spec_tools.run_suggestions --report qa/reports/latest-partner-report.md
 ```

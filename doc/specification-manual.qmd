@@ -2,7 +2,7 @@
 
 This document defines how specifications are authored and maintained in TPL-App.
 
-For test execution, reports, and suggestion handling, see `doc/test-manual.md`.
+For test execution, reports, and suggestion handling, see `doc/test-manual.qmd`.
 
 ## Scope of This Manual
 
@@ -25,7 +25,7 @@ Specs are consumed by tooling in `qa/spec_tools/`, which supports:
 - `spec-case` -> spec-derived HTTP checks
 - `partner-case` -> partner-driven UI + DB scenarios
 
-Operational commands are documented in `doc/test-manual.md`.
+Operational commands are documented in `doc/test-manual.qmd`.
 
 ## Writing New Specs
 
@@ -230,7 +230,7 @@ In this project:
 
 ## Relationship To Other Manuals
 
-- Server startup and env config: `doc/server-manual.md`
-- Client startup and dev runtime: `doc/client-manual.md`
-- Seed profiles and data categories: `doc/seeding-manual.md`
-- Test workflow operations: `doc/test-manual.md`
+- Server startup and env config: `doc/server-manual.qmd`
+- Client startup and dev runtime: `doc/client-manual.qmd`
+- Seed profiles and data categories: `doc/seeding-manual.qmd`
+- Test workflow operations: `doc/test-manual.qmd`

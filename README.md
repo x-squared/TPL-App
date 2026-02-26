@@ -4,15 +4,15 @@ Full-stack web application with a **FastAPI** backend, **React + TypeScript** fr
 
 ## Documentation
 
-- Start here: `doc/setup-manual.md`
+- Start here: `doc/setup-manual.qmd`
 - CLI cookbook / Quarto usage: `doc/diy-manual.qmd`
-- Server operations: `doc/server-manual.md`
-- External interfaces architecture: `doc/interface-manual.md`
-- Client operations: `doc/client-manual.md`
-- Report builder usage and internals: `doc/report-builder-manual.md`
-- Seeding and environments: `doc/seeding-manual.md`
-- Specification authoring: `doc/specification-manual.md`
-- Test execution and reports: `doc/test-manual.md`
+- Server operations: `doc/server-manual.qmd`
+- External interfaces architecture: `doc/interface-manual.qmd`
+- Client operations: `doc/client-manual.qmd`
+- Report builder usage and internals: `doc/report-builder-manual.qmd`
+- Seeding and environments: `doc/seeding-manual.qmd`
+- Specification authoring: `doc/specification-manual.qmd`
+- Test execution and reports: `doc/test-manual.qmd`
 
 ## Project Structure
 

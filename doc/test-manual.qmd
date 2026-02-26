@@ -2,7 +2,7 @@
 
 This manual explains how testing works in TPL-App, where test files live, how to create new tests, how to run them, and how to evaluate results.
 
-For specification authoring conventions and structure, see `doc/specification-manual.md`.
+For specification authoring conventions and structure, see `doc/specification-manual.qmd`.
 
 ## 1) Test Structure
 
@@ -53,7 +53,7 @@ Create a new Markdown file under:
 - `spec/server/` for server-only behavior
 - `spec/client-server/` for cross-layer behavior
 
-Specification format details live in `doc/specification-manual.md`.
+Specification format details live in `doc/specification-manual.qmd`.
 
 ### B) Add/extend executable scenario logic (only for partner scenarios)
 
@@ -71,7 +71,7 @@ From repository root:
 
 ### Standard spec pipeline
 
-```bash
+```{bash}
 python -m qa.spec_tools.run_specs
 ```
 
@@ -79,7 +79,7 @@ This regenerates tests from specs and runs generated checks.
 
 ### Partner-driven scenario pipeline
 
-```bash
+```{bash}
 python -m qa.spec_tools.run_partner_specs
 ```
 
@@ -102,7 +102,7 @@ Each report includes:
 
 Run:
 
-```bash
+```{bash}
 python -m qa.spec_tools.run_suggestions --report qa/reports/latest-spec-report.md
 python -m qa.spec_tools.run_suggestions --report qa/reports/latest-partner-report.md
 ```
@@ -111,8 +111,8 @@ Then apply one suggestion at a time and rerun the respective pipeline.
 
 ## 8) Typical Local Sequence
 
-1. Start backend (`doc/server-manual.md`)
-2. Start frontend (`doc/client-manual.md`)
+1. Start backend (`doc/server-manual.qmd`)
+2. Start frontend (`doc/client-manual.qmd`)
 3. Run partner specs
 4. Read partner report
 5. Execute suggestions
@@ -120,7 +120,7 @@ Then apply one suggestion at a time and rerun the respective pipeline.
 
 ## 9) Related Manuals
 
-- `doc/specification-manual.md`
-- `doc/server-manual.md`
-- `doc/client-manual.md`
-- `doc/seeding-manual.md`
+- `doc/specification-manual.qmd`
+- `doc/server-manual.qmd`
+- `doc/client-manual.qmd`
+- `doc/seeding-manual.qmd`

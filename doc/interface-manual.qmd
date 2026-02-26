@@ -2,8 +2,8 @@
 
 This manual defines how external interfaces are implemented and maintained in TPL-App.
 
-For server startup and environment basics, see `doc/server-manual.md`.
-For setup steps, see `doc/setup-manual.md`.
+For server startup and environment basics, see `doc/server-manual.qmd`.
+For setup steps, see `doc/setup-manual.qmd`.
 
 ## 1) Purpose and scope
 
@@ -111,7 +111,7 @@ When routers are added, include endpoint tests for success and key failures.
 3. Implement `client.py` with timeout/retry/auth strategy.
 4. Implement `service.py` with validation, idempotency, and persistence behavior.
 5. Add router (if needed) and register in `backend/app/routers/registry.py`.
-6. Add/extend config variables and document them in `doc/server-manual.md` when operator-relevant.
+6. Add/extend config variables and document them in `doc/server-manual.qmd` when operator-relevant.
 7. Add tests for mapper + service (and router if present).
 8. Update this manual when architecture, conventions, or workflows change.
 
@@ -121,6 +121,5 @@ This manual is intentionally living documentation.
 
 When interface architecture or workflow conventions change, update:
 
-- `doc/interface-manual.md` (primary source)
-- `doc/server-manual.md` (only for runtime/operator changes)
-
+- `doc/interface-manual.qmd` (primary source)
+- `doc/server-manual.qmd` (only for runtime/operator changes)

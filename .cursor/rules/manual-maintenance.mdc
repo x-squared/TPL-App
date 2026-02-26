@@ -21,8 +21,10 @@ After implementing changes, always evaluate whether any manual in `doc/` should 
   - Keep updates concise and consistent with existing wording.
   - Prefer editing the most relevant manual(s) over duplicating text across many manuals.
   - Add cross-links when a change spans multiple manuals.
-  - For external interface changes, `doc/interface-manual.md` is the primary manual and must be checked first.
-  - If interface changes alter runtime/env/operator behavior, also update `doc/server-manual.md`.
+  - Manuals in `doc/` must use `.qmd` (Quarto) format; do not introduce new `*-manual.md` files.
+  - Command/code blocks intended for execution should use runnable Quarto chunks (for example ` ```{bash} `) instead of plain fenced code blocks.
+  - For external interface changes, `doc/interface-manual.qmd` is the primary manual and must be checked first.
+  - If interface changes alter runtime/env/operator behavior, also update `doc/server-manual.qmd`.
 
 - **Before finishing**:
   - State briefly whether manuals were updated or intentionally left unchanged, and why.
