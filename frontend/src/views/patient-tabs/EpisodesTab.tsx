@@ -9,7 +9,7 @@ import EpisodeMetaSection from './episodes/EpisodeMetaSection';
 import EpisodeProcessTabs from './episodes/EpisodeProcessTabs';
 import EpisodeTable from './episodes/EpisodeTable';
 import { isDateField } from './episodes/episodeDetailUtils';
-import type { EpisodeDetailForm, EpisodeDetailTab, EpisodesTabProps } from './episodes/types';
+import type { EpisodeDetailForm, EpisodeDetailTab, EpisodeMetaForm, EpisodesTabProps } from './episodes/types';
 import './EpisodesTab.css';
 
 export default function EpisodesTab(props: EpisodesTabProps) {
@@ -36,7 +36,7 @@ export default function EpisodesTab(props: EpisodesTabProps) {
   const [detailForm, setDetailForm] = useState<EpisodeDetailForm>({});
   const [detailSaveError, setDetailSaveError] = useState('');
   const [editingEpisodeMeta, setEditingEpisodeMeta] = useState(false);
-  const [episodeMetaForm, setEpisodeMetaForm] = useState({ comment: '', cave: '' });
+  const [episodeMetaForm, setEpisodeMetaForm] = useState<EpisodeMetaForm>({ fall_nr: '', comment: '', cave: '' });
   const [episodeColloqiumAgendas, setEpisodeColloqiumAgendas] = useState<ColloqiumAgenda[]>([]);
   const [loadingEpisodeColloqiums, setLoadingEpisodeColloqiums] = useState(false);
   const [assignDialogOpen, setAssignDialogOpen] = useState(false);
@@ -131,6 +131,7 @@ export default function EpisodesTab(props: EpisodesTabProps) {
   const startEditingEpisodeMeta = () => {
     if (!selectedEpisode) return;
     setEpisodeMetaForm({
+      fall_nr: selectedEpisode.fall_nr ?? '',
       comment: selectedEpisode.comment ?? '',
       cave: selectedEpisode.cave ?? '',
     });
@@ -144,6 +145,7 @@ export default function EpisodesTab(props: EpisodesTabProps) {
     setDetailSaveError('');
     try {
       await api.updateEpisode(patient.id, selectedEpisode.id, {
+        fall_nr: episodeMetaForm.fall_nr ?? '',
         comment: episodeMetaForm.comment ?? '',
         cave: episodeMetaForm.cave ?? '',
       });

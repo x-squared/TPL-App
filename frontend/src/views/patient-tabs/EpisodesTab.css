@@ -86,8 +86,13 @@
 .episode-meta-grid {
   margin-top: 0.7rem;
   display: grid;
-  grid-template-columns: 2fr 1fr;
+  grid-template-columns: repeat(2, minmax(12rem, 1fr));
   gap: 0.55rem 0.8rem;
+}
+
+.episode-meta-case {
+  grid-column: 1 / -1;
+  max-width: 22rem;
 }
 
 .episode-organs-table {
@@ -116,8 +121,25 @@
 
 .episode-meta-comment .episode-meta-textarea,
 .episode-meta-cave .episode-meta-textarea {
-  border-left: 2px solid #222;
-  padding-left: 0.55rem;
+  border-left: none;
+  padding-left: 0.75rem;
+}
+
+.episode-meta-comment,
+.episode-meta-cave {
+  position: relative;
+}
+
+.episode-meta-comment::before,
+.episode-meta-cave::before {
+  content: '';
+  position: absolute;
+  left: 0.15rem;
+  top: 1.45rem;
+  bottom: 0.2rem;
+  width: 1px;
+  background: #222;
+  pointer-events: none;
 }
 
 .episode-meta-section .detail-input.episode-meta-readonly {
@@ -125,10 +147,10 @@
   border-top: none !important;
   border-right: none !important;
   border-bottom: none !important;
-  border-left: 2px solid #222 !important;
+  border-left: none !important;
   box-shadow: none !important;
   outline: none;
-  padding-left: 0.55rem;
+  padding-left: 0.75rem;
   padding-right: 0;
 }
 

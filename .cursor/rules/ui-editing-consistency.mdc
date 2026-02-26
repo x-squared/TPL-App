@@ -9,6 +9,7 @@ alwaysApply: false
 Use one consistent pattern for editable views unless a feature explicitly requires different behavior.
 
 - **Layout**: Reuse shared section structure/classes (`detail-section`, `detail-section-heading`, `detail-grid`, `detail-field`, `detail-label`, `detail-value`, `detail-input`) instead of creating parallel local variants.
+- **Case number display**: Render case identifiers (for example `fall_nr` / case number) as plain read-only values (`detail-value`) when not editing; do not render them as read-only textboxes. Use input controls only in edit mode.
 - **Edit flow**: Read-only by default; enter edit mode only via `Edit`; in edit mode show `Save` + `Cancel`; cancel restores last persisted values.
 - **Save logic**: Do not introduce implicit autosave for top-level/general fields unless explicitly requested. Explicit save is default.
 - **Autosave scope**: If autosave is requested, limit it to the specifically requested sub-section only.

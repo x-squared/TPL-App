@@ -313,7 +313,7 @@ export default function EpisodeMetaSection({
           </tbody>
         </table>
         <div className="detail-section-heading episode-meta-notes-heading">
-          <h3>Comment / Cave</h3>
+          <h3>Episode Data</h3>
           {editingEpisodeMeta ? (
             <div className="edit-actions">
               <button
@@ -338,6 +338,18 @@ export default function EpisodeMetaSection({
           )}
         </div>
         <div className="episode-meta-grid">
+          <div className="episode-detail-field episode-meta-case">
+            <span className="episode-detail-label">Fall-Nr.</span>
+            {editingEpisodeMeta ? (
+              <input
+                className="detail-input"
+                value={episodeMetaForm.fall_nr}
+                onChange={(e) => setEpisodeMetaForm((f) => ({ ...f, fall_nr: e.target.value }))}
+              />
+            ) : (
+              <span className="episode-detail-value">{selectedEpisode.fall_nr || '–'}</span>
+            )}
+          </div>
           <div className="episode-detail-field episode-meta-comment">
             <span className="episode-detail-label">Comment</span>
             {editingEpisodeMeta ? (

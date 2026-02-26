@@ -4,6 +4,7 @@ import type { PatientEpisodesModel } from '../../patient-detail/PatientDetailTab
 export type EpisodeDetailTab = 'Evaluation' | 'Listing' | 'Transplantation' | 'Follow-Up' | 'Closed';
 
 export type EpisodeMetaForm = {
+  fall_nr: string;
   comment: string;
   cave: string;
 };
