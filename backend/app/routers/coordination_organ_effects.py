@@ -2,7 +2,7 @@ from fastapi import APIRouter, Depends, HTTPException
 from sqlalchemy.exc import IntegrityError
 from sqlalchemy.orm import Session, joinedload
 
-from ..auth import get_current_user
+from ..auth import require_permission
 from ..database import get_db
 from ..models import Catalogue, Code, Coordination, CoordinationOrganEffect, User
 from ..schemas import (
@@ -51,7 +51,11 @@ def _validate_payload(*, organ_id: int, procurement_effect_id: int | None, db: S
 
 
 @router.get("/", response_model=list[CoordinationOrganEffectResponse])
-def list_coordination_organ_effects(coordination_id: int, db: Session = Depends(get_db)):
+def list_coordination_organ_effects(
+    coordination_id: int,
+    db: Session = Depends(get_db),
+    _: User = Depends(require_permission("view.donations")),
+):
     _ensure_coordination_exists(coordination_id, db)
     return (
         _query_with_joins(db)
@@ -65,7 +69,7 @@ def create_coordination_organ_effect(
     coordination_id: int,
     payload: CoordinationOrganEffectCreate,
     db: Session = Depends(get_db),
-    current_user: User = Depends(get_current_user),
+    current_user: User = Depends(require_permission("edit.donations")),
 ):
     _ensure_coordination_exists(coordination_id, db)
     _validate_payload(
@@ -94,7 +98,7 @@ def update_coordination_organ_effect(
     organ_effect_id: int,
     payload: CoordinationOrganEffectUpdate,
     db: Session = Depends(get_db),
-    current_user: User = Depends(get_current_user),
+    current_user: User = Depends(require_permission("edit.donations")),
 ):
     _ensure_coordination_exists(coordination_id, db)
     item = (
@@ -129,7 +133,7 @@ def delete_coordination_organ_effect(
     coordination_id: int,
     organ_effect_id: int,
     db: Session = Depends(get_db),
-    current_user: User = Depends(get_current_user),
+    current_user: User = Depends(require_permission("edit.donations")),
 ):
     _ensure_coordination_exists(coordination_id, db)
     item = (

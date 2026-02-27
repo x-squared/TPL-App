@@ -1,7 +1,7 @@
 from fastapi import APIRouter, Depends, HTTPException
 from sqlalchemy.orm import Session, joinedload
 
-from ..auth import get_current_user
+from ..auth import require_permission
 from ..database import get_db
 from ..models import Code, Coordination, User
 from ..schemas import CoordinationCreate, CoordinationResponse, CoordinationUpdate
@@ -54,12 +54,19 @@ def _ensure_status_exists(status_id: int, db: Session) -> None:
 
 
 @router.get("/", response_model=list[CoordinationResponse])
-def list_coordinations(db: Session = Depends(get_db)):
+def list_coordinations(
+    db: Session = Depends(get_db),
+    _: User = Depends(require_permission("view.donations")),
+):
     return _base_query(db).all()
 
 
 @router.get("/{coordination_id}", response_model=CoordinationResponse)
-def get_coordination(coordination_id: int, db: Session = Depends(get_db)):
+def get_coordination(
+    coordination_id: int,
+    db: Session = Depends(get_db),
+    _: User = Depends(require_permission("view.donations")),
+):
     return _get_coordination_or_404(coordination_id, db)
 
 
@@ -67,7 +74,7 @@ def get_coordination(coordination_id: int, db: Session = Depends(get_db)):
 def create_coordination(
     payload: CoordinationCreate,
     db: Session = Depends(get_db),
-    current_user: User = Depends(get_current_user),
+    current_user: User = Depends(require_permission("edit.donations")),
 ):
     status_id = payload.status_id if payload.status_id is not None else _resolve_default_status_id(db)
     _ensure_status_exists(status_id, db)
@@ -92,7 +99,7 @@ def update_coordination(
     coordination_id: int,
     payload: CoordinationUpdate,
     db: Session = Depends(get_db),
-    current_user: User = Depends(get_current_user),
+    current_user: User = Depends(require_permission("edit.donations")),
 ):
     item = db.query(Coordination).filter(Coordination.id == coordination_id).first()
     if not item:
@@ -113,7 +120,7 @@ def update_coordination(
 def delete_coordination(
     coordination_id: int,
     db: Session = Depends(get_db),
-    current_user: User = Depends(get_current_user),
+    current_user: User = Depends(require_permission("edit.donations")),
 ):
     item = db.query(Coordination).filter(Coordination.id == coordination_id).first()
     if not item:

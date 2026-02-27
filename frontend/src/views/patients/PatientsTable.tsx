@@ -7,11 +7,13 @@ interface Props {
   filteredPatients: PatientListItem[];
   expandedContacts: number | null;
   expandedEpisodes: number | null;
+  expandedMedical: number | null;
   selectedTaskPatientId: number | null;
   setSelectedTaskPatientId: React.Dispatch<React.SetStateAction<number | null>>;
   onSelectPatient: (id: number) => void;
   toggleEpisodes: (id: number) => void;
   toggleContacts: (id: number) => void;
+  toggleMedical: (id: number) => void;
   loadingDetails: Record<number, boolean>;
   patientDetails: Record<number, Patient>;
 }
@@ -20,14 +22,25 @@ export default function PatientsTable({
   filteredPatients,
   expandedContacts,
   expandedEpisodes,
+  expandedMedical,
   selectedTaskPatientId,
   setSelectedTaskPatientId,
   onSelectPatient,
   toggleEpisodes,
   toggleContacts,
+  toggleMedical,
   loadingDetails,
   patientDetails,
 }: Props) {
+  const medicalSummary = (p: PatientListItem) => {
+    const entries = p.static_medical_values ?? [];
+    if (!entries.length) return '–';
+    const bloodType = entries.find((entry) => entry.name.toLowerCase().includes('blood'));
+    const primary = bloodType ?? entries[0];
+    if (entries.length > 1) return `${primary.value}/...(other values)`;
+    return primary.value;
+  };
+
   return (
     <div className="patients-table-wrap ui-table-wrap">
       <table className="data-table">
@@ -38,8 +51,8 @@ export default function PatientsTable({
             <th>Name</th>
             <th>First Name</th>
             <th>Date of Birth</th>
-            <th>Blood Type</th>
             <th>AHV Nr.</th>
+            <th>Medical</th>
             <th>Episodes</th>
             <th>Resp. Coord.</th>
             <th>Contacts</th>
@@ -51,7 +64,7 @@ export default function PatientsTable({
           {filteredPatients.map((p) => (
             <React.Fragment key={p.id}>
               <tr
-                className={`${expandedContacts === p.id || expandedEpisodes === p.id ? 'row-expanded' : ''} ${selectedTaskPatientId === p.id ? 'row-selected-for-tasks' : ''}`}
+                className={`${expandedContacts === p.id || expandedEpisodes === p.id || expandedMedical === p.id ? 'row-expanded' : ''} ${selectedTaskPatientId === p.id ? 'row-selected-for-tasks' : ''}`}
                 onDoubleClick={() => onSelectPatient(p.id)}
                 onClick={() => setSelectedTaskPatientId((prev) => (prev === p.id ? null : p.id))}
               >
@@ -68,8 +81,16 @@ export default function PatientsTable({
                 <td>{p.name}</td>
                 <td>{p.first_name}</td>
                 <td>{formatDate(p.date_of_birth)}</td>
-                <td>{p.blood_type?.name_default || '–'}</td>
                 <td>{p.ahv_nr || '–'}</td>
+                <td className="patients-static-medical-cell">
+                  {(p.static_medical_values?.length ?? 0) > 0 ? (
+                    <button className="link-btn" onClick={() => toggleMedical(p.id)}>
+                      {medicalSummary(p)} {expandedMedical === p.id ? '▲' : '▼'}
+                    </button>
+                  ) : (
+                    '–'
+                  )}
+                </td>
                 <td>
                   <>
                     {p.open_episode_count > 0 && (
@@ -93,7 +114,7 @@ export default function PatientsTable({
               </tr>
               {expandedContacts === p.id && (
                 <tr className="contact-row">
-                  <td colSpan={11}>
+                  <td colSpan={12}>
                     <div className="contact-section">
                       {loadingDetails[p.id] ? (
                         <p className="contact-empty">Loading contact information...</p>
@@ -119,9 +140,37 @@ export default function PatientsTable({
                   </td>
                 </tr>
               )}
+              {expandedMedical === p.id && (
+                <tr className="contact-row">
+                  <td colSpan={12}>
+                    <div className="contact-section">
+                      {p.static_medical_values?.length ? (
+                        <table className="contact-table">
+                          <thead>
+                            <tr>
+                              <th>Name</th>
+                              <th>Value</th>
+                            </tr>
+                          </thead>
+                          <tbody>
+                            {p.static_medical_values.map((entry, idx) => (
+                              <tr key={`${p.id}-mv-${idx}`}>
+                                <td>{entry.name}</td>
+                                <td>{entry.value || '–'}</td>
+                              </tr>
+                            ))}
+                          </tbody>
+                        </table>
+                      ) : (
+                        <p className="contact-empty">No medical values.</p>
+                      )}
+                    </div>
+                  </td>
+                </tr>
+              )}
               {expandedEpisodes === p.id && (
                 <tr className="contact-row">
-                  <td colSpan={11}>
+                  <td colSpan={12}>
                     <div className="contact-section">
                       {loadingDetails[p.id] ? (
                         <p className="contact-empty">Loading episodes...</p>

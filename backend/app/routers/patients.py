@@ -3,7 +3,18 @@ from sqlalchemy.orm import Session, joinedload, subqueryload
 
 from ..auth import get_current_user
 from ..database import get_db
-from ..models import Absence, Catalogue, ContactInfo, Diagnosis, Episode, MedicalValue, MedicalValueTemplate, Patient, User
+from ..features.medical_values import instantiate_templates_for_patient
+from ..models import (
+    Absence,
+    ContactInfo,
+    Diagnosis,
+    Episode,
+    MedicalValue,
+    MedicalValueGroup,
+    MedicalValueTemplate,
+    Patient,
+    User,
+)
 from ..schemas import PatientCreate, PatientListResponse, PatientResponse, PatientUpdate
 
 router = APIRouter(prefix="/patients", tags=["patients"])
@@ -18,6 +29,39 @@ def _episode_organ_ids(episode: Episode) -> list[int]:
     return []
 
 
+def _static_medical_values(patient: Patient) -> list[dict[str, str]]:
+    rows: list[MedicalValue] = []
+    for mv in patient.medical_values or []:
+        if bool(mv.is_donor_context):
+            continue
+        group_key = None
+        if mv.medical_value_group and mv.medical_value_group.medical_value_group_template:
+            group_key = mv.medical_value_group.medical_value_group_template.key
+        elif mv.medical_value_group_template:
+            group_key = mv.medical_value_group_template.key
+        elif mv.medical_value_template and mv.medical_value_template.medical_value_group_template:
+            group_key = mv.medical_value_template.medical_value_group_template.key
+
+        # Prefer semantic grouping; fall back to legacy STATIC context records.
+        if group_key != "STATIC_PATIENT":
+            if mv.organ_id is not None:
+                continue
+            if mv.context_key and mv.context_key != "STATIC":
+                continue
+        # Patients overview should show only static values marked as main.
+        if not bool(mv.medical_value_template and mv.medical_value_template.is_main):
+            continue
+        rows.append(mv)
+    rows.sort(key=lambda mv: ((mv.pos or 0), mv.id))
+    return [
+        {
+            "name": (mv.name or (mv.medical_value_template.name_default if mv.medical_value_template else "") or "Value"),
+            "value": mv.value or "–",
+        }
+        for mv in rows
+    ]
+
+
 @router.get("/", response_model=list[PatientListResponse])
 def list_patients(skip: int = 0, limit: int = 100, db: Session = Depends(get_db)):
     patients = (
@@ -25,9 +69,13 @@ def list_patients(skip: int = 0, limit: int = 100, db: Session = Depends(get_db)
         .options(
             joinedload(Patient.changed_by_user),
             joinedload(Patient.sex),
-            joinedload(Patient.blood_type),
             joinedload(Patient.resp_coord),
             subqueryload(Patient.contact_infos),
+            subqueryload(Patient.medical_values).joinedload(MedicalValue.medical_value_template).joinedload(MedicalValueTemplate.medical_value_group_template),
+            subqueryload(Patient.medical_values).joinedload(MedicalValue.medical_value_group_template),
+            subqueryload(Patient.medical_values)
+            .joinedload(MedicalValue.medical_value_group)
+            .joinedload(MedicalValueGroup.medical_value_group_template),
             subqueryload(Patient.episodes).joinedload(Episode.organ),
             subqueryload(Patient.episodes).subqueryload(Episode.organs),
             subqueryload(Patient.episodes).joinedload(Episode.status),
@@ -55,8 +103,6 @@ def list_patients(skip: int = 0, limit: int = 100, db: Session = Depends(get_db)
                 lang=p.lang,
                 sex_id=p.sex_id,
                 sex=p.sex,
-                blood_type_id=p.blood_type_id,
-                blood_type=p.blood_type,
                 resp_coord_id=p.resp_coord_id,
                 resp_coord=p.resp_coord,
                 translate=p.translate,
@@ -82,6 +128,7 @@ def list_patients(skip: int = 0, limit: int = 100, db: Session = Depends(get_db)
                     for ep in open_episodes
                     for organ_id in _episode_organ_ids(ep)
                 ],
+                static_medical_values=_static_medical_values(p),
             )
         )
     return result
@@ -94,7 +141,6 @@ def get_patient(patient_id: int, db: Session = Depends(get_db)):
         .options(
             joinedload(Patient.changed_by_user),
             joinedload(Patient.sex),
-            joinedload(Patient.blood_type),
             joinedload(Patient.resp_coord),
             subqueryload(Patient.contact_infos).joinedload(ContactInfo.type),
             subqueryload(Patient.contact_infos).joinedload(ContactInfo.changed_by_user),
@@ -102,8 +148,11 @@ def get_patient(patient_id: int, db: Session = Depends(get_db)):
             subqueryload(Patient.diagnoses).joinedload(Diagnosis.catalogue),
             subqueryload(Patient.diagnoses).joinedload(Diagnosis.changed_by_user),
             subqueryload(Patient.medical_values).joinedload(MedicalValue.medical_value_template).joinedload(MedicalValueTemplate.datatype),
-            subqueryload(Patient.medical_values).joinedload(MedicalValue.medical_value_template).joinedload(MedicalValueTemplate.medical_value_group),
-            subqueryload(Patient.medical_values).joinedload(MedicalValue.medical_value_group),
+            subqueryload(Patient.medical_values).joinedload(MedicalValue.medical_value_template).joinedload(MedicalValueTemplate.medical_value_group_template),
+            subqueryload(Patient.medical_values).joinedload(MedicalValue.medical_value_group_template),
+            subqueryload(Patient.medical_values)
+            .joinedload(MedicalValue.medical_value_group)
+            .joinedload(MedicalValueGroup.medical_value_group_template),
             subqueryload(Patient.medical_values).joinedload(MedicalValue.datatype),
             subqueryload(Patient.medical_values).joinedload(MedicalValue.changed_by_user),
             subqueryload(Patient.episodes).joinedload(Episode.organ),
@@ -129,6 +178,8 @@ def create_patient(
     db.add(patient)
     db.commit()
     db.refresh(patient)
+    instantiate_templates_for_patient(db, patient.id, include_donor_context=False, changed_by_id=current_user.id)
+    db.refresh(patient)
     return patient
 
 
@@ -151,7 +202,6 @@ def update_patient(
         .options(
             joinedload(Patient.changed_by_user),
             joinedload(Patient.sex),
-            joinedload(Patient.blood_type),
             joinedload(Patient.resp_coord),
             subqueryload(Patient.contact_infos).joinedload(ContactInfo.type),
             subqueryload(Patient.contact_infos).joinedload(ContactInfo.changed_by_user),
@@ -159,8 +209,11 @@ def update_patient(
             subqueryload(Patient.diagnoses).joinedload(Diagnosis.catalogue),
             subqueryload(Patient.diagnoses).joinedload(Diagnosis.changed_by_user),
             subqueryload(Patient.medical_values).joinedload(MedicalValue.medical_value_template).joinedload(MedicalValueTemplate.datatype),
-            subqueryload(Patient.medical_values).joinedload(MedicalValue.medical_value_template).joinedload(MedicalValueTemplate.medical_value_group),
-            subqueryload(Patient.medical_values).joinedload(MedicalValue.medical_value_group),
+            subqueryload(Patient.medical_values).joinedload(MedicalValue.medical_value_template).joinedload(MedicalValueTemplate.medical_value_group_template),
+            subqueryload(Patient.medical_values).joinedload(MedicalValue.medical_value_group_template),
+            subqueryload(Patient.medical_values)
+            .joinedload(MedicalValue.medical_value_group)
+            .joinedload(MedicalValueGroup.medical_value_group_template),
             subqueryload(Patient.medical_values).joinedload(MedicalValue.datatype),
             subqueryload(Patient.medical_values).joinedload(MedicalValue.changed_by_user),
             subqueryload(Patient.episodes).joinedload(Episode.organ),

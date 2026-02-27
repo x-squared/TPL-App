@@ -1,5 +1,16 @@
-export { getToken, setToken, clearToken, authApi, codesApi, medicalValueTemplatesApi, medicalValueGroupsApi, usersApi } from './core';
-export type { AppUser, Code, HealthInfo, MedicalValueTemplate, MedicalValueGroup, MedicalValueGroupUpdate } from './core';
+export { getToken, setToken, clearToken, authApi, codesApi, medicalValueTemplatesApi, medicalValueGroupsApi, usersApi, adminAccessApi } from './core';
+export type {
+  AppUser,
+  AccessControlMatrix,
+  AccessPermission,
+  Code,
+  HealthInfo,
+  DatatypeDefinition,
+  MedicalValueGroupInstance,
+  MedicalValueTemplate,
+  MedicalValueGroup,
+  MedicalValueGroupUpdate,
+} from './core';
 
 export { patientsApi } from './patients';
 export type {
@@ -64,7 +75,7 @@ export type {
   E2ETestRunResponse,
 } from './e2eTests';
 
-import { authApi, codesApi, medicalValueTemplatesApi, medicalValueGroupsApi, usersApi } from './core';
+import { authApi, codesApi, medicalValueTemplatesApi, medicalValueGroupsApi, usersApi, adminAccessApi } from './core';
 import { patientsApi } from './patients';
 import { tasksApi } from './tasks';
 import { colloqiumsApi } from './colloqiums';
@@ -79,6 +90,7 @@ export const api = {
   ...medicalValueTemplatesApi,
   ...medicalValueGroupsApi,
   ...usersApi,
+  ...adminAccessApi,
   ...patientsApi,
   ...tasksApi,
   ...colloqiumsApi,

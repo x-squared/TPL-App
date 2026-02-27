@@ -6,7 +6,10 @@ export interface AppUser {
   ext_id: string;
   name: string;
   role_id: number | null;
+  role_ids: number[];
   role: Code | null;
+  roles: Code[];
+  permissions: string[];
 }
 
 export interface HealthInfo {
@@ -58,15 +61,14 @@ export interface MedicalValueTemplate {
   kis_key: string;
   datatype_id: number;
   datatype: Code | null;
+  datatype_def_id: number | null;
+  datatype_definition: DatatypeDefinition | null;
   name_default: string;
   pos: number;
-  use_liver: boolean;
-  use_kidney: boolean;
-  use_heart: boolean;
-  use_lung: boolean;
-  use_donor: boolean;
+  is_main: boolean;
   medical_value_group_id: number | null;
-  medical_value_group: MedicalValueGroup | null;
+  medical_value_group_template: MedicalValueGroup | null;
+  context_templates: MedicalValueTemplateContextTemplate[];
 }
 
 export interface MedicalValueGroup {
@@ -75,12 +77,66 @@ export interface MedicalValueGroup {
   name_default: string;
   pos: number;
   renew_date: string | null;
+  context_templates: MedicalValueGroupContextTemplate[];
+}
+
+export interface MedicalValueGroupInstance {
+  id: number;
+  patient_id: number;
+  medical_value_group_id: number;
+  medical_value_group_template: MedicalValueGroup | null;
+  context_key: string;
+  organ_id: number | null;
+  is_donor_context: boolean;
+  renew_date: string | null;
 }
 
 export interface MedicalValueGroupUpdate {
   name_default?: string;
   pos?: number;
   renew_date?: string | null;
+}
+
+export interface MedicalValueGroupContextTemplate {
+  id: number;
+  medical_value_group_id: number;
+  context_kind: 'STATIC' | 'ORGAN' | 'DONOR' | string;
+  organ_id: number | null;
+  organ: Code | null;
+}
+
+export interface MedicalValueTemplateContextTemplate {
+  id: number;
+  medical_value_template_id: number;
+  context_kind: 'STATIC' | 'ORGAN' | 'DONOR' | string;
+  organ_id: number | null;
+  organ: Code | null;
+}
+
+export interface DatatypeDefinition {
+  id: number;
+  code_id: number;
+  code: Code | null;
+  primitive_kind: string;
+  unit: string | null;
+  format_pattern: string | null;
+  validation_regex: string | null;
+  min_value: string | null;
+  max_value: string | null;
+  precision: number | null;
+  catalogue_type: string | null;
+}
+
+export interface AccessPermission {
+  id: number;
+  key: string;
+  name_default: string;
+}
+
+export interface AccessControlMatrix {
+  roles: Code[];
+  permissions: AccessPermission[];
+  role_permissions: Record<string, string[]>;
 }
 
 export const authApi = {
@@ -117,4 +173,13 @@ export const medicalValueGroupsApi = {
 export const usersApi = {
   listUsers: (roleKey?: string) =>
     request<AppUser[]>(`/users/${roleKey ? `?role_key=${encodeURIComponent(roleKey)}` : ''}`),
+};
+
+export const adminAccessApi = {
+  getAccessControlMatrix: () => request<AccessControlMatrix>('/admin/access/matrix'),
+  updateRolePermissions: (roleKey: string, permissionKeys: string[]) =>
+    request<AccessControlMatrix>(`/admin/access/roles/${encodeURIComponent(roleKey)}`, {
+      method: 'PUT',
+      body: JSON.stringify({ permission_keys: permissionKeys }),
+    }),
 };

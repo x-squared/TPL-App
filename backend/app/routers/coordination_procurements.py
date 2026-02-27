@@ -1,7 +1,7 @@
 from fastapi import APIRouter, Depends, HTTPException
 from sqlalchemy.orm import Session, joinedload
 
-from ..auth import get_current_user
+from ..auth import require_permission
 from ..database import get_db
 from ..models import Coordination, CoordinationProcurement, User
 from ..schemas import (
@@ -24,7 +24,11 @@ def _query_with_joins(db: Session):
 
 
 @router.get("/", response_model=CoordinationProcurementResponse)
-def get_coordination_procurement(coordination_id: int, db: Session = Depends(get_db)):
+def get_coordination_procurement(
+    coordination_id: int,
+    db: Session = Depends(get_db),
+    _: User = Depends(require_permission("view.donations")),
+):
     _ensure_coordination_exists(coordination_id, db)
     item = (
         _query_with_joins(db)
@@ -41,7 +45,7 @@ def upsert_coordination_procurement(
     coordination_id: int,
     payload: CoordinationProcurementCreate,
     db: Session = Depends(get_db),
-    current_user: User = Depends(get_current_user),
+    current_user: User = Depends(require_permission("edit.donations")),
 ):
     _ensure_coordination_exists(coordination_id, db)
     item = db.query(CoordinationProcurement).filter(CoordinationProcurement.coordination_id == coordination_id).first()
@@ -69,7 +73,7 @@ def update_coordination_procurement(
     coordination_id: int,
     payload: CoordinationProcurementUpdate,
     db: Session = Depends(get_db),
-    current_user: User = Depends(get_current_user),
+    current_user: User = Depends(require_permission("edit.donations")),
 ):
     _ensure_coordination_exists(coordination_id, db)
     item = db.query(CoordinationProcurement).filter(CoordinationProcurement.coordination_id == coordination_id).first()
@@ -92,7 +96,7 @@ def update_coordination_procurement(
 def delete_coordination_procurement(
     coordination_id: int,
     db: Session = Depends(get_db),
-    current_user: User = Depends(get_current_user),
+    current_user: User = Depends(require_permission("edit.donations")),
 ):
     _ensure_coordination_exists(coordination_id, db)
     item = db.query(CoordinationProcurement).filter(CoordinationProcurement.coordination_id == coordination_id).first()

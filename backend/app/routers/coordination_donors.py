@@ -1,7 +1,7 @@
 from fastapi import APIRouter, Depends, HTTPException
 from sqlalchemy.orm import Session, joinedload
 
-from ..auth import get_current_user
+from ..auth import require_permission
 from ..database import get_db
 from ..models import Catalogue, Code, Coordination, CoordinationDonor, User
 from ..schemas import CoordinationDonorCreate, CoordinationDonorResponse, CoordinationDonorUpdate
@@ -56,7 +56,11 @@ def _validate_payload(
 
 
 @router.get("/", response_model=CoordinationDonorResponse)
-def get_coordination_donor(coordination_id: int, db: Session = Depends(get_db)):
+def get_coordination_donor(
+    coordination_id: int,
+    db: Session = Depends(get_db),
+    _: User = Depends(require_permission("view.donations")),
+):
     _ensure_coordination_exists(coordination_id, db)
     item = (
         _query_with_joins(db)
@@ -73,7 +77,7 @@ def upsert_coordination_donor(
     coordination_id: int,
     payload: CoordinationDonorCreate,
     db: Session = Depends(get_db),
-    current_user: User = Depends(get_current_user),
+    current_user: User = Depends(require_permission("edit.donations")),
 ):
     _ensure_coordination_exists(coordination_id, db)
     _validate_payload(
@@ -108,7 +112,7 @@ def update_coordination_donor(
     coordination_id: int,
     payload: CoordinationDonorUpdate,
     db: Session = Depends(get_db),
-    current_user: User = Depends(get_current_user),
+    current_user: User = Depends(require_permission("edit.donations")),
 ):
     _ensure_coordination_exists(coordination_id, db)
     item = db.query(CoordinationDonor).filter(CoordinationDonor.coordination_id == coordination_id).first()
@@ -138,7 +142,7 @@ def update_coordination_donor(
 def delete_coordination_donor(
     coordination_id: int,
     db: Session = Depends(get_db),
-    current_user: User = Depends(get_current_user),
+    current_user: User = Depends(require_permission("edit.donations")),
 ):
     _ensure_coordination_exists(coordination_id, db)
     item = db.query(CoordinationDonor).filter(CoordinationDonor.coordination_id == coordination_id).first()

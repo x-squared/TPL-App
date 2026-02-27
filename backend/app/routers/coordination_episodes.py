@@ -2,7 +2,7 @@ from fastapi import APIRouter, Depends, HTTPException
 from sqlalchemy.exc import IntegrityError
 from sqlalchemy.orm import Session, joinedload
 
-from ..auth import get_current_user
+from ..auth import require_permission
 from ..database import get_db
 from ..models import Catalogue, Code, Coordination, CoordinationEpisode, Episode, User
 from ..schemas import (
@@ -67,7 +67,11 @@ def _validate_payload(
 
 
 @router.get("/", response_model=list[CoordinationEpisodeResponse])
-def list_coordination_episodes(coordination_id: int, db: Session = Depends(get_db)):
+def list_coordination_episodes(
+    coordination_id: int,
+    db: Session = Depends(get_db),
+    _: User = Depends(require_permission("view.donations")),
+):
     _ensure_coordination_exists(coordination_id, db)
     return (
         _query_with_joins(db)
@@ -81,7 +85,7 @@ def create_coordination_episode(
     coordination_id: int,
     payload: CoordinationEpisodeCreate,
     db: Session = Depends(get_db),
-    current_user: User = Depends(get_current_user),
+    current_user: User = Depends(require_permission("edit.donations")),
 ):
     _ensure_coordination_exists(coordination_id, db)
     _validate_payload(
@@ -116,7 +120,7 @@ def update_coordination_episode(
     coordination_episode_id: int,
     payload: CoordinationEpisodeUpdate,
     db: Session = Depends(get_db),
-    current_user: User = Depends(get_current_user),
+    current_user: User = Depends(require_permission("edit.donations")),
 ):
     _ensure_coordination_exists(coordination_id, db)
     item = (
@@ -157,7 +161,7 @@ def delete_coordination_episode(
     coordination_id: int,
     coordination_episode_id: int,
     db: Session = Depends(get_db),
-    current_user: User = Depends(get_current_user),
+    current_user: User = Depends(require_permission("edit.donations")),
 ):
     _ensure_coordination_exists(coordination_id, db)
     item = (

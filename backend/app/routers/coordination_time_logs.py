@@ -3,7 +3,7 @@ from datetime import datetime
 from fastapi import APIRouter, Depends, HTTPException
 from sqlalchemy.orm import Session, joinedload
 
-from ..auth import get_current_user
+from ..auth import require_permission
 from ..database import get_db
 from ..models import Coordination, CoordinationTimeLog, User
 from ..schemas import (
@@ -71,7 +71,11 @@ def _ensure_no_overlap(
 
 
 @router.get("/", response_model=list[CoordinationTimeLogResponse])
-def list_coordination_time_logs(coordination_id: int, db: Session = Depends(get_db)):
+def list_coordination_time_logs(
+    coordination_id: int,
+    db: Session = Depends(get_db),
+    _: User = Depends(require_permission("view.donations")),
+):
     _ensure_coordination_exists(coordination_id, db)
     return (
         _query_with_joins(db)
@@ -85,7 +89,7 @@ def create_coordination_time_log(
     coordination_id: int,
     payload: CoordinationTimeLogCreate,
     db: Session = Depends(get_db),
-    current_user: User = Depends(get_current_user),
+    current_user: User = Depends(require_permission("edit.donations")),
 ):
     _ensure_coordination_exists(coordination_id, db)
     _ensure_user_exists(payload.user_id, db)
@@ -116,7 +120,7 @@ def update_coordination_time_log(
     time_log_id: int,
     payload: CoordinationTimeLogUpdate,
     db: Session = Depends(get_db),
-    current_user: User = Depends(get_current_user),
+    current_user: User = Depends(require_permission("edit.donations")),
 ):
     _ensure_coordination_exists(coordination_id, db)
     item = (
@@ -157,7 +161,7 @@ def delete_coordination_time_log(
     coordination_id: int,
     time_log_id: int,
     db: Session = Depends(get_db),
-    current_user: User = Depends(get_current_user),
+    current_user: User = Depends(require_permission("edit.donations")),
 ):
     _ensure_coordination_exists(coordination_id, db)
     item = (

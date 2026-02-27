@@ -9,6 +9,7 @@ import {
 } from './api';
 import './App.css';
 import './styles/TableStyles.css';
+import AdminView from './views/AdminView';
 import ColloquiumDetailView from './views/ColloquiumDetailView';
 import ColloquiumsView from './views/ColloquiumsView';
 import CoordinationDetailView from './views/CoordinationDetailView';
@@ -21,7 +22,7 @@ import PatientsView from './views/PatientsView';
 import ReportsView from './views/ReportsView';
 import type { PatientDetailTab } from './views/patient-detail/PatientDetailTabs';
 
-type Page = 'my-work' | 'patients' | 'donations' | 'colloquiums' | 'coordinations' | 'reports' | 'e2e-tests';
+type Page = 'my-work' | 'patients' | 'donations' | 'colloquiums' | 'coordinations' | 'reports' | 'admin' | 'e2e-tests';
 
 function App() {
   const protocolParam = new URLSearchParams(window.location.search).get('protocol');
@@ -35,7 +36,7 @@ function App() {
 
   const [user, setUser] = useState<AppUser | null>(null);
   const [authLoading, setAuthLoading] = useState(true);
-  const [extId, setExtId] = useState('TKOORD');
+  const [extId, setExtId] = useState('TALL');
   const [loginError, setLoginError] = useState('');
 
   const [page, setPage] = useState<Page>('patients');
@@ -47,6 +48,13 @@ function App() {
   const [sidebarOpen, setSidebarOpen] = useState(true);
   const [userMenuOpen, setUserMenuOpen] = useState(false);
   const [devToolsEnabled, setDevToolsEnabled] = useState(false);
+  const hasPermission = (permissionKey: string) => !!user?.permissions?.includes(permissionKey);
+  const canViewPatients = hasPermission('view.patients');
+  const canViewDonations = hasPermission('view.donations');
+  const canViewColloquiums = hasPermission('view.colloquiums');
+  const canViewCoordinations = hasPermission('view.coordinations');
+  const canViewReports = hasPermission('view.reports');
+  const canViewAdmin = hasPermission('view.admin');
 
   useEffect(() => {
     const token = getToken();
@@ -74,6 +82,33 @@ function App() {
       setPage('patients');
     }
   }, [devToolsEnabled, page]);
+
+  useEffect(() => {
+    const pagePermissions: Partial<Record<Page, boolean>> = {
+      patients: canViewPatients,
+      donations: canViewDonations,
+      colloquiums: canViewColloquiums,
+      coordinations: canViewCoordinations,
+      reports: canViewReports,
+      admin: canViewAdmin,
+    };
+    const pageAllowed = pagePermissions[page];
+    if (typeof pageAllowed === 'boolean' && !pageAllowed) {
+      if (canViewPatients) {
+        setPage('patients');
+      } else {
+        setPage('my-work');
+      }
+    }
+  }, [
+    canViewAdmin,
+    canViewColloquiums,
+    canViewCoordinations,
+    canViewDonations,
+    canViewPatients,
+    canViewReports,
+    page,
+  ]);
 
   const handleLogin = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -223,79 +258,113 @@ function App() {
             <span className="nav-icon">{'\u2606'}</span>
             {sidebarOpen && <span className="nav-label">My Work</span>}
           </button>
-          <button
-            className={`nav-item ${page === 'patients' ? 'active' : ''}`}
-            onClick={() => {
-              setPage('patients');
-              setSelectedPatientId(null);
-              setSelectedColloqiumId(null);
-              setSelectedCoordinationId(null);
-              setPatientInitialTab(undefined);
-              setPatientInitialEpisodeId(null);
-            }}
-            title="Recipients"
-          >
-            <span className="nav-icon">{'\u2695'}</span>
-            {sidebarOpen && <span className="nav-label">Recipients</span>}
-          </button>
-          <button
-            className={`nav-item ${page === 'donations' ? 'active' : ''}`}
-            onClick={() => {
-              setPage('donations');
-              setSelectedPatientId(null);
-              setSelectedColloqiumId(null);
-              setSelectedCoordinationId(null);
-              setPatientInitialTab(undefined);
-              setPatientInitialEpisodeId(null);
-            }}
-            title="Donations"
-          >
-            <span className="nav-icon">{'\u25C8'}</span>
-            {sidebarOpen && <span className="nav-label">Donations</span>}
-          </button>
-          <button
-            className={`nav-item ${page === 'colloquiums' ? 'active' : ''}`}
-            onClick={() => {
-              setPage('colloquiums');
-              setSelectedPatientId(null);
-              setSelectedCoordinationId(null);
-              setPatientInitialTab(undefined);
-              setPatientInitialEpisodeId(null);
-            }}
-            title="Colloquiums"
-          >
-            <span className="nav-icon">{'\u2263'}</span>
-            {sidebarOpen && <span className="nav-label">Colloquiums</span>}
-          </button>
-          <button
-            className={`nav-item ${page === 'coordinations' ? 'active' : ''}`}
-            onClick={() => {
-              setPage('coordinations');
-              setSelectedPatientId(null);
-              setSelectedColloqiumId(null);
-              setPatientInitialTab(undefined);
-              setPatientInitialEpisodeId(null);
-            }}
-            title="Coordinations"
-          >
-            <span className="nav-icon">{'\u23F1'}</span>
-            {sidebarOpen && <span className="nav-label">Coordinations</span>}
-          </button>
-          <button
-            className={`nav-item ${page === 'reports' ? 'active' : ''}`}
-            onClick={() => {
-              setPage('reports');
-              setSelectedPatientId(null);
-              setSelectedColloqiumId(null);
-              setSelectedCoordinationId(null);
-              setPatientInitialTab(undefined);
-              setPatientInitialEpisodeId(null);
-            }}
-            title="Reports"
-          >
-            <span className="nav-icon">{'\u25A4'}</span>
-            {sidebarOpen && <span className="nav-label">Reports</span>}
-          </button>
+          {canViewPatients && (
+            <button
+              className={`nav-item ${page === 'patients' ? 'active' : ''}`}
+              onClick={() => {
+                setPage('patients');
+                setSelectedPatientId(null);
+                setSelectedColloqiumId(null);
+                setSelectedCoordinationId(null);
+                setPatientInitialTab(undefined);
+                setPatientInitialEpisodeId(null);
+              }}
+              title="Recipients"
+            >
+              <span className="nav-icon">{'\u2695'}</span>
+              {sidebarOpen && <span className="nav-label">Recipients</span>}
+            </button>
+          )}
+          {canViewDonations && (
+            <button
+              className={`nav-item ${page === 'donations' ? 'active' : ''}`}
+              onClick={() => {
+                setPage('donations');
+                setSelectedPatientId(null);
+                setSelectedColloqiumId(null);
+                setSelectedCoordinationId(null);
+                setPatientInitialTab(undefined);
+                setPatientInitialEpisodeId(null);
+              }}
+              title="Donations"
+            >
+              <span className="nav-icon">{'\u25C8'}</span>
+              {sidebarOpen && <span className="nav-label">Donations</span>}
+            </button>
+          )}
+          {canViewColloquiums && (
+            <button
+              className={`nav-item ${page === 'colloquiums' ? 'active' : ''}`}
+              onClick={() => {
+                setPage('colloquiums');
+                setSelectedPatientId(null);
+                setSelectedCoordinationId(null);
+                setPatientInitialTab(undefined);
+                setPatientInitialEpisodeId(null);
+              }}
+              title="Colloquiums"
+            >
+              <span className="nav-icon">{'\u2263'}</span>
+              {sidebarOpen && <span className="nav-label">Colloquiums</span>}
+            </button>
+          )}
+          {canViewCoordinations && (
+            <button
+              className={`nav-item ${page === 'coordinations' ? 'active' : ''}`}
+              onClick={() => {
+                setPage('coordinations');
+                setSelectedPatientId(null);
+                setSelectedColloqiumId(null);
+                setPatientInitialTab(undefined);
+                setPatientInitialEpisodeId(null);
+              }}
+              title="Coordinations"
+            >
+              <span className="nav-icon">{'\u23F1'}</span>
+              {sidebarOpen && <span className="nav-label">Coordinations</span>}
+            </button>
+          )}
+          {canViewReports && (
+            <button
+              className={`nav-item ${page === 'reports' ? 'active' : ''}`}
+              onClick={() => {
+                setPage('reports');
+                setSelectedPatientId(null);
+                setSelectedColloqiumId(null);
+                setSelectedCoordinationId(null);
+                setPatientInitialTab(undefined);
+                setPatientInitialEpisodeId(null);
+              }}
+              title="Reports"
+            >
+              <span className="nav-icon">{'\u25A4'}</span>
+              {sidebarOpen && <span className="nav-label">Reports</span>}
+            </button>
+          )}
+          {canViewAdmin && (
+            <>
+              <div className="nav-divider-dev" aria-hidden="true">
+                <span className="nav-divider-line" />
+                {sidebarOpen && <span className="nav-divider-label">ADMIN</span>}
+                <span className="nav-divider-line" />
+              </div>
+              <button
+                className={`nav-item ${page === 'admin' ? 'active' : ''}`}
+                onClick={() => {
+                  setPage('admin');
+                  setSelectedPatientId(null);
+                  setSelectedColloqiumId(null);
+                  setSelectedCoordinationId(null);
+                  setPatientInitialTab(undefined);
+                  setPatientInitialEpisodeId(null);
+                }}
+                title="Admin"
+              >
+                <span className="nav-icon">{'\u2699'}</span>
+                {sidebarOpen && <span className="nav-label">Admin</span>}
+              </button>
+            </>
+          )}
           {devToolsEnabled && (
             <>
               <div className="nav-divider-dev" aria-hidden="true">
@@ -351,7 +420,7 @@ function App() {
         {page === 'my-work' && (
           <MyWorkView onOpenFavorite={openFavorite} />
         )}
-        {page === 'patients' && !selectedPatientId && (
+        {page === 'patients' && canViewPatients && !selectedPatientId && (
           <PatientsView
             onSelectPatient={(id) => {
               setPatientInitialTab(undefined);
@@ -360,7 +429,7 @@ function App() {
             }}
           />
         )}
-        {page === 'patients' && selectedPatientId && (
+        {page === 'patients' && canViewPatients && selectedPatientId && (
           <PatientDetailView
             patientId={selectedPatientId}
             initialTab={patientInitialTab}
@@ -380,11 +449,11 @@ function App() {
             }}
           />
         )}
-        {page === 'donations' && <DonationsView />}
-        {page === 'colloquiums' && selectedColloqiumId === null && (
+        {page === 'donations' && canViewDonations && <DonationsView />}
+        {page === 'colloquiums' && canViewColloquiums && selectedColloqiumId === null && (
           <ColloquiumsView onOpenColloqium={(id) => setSelectedColloqiumId(id)} />
         )}
-        {page === 'colloquiums' && selectedColloqiumId !== null && (
+        {page === 'colloquiums' && canViewColloquiums && selectedColloqiumId !== null && (
           <ColloquiumDetailView
             colloqiumId={selectedColloqiumId}
             onOpenEpisode={(patientId, episodeId) => {
@@ -398,10 +467,10 @@ function App() {
             onBack={() => setSelectedColloqiumId(null)}
           />
         )}
-        {page === 'coordinations' && selectedCoordinationId === null && (
+        {page === 'coordinations' && canViewCoordinations && selectedCoordinationId === null && (
           <CoordinationsView onOpenCoordination={(id) => setSelectedCoordinationId(id)} />
         )}
-        {page === 'coordinations' && selectedCoordinationId !== null && (
+        {page === 'coordinations' && canViewCoordinations && selectedCoordinationId !== null && (
           <CoordinationDetailView
             coordinationId={selectedCoordinationId}
             onBack={() => setSelectedCoordinationId(null)}
@@ -414,7 +483,8 @@ function App() {
             }}
           />
         )}
-        {page === 'reports' && <ReportsView />}
+        {page === 'reports' && canViewReports && <ReportsView />}
+        {page === 'admin' && canViewAdmin && <AdminView />}
         {page === 'e2e-tests' && devToolsEnabled && <E2ETestsView />}
       </main>
     </div>
