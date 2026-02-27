@@ -77,14 +77,6 @@ class Patient(Base):
         comment="Sex reference (`CODE.SEX`).",
         info={"label": "Sex"},
     )
-    blood_type_id = Column(
-        "BLOOD_TYPE_ID",
-        Integer,
-        ForeignKey("CATALOGUE.ID"),
-        nullable=True,
-        comment="Blood type reference (`CATALOGUE.BLOOD_TYPE`).",
-        info={"label": "Blood Type"},
-    )
     resp_coord_id = Column(
         "RESP_COORD",
         Integer,
@@ -125,7 +117,6 @@ class Patient(Base):
 
     changed_by_user = relationship("User", foreign_keys=[changed_by_id])
     sex = relationship("Code", foreign_keys=[sex_id])
-    blood_type = relationship("Catalogue", foreign_keys=[blood_type_id])
     resp_coord = relationship("User", foreign_keys=[resp_coord_id])
     contact_infos = relationship("ContactInfo", back_populates="patient", cascade="all, delete-orphan")
     absences = relationship("Absence", back_populates="patient", cascade="all, delete-orphan")

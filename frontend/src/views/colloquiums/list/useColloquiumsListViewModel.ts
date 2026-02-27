@@ -1,5 +1,6 @@
 import { useEffect, useMemo, useState } from 'react';
 import { api, type Colloqium, type ColloqiumAgenda, type ColloqiumCreate, type ColloqiumType } from '../../../api';
+import { toUserErrorMessage } from '../../../api/error';
 import type { ColloquiumCreateFormState, ColloquiumsFilterState } from './listTypes';
 import { daysBetween, todayIso } from './listUtils';
 
@@ -21,7 +22,8 @@ export function useColloquiumsListViewModel() {
   const [form, setForm] = useState<ColloquiumCreateFormState>({
     colloqium_type_id: '',
     date: todayIso(),
-    participants: '',
+    participant_ids: [],
+    participants_people: [],
   });
 
   const fetchAll = async () => {
@@ -79,7 +81,7 @@ export function useColloquiumsListViewModel() {
     const payload: ColloqiumCreate = {
       colloqium_type_id: typeId,
       date: form.date,
-      participants: form.participants.trim(),
+      participant_ids: form.participant_ids,
     };
 
     setCreating(true);
@@ -87,9 +89,9 @@ export function useColloquiumsListViewModel() {
       await api.createColloqium(payload);
       await fetchAll();
       setAdding(false);
-      setForm({ colloqium_type_id: '', date: todayIso(), participants: '' });
+      setForm({ colloqium_type_id: '', date: todayIso(), participant_ids: [], participants_people: [] });
     } catch (err) {
-      setCreateError(err instanceof Error ? err.message : 'Could not create colloquium.');
+      setCreateError(toUserErrorMessage(err, 'Could not create colloquium.'));
     } finally {
       setCreating(false);
     }

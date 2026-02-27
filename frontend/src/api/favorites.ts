@@ -11,6 +11,7 @@ export interface Favorite {
   episode_id: number | null;
   colloqium_id: number | null;
   coordination_id: number | null;
+  sort_pos: number;
   created_at: string;
   updated_at: string | null;
 }
@@ -28,5 +29,10 @@ export const favoritesApi = {
   listFavorites: () => request<Favorite[]>('/favorites/'),
   createFavorite: (data: FavoriteCreate) =>
     request<Favorite>('/favorites/', { method: 'POST', body: JSON.stringify(data) }),
+  reorderFavorites: (favoriteIds: number[]) =>
+    request<Favorite[]>('/favorites/order', {
+      method: 'PATCH',
+      body: JSON.stringify({ favorite_ids: favoriteIds }),
+    }),
   deleteFavorite: (id: number) => request<void>(`/favorites/${id}`, { method: 'DELETE' }),
 };

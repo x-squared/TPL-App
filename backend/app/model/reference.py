@@ -1,4 +1,5 @@
 from sqlalchemy import Column, Integer, String, UniqueConstraint
+from sqlalchemy.orm import relationship
 
 from ..database import Base
 
@@ -60,6 +61,8 @@ class Code(Base):
         comment="Default display name for the code entry.",
         info={"label": "Name"},
     )
+
+    permissions = relationship("AccessPermission", secondary="ROLE_PERMISSION", back_populates="roles")
 
 
 class Catalogue(Base):

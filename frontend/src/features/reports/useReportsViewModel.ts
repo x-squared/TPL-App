@@ -7,6 +7,7 @@ import {
   type ReportOperatorKey,
   type ReportSourceOption,
 } from '../../api';
+import { toUserErrorMessage } from '../../api/error';
 
 interface FilterDraft extends ReportFilterInput {
   id: number;
@@ -51,7 +52,7 @@ export function useReportsViewModel() {
         setSelectedFields(firstSource.fields.slice(0, Math.min(5, firstSource.fields.length)).map((field) => field.key));
       }
     } catch (err) {
-      setError(err instanceof Error ? err.message : 'Failed to load report metadata');
+      setError(toUserErrorMessage(err, 'Failed to load report metadata'));
     } finally {
       setLoading(false);
     }
@@ -138,7 +139,7 @@ export function useReportsViewModel() {
       });
       setResult(response);
     } catch (err) {
-      setError(err instanceof Error ? err.message : 'Failed to execute report');
+      setError(toUserErrorMessage(err, 'Failed to execute report'));
     } finally {
       setRunning(false);
     }

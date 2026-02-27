@@ -99,3 +99,28 @@
   font-size: 0.8rem;
   line-height: 1.35;
 }
+
+.e2e-health-grid {
+  display: grid;
+  gap: 0.8rem;
+}
+
+.e2e-health-box {
+  border: 1px solid #222;
+  border-radius: 6px;
+  padding: 0.6rem 0.75rem 0.7rem;
+}
+
+.e2e-health-box legend {
+  padding: 0 0.35rem;
+  font-weight: 600;
+}
+
+.e2e-health-help {
+  text-align: left;
+}
+
+.e2e-health-actions {
+  display: flex;
+  justify-content: flex-end;
+}

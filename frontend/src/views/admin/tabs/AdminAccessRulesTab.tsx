@@ -1,4 +1,5 @@
 import type { AccessControlMatrix } from '../../../api';
+import ErrorBanner from '../../layout/ErrorBanner';
 
 interface AdminAccessRulesTabProps {
   matrix: AccessControlMatrix | null;
@@ -29,19 +30,20 @@ export default function AdminAccessRulesTab({
 }: AdminAccessRulesTabProps) {
   return (
     <section className="detail-section ui-panel-section">
-      <header>
+      <div className="detail-section-heading">
         <h2>Access Rules</h2>
-      </header>
+      </div>
       {loading && <p className="status">Loading access matrix...</p>}
-      {error && <p className="status status-error">{error}</p>}
+      {error && <ErrorBanner message={error} />}
       {status && <p className="status">{status}</p>}
 
       {!loading && matrix && (
-        <div className="table-wrap">
-          <div className="filters-row">
-            <label>
+        <div className="admin-people-card">
+          <div className="admin-access-controls">
+            <label className="admin-access-role-field">
               <span>Role</span>
               <select
+                className="detail-input"
                 value={selectedRoleKey}
                 onChange={(e) => onSelectRole(e.target.value)}
               >
@@ -54,6 +56,7 @@ export default function AdminAccessRulesTab({
             </label>
             <button
               type="button"
+              className="patients-save-btn"
               onClick={() => {
                 void onSave();
               }}
@@ -63,32 +66,38 @@ export default function AdminAccessRulesTab({
             </button>
           </div>
 
-          <table>
-            <thead>
-              <tr>
-                <th>Permission</th>
-                <th>Allowed</th>
-              </tr>
-            </thead>
-            <tbody>
-              {matrix.permissions.map((permission) => (
-                <tr key={permission.key}>
-                  <td>
-                    <strong>{permission.name_default}</strong>
-                    <br />
-                    <span className="status">{permission.key}</span>
-                  </td>
-                  <td>
-                    <input
-                      type="checkbox"
-                      checked={selectedPermissionKeys.includes(permission.key)}
-                      onChange={() => onTogglePermission(permission.key)}
-                    />
-                  </td>
+          <div className="patients-table-wrap ui-table-wrap">
+            <table className="data-table">
+              <thead>
+                <tr>
+                  <th>Permission</th>
+                  <th>Allowed</th>
                 </tr>
-              ))}
-            </tbody>
-          </table>
+              </thead>
+              <tbody>
+                {matrix.permissions.map((permission) => (
+                  <tr key={permission.key}>
+                    <td>
+                      <span className="admin-access-permission-line">
+                        <strong>{permission.name_default}</strong>
+                        <span className="admin-access-permission-key">{permission.key}</span>
+                      </span>
+                    </td>
+                    <td className="admin-access-allowed-cell">
+                      <label className="admin-access-checkbox-wrap">
+                        <input
+                          type="checkbox"
+                          checked={selectedPermissionKeys.includes(permission.key)}
+                          onChange={() => onTogglePermission(permission.key)}
+                          aria-label={`Toggle ${permission.key}`}
+                        />
+                      </label>
+                    </td>
+                  </tr>
+                ))}
+              </tbody>
+            </table>
+          </div>
         </div>
       )}
     </section>

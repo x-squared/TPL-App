@@ -1,10 +1,13 @@
 import { useEffect, useMemo, useRef, useState } from 'react';
 import { api, type Task, type TaskCreate, type TaskGroup, type TaskUpdate } from '../../api';
+import { ApiError } from '../../api/error';
+import ErrorBanner from '../layout/ErrorBanner';
 import '../layout/PanelLayout.css';
 import './TaskBoard.css';
 import TaskBoardFilters from './TaskBoardFilters';
 import TaskBoardTable from './TaskBoardTable';
 import { computeGroupState, isCancelledTask, isDoneTask, sortTasks } from './taskBoardUtils';
+import { buildDefaultTaskDescription, findContextManagedGroup } from './taskBoardContext';
 import type {
   TaskActionState,
   TaskBoardProps,
@@ -36,6 +39,15 @@ export default function TaskBoard({
   onAutoCreateSaved,
   onAutoCreateDiscarded,
 }: TaskBoardProps) {
+  const apiErrorHasDetail = (error: unknown, expected: string): boolean => {
+    if (!(error instanceof ApiError)) return false;
+    const detail = (error.detail as { detail?: unknown })?.detail;
+    if (typeof detail === 'string') return detail.includes(expected);
+    if (Array.isArray(detail)) {
+      return detail.some((item) => JSON.stringify(item).includes(expected));
+    }
+    return JSON.stringify(error.detail).includes(expected);
+  };
   const [effectiveColloqiumAgendaId, setEffectiveColloqiumAgendaId] = useState<number | null>(
     criteria.colloqiumAgendaId ?? null,
   );
@@ -65,11 +77,6 @@ export default function TaskBoard({
   useEffect(() => {
     setEffectiveColloqiumAgendaId(criteria.colloqiumAgendaId ?? null);
   }, [criteria.colloqiumAgendaId, criteria.episodeId, criteria.colloqiumId, criteria.patientId]);
-
-  const isGroupClosed = (taskGroup: TaskGroup): boolean => {
-    const state = computeGroupState(tasksByGroup[taskGroup.id] ?? []);
-    return state === 'COMPLETED' || state === 'DISCARDED';
-  };
 
   useEffect(() => {
     setPreferredTopGroupId(null);
@@ -266,31 +273,6 @@ export default function TaskBoard({
     }
   };
 
-  const findContextManagedGroup = (groups: TaskGroup[]): TaskGroup | null => {
-    if (!criteria.patientId) return null;
-    const contextEpisodeId = criteria.episodeId ?? null;
-    const contextColloqiumAgendaId = effectiveColloqiumAgendaId;
-    const contextPhaseId = contextEpisodeId != null ? (criteria.tplPhaseId ?? null) : null;
-    const matches = groups.filter((group) =>
-      group.patient_id === criteria.patientId
-      && group.task_group_template_id === null
-      && (group.episode_id ?? null) === contextEpisodeId
-      && (group.tpl_phase_id ?? null) === contextPhaseId
-      && !isGroupClosed(group));
-    const exact = matches.filter((group) => (group.colloqium_agenda_id ?? null) === contextColloqiumAgendaId);
-    const fallbackUnlinked = matches.filter((group) => group.colloqium_agenda_id == null);
-    const candidates = exact.length > 0 ? exact : fallbackUnlinked;
-    if (candidates.length === 0) return null;
-    return [...candidates].sort((a, b) => a.id - b.id)[0];
-  };
-
-  const buildDefaultTaskDescription = (taskGroup: TaskGroup) => {
-    const parts = [`New task for P#${taskGroup.patient_id}`];
-    if (taskGroup.episode_id != null) parts.push(`E#${taskGroup.episode_id}`);
-    if (taskGroup.tpl_phase?.name_default) parts.push(taskGroup.tpl_phase.name_default);
-    return parts.join(' · ');
-  };
-
   const createTaskFromPanelContext = async (source: 'manual' | 'auto' = 'manual') => {
     if (panelAddSaving) return;
     const contextPatientId = criteria.patientId;
@@ -317,7 +299,14 @@ export default function TaskBoard({
         colloqium_agenda_id: colloqiumAgendaId,
         tpl_phase_id: criteria.episodeId != null ? (criteria.tplPhaseId ?? null) : null,
       });
-      let taskGroup = findContextManagedGroup(taskGroups);
+      let taskGroup = findContextManagedGroup({
+        groups: taskGroups,
+        patientId: criteria.patientId,
+        episodeId: criteria.episodeId,
+        colloqiumAgendaId: effectiveColloqiumAgendaId,
+        tplPhaseId: criteria.tplPhaseId,
+        taskGroupsTasks: tasksByGroup,
+      });
       if (taskGroup && taskGroup.colloqium_agenda_id == null && effectiveColloqiumAgendaId != null) {
         try {
           taskGroup = await api.updateTaskGroup(taskGroup.id, { colloqium_agenda_id: effectiveColloqiumAgendaId });
@@ -333,12 +322,9 @@ export default function TaskBoard({
         try {
           taskGroup = await tryCreateContextGroup(initialAgendaId);
         } catch (err) {
-          const message = err instanceof Error ? err.message : '';
-          const isAgendaLinkError = message.includes('API 422')
-            && (
-              message.includes('colloqium_agenda_id references unknown COLLOQIUM_AGENDA')
-              || message.includes('episode_id must match COLLOQIUM_AGENDA.episode_id')
-            );
+          const isAgendaLinkError =
+            apiErrorHasDetail(err, 'colloqium_agenda_id references unknown COLLOQIUM_AGENDA')
+            || apiErrorHasDetail(err, 'episode_id must match COLLOQIUM_AGENDA.episode_id');
           if (!isAgendaLinkError) throw err;
           const resolvedAgendaId = await resolveCurrentColloqiumAgendaId();
           taskGroup = await tryCreateContextGroup(resolvedAgendaId);
@@ -355,20 +341,15 @@ export default function TaskBoard({
       try {
         createdTask = await api.createTask(createPayload(taskGroup.id, buildDefaultTaskDescription(taskGroup)));
       } catch (err) {
-        const message = err instanceof Error ? err.message : '';
-        const isClosedGroupError = message.includes('API 422')
-          && message.includes('completed/discarded task group');
+        const isClosedGroupError = apiErrorHasDetail(err, 'completed/discarded task group');
         if (!isClosedGroupError) throw err;
         let replacementGroup: TaskGroup;
         try {
           replacementGroup = await tryCreateContextGroup(effectiveColloqiumAgendaId);
         } catch (retryErr) {
-          const retryMessage = retryErr instanceof Error ? retryErr.message : '';
-          const isAgendaLinkError = retryMessage.includes('API 422')
-            && (
-              retryMessage.includes('colloqium_agenda_id references unknown COLLOQIUM_AGENDA')
-              || retryMessage.includes('episode_id must match COLLOQIUM_AGENDA.episode_id')
-            );
+          const isAgendaLinkError =
+            apiErrorHasDetail(retryErr, 'colloqium_agenda_id references unknown COLLOQIUM_AGENDA')
+            || apiErrorHasDetail(retryErr, 'episode_id must match COLLOQIUM_AGENDA.episode_id');
           if (!isAgendaLinkError) throw retryErr;
           const resolvedAgendaId = await resolveCurrentColloqiumAgendaId();
           replacementGroup = await tryCreateContextGroup(resolvedAgendaId);
@@ -538,7 +519,7 @@ export default function TaskBoard({
       )}
 
       {loading && <p className="status">Loading tasks...</p>}
-      {!loading && error && <p className="status">{error}</p>}
+      {!loading && error && <ErrorBanner message={error} />}
       {!loading && !error && (
         <TaskBoardTable
           rows={rows}

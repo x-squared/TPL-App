@@ -1,3 +1,4 @@
+import { useState } from 'react';
 import type { PatientMedicalValuesModel } from '../../patient-detail/PatientDetailTabs';
 import InlineDeleteActions from '../../layout/InlineDeleteActions';
 
@@ -37,12 +38,10 @@ export default function MedicalValuesSection({
   formatDate,
   catalogueCache,
   getCatalogueType,
-  mvAddMode,
   setMvAddMode,
   mvForm,
   setMvForm,
   datatypeCodes,
-  medicalValueGroups,
   handleAddMv,
   editingGroupRenewId,
   groupRenewDraft,
@@ -51,6 +50,40 @@ export default function MedicalValuesSection({
   cancelEditingGroupRenew,
   saveGroupRenewDate,
 }: MedicalValuesSectionProps) {
+  const [addingMvGroupId, setAddingMvGroupId] = useState<number | null>(null);
+
+  const openAddForGroup = (group: { id: number; key: string }, groupTemplateOptions: typeof mvTemplates) => {
+    const isUserCapturedGroup = group.key === 'USER_CAPTURED';
+    const hasTemplates = groupTemplateOptions.length > 0 || mvTemplates.length > 0;
+    if (!isUserCapturedGroup && hasTemplates) {
+      setMvAddMode('template');
+      setMvForm({
+        medical_value_template_id: null,
+        medical_value_group_id: group.id,
+        name: '',
+        value: '',
+        renew_date: '',
+      });
+    } else {
+      setMvAddMode('custom');
+      setMvForm({
+        medical_value_template_id: null,
+        datatype_id: null,
+        medical_value_group_id: group.id,
+        name: '',
+        value: '',
+        renew_date: '',
+      });
+    }
+    setAddingMvGroupId(group.id);
+    setAddingMv(true);
+  };
+
+  const closeAddForGroup = () => {
+    setAddingMv(false);
+    setAddingMvGroupId(null);
+  };
+
   return (
     <section className="detail-section medical-values-section">
       <div className="detail-section-heading">
@@ -58,136 +91,9 @@ export default function MedicalValuesSection({
         {!addingMv && (
           <>
             <button className="ci-add-btn" onClick={handleAddAllMv} disabled={mvSaving}>+ Add all</button>
-            <button className="ci-add-btn" onClick={() => setAddingMv(true)}>+ Add</button>
           </>
         )}
       </div>
-      {addingMv && (
-        <div className="ci-add-form">
-          <div className="mv-mode-toggle">
-            <button
-              className={`mv-mode-btn ${mvAddMode === 'template' ? 'active' : ''}`}
-              onClick={() => {
-                setMvAddMode('template');
-                const first = mvTemplates[0];
-                setMvForm({
-                  medical_value_template_id: first?.id ?? null,
-                  medical_value_group_id: first?.medical_value_group_id ?? null,
-                  name: first?.name_default ?? '',
-                  value: '',
-                  renew_date: '',
-                });
-              }}
-            >From Template</button>
-            <button
-              className={`mv-mode-btn ${mvAddMode === 'custom' ? 'active' : ''}`}
-              onClick={() => {
-                setMvAddMode('custom');
-                const userCapturedGroup = groupedMedicalValues.find((entry) => entry.group.key === 'USER_CAPTURED')?.group;
-                setMvForm({
-                  medical_value_template_id: null,
-                  datatype_id: datatypeCodes[0]?.id ?? null,
-                  medical_value_group_id: userCapturedGroup?.id ?? null,
-                  name: '',
-                  value: '',
-                  renew_date: '',
-                });
-              }}
-            >Custom</button>
-          </div>
-
-          {mvAddMode === 'template' ? (
-            <select
-              className="detail-input"
-              value={mvForm.medical_value_template_id ?? ''}
-              onChange={(e) => {
-                const tplId = Number(e.target.value);
-                const tpl = mvTemplates.find((t) => t.id === tplId);
-                    setMvForm((f) => ({
-                      ...f,
-                      medical_value_template_id: tplId,
-                      medical_value_group_id: tpl?.medical_value_group_id ?? null,
-                      name: tpl?.name_default ?? '',
-                    }));
-              }}
-            >
-              {mvTemplates.map((t) => (
-                <option key={t.id} value={t.id}>{t.name_default}</option>
-              ))}
-            </select>
-          ) : (
-            <>
-              <select
-                className="detail-input"
-                value={mvForm.datatype_id ?? ''}
-                onChange={(e) => setMvForm((f) => ({ ...f, datatype_id: Number(e.target.value) }))}
-              >
-                <option value="" disabled>Datatype...</option>
-                {datatypeCodes.map((c) => (
-                  <option key={c.id} value={c.id}>{c.name_default}</option>
-                ))}
-              </select>
-              <input
-                className="detail-input"
-                placeholder="Name"
-                value={mvForm.name}
-                onChange={(e) => setMvForm((f) => ({ ...f, name: e.target.value }))}
-              />
-            </>
-          )}
-
-          <select
-            className="detail-input"
-            value={mvForm.medical_value_group_id ?? ''}
-            onChange={(e) => setMvForm((f) => ({ ...f, medical_value_group_id: e.target.value ? Number(e.target.value) : null }))}
-          >
-            <option value="">Group...</option>
-            {medicalValueGroups
-              .slice()
-              .sort((a, b) => (a.pos ?? 0) - (b.pos ?? 0) || a.name_default.localeCompare(b.name_default))
-              .map((group) => (
-                <option key={group.id} value={group.id}>
-                  {group.name_default}
-                </option>
-              ))}
-          </select>
-
-          {renderValueInput(
-            mvForm.value ?? '',
-            mvAddMode === 'template'
-              ? resolveDt(mvForm.medical_value_template_id)
-              : resolveDt(null, mvForm.datatype_id),
-            (v: string) => setMvForm((f) => ({ ...f, value: v })),
-            'detail-input',
-          )}
-          <input
-            className="detail-input"
-            type="date"
-            placeholder="Renew Date"
-            value={mvForm.renew_date ?? ''}
-            onChange={(e) => setMvForm((f) => ({ ...f, renew_date: e.target.value || null }))}
-          />
-          <div className="ci-add-actions">
-            <button
-              className="save-btn"
-              onClick={handleAddMv}
-              disabled={
-                mvSaving ||
-                (mvAddMode === 'template'
-                  ? !mvForm.medical_value_template_id
-                  : (!mvForm.datatype_id || !mvForm.name?.trim())) ||
-                !validateValue(
-                  mvForm.value ?? '',
-                  mvAddMode === 'template' ? resolveDt(mvForm.medical_value_template_id) : resolveDt(null, mvForm.datatype_id)
-                )
-              }
-            >
-              {mvSaving ? 'Saving...' : 'Save'}
-            </button>
-            <button className="cancel-btn" onClick={() => setAddingMv(false)} disabled={mvSaving}>Cancel</button>
-          </div>
-        </div>
-      )}
       {groupedMedicalValues.length === 0 ? (
         <table className="detail-contact-table">
           <tbody>
@@ -197,6 +103,12 @@ export default function MedicalValuesSection({
       ) : (
         groupedMedicalValues.map(({ group, values }) => (
           <div key={group.id} className="mv-group-block">
+            {(() => {
+              const groupTemplates = mvTemplates.filter((template) => template.medical_value_group_id === group.id);
+              const templateOptions = groupTemplates.length > 0 ? groupTemplates : mvTemplates;
+              const effectiveAddMode = group.key === 'USER_CAPTURED' ? 'custom' : 'template';
+              return (
+                <>
             <div className="detail-section-heading mv-group-heading">
               <h3>{group.name_default || group.key}</h3>
               {editingGroupRenewId === group.id ? (
@@ -209,14 +121,105 @@ export default function MedicalValuesSection({
                   />
                   <button className="ci-save-inline" onClick={() => void saveGroupRenewDate(group.id)} title="Save renewal">✓</button>
                   <button className="ci-cancel-inline" onClick={cancelEditingGroupRenew} title="Cancel">✕</button>
+                  <button className="mv-group-add-inline" onClick={() => openAddForGroup(group, templateOptions)} title={`Add value to ${group.name_default || group.key}`}>+ Add</button>
                 </div>
               ) : (
                 <div className="mv-group-renew-read">
                   <span className="detail-label">Renewal: {formatDate(group.renew_date)}</span>
                   <button className="ci-edit-inline" onClick={() => startEditingGroupRenew(group)} title="Edit group renewal">✎</button>
+                  <button className="mv-group-add-inline" onClick={() => openAddForGroup(group, templateOptions)} title={`Add value to ${group.name_default || group.key}`}>+ Add</button>
                 </div>
               )}
             </div>
+            {addingMv && addingMvGroupId === group.id && (
+              <div className="ci-add-form mv-group-add-form">
+                {effectiveAddMode === 'template' ? (
+                  <select
+                    className="detail-input"
+                    value={mvForm.medical_value_template_id ?? ''}
+                    onChange={(e) => {
+                      const raw = e.target.value;
+                      const tplId = raw ? Number(raw) : null;
+                      const tpl = templateOptions.find((t) => t.id === tplId);
+                      setMvForm((f) => ({
+                        ...f,
+                        medical_value_template_id: tplId,
+                        medical_value_group_id: group.id,
+                        name: tpl?.name_default ?? f.name ?? '',
+                        value: '',
+                      }));
+                    }}
+                  >
+                    <option value="" disabled>Template...</option>
+                    {templateOptions.map((t) => (
+                      <option key={t.id} value={t.id}>{t.name_default}</option>
+                    ))}
+                  </select>
+                ) : (
+                  <>
+                    <select
+                      className="detail-input"
+                      value={mvForm.datatype_id ?? ''}
+                      onChange={(e) => setMvForm((f) => ({ ...f, datatype_id: Number(e.target.value) }))}
+                    >
+                      <option value="" disabled>Datatype...</option>
+                      {datatypeCodes.map((c) => (
+                        <option key={c.id} value={c.id}>{c.name_default}</option>
+                      ))}
+                    </select>
+                    <input
+                      className="detail-input"
+                      placeholder="Name"
+                      value={mvForm.name}
+                      onChange={(e) => setMvForm((f) => ({ ...f, name: e.target.value }))}
+                    />
+                  </>
+                )}
+                {effectiveAddMode === 'template' && !mvForm.medical_value_template_id ? (
+                  <input className="detail-input" value="" placeholder="Choose template first" disabled />
+                ) : (
+                  renderValueInput(
+                    mvForm.value ?? '',
+                    effectiveAddMode === 'template'
+                      ? resolveDt(mvForm.medical_value_template_id)
+                      : resolveDt(null, mvForm.datatype_id),
+                    (v: string) => setMvForm((f) => ({ ...f, value: v })),
+                    'detail-input',
+                  )
+                )}
+                <div className="mv-renew-capture-field">
+                  <span className="mv-renew-capture-label">Renewal</span>
+                  <input
+                    className="detail-input"
+                    type="date"
+                    value={mvForm.renew_date ?? ''}
+                    onChange={(e) => setMvForm((f) => ({ ...f, renew_date: e.target.value || null }))}
+                  />
+                </div>
+                <div className="ci-add-actions">
+                  <button
+                    className="save-btn"
+                    onClick={async () => {
+                      await handleAddMv();
+                      setAddingMvGroupId(null);
+                    }}
+                    disabled={
+                      mvSaving ||
+                      (effectiveAddMode === 'template'
+                        ? !mvForm.medical_value_template_id
+                        : (!mvForm.datatype_id || !mvForm.name?.trim())) ||
+                      !validateValue(
+                        mvForm.value ?? '',
+                        effectiveAddMode === 'template' ? resolveDt(mvForm.medical_value_template_id) : resolveDt(null, mvForm.datatype_id)
+                      )
+                    }
+                  >
+                    {mvSaving ? 'Saving...' : 'Save'}
+                  </button>
+                  <button className="cancel-btn" onClick={closeAddForGroup} disabled={mvSaving}>Cancel</button>
+                </div>
+              </div>
+            )}
             <table className="detail-contact-table">
               <thead>
                 <tr>
@@ -296,7 +299,12 @@ export default function MedicalValuesSection({
                         className={mvDragId === mv.id ? 'mv-dragging' : mvDragOverId === mv.id ? 'mv-drag-over' : ''}
                       >
                         <td className="mv-pos mv-drag-handle">{mv.pos || ''}</td>
-                        <td className="mv-name">{mv.name || mv.medical_value_template?.name_default || '–'}</td>
+                        <td className="mv-name">
+                          {mv.medical_value_template?.is_main ? (
+                            <span className="mv-main-badge" title="Primary value" aria-label="Primary value" />
+                          ) : null}
+                          {mv.name || mv.medical_value_template?.name_default || '–'}
+                        </td>
                         <td className="mv-value">{formatValue(mv.value, mv.datatype, catalogueCache[getCatalogueType(mv.datatype)])}</td>
                         <td className="mv-renew-date">{formatDate(mv.renew_date)}</td>
                         <td className="diag-date">{formatDate(mv.updated_at ?? mv.created_at)}</td>
@@ -324,6 +332,9 @@ export default function MedicalValuesSection({
                 )}
               </tbody>
             </table>
+                </>
+              );
+            })()}
           </div>
         ))
       )}

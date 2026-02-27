@@ -5,6 +5,7 @@ from datetime import date as dt_date, datetime
 from pydantic import BaseModel, ConfigDict
 
 from .clinical import EpisodeResponse
+from .person import PersonResponse
 from .reference import CodeResponse, UserResponse
 
 
@@ -12,6 +13,7 @@ class ColloqiumTypeBase(BaseModel):
     name: str
     organ_id: int
     participants: str = ""
+    participant_ids: list[int] = []
 
 
 class ColloqiumTypeCreate(ColloqiumTypeBase):
@@ -22,6 +24,7 @@ class ColloqiumTypeUpdate(BaseModel):
     name: str | None = None
     organ_id: int | None = None
     participants: str | None = None
+    participant_ids: list[int] | None = None
 
 
 class ColloqiumTypeResponse(ColloqiumTypeBase):
@@ -31,6 +34,7 @@ class ColloqiumTypeResponse(ColloqiumTypeBase):
     organ: CodeResponse | None = None
     changed_by_id: int | None = None
     changed_by_user: UserResponse | None = None
+    participants_people: list[PersonResponse] = []
     created_at: datetime
     updated_at: datetime | None = None
 
@@ -39,6 +43,7 @@ class ColloqiumBase(BaseModel):
     colloqium_type_id: int
     date: dt_date
     participants: str = ""
+    participant_ids: list[int] = []
 
 
 class ColloqiumCreate(ColloqiumBase):
@@ -49,6 +54,7 @@ class ColloqiumUpdate(BaseModel):
     colloqium_type_id: int | None = None
     date: dt_date | None = None
     participants: str | None = None
+    participant_ids: list[int] | None = None
 
 
 class ColloqiumResponse(ColloqiumBase):
@@ -58,6 +64,7 @@ class ColloqiumResponse(ColloqiumBase):
     colloqium_type: ColloqiumTypeResponse | None = None
     changed_by_id: int | None = None
     changed_by_user: UserResponse | None = None
+    participants_people: list[PersonResponse] = []
     created_at: datetime
     updated_at: datetime | None = None
 

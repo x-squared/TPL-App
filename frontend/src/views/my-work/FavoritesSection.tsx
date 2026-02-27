@@ -1,5 +1,5 @@
 import type { Favorite } from '../../api';
-import { useState } from 'react';
+import { useState, type Dispatch, type SetStateAction } from 'react';
 import InlineDeleteActions from '../layout/InlineDeleteActions';
 
 interface FavoritesSectionProps {
@@ -8,6 +8,11 @@ interface FavoritesSectionProps {
   episodeFavoriteNames: Record<number, string>;
   onOpenFavorite: (favorite: Favorite) => void;
   deletingFavoriteId: number | null;
+  draggingFavoriteId: number | null;
+  dragOverFavoriteId: number | null;
+  setDraggingFavoriteId: Dispatch<SetStateAction<number | null>>;
+  setDragOverFavoriteId: Dispatch<SetStateAction<number | null>>;
+  onDropFavorite: (id: number) => void;
   onDeleteFavorite: (id: number) => void;
 }
 
@@ -17,6 +22,11 @@ export default function FavoritesSection({
   episodeFavoriteNames,
   onOpenFavorite,
   deletingFavoriteId,
+  draggingFavoriteId,
+  dragOverFavoriteId,
+  setDraggingFavoriteId,
+  setDragOverFavoriteId,
+  onDropFavorite,
   onDeleteFavorite,
 }: FavoritesSectionProps) {
   const [confirmDeleteId, setConfirmDeleteId] = useState<number | null>(null);
@@ -42,7 +52,17 @@ export default function FavoritesSection({
             </tr>
           ) : (
             favorites.map((favorite) => (
-              <tr key={favorite.id} onDoubleClick={() => onOpenFavorite(favorite)}>
+              <tr
+                key={favorite.id}
+                draggable
+                onDragStart={() => setDraggingFavoriteId(favorite.id)}
+                onDragOver={(e) => { e.preventDefault(); setDragOverFavoriteId(favorite.id); }}
+                onDragLeave={() => setDragOverFavoriteId((prev) => (prev === favorite.id ? null : prev))}
+                onDrop={() => onDropFavorite(favorite.id)}
+                onDragEnd={() => { setDraggingFavoriteId(null); setDragOverFavoriteId(null); }}
+                onDoubleClick={() => onOpenFavorite(favorite)}
+                className={draggingFavoriteId === favorite.id ? 'favorite-dragging' : dragOverFavoriteId === favorite.id ? 'favorite-drag-over' : ''}
+              >
                 <td className="open-col">
                   <button
                     className="open-btn"

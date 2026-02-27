@@ -1,7 +1,15 @@
-from sqlalchemy import Column, ForeignKey, Integer, String
+from sqlalchemy import Column, ForeignKey, Integer, String, Table, UniqueConstraint
 from sqlalchemy.orm import relationship
 
 from ..database import Base
+
+user_role_table = Table(
+    "USER_ROLE",
+    Base.metadata,
+    Column("USER_ID", Integer, ForeignKey("USER.ID"), primary_key=True),
+    Column("ROLE_ID", Integer, ForeignKey("CODE.ID"), primary_key=True),
+    UniqueConstraint("USER_ID", "ROLE_ID"),
+)
 
 
 class User(Base):
@@ -42,5 +50,13 @@ class User(Base):
     )
 
     role = relationship("Code", foreign_keys=[role_id])
+    roles = relationship("Code", secondary=user_role_table)
     assigned_tasks = relationship("Task", foreign_keys="Task.assigned_to_id", back_populates="assigned_to")
     closed_tasks = relationship("Task", foreign_keys="Task.closed_by_id", back_populates="closed_by")
+
+    @property
+    def role_ids(self) -> list[int]:
+        ids = [role.id for role in (self.roles or []) if role and role.id is not None]
+        if self.role_id is not None and self.role_id not in ids:
+            ids.append(self.role_id)
+        return ids

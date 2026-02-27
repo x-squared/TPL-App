@@ -1,0 +1,120 @@
+# Database Manual
+
+Purpose: manage schema and data lifecycle explicitly during development and operations.
+
+The backend now separates:
+
+- schema management (DDL): `python -m app.db_schema`
+- data management (DML): `python -m app.db_data`
+- convenience orchestration: `python -m app.db_admin`
+
+Run commands from `backend/` with the venv activated.
+
+## Quick Examples
+
+```{bash}
+cd /Users/stephan/Workspace/TPL-App/backend
+source .venv/bin/activate
+```
+
+Recreate everything (drop/create schema + seed):
+
+```{bash}
+python -m app.db_admin --mode recreate --env DEV
+```
+
+Update schema only (keep data):
+
+```{bash}
+python -m app.db_schema --mode migrate --env DEV
+```
+
+Default refresh (migrate schema + clean data + seed):
+
+```{bash}
+python -m app.db_admin --mode refresh --env DEV
+```
+
+Clean data only:
+
+```{bash}
+python -m app.db_data --mode clean --env DEV
+```
+
+## `app.db_schema` (DDL only)
+
+```{bash}
+python -m app.db_schema --mode <recreate|migrate|verify> --env <DEV|TEST|PROD> [--db-url <URL>]
+```
+
+- `recreate`: drops all tables and creates schema from current model metadata.
+- `migrate`: creates missing schema objects from model metadata.
+- `verify`: reports schema drift (missing tables/columns), no writes.
+
+Use `verify` in CI or before release checks.
+
+## `app.db_data` (DML only)
+
+```{bash}
+python -m app.db_data --mode <clean|seed|refresh> --env <DEV|TEST|PROD> [--seed-profile <PROFILE>] [--db-url <URL>]
+```
+
+- `clean`: wipes row data, keeps schema.
+- `seed`: loads seed jobs resolved by env/profile.
+- `refresh`: `clean + seed`.
+
+### Seed profile resolution
+
+- no profile: resolved from env (`DEV`, `TEST`, `PROD`)
+- explicit profile examples:
+  - `CORE`
+  - `CORE_SAMPLE`
+  - `CORE_TEST`
+  - `NONE`
+
+Example:
+
+```{bash}
+python -m app.db_data --mode seed --env TEST --seed-profile CORE_TEST
+```
+
+## `app.db_admin` (wrapper)
+
+```{bash}
+python -m app.db_admin --mode <recreate|migrate|refresh|clean> --env <DEV|TEST|PROD> [--seed-profile <PROFILE>] [--db-url <URL>]
+```
+
+Mode behavior:
+
+- `recreate` = `db_schema recreate` + `db_data seed`
+- `migrate` = `db_schema migrate`
+- `refresh` = `db_schema migrate` + `db_data refresh` (default)
+- `clean` = `db_data clean`
+
+For `refresh`, if `migrate` cannot reconcile schema drift, the wrapper automatically falls back to `db_schema recreate` before data refresh.
+
+## Recommended Usage by Scenario
+
+Local development reset (most common):
+
+```{bash}
+python -m app.db_admin --mode refresh --env DEV
+```
+
+After model changes, keep existing data if possible:
+
+```{bash}
+python -m app.db_schema --mode migrate --env DEV
+```
+
+Production-like schema check in CI:
+
+```{bash}
+python -m app.db_schema --mode verify --env PROD
+```
+
+## Notes
+
+- If schema is older than current models, `db_data seed` may fail; run schema step first.
+- `--db-url` allows targeting a non-default database.
+- For SQLite, "clean" keeps the file and clears all table rows.

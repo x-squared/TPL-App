@@ -45,7 +45,24 @@ The server reads configuration from environment variables centralized in:
 - `TPL_DATABASE_URL`: database connection string (default: SQLite file in `database/`)
 - `TPL_CORS_ORIGINS`: comma-separated allowed browser origins
 - `TPL_SEED_PROFILE`: optional explicit seed profile override
-- `TPL_SEED_ON_STARTUP`: enable/disable startup seeding (`true`/`false`)
+
+### Support ticket mail configuration
+
+Support ticket mail destination is configured via JSON file (not env vars):
+
+- `backend/config/config`
+
+Expected shape:
+
+```json
+{
+  "support": {
+    "email": "support@tpl-app.local"
+  }
+}
+```
+
+This address is exposed to the frontend via `GET /api/support-ticket/config` and used by the "Open Ticket" action in error banners.
 
 Seed profile semantics and allowed values are documented in:
 
@@ -55,7 +72,6 @@ Seed profile semantics and allowed values are documented in:
 
 - Local development: `TPL_ENV=DEV`
 - Production-like run: `TPL_ENV=PROD`
-- Disable startup seeds: `TPL_SEED_ON_STARTUP=false`
 - Keep browser access default by including `http://localhost:5173` in `TPL_CORS_ORIGINS`
 
 ## 5) Start the backend server
@@ -88,14 +104,7 @@ export TPL_ENV=PROD
 uvicorn app.main:app --reload
 ```
 
-### C) Start server without startup seeding
-
-```{bash}
-export TPL_SEED_ON_STARTUP=false
-uvicorn app.main:app --reload
-```
-
-### D) Explicit profile override
+### C) Explicit profile override
 
 ```{bash}
 export TPL_ENV=DEV
@@ -103,7 +112,7 @@ export TPL_SEED_PROFILE=CORE_TEST
 uvicorn app.main:app --reload
 ```
 
-### E) Custom DB and CORS configuration
+### D) Custom DB and CORS configuration
 
 ```{bash}
 export TPL_DATABASE_URL=sqlite:///../database/tpl_app.db
@@ -123,9 +132,9 @@ If running with `--reload`, code changes trigger automatic restart.
 ## 8) Troubleshooting
 
 - **Port already in use**: stop the process using port `8000`, then restart.
-- **Unexpected seed data**: verify `TPL_ENV`, `TPL_SEED_PROFILE`, and `TPL_SEED_ON_STARTUP`.
-- **No seed changes visible**: restart the backend after changing seed files.
-- **Need to run seeds without restart**: use `python -m app.seed run ...` from `backend/`.
+- **Unexpected seed data**: verify `TPL_ENV` and `TPL_SEED_PROFILE`.
+- **No seed changes visible**: run `python -m app.seed run ...` (or `python -m app.db_admin --mode refresh ...`) after changing seed files.
+- **Need to run seeds manually**: use `python -m app.seed run ...` from `backend/`.
 - **Import/runtime errors after dependency changes**: re-run `pip install -r requirements.txt`.
 
 ## 9) Operational notes
@@ -136,7 +145,7 @@ If running with `--reload`, code changes trigger automatic restart.
   - creates datatype metadata table `MEDICAL_VALUE_DATATYPE`
   - adds context columns on `MEDICAL_VALUE` (`EPISODE_ID`, `ORGAN_ID`, `IS_DONOR_CONTEXT`, `CONTEXT_KEY`)
   - backfills patient `BLOOD_TYPE_ID` into static medical values and clears the patient column
-- Seeding runs during startup unless disabled.
+- Startup does not run seeding. Use DB/seed scripts explicitly when data refresh is required.
 
 For all seed design and profile details, always refer to:
 

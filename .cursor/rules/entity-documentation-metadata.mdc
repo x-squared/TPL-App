@@ -13,6 +13,13 @@ For every SQLAlchemy entity in `backend/app/model/**/*.py`:
   - a human-readable label in `Column.info["label"]`
   - a column comment in `Column.comment`
 
+## Template vs runtime entity naming
+
+- If an entity models a reusable definition/blueprint, its class name must end with `Template`.
+- If an entity models runtime/persisted instances of that blueprint, its class name must not use an `Instance` suffix.
+- Apply this consistently across model class names, imports, and ORM relationship targets.
+- When renaming model classes for this convention, also update related schemas/typing names so API contracts remain explicit and unambiguous.
+
 ## Column layout rule
 
 - Keep each `Column(...)` declaration in a two-part layout:

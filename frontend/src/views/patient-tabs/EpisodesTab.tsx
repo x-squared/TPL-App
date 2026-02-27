@@ -1,5 +1,7 @@
 import { useEffect, useMemo, useState } from 'react';
 import { api, type ColloqiumAgenda, type ColloqiumType } from '../../api';
+import { toUserErrorMessage } from '../../api/error';
+import ErrorBanner from '../layout/ErrorBanner';
 import { formatEpisodeFavoriteName, formatOrganNames } from '../layout/episodeDisplay';
 import FavoriteButton from '../layout/FavoriteButton';
 import { useFavoriteToggle } from '../layout/useFavoriteToggle';
@@ -122,7 +124,7 @@ export default function EpisodesTab(props: EpisodesTabProps) {
       await refreshPatient();
       setEditingDetailTab(null);
     } catch (err) {
-      setDetailSaveError(err instanceof Error ? err.message : 'Could not save episode details.');
+      setDetailSaveError(toUserErrorMessage(err, 'Could not save episode details.'));
     } finally {
       setDetailSaving(false);
     }
@@ -152,7 +154,7 @@ export default function EpisodesTab(props: EpisodesTabProps) {
       await refreshPatient();
       setEditingEpisodeMeta(false);
     } catch (err) {
-      setDetailSaveError(err instanceof Error ? err.message : 'Could not save episode details.');
+      setDetailSaveError(toUserErrorMessage(err, 'Could not save episode details.'));
     } finally {
       setDetailSaving(false);
     }
@@ -171,7 +173,7 @@ export default function EpisodesTab(props: EpisodesTabProps) {
       await api.addEpisodeOrgan(patient.id, selectedEpisode.id, payload);
       await refreshPatient();
     } catch (err) {
-      setDetailSaveError(err instanceof Error ? err.message : 'Could not add or reactivate organ.');
+      setDetailSaveError(toUserErrorMessage(err, 'Could not add or reactivate organ.'));
     } finally {
       setOrganActionLoading(false);
     }
@@ -193,7 +195,7 @@ export default function EpisodesTab(props: EpisodesTabProps) {
       await api.updateEpisodeOrgan(patient.id, selectedEpisode.id, episodeOrganId, payload);
       await refreshPatient();
     } catch (err) {
-      setDetailSaveError(err instanceof Error ? err.message : 'Could not update episode organ.');
+      setDetailSaveError(toUserErrorMessage(err, 'Could not update episode organ.'));
     } finally {
       setOrganActionLoading(false);
     }
@@ -260,7 +262,7 @@ export default function EpisodesTab(props: EpisodesTabProps) {
       await reloadEpisodeColloqiums(selectedEpisode.id);
       setAssignDialogOpen(false);
     } catch (err) {
-      setAssignError(err instanceof Error ? err.message : 'Could not assign episode to colloquium.');
+      setAssignError(toUserErrorMessage(err, 'Could not assign episode to colloquium.'));
     } finally {
       setAssigningColloqium(false);
     }
@@ -342,7 +344,7 @@ export default function EpisodesTab(props: EpisodesTabProps) {
             setDetailSaveError={setDetailSaveError}
           />
 
-          {detailSaveError && <p className="episode-detail-error">{detailSaveError}</p>}
+          <ErrorBanner message={detailSaveError} />
 
           {activeEpisodeTab === 'Evaluation' && (
             <EpisodeDetailGrid

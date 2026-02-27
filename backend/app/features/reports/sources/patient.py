@@ -16,7 +16,6 @@ def build_patient_source() -> SourceDef:
         FieldDef("ahv_nr", "AHV Nr.", "string", ("eq", "contains"), lambda row: row.ahv_nr),
         FieldDef("lang", "Language", "string", ("eq", "contains"), lambda row: row.lang),
         FieldDef("translate", "Translate", "boolean", ("eq",), lambda row: row.translate),
-        FieldDef("blood_type_name", "Blood Type", "string", ("eq", "contains"), lambda row: row.blood_type.name_default if row.blood_type else ""),
         FieldDef("resp_coord_name", "Responsible Coord.", "string", ("eq", "contains"), lambda row: row.resp_coord.name if row.resp_coord else ""),
         FieldDef("created_at", "Created At", "datetime", ("gte", "lte"), lambda row: row.created_at),
     )
@@ -48,7 +47,6 @@ def build_patient_source() -> SourceDef:
         return (
             db.query(Patient)
             .options(
-                joinedload(Patient.blood_type),
                 joinedload(Patient.resp_coord).joinedload(User.role),
             )
             .all()

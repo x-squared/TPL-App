@@ -1,31 +1,23 @@
-from fastapi import APIRouter, Depends, HTTPException
-from sqlalchemy import func as sa_func
-from sqlalchemy.orm import Session, joinedload
+from fastapi import APIRouter, Depends
+from sqlalchemy.orm import Session
 
 from ..auth import get_current_user
 from ..database import get_db
-from ..models import ContactInfo, Patient, User
+from ..features.contact_infos import (
+    create_contact_info as create_contact_info_service,
+    delete_contact_info as delete_contact_info_service,
+    list_contact_infos as list_contact_infos_service,
+    update_contact_info as update_contact_info_service,
+)
+from ..models import User
 from ..schemas import ContactInfoCreate, ContactInfoResponse, ContactInfoUpdate
 
 router = APIRouter(prefix="/patients/{patient_id}/contacts", tags=["contact_infos"])
 
 
-def _get_patient_or_404(patient_id: int, db: Session) -> Patient:
-    patient = db.query(Patient).filter(Patient.id == patient_id).first()
-    if not patient:
-        raise HTTPException(status_code=404, detail="Patient not found")
-    return patient
-
-
 @router.get("/", response_model=list[ContactInfoResponse])
 def list_contact_infos(patient_id: int, db: Session = Depends(get_db)):
-    _get_patient_or_404(patient_id, db)
-    return (
-        db.query(ContactInfo)
-        .options(joinedload(ContactInfo.type), joinedload(ContactInfo.changed_by_user))
-        .filter(ContactInfo.patient_id == patient_id)
-        .all()
-    )
+    return list_contact_infos_service(patient_id=patient_id, db=db)
 
 
 @router.post("/", response_model=ContactInfoResponse, status_code=201)
@@ -35,22 +27,12 @@ def create_contact_info(
     db: Session = Depends(get_db),
     current_user: User = Depends(get_current_user),
 ):
-    _get_patient_or_404(patient_id, db)
-    max_pos = (
-        db.query(sa_func.max(ContactInfo.pos))
-        .filter(ContactInfo.patient_id == patient_id)
-        .scalar()
-    ) or 0
-    ci = ContactInfo(
+    return create_contact_info_service(
         patient_id=patient_id,
-        **payload.model_dump(),
-        pos=max_pos + 1,
+        payload=payload,
         changed_by_id=current_user.id,
+        db=db,
     )
-    db.add(ci)
-    db.commit()
-    db.refresh(ci)
-    return ci
 
 
 @router.patch("/{contact_id}", response_model=ContactInfoResponse)
@@ -61,19 +43,13 @@ def update_contact_info(
     db: Session = Depends(get_db),
     current_user: User = Depends(get_current_user),
 ):
-    ci = (
-        db.query(ContactInfo)
-        .filter(ContactInfo.id == contact_id, ContactInfo.patient_id == patient_id)
-        .first()
+    return update_contact_info_service(
+        patient_id=patient_id,
+        contact_id=contact_id,
+        payload=payload,
+        changed_by_id=current_user.id,
+        db=db,
     )
-    if not ci:
-        raise HTTPException(status_code=404, detail="Contact info not found")
-    for key, value in payload.model_dump(exclude_unset=True).items():
-        setattr(ci, key, value)
-    ci.changed_by_id = current_user.id
-    db.commit()
-    db.refresh(ci)
-    return ci
 
 
 @router.delete("/{contact_id}", status_code=204)
@@ -83,12 +59,4 @@ def delete_contact_info(
     db: Session = Depends(get_db),
     current_user: User = Depends(get_current_user),
 ):
-    ci = (
-        db.query(ContactInfo)
-        .filter(ContactInfo.id == contact_id, ContactInfo.patient_id == patient_id)
-        .first()
-    )
-    if not ci:
-        raise HTTPException(status_code=404, detail="Contact info not found")
-    db.delete(ci)
-    db.commit()
+    delete_contact_info_service(patient_id=patient_id, contact_id=contact_id, db=db)

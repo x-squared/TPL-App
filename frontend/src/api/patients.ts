@@ -1,4 +1,11 @@
-import { request, type AppUser, type Code, type MedicalValueGroup, type MedicalValueTemplate } from './core';
+import {
+  request,
+  type AppUser,
+  type Code,
+  type MedicalValueGroup,
+  type MedicalValueGroupInstance,
+  type MedicalValueTemplate,
+} from './core';
 
 /* ── Contact Info ── */
 
@@ -95,11 +102,16 @@ export interface MedicalValue {
   datatype_id: number | null;
   datatype: Code | null;
   medical_value_group_id: number | null;
-  medical_value_group: MedicalValueGroup | null;
+  medical_value_group_template: MedicalValueGroup | null;
+  medical_value_group_instance_id: number | null;
+  medical_value_group: MedicalValueGroupInstance | null;
   name: string;
   pos: number;
   value: string;
   renew_date: string | null;
+  organ_id: number | null;
+  is_donor_context: boolean;
+  context_key: string | null;
   changed_by_id: number | null;
   changed_by_user: AppUser | null;
   created_at: string;
@@ -110,20 +122,28 @@ export interface MedicalValueCreate {
   medical_value_template_id?: number | null;
   datatype_id?: number | null;
   medical_value_group_id?: number | null;
+  medical_value_group_instance_id?: number | null;
   name?: string;
   pos?: number;
   value?: string;
   renew_date?: string | null;
+  organ_id?: number | null;
+  is_donor_context?: boolean;
+  context_key?: string | null;
 }
 
 export interface MedicalValueUpdate {
   medical_value_template_id?: number | null;
   datatype_id?: number | null;
   medical_value_group_id?: number | null;
+  medical_value_group_instance_id?: number | null;
   name?: string;
   pos?: number;
   value?: string;
   renew_date?: string | null;
+  organ_id?: number | null;
+  is_donor_context?: boolean;
+  context_key?: string | null;
 }
 
 /* ── Episode ── */
@@ -262,8 +282,6 @@ export interface Patient {
   lang: string;
   sex_id: number | null;
   sex: Code | null;
-  blood_type_id: number | null;
-  blood_type: Code | null;
   resp_coord_id: number | null;
   resp_coord: AppUser | null;
   translate: boolean;
@@ -289,8 +307,6 @@ export interface PatientListItem {
   lang: string;
   sex_id: number | null;
   sex: Code | null;
-  blood_type_id: number | null;
-  blood_type: Code | null;
   resp_coord_id: number | null;
   resp_coord: AppUser | null;
   translate: boolean;
@@ -299,6 +315,10 @@ export interface PatientListItem {
   open_episode_indicators: string[];
   episode_organ_ids: number[];
   open_episode_organ_ids: number[];
+  static_medical_values: {
+    name: string;
+    value: string;
+  }[];
 }
 
 export interface PatientCreate {
@@ -320,7 +340,6 @@ export interface PatientUpdate {
   ahv_nr?: string;
   lang?: string;
   sex_id?: number | null;
-  blood_type_id?: number | null;
   resp_coord_id?: number | null;
   translate?: boolean;
 }
@@ -396,6 +415,11 @@ export const patientsApi = {
     }),
   deleteMedicalValue: (patientId: number, medicalValueId: number) =>
     request<void>(`/patients/${patientId}/medical-values/${medicalValueId}`, { method: 'DELETE' }),
+  instantiateMedicalValues: (patientId: number, includeDonorContext = false) =>
+    request<{ created_values: number }>(
+      `/patients/${patientId}/medical-values/instantiate?include_donor_context=${includeDonorContext ? 'true' : 'false'}`,
+      { method: 'POST' },
+    ),
 
   listEpisodes: (patientId: number) =>
     request<Episode[]>(`/patients/${patientId}/episodes/`),

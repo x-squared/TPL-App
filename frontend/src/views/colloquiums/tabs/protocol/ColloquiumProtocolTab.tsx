@@ -1,17 +1,20 @@
 import { useMemo, useState } from 'react';
-import { api, type ColloqiumAgenda, type PatientListItem, type Task } from '../../../../api';
+import { api, type ColloqiumAgenda, type PatientListItem, type Person, type Task } from '../../../../api';
 import { exportProtocolPdf } from './exportProtocolPdf';
 import TaskBoard from '../../../tasks/TaskBoard';
+import PersonMultiSelect from '../../../layout/PersonMultiSelect';
 
 interface Props {
   draftName: string;
   draftDate: string;
   draftParticipants: string;
+  draftParticipantsPeople: Person[];
   agendas: ColloqiumAgenda[];
   agendaDrafts: Record<number, AgendaDraft>;
   loadingAgendas: boolean;
   patientsById: Record<number, PatientListItem>;
   onChangeAgendaDraft: (agendaId: number, patch: Partial<AgendaDraft>) => void;
+  onChangeDraftParticipantsPeople: (next: Person[]) => void;
 }
 
 export interface AgendaDraft {
@@ -41,11 +44,13 @@ export default function ColloquiumProtocolTab({
   draftName,
   draftDate,
   draftParticipants,
+  draftParticipantsPeople,
   agendas,
   agendaDrafts,
   loadingAgendas,
   patientsById,
   onChangeAgendaDraft,
+  onChangeDraftParticipantsPeople,
 }: Props) {
   const [exportingPdf, setExportingPdf] = useState(false);
   const [visibleTaskListsByAgendaId, setVisibleTaskListsByAgendaId] = useState<Record<number, boolean>>({});
@@ -115,6 +120,10 @@ export default function ColloquiumProtocolTab({
             </div>
             <div className="detail-field">
               <span className="detail-label">Participants</span>
+              <PersonMultiSelect
+                selectedPeople={draftParticipantsPeople}
+                onChange={onChangeDraftParticipantsPeople}
+              />
               <span className="detail-value">{draftParticipants || '–'}</span>
             </div>
           </div>

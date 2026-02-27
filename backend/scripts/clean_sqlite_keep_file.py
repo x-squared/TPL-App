@@ -32,7 +32,10 @@ def clean_database(db_path: Path) -> int:
         for table in table_names:
             cursor.execute(f"DELETE FROM {_quote_identifier(table)}")
 
-        cursor.execute("DELETE FROM sqlite_sequence")
+        # sqlite_sequence exists only when AUTOINCREMENT is used.
+        cursor.execute("SELECT name FROM sqlite_master WHERE type='table' AND name='sqlite_sequence'")
+        if cursor.fetchone():
+            cursor.execute("DELETE FROM sqlite_sequence")
         conn.commit()
         cursor.execute("VACUUM")
         conn.commit()

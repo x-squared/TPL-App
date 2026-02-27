@@ -1,7 +1,9 @@
-import type { Colloqium, ColloqiumAgenda, PatientListItem } from '../../../../api';
+import type { Colloqium, ColloqiumAgenda, PatientListItem, Person } from '../../../../api';
 import ColloquiumAgendaTable from './ColloquiumAgendaTable';
 import EpisodePickerDialog from './EpisodePickerDialog';
 import EditableSectionHeader from '../../../layout/EditableSectionHeader';
+import ErrorBanner from '../../../layout/ErrorBanner';
+import PersonMultiSelect from '../../../layout/PersonMultiSelect';
 
 interface EpisodeChoice {
   episodeId: number;
@@ -33,6 +35,7 @@ interface Props {
   draftName: string;
   draftDate: string;
   draftParticipants: string;
+  draftParticipantsPeople: Person[];
   loadingAgendas: boolean;
   agendas: ColloqiumAgenda[];
   editingAgendaId: number | null;
@@ -70,7 +73,7 @@ interface Props {
   }>) => void;
   onChangeName: (value: string) => void;
   onChangeDate: (value: string) => void;
-  onChangeParticipants: (value: string) => void;
+  onChangeParticipantsPeople: (value: Person[]) => void;
   onSaveGeneralDetails: () => void;
   onStartGeneralEditing: () => void;
   onCancelGeneralEditing: () => void;
@@ -85,6 +88,7 @@ export default function ColloquiumDetailSection({
   draftName,
   draftDate,
   draftParticipants,
+  draftParticipantsPeople,
   loadingAgendas,
   agendas,
   editingAgendaId,
@@ -110,7 +114,7 @@ export default function ColloquiumDetailSection({
   onAgendaFormChange,
   onChangeName,
   onChangeDate,
-  onChangeParticipants,
+  onChangeParticipantsPeople,
   onSaveGeneralDetails,
   onStartGeneralEditing,
   onCancelGeneralEditing,
@@ -167,18 +171,17 @@ export default function ColloquiumDetailSection({
         <div className="detail-field">
           <span className="detail-label">Participants</span>
           {generalEditing ? (
-            <input
-              className="detail-input"
-              type="text"
-              value={draftParticipants}
-              onChange={(e) => onChangeParticipants(e.target.value)}
+            <PersonMultiSelect
+              selectedPeople={draftParticipantsPeople}
+              onChange={onChangeParticipantsPeople}
+              disabled={savingGeneral}
             />
           ) : (
             <span className="detail-value">{draftParticipants || '–'}</span>
           )}
         </div>
       </div>
-      {generalSaveError && <p className="status">{generalSaveError}</p>}
+      <ErrorBanner message={generalSaveError} />
       <div className="colloquiums-agenda-section">
         <div className="detail-section-heading">
           <h3>Agenda</h3>

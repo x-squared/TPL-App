@@ -1,109 +1,12 @@
-from sqlalchemy import Boolean, Column, Date, DateTime, ForeignKey, Integer, String
+from sqlalchemy import Boolean, Column, Date, DateTime, ForeignKey, Integer, String, UniqueConstraint
 from sqlalchemy.orm import relationship
 from sqlalchemy.sql import func
 
 from ..database import Base
 
 
-class MedicalValueTemplate(Base):
-    """Template definition for medical values and organ applicability flags."""
-
-    __tablename__ = "MEDICAL_VALUE_TEMPLATE"
-
-    id = Column(
-        "ID",
-        Integer,
-        primary_key=True,
-        index=True,
-        comment="Technical primary key of the medical value template.",
-        info={"label": "ID"},
-    )
-    lab_key = Column(
-        "LAB_KEY",
-        String(12),
-        nullable=False,
-        comment="Laboratory key used to map incoming values.",
-        info={"label": "Lab Key"},
-    )
-    kis_key = Column(
-        "KIS_KEY",
-        String(64),
-        nullable=False,
-        comment="KIS key used to map values from clinical systems.",
-        info={"label": "KIS Key"},
-    )
-    datatype_id = Column(
-        "DATATYPE_ID",
-        Integer,
-        ForeignKey("CODE.ID"),
-        nullable=False,
-        comment="Data type reference (`CODE.DATATYPE`) of this template.",
-        info={"label": "Datatype"},
-    )
-    name_default = Column(
-        "NAME_DEFAULT",
-        String(64),
-        default="",
-        comment="Default display name of the template.",
-        info={"label": "Name"},
-    )
-    pos = Column(
-        "POS",
-        Integer,
-        nullable=False,
-        comment="Sort position among templates.",
-        info={"label": "Position"},
-    )
-    use_liver = Column(
-        "USE_LIVER",
-        Boolean,
-        default=False,
-        comment="Whether this template is applicable for liver context.",
-        info={"label": "Use Liver"},
-    )
-    use_kidney = Column(
-        "USE_KIDNEY",
-        Boolean,
-        default=False,
-        comment="Whether this template is applicable for kidney context.",
-        info={"label": "Use Kidney"},
-    )
-    use_heart = Column(
-        "USE_HEART",
-        Boolean,
-        default=False,
-        comment="Whether this template is applicable for heart context.",
-        info={"label": "Use Heart"},
-    )
-    use_lung = Column(
-        "USE_LUNG",
-        Boolean,
-        default=False,
-        comment="Whether this template is applicable for lung context.",
-        info={"label": "Use Lung"},
-    )
-    use_donor = Column(
-        "USE_DONOR",
-        Boolean,
-        default=False,
-        comment="Whether this template is applicable for donor context.",
-        info={"label": "Use Donor"},
-    )
-    medical_value_group_id = Column(
-        "MEDICAL_VALUE_GROUP_ID",
-        Integer,
-        ForeignKey("MEDICAL_VALUE_GROUP.ID"),
-        nullable=True,
-        comment="Optional default group/bunch reference for this template.",
-        info={"label": "Medical Value Group"},
-    )
-
-    datatype = relationship("Code")
-    medical_value_group = relationship("MedicalValueGroup")
-
-
-class MedicalValueGroup(Base):
-    """Named bunch/group for medical values with optional group-level renewal date."""
+class MedicalValueGroupTemplate(Base):
+    """Template definition of a named medical-value group/bunch."""
 
     __tablename__ = "MEDICAL_VALUE_GROUP"
 
@@ -169,6 +72,164 @@ class MedicalValueGroup(Base):
         info={"label": "Updated At"},
     )
 
+    changed_by_user = relationship("User")
+    context_templates = relationship(
+        "MedicalValueGroupContextTemplate",
+        back_populates="medical_value_group_template",
+        cascade="all, delete-orphan",
+    )
+
+
+class MedicalValueTemplate(Base):
+    """Template definition for medical values."""
+
+    __tablename__ = "MEDICAL_VALUE_TEMPLATE"
+
+    id = Column(
+        "ID",
+        Integer,
+        primary_key=True,
+        index=True,
+        comment="Technical primary key of the medical value template.",
+        info={"label": "ID"},
+    )
+    lab_key = Column(
+        "LAB_KEY",
+        String(12),
+        nullable=False,
+        comment="Laboratory key used to map incoming values.",
+        info={"label": "Lab Key"},
+    )
+    kis_key = Column(
+        "KIS_KEY",
+        String(64),
+        nullable=False,
+        comment="KIS key used to map values from clinical systems.",
+        info={"label": "KIS Key"},
+    )
+    datatype_id = Column(
+        "DATATYPE_ID",
+        Integer,
+        ForeignKey("CODE.ID"),
+        nullable=False,
+        comment="Data type reference (`CODE.DATATYPE`) of this template.",
+        info={"label": "Datatype"},
+    )
+    name_default = Column(
+        "NAME_DEFAULT",
+        String(64),
+        default="",
+        comment="Default display name of the template.",
+        info={"label": "Name"},
+    )
+    pos = Column(
+        "POS",
+        Integer,
+        nullable=False,
+        comment="Sort position among templates.",
+        info={"label": "Position"},
+    )
+    is_main = Column(
+        "IS_MAIN",
+        Boolean,
+        nullable=False,
+        default=False,
+        comment="Whether this template is highlighted as a primary medical value.",
+        info={"label": "Main"},
+    )
+    medical_value_group_id = Column(
+        "MEDICAL_VALUE_GROUP_ID",
+        Integer,
+        ForeignKey("MEDICAL_VALUE_GROUP.ID"),
+        nullable=True,
+        comment="Optional default group/bunch reference for this template.",
+        info={"label": "Medical Value Group"},
+    )
+    datatype_def_id = Column(
+        "DATATYPE_DEF_ID",
+        Integer,
+        ForeignKey("MEDICAL_VALUE_DATATYPE.ID"),
+        nullable=True,
+        comment="Optional explicit datatype-definition row for metadata-driven rendering.",
+        info={"label": "Datatype Definition"},
+    )
+
+    datatype = relationship("Code", foreign_keys=[datatype_id])
+    datatype_definition = relationship("DatatypeDefinition")
+    medical_value_group_template = relationship("MedicalValueGroupTemplate")
+    context_templates = relationship(
+        "MedicalValueTemplateContextTemplate",
+        back_populates="medical_value_template",
+        cascade="all, delete-orphan",
+    )
+
+
+class MedicalValueGroupContextTemplate(Base):
+    """Applicability context template for group templates (STATIC, DONOR, ORGAN)."""
+
+    __tablename__ = "MEDICAL_VALUE_GROUP_CONTEXT_TEMPLATE"
+    __table_args__ = (
+        UniqueConstraint("MEDICAL_VALUE_GROUP_ID", "CONTEXT_KIND", "ORGAN_ID"),
+    )
+
+    id = Column("ID", Integer, primary_key=True, index=True)
+    medical_value_group_id = Column("MEDICAL_VALUE_GROUP_ID", Integer, ForeignKey("MEDICAL_VALUE_GROUP.ID"), nullable=False, index=True)
+    context_kind = Column("CONTEXT_KIND", String(16), nullable=False)
+    organ_id = Column("ORGAN_ID", Integer, ForeignKey("CODE.ID"), nullable=True, index=True)
+    changed_by_id = Column("CHANGED_BY", Integer, ForeignKey("USER.ID"), nullable=True)
+    created_at = Column("CREATED_AT", DateTime(timezone=True), server_default=func.now())
+    updated_at = Column("UPDATED_AT", DateTime(timezone=True), onupdate=func.now())
+
+    medical_value_group_template = relationship("MedicalValueGroupTemplate", back_populates="context_templates")
+    organ = relationship("Code", foreign_keys=[organ_id])
+    changed_by_user = relationship("User")
+
+
+class MedicalValueTemplateContextTemplate(Base):
+    """Applicability context template for value templates (STATIC, DONOR, ORGAN)."""
+
+    __tablename__ = "MEDICAL_VALUE_TEMPLATE_CONTEXT_TEMPLATE"
+    __table_args__ = (
+        UniqueConstraint("MEDICAL_VALUE_TEMPLATE_ID", "CONTEXT_KIND", "ORGAN_ID"),
+    )
+
+    id = Column("ID", Integer, primary_key=True, index=True)
+    medical_value_template_id = Column("MEDICAL_VALUE_TEMPLATE_ID", Integer, ForeignKey("MEDICAL_VALUE_TEMPLATE.ID"), nullable=False, index=True)
+    context_kind = Column("CONTEXT_KIND", String(16), nullable=False)
+    organ_id = Column("ORGAN_ID", Integer, ForeignKey("CODE.ID"), nullable=True, index=True)
+    changed_by_id = Column("CHANGED_BY", Integer, ForeignKey("USER.ID"), nullable=True)
+    created_at = Column("CREATED_AT", DateTime(timezone=True), server_default=func.now())
+    updated_at = Column("UPDATED_AT", DateTime(timezone=True), onupdate=func.now())
+
+    medical_value_template = relationship("MedicalValueTemplate", back_populates="context_templates")
+    organ = relationship("Code", foreign_keys=[organ_id])
+    changed_by_user = relationship("User")
+
+
+class MedicalValueGroup(Base):
+    """Per-patient, per-context runtime group instance derived from group template."""
+
+    __tablename__ = "MEDICAL_VALUE_GROUP_INSTANCE"
+    __table_args__ = (
+        UniqueConstraint("PATIENT_ID", "MEDICAL_VALUE_GROUP_ID", "CONTEXT_KEY"),
+    )
+
+    id = Column("ID", Integer, primary_key=True, index=True)
+    patient_id = Column("PATIENT_ID", Integer, ForeignKey("PATIENT.ID"), nullable=False, index=True)
+    medical_value_group_id = Column("MEDICAL_VALUE_GROUP_ID", Integer, ForeignKey("MEDICAL_VALUE_GROUP.ID"), nullable=False, index=True)
+    context_key = Column("CONTEXT_KEY", String(128), nullable=False, index=True)
+    episode_id = Column("EPISODE_ID", Integer, ForeignKey("EPISODE.ID"), nullable=True, index=True)
+    organ_id = Column("ORGAN_ID", Integer, ForeignKey("CODE.ID"), nullable=True, index=True)
+    is_donor_context = Column("IS_DONOR_CONTEXT", Boolean, nullable=False, default=False)
+    renew_date = Column("RENEW_DATE", Date, nullable=True)
+    changed_by_id = Column("CHANGED_BY", Integer, ForeignKey("USER.ID"), nullable=True)
+    created_at = Column("CREATED_AT", DateTime(timezone=True), server_default=func.now())
+    updated_at = Column("UPDATED_AT", DateTime(timezone=True), onupdate=func.now())
+
+    patient = relationship("Patient")
+    medical_value_group_template = relationship("MedicalValueGroupTemplate")
+    episode = relationship("Episode")
+    organ = relationship("Code", foreign_keys=[organ_id])
     changed_by_user = relationship("User")
 
 
@@ -246,6 +307,49 @@ class MedicalValue(Base):
         comment="Optional group/bunch reference for this value.",
         info={"label": "Medical Value Group"},
     )
+    medical_value_group_instance_id = Column(
+        "MEDICAL_VALUE_GROUP_INSTANCE_ID",
+        Integer,
+        ForeignKey("MEDICAL_VALUE_GROUP_INSTANCE.ID"),
+        nullable=True,
+        index=True,
+        comment="Runtime group-instance reference for this value/context.",
+        info={"label": "Medical Value Group Instance"},
+    )
+    episode_id = Column(
+        "EPISODE_ID",
+        Integer,
+        ForeignKey("EPISODE.ID"),
+        nullable=True,
+        index=True,
+        comment="Optional episode context reference for this instantiated value.",
+        info={"label": "Episode Context"},
+    )
+    organ_id = Column(
+        "ORGAN_ID",
+        Integer,
+        ForeignKey("CODE.ID"),
+        nullable=True,
+        index=True,
+        comment="Optional organ context reference for this instantiated value.",
+        info={"label": "Organ Context"},
+    )
+    is_donor_context = Column(
+        "IS_DONOR_CONTEXT",
+        Boolean,
+        nullable=False,
+        default=False,
+        comment="Marks value as instantiated for donor context.",
+        info={"label": "Donor Context"},
+    )
+    context_key = Column(
+        "CONTEXT_KEY",
+        String(128),
+        nullable=True,
+        index=True,
+        comment="Deterministic context key (e.g. STATIC, EPISODE:12:ORGAN:3, DONOR).",
+        info={"label": "Context Key"},
+    )
     changed_by_id = Column(
         "CHANGED_BY",
         Integer,
@@ -271,6 +375,9 @@ class MedicalValue(Base):
 
     patient = relationship("Patient", back_populates="medical_values")
     medical_value_template = relationship("MedicalValueTemplate")
+    medical_value_group_template = relationship("MedicalValueGroupTemplate")
     medical_value_group = relationship("MedicalValueGroup")
-    datatype = relationship("Code")
+    datatype = relationship("Code", foreign_keys=[datatype_id])
+    episode = relationship("Episode")
+    organ = relationship("Code", foreign_keys=[organ_id])
     changed_by_user = relationship("User")

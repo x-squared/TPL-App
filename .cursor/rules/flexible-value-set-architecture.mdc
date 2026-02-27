@@ -1,0 +1,15 @@
+---
+description: Prefer flexible template/value-set architecture for extensible clinical domains
+alwaysApply: true
+---
+
+# Flexible Value-Set Architecture
+
+- For extensible domain data (for example organ-dependent procurement data), do not model one entity/table per organ.
+- Use a template/value-set architecture instead:
+  - `*Template` entities define fields/metadata.
+  - Runtime entities store instantiated values without `Instance` suffixes.
+- Applicability/scope must be modeled with explicit relation entities (N:M), not hardcoded boolean columns such as `use_*`.
+- Reuse shared datatype definitions across domains; avoid domain-specific datatype entities when semantics are identical.
+- If a domain has optional dimensions (for example left/right for only some organs), model the dimension as data (slot/subcontext rows), not as fixed columns.
+- When changing this architecture, update model, schema, routers, seed loaders, seed datasets, and impacted UI/contracts in the same change set.

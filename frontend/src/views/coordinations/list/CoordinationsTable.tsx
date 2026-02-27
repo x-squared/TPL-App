@@ -1,5 +1,8 @@
+import { useEffect, useRef } from 'react';
 import type { CoordinationListRow } from './useCoordinationsListViewModel';
+import ErrorBanner from '../../layout/ErrorBanner';
 import { formatDateDdMmYyyy } from '../../layout/dateFormat';
+import type { Code } from '../../../api';
 
 function fmt(value: string | null | undefined): string {
   return formatDateDdMmYyyy(value);
@@ -11,12 +14,20 @@ interface Props {
   adding: boolean;
   creating: boolean;
   createError: string;
+  deathKindCodes: Code[];
   startDateInput: string;
+  donorFullName: string;
+  donorBirthDateInput: string;
+  donorDeathKindId: number | null;
   donorNr: string;
   swtplNr: string;
   nationalCoordinator: string;
   comment: string;
+  donorFocusToken: number;
   onDateChange: (value: string) => void;
+  onDonorFullNameChange: (value: string) => void;
+  onDonorBirthDateChange: (value: string) => void;
+  onDonorDeathKindChange: (value: string) => void;
   onFieldChange: (key: 'donor_nr' | 'swtpl_nr' | 'national_coordinator' | 'comment', value: string) => void;
   onSave: () => void;
   onCancel: () => void;
@@ -28,16 +39,33 @@ export default function CoordinationsTable({
   adding,
   creating,
   createError,
+  deathKindCodes,
   startDateInput,
+  donorFullName,
+  donorBirthDateInput,
+  donorDeathKindId,
   donorNr,
   swtplNr,
   nationalCoordinator,
   comment,
+  donorFocusToken,
   onDateChange,
+  onDonorFullNameChange,
+  onDonorBirthDateChange,
+  onDonorDeathKindChange,
   onFieldChange,
   onSave,
   onCancel,
 }: Props) {
+  const donorNameInputRef = useRef<HTMLInputElement | null>(null);
+
+  useEffect(() => {
+    if (!adding) {
+      return;
+    }
+    donorNameInputRef.current?.focus();
+  }, [adding, donorFocusToken]);
+
   return (
     <div className="patients-table-wrap ui-table-wrap">
       <table className="data-table">
@@ -65,10 +93,34 @@ export default function CoordinationsTable({
                   />
                   <input
                     type="text"
+                    placeholder="Donor name *"
+                    value={donorFullName}
+                    ref={donorNameInputRef}
+                    onChange={(e) => onDonorFullNameChange(e.target.value)}
+                  />
+                  <input
+                    type="text"
                     placeholder="Donor Nr"
                     value={donorNr}
                     onChange={(e) => onFieldChange('donor_nr', e.target.value)}
                   />
+                  <input
+                    type="date"
+                    value={donorBirthDateInput}
+                    onChange={(e) => onDonorBirthDateChange(e.target.value)}
+                  />
+                  <select
+                    className="filter-select"
+                    value={donorDeathKindId ?? ''}
+                    onChange={(e) => onDonorDeathKindChange(e.target.value)}
+                  >
+                    <option value="">Reason of death...</option>
+                    {deathKindCodes.map((code) => (
+                      <option key={code.id} value={code.id}>
+                        {code.name_default}
+                      </option>
+                    ))}
+                  </select>
                   <input
                     type="text"
                     placeholder="SWTPL Nr"
@@ -95,7 +147,7 @@ export default function CoordinationsTable({
                       Cancel
                     </button>
                   </div>
-                  {createError && <p className="patients-add-error">{createError}</p>}
+                  <ErrorBanner message={createError} />
                 </div>
               </td>
             </tr>

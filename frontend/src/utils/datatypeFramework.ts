@@ -1,4 +1,4 @@
-import type { Code } from '../api';
+import type { Code, DatatypeDefinition } from '../api';
 
 interface DatatypeConfig {
   inputType: 'number' | 'text' | 'date' | 'boolean' | 'catalogue';
@@ -24,6 +24,26 @@ export function getConfig(dt: Code | null | undefined): DatatypeConfig {
   if (!dt) return FALLBACK;
   if (isCatalogueDatatype(dt)) return { inputType: 'catalogue' };
   return KNOWN[dt.key] ?? FALLBACK;
+}
+
+export function getConfigFromMetadata(
+  dt: Code | null | undefined,
+  metadata: DatatypeDefinition | null | undefined,
+): DatatypeConfig {
+  if (!metadata) return getConfig(dt);
+  const kind = metadata.primitive_kind?.toLowerCase() ?? 'text';
+  const inputType: DatatypeConfig['inputType'] =
+    kind === 'number' ? 'number'
+      : kind === 'date' ? 'date'
+        : kind === 'boolean' ? 'boolean'
+          : kind === 'catalogue' ? 'catalogue'
+            : 'text';
+  return {
+    inputType,
+    unit: metadata.unit ?? undefined,
+    placeholder: metadata.format_pattern ?? undefined,
+    step: inputType === 'number' && metadata.precision !== null ? 'any' : undefined,
+  };
 }
 
 export function isCatalogueDatatype(dt: Code | null | undefined): boolean {

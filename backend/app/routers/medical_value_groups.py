@@ -1,41 +1,33 @@
-from fastapi import APIRouter, Depends, HTTPException
-from sqlalchemy.orm import Session, joinedload
+from fastapi import APIRouter, Depends
+from sqlalchemy.orm import Session
 
 from ..auth import get_current_user
 from ..database import get_db
-from ..models import MedicalValueGroup, User
-from ..schemas import MedicalValueGroupResponse, MedicalValueGroupUpdate
+from ..features.medical_value_groups import (
+    list_medical_value_groups as list_medical_value_groups_service,
+    update_medical_value_group as update_medical_value_group_service,
+)
+from ..models import User
+from ..schemas import MedicalValueGroupTemplateResponse, MedicalValueGroupTemplateUpdate
 
 router = APIRouter(prefix="/medical-value-groups", tags=["medical-value-groups"])
 
 
-@router.get("/", response_model=list[MedicalValueGroupResponse])
+@router.get("/", response_model=list[MedicalValueGroupTemplateResponse])
 def list_medical_value_groups(db: Session = Depends(get_db)):
-    return (
-        db.query(MedicalValueGroup)
-        .options(joinedload(MedicalValueGroup.changed_by_user))
-        .order_by(MedicalValueGroup.pos.asc(), MedicalValueGroup.name_default.asc())
-        .all()
-    )
+    return list_medical_value_groups_service(db=db)
 
 
-@router.patch("/{group_id}", response_model=MedicalValueGroupResponse)
+@router.patch("/{group_id}", response_model=MedicalValueGroupTemplateResponse)
 def update_medical_value_group(
     group_id: int,
-    payload: MedicalValueGroupUpdate,
+    payload: MedicalValueGroupTemplateUpdate,
     db: Session = Depends(get_db),
     current_user: User = Depends(get_current_user),
 ):
-    group = db.query(MedicalValueGroup).filter(MedicalValueGroup.id == group_id).first()
-    if not group:
-        raise HTTPException(status_code=404, detail="Medical value group not found")
-    for key, value in payload.model_dump(exclude_unset=True).items():
-        setattr(group, key, value)
-    group.changed_by_id = current_user.id
-    db.commit()
-    return (
-        db.query(MedicalValueGroup)
-        .options(joinedload(MedicalValueGroup.changed_by_user))
-        .filter(MedicalValueGroup.id == group_id)
-        .first()
+    return update_medical_value_group_service(
+        group_id=group_id,
+        payload=payload,
+        changed_by_id=current_user.id,
+        db=db,
     )

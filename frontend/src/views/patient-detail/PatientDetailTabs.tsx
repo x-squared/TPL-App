@@ -36,7 +36,6 @@ export interface PatientFormState {
   ahv_nr: string;
   lang: string;
   sex_id: number | null;
-  blood_type_id: number | null;
   resp_coord_id: number | null;
   translate: boolean;
 }
@@ -52,7 +51,6 @@ export interface PatientCoreModel {
   setField: (key: keyof PatientFormState, value: string | boolean) => void;
   languages: Code[];
   sexCodes: Code[];
-  bloodTypes: Code[];
   coordUsers: AppUser[];
 }
 

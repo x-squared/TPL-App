@@ -1,31 +1,23 @@
-from fastapi import APIRouter, Depends, HTTPException
-from sqlalchemy.orm import Session, joinedload
+from fastapi import APIRouter, Depends
+from sqlalchemy.orm import Session
 
 from ..auth import get_current_user
 from ..database import get_db
-from ..models import Absence, Patient, User
+from ..features.absences import (
+    create_absence as create_absence_service,
+    delete_absence as delete_absence_service,
+    list_absences as list_absences_service,
+    update_absence as update_absence_service,
+)
+from ..models import User
 from ..schemas import AbsenceCreate, AbsenceResponse, AbsenceUpdate
 
 router = APIRouter(prefix="/patients/{patient_id}/absences", tags=["absences"])
 
 
-def _get_patient_or_404(patient_id: int, db: Session) -> Patient:
-    patient = db.query(Patient).filter(Patient.id == patient_id).first()
-    if not patient:
-        raise HTTPException(status_code=404, detail="Patient not found")
-    return patient
-
-
 @router.get("/", response_model=list[AbsenceResponse])
 def list_absences(patient_id: int, db: Session = Depends(get_db)):
-    _get_patient_or_404(patient_id, db)
-    return (
-        db.query(Absence)
-        .options(joinedload(Absence.changed_by_user))
-        .filter(Absence.patient_id == patient_id)
-        .order_by(Absence.start.desc())
-        .all()
-    )
+    return list_absences_service(patient_id=patient_id, db=db)
 
 
 @router.post("/", response_model=AbsenceResponse, status_code=201)
@@ -35,16 +27,12 @@ def create_absence(
     db: Session = Depends(get_db),
     current_user: User = Depends(get_current_user),
 ):
-    _get_patient_or_404(patient_id, db)
-    absence = Absence(
+    return create_absence_service(
         patient_id=patient_id,
-        **payload.model_dump(),
+        payload=payload,
         changed_by_id=current_user.id,
+        db=db,
     )
-    db.add(absence)
-    db.commit()
-    db.refresh(absence)
-    return absence
 
 
 @router.patch("/{absence_id}", response_model=AbsenceResponse)
@@ -55,19 +43,13 @@ def update_absence(
     db: Session = Depends(get_db),
     current_user: User = Depends(get_current_user),
 ):
-    absence = (
-        db.query(Absence)
-        .filter(Absence.id == absence_id, Absence.patient_id == patient_id)
-        .first()
+    return update_absence_service(
+        patient_id=patient_id,
+        absence_id=absence_id,
+        payload=payload,
+        changed_by_id=current_user.id,
+        db=db,
     )
-    if not absence:
-        raise HTTPException(status_code=404, detail="Absence not found")
-    for key, value in payload.model_dump(exclude_unset=True).items():
-        setattr(absence, key, value)
-    absence.changed_by_id = current_user.id
-    db.commit()
-    db.refresh(absence)
-    return absence
 
 
 @router.delete("/{absence_id}", status_code=204)
@@ -77,12 +59,4 @@ def delete_absence(
     db: Session = Depends(get_db),
     current_user: User = Depends(get_current_user),
 ):
-    absence = (
-        db.query(Absence)
-        .filter(Absence.id == absence_id, Absence.patient_id == patient_id)
-        .first()
-    )
-    if not absence:
-        raise HTTPException(status_code=404, detail="Absence not found")
-    db.delete(absence)
-    db.commit()
+    delete_absence_service(patient_id=patient_id, absence_id=absence_id, db=db)

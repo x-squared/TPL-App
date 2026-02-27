@@ -1,0 +1,15 @@
+RECORDS = [
+    {"field_key": "COLD_PERFUSION", "organ_key": "HEART", "slot_key": "MAIN"},
+    {"field_key": "COLD_PERFUSION_ABDOMINAL", "organ_key": "LIVER", "slot_key": "MAIN"},
+    {"field_key": "NMP_USED", "organ_key": "HEART", "slot_key": "MAIN"},
+    {"field_key": "NMP_USED", "organ_key": "LIVER", "slot_key": "MAIN"},
+    {"field_key": "EVLP_USED", "organ_key": "HEART", "slot_key": "MAIN"},
+    {"field_key": "EVLP_USED", "organ_key": "LUNG", "slot_key": "LEFT"},
+    {"field_key": "EVLP_USED", "organ_key": "LUNG", "slot_key": "RIGHT"},
+    {"field_key": "HOPE_USED", "organ_key": "LIVER", "slot_key": "MAIN"},
+    {"field_key": "LIFEPORT_USED", "organ_key": "KIDNEY", "slot_key": "LEFT"},
+    {"field_key": "LIFEPORT_USED", "organ_key": "KIDNEY", "slot_key": "RIGHT"},
+    {"field_key": "OPE_USED", "organ_key": "KIDNEY", "slot_key": "MAIN"},
+    {"field_key": "EHB_BOX_NR", "organ_key": "HEART_VALVE", "slot_key": "MAIN"},
+    {"field_key": "EHB_NR", "organ_key": "HEART_VALVE", "slot_key": "MAIN"},
+]

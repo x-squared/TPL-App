@@ -2,6 +2,7 @@ import { createElement, useEffect, useMemo, useState } from 'react';
 import {
   api,
   type Code,
+  type DatatypeDefinition,
   type MedicalValue,
   type MedicalValueCreate,
   type MedicalValueGroup,
@@ -9,13 +10,12 @@ import {
   type MedicalValueUpdate,
   type Patient,
 } from '../../../api';
-import { formatValue, getCatalogueType, getConfig, isCatalogueDatatype, validateValue } from '../../../utils/datatypeFramework';
+import { formatValue, getCatalogueType, getConfigFromMetadata, isCatalogueDatatype, validateValue } from '../../../utils/datatypeFramework';
 
 export function usePatientMedicalValues(
   patientId: number,
   patient: Patient | null,
   refreshPatient: () => Promise<void>,
-  organCodes: Code[],
 ) {
   const [mvTemplates, setMvTemplates] = useState<MedicalValueTemplate[]>([]);
   const [medicalValueGroups, setMedicalValueGroups] = useState<MedicalValueGroup[]>([]);
@@ -71,13 +71,17 @@ export function usePatientMedicalValues(
   );
 
   const resolveMvGroup = (mv: MedicalValue): MedicalValueGroup | null => {
-    const byValueId = mv.medical_value_group_id ?? mv.medical_value_group?.id ?? null;
-    if (byValueId != null) {
-      return medicalValueGroups.find((group) => group.id === byValueId) ?? mv.medical_value_group ?? null;
+    const byInstanceId = mv.medical_value_group?.medical_value_group_template?.id ?? null;
+    if (byInstanceId != null) {
+      return medicalValueGroups.find((group) => group.id === byInstanceId) ?? mv.medical_value_group?.medical_value_group_template ?? null;
     }
-    const templateGroupId = mv.medical_value_template?.medical_value_group_id ?? mv.medical_value_template?.medical_value_group?.id ?? null;
+    const byValueId = mv.medical_value_group_id ?? mv.medical_value_group_template?.id ?? null;
+    if (byValueId != null) {
+      return medicalValueGroups.find((group) => group.id === byValueId) ?? mv.medical_value_group_template ?? null;
+    }
+    const templateGroupId = mv.medical_value_template?.medical_value_group_id ?? mv.medical_value_template?.medical_value_group_template?.id ?? null;
     if (templateGroupId != null) {
-      return medicalValueGroups.find((group) => group.id === templateGroupId) ?? mv.medical_value_template?.medical_value_group ?? null;
+      return medicalValueGroups.find((group) => group.id === templateGroupId) ?? mv.medical_value_template?.medical_value_group_template ?? null;
     }
     return medicalValueGroups.find((group) => group.key === 'UNGROUPED') ?? null;
   };
@@ -105,54 +109,10 @@ export function usePatientMedicalValues(
   };
 
   const handleAddAllMv = async () => {
-    if (!patient || mvTemplates.length === 0) return;
-    const organFlagByKey: Record<
-      string,
-      'use_kidney' | 'use_liver' | 'use_heart' | 'use_lung' | 'use_donor'
-    > = {
-      KIDNEY: 'use_kidney',
-      LIVER: 'use_liver',
-      HEART: 'use_heart',
-      LUNG: 'use_lung',
-      DONOR: 'use_donor',
-    };
-    const templateMatchesOrgan = (tpl: MedicalValueTemplate, organKey: string) => {
-      const flag = organFlagByKey[organKey];
-      if (!flag) return false;
-      return Boolean(tpl[flag]);
-    };
-    const existingTplIds = new Set(patient.medical_values?.map((mv) => mv.medical_value_template_id).filter(Boolean));
-    const openOrganKeys = new Set(
-      (patient.episodes ?? [])
-        .filter((ep) => !ep.closed)
-        .flatMap((ep) => {
-          const multi = (ep.organs ?? []).map((organ) => organ.key).filter((key): key is string => Boolean(key));
-          if (multi.length > 0) return multi;
-          const single = ep.organ?.key ?? organCodes.find((c) => c.id === ep.organ_id)?.key ?? '';
-          return single ? [single] : [];
-        })
-        .filter((key) => key !== '')
-    );
-    const eligible = mvTemplates.filter((tpl) => {
-      for (const organKey of openOrganKeys) {
-        if (templateMatchesOrgan(tpl, organKey)) return true;
-      }
-      return false;
-    });
-    const missing = eligible.filter((tpl) => !existingTplIds.has(tpl.id));
-    if (missing.length === 0) return;
+    if (!patient) return;
     setMvSaving(true);
     try {
-      for (const tpl of missing) {
-        await api.createMedicalValue(patient.id, {
-          medical_value_template_id: tpl.id,
-          datatype_id: tpl.datatype_id,
-          name: tpl.name_default,
-          pos: tpl.pos,
-          value: '',
-          renew_date: null,
-        });
-      }
+      await api.instantiateMedicalValues(patient.id, false);
       await refreshPatient();
     } finally {
       setMvSaving(false);
@@ -251,13 +211,26 @@ export function usePatientMedicalValues(
     return null;
   };
 
+  const resolveDatatypeMetadata = (templateId?: number | null, datatypeId?: number | null): DatatypeDefinition | null => {
+    if (templateId) {
+      const tpl = mvTemplates.find((t) => t.id === templateId);
+      if (tpl?.datatype_definition) return tpl.datatype_definition;
+      if (tpl?.datatype_def_id) return null;
+    }
+    if (datatypeId) {
+      const tpl = mvTemplates.find((entry) => entry.datatype_id === datatypeId && entry.datatype_definition);
+      if (tpl?.datatype_definition) return tpl.datatype_definition;
+    }
+    return null;
+  };
+
   const renderValueInput = (
     value: string,
     dt: Code | null,
     onChange: (v: string) => void,
     className: string,
   ) => {
-    const cfg = getConfig(dt);
+    const cfg = getConfigFromMetadata(dt, resolveDatatypeMetadata(undefined, dt?.id ?? null));
 
     if (cfg.inputType === 'catalogue') {
       const catType = getCatalogueType(dt);
@@ -333,6 +306,15 @@ export function usePatientMedicalValues(
       byId.get(group.id)?.values.push(mv);
     }
     return [...byId.values()]
+      .map((entry) => ({
+        ...entry,
+        values: [...entry.values].sort((a, b) => {
+          const aMain = a.medical_value_template?.is_main ? 1 : 0;
+          const bMain = b.medical_value_template?.is_main ? 1 : 0;
+          if (aMain !== bMain) return bMain - aMain;
+          return 0;
+        }),
+      }))
       .filter((entry) => entry.values.length > 0 || entry.group.key === 'USER_CAPTURED')
       .sort((a, b) => (a.group.pos ?? 0) - (b.group.pos ?? 0) || a.group.name_default.localeCompare(b.group.name_default));
   }, [medicalValueGroups, sortedMedicalValues]);
@@ -437,6 +419,7 @@ export function usePatientMedicalValues(
     cancelEditingMv,
     handleSaveMv,
     resolveDt,
+    resolveDatatypeMetadata,
     renderValueInput,
     toggleMvSort,
     mvSortIndicator,

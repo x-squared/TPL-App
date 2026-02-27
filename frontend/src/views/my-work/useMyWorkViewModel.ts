@@ -1,5 +1,6 @@
 import { useCallback, useEffect, useMemo, useState } from 'react';
 import { api, type Code, type Favorite, type Patient } from '../../api';
+import { toUserErrorMessage } from '../../api/error';
 import { formatEpisodeFavoriteName, formatOrganNames } from '../layout/episodeDisplay';
 
 const fallbackTypeLabels: Record<string, string> = {
@@ -15,6 +16,8 @@ export function useMyWorkViewModel() {
   const [favoriteTypes, setFavoriteTypes] = useState<Code[]>([]);
   const [error, setError] = useState('');
   const [deletingFavoriteId, setDeletingFavoriteId] = useState<number | null>(null);
+  const [draggingFavoriteId, setDraggingFavoriteId] = useState<number | null>(null);
+  const [dragOverFavoriteId, setDragOverFavoriteId] = useState<number | null>(null);
   const [episodeFavoriteNames, setEpisodeFavoriteNames] = useState<Record<number, string>>({});
 
   const load = useCallback(async () => {
@@ -67,7 +70,7 @@ export function useMyWorkViewModel() {
         setEpisodeFavoriteNames({});
       }
     } catch (err) {
-      setError(err instanceof Error ? err.message : 'Failed to load favorites');
+      setError(toUserErrorMessage(err, 'Failed to load favorites'));
     } finally {
       setLoading(false);
     }
@@ -97,11 +100,37 @@ export function useMyWorkViewModel() {
         return next;
       });
     } catch (err) {
-      setError(err instanceof Error ? err.message : 'Failed to delete favorite');
+      setError(toUserErrorMessage(err, 'Failed to delete favorite'));
     } finally {
       setDeletingFavoriteId(null);
     }
   }, []);
+
+  const reorderFavorites = useCallback(async (targetId: number) => {
+    if (draggingFavoriteId == null || draggingFavoriteId === targetId) {
+      return;
+    }
+    const fromIndex = favorites.findIndex((item) => item.id === draggingFavoriteId);
+    const toIndex = favorites.findIndex((item) => item.id === targetId);
+    if (fromIndex < 0 || toIndex < 0) {
+      setDraggingFavoriteId(null);
+      setDragOverFavoriteId(null);
+      return;
+    }
+    const next = [...favorites];
+    const [moved] = next.splice(fromIndex, 1);
+    next.splice(toIndex, 0, moved);
+    const normalized = next.map((item, index) => ({ ...item, sort_pos: index + 1 }));
+    setFavorites(normalized);
+    setDraggingFavoriteId(null);
+    setDragOverFavoriteId(null);
+    try {
+      await api.reorderFavorites(normalized.map((item) => item.id));
+    } catch (err) {
+      setError(toUserErrorMessage(err, 'Failed to reorder favorites'));
+      await load();
+    }
+  }, [draggingFavoriteId, favorites, load]);
 
   return {
     loading,
@@ -109,8 +138,13 @@ export function useMyWorkViewModel() {
     favorites,
     typeLabels,
     deletingFavoriteId,
+    draggingFavoriteId,
+    dragOverFavoriteId,
     episodeFavoriteNames,
     deleteFavorite,
+    setDraggingFavoriteId,
+    setDragOverFavoriteId,
+    reorderFavorites,
     refresh: load,
   };
 }

@@ -1,5 +1,6 @@
 import { useCallback, useEffect, useMemo, useState } from 'react';
-import { api, type Coordination, type CoordinationCreate, type CoordinationDonor } from '../../../api';
+import { api, type Code, type Coordination, type CoordinationCreate, type CoordinationDonor } from '../../../api';
+import { toUserErrorMessage } from '../../../api/error';
 
 export interface CoordinationListRow {
   coordination: Coordination;
@@ -19,6 +20,19 @@ const emptyCreateForm: CoordinationCreate = {
   comment: '',
 };
 
+type CoordinationCreateForm = CoordinationCreate & {
+  donor_full_name?: string;
+  donor_birth_date?: string | null;
+  donor_death_kind_id?: number | null;
+};
+
+const emptyCreateFormWithDonor: CoordinationCreateForm = {
+  ...emptyCreateForm,
+  donor_full_name: '',
+  donor_birth_date: null,
+  donor_death_kind_id: null,
+};
+
 export function useCoordinationsListViewModel() {
   const [rows, setRows] = useState<CoordinationListRow[]>([]);
   const [loading, setLoading] = useState(true);
@@ -26,7 +40,8 @@ export function useCoordinationsListViewModel() {
   const [adding, setAdding] = useState(false);
   const [creating, setCreating] = useState(false);
   const [createError, setCreateError] = useState('');
-  const [form, setForm] = useState<CoordinationCreate>(emptyCreateForm);
+  const [form, setForm] = useState<CoordinationCreateForm>(emptyCreateFormWithDonor);
+  const [deathKindCodes, setDeathKindCodes] = useState<Code[]>([]);
 
   const loadRows = useCallback(async () => {
     setLoading(true);
@@ -45,7 +60,7 @@ export function useCoordinationsListViewModel() {
       );
       setRows(donorEntries);
     } catch (err) {
-      setLoadError(err instanceof Error ? err.message : 'Failed to load coordinations');
+      setLoadError(toUserErrorMessage(err, 'Failed to load coordinations'));
     } finally {
       setLoading(false);
     }
@@ -53,13 +68,19 @@ export function useCoordinationsListViewModel() {
 
   useEffect(() => {
     void loadRows();
+    api.listCodes('DEATH_KIND').then(setDeathKindCodes);
   }, [loadRows]);
 
-  const handleCreate = useCallback(async () => {
+  const handleCreate = useCallback(async (): Promise<number | null> => {
+    const donorFullName = form.donor_full_name?.trim() ?? '';
+    if (!donorFullName) {
+      setCreateError('Donor name is required.');
+      return null;
+    }
     try {
       setCreateError('');
       setCreating(true);
-      await api.createCoordination({
+      const created = await api.createCoordination({
         start: form.start ?? null,
         end: form.end ?? null,
         donor_nr: form.donor_nr?.trim() ?? '',
@@ -67,11 +88,18 @@ export function useCoordinationsListViewModel() {
         national_coordinator: form.national_coordinator?.trim() ?? '',
         comment: form.comment?.trim() ?? '',
       });
+      await api.upsertCoordinationDonor(created.id, {
+        full_name: donorFullName,
+        birth_date: form.donor_birth_date || null,
+        death_kind_id: form.donor_death_kind_id ?? null,
+      });
       setAdding(false);
-      setForm(emptyCreateForm);
+      setForm(emptyCreateFormWithDonor);
       await loadRows();
+      return created.id;
     } catch (err) {
-      setCreateError(err instanceof Error ? err.message : 'Failed to create coordination');
+      setCreateError(toUserErrorMessage(err, 'Failed to create coordination'));
+      return null;
     } finally {
       setCreating(false);
     }
@@ -79,6 +107,18 @@ export function useCoordinationsListViewModel() {
 
   const setFormDate = (value: string) => {
     setForm((prev) => ({ ...prev, start: value || null }));
+  };
+
+  const setDonorBirthDate = (value: string) => {
+    setForm((prev) => ({ ...prev, donor_birth_date: value || null }));
+  };
+
+  const setDonorDeathKind = (value: string) => {
+    setForm((prev) => ({ ...prev, donor_death_kind_id: value ? Number(value) : null }));
+  };
+
+  const setDonorFullName = (value: string) => {
+    setForm((prev) => ({ ...prev, donor_full_name: value }));
   };
 
   const setFormField = (
@@ -89,10 +129,11 @@ export function useCoordinationsListViewModel() {
   };
 
   const startDateInput = form.start ? form.start.slice(0, 10) : '';
+  const donorBirthDateInput = form.donor_birth_date ? form.donor_birth_date.slice(0, 10) : '';
   const resetCreate = () => {
     setAdding(false);
     setCreateError('');
-    setForm({ ...emptyCreateForm, start: todayIsoDate() });
+    setForm({ ...emptyCreateFormWithDonor, start: todayIsoDate() });
   };
 
   const sortedRows = useMemo(
@@ -114,9 +155,15 @@ export function useCoordinationsListViewModel() {
     creating,
     createError,
     handleCreate,
+    deathKindCodes,
     startDateInput,
+    donorFullName: form.donor_full_name ?? '',
+    donorBirthDateInput,
     form,
     setFormDate,
+    setDonorFullName,
+    setDonorBirthDate,
+    setDonorDeathKind,
     setFormField,
     resetCreate,
   };

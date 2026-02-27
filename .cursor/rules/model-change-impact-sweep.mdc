@@ -9,6 +9,22 @@ When adding/changing/removing entities, attributes, relations, or cardinalities:
 
 1. Perform an explicit impact sweep before finishing.
 2. Update all affected layers, not just the changed model.
+3. Treat seed updates as mandatory: every model change must include a seed-impact review and required seed updates.
+
+## Mandatory seed rule (always)
+
+- Any data model change must be reflected in the seed system in the same change set.
+- Update both:
+  - seed loaders (`backend/app/seed/__init__.py`)
+  - relevant seed datasets (`backend/app/seed/datasets/**`)
+- If no seed data change is required, document why explicitly in the final change notes.
+
+## Related entity colocation
+
+- Entities that logically belong together must be implemented in a single model file.
+- Example: medical values and their template/runtime/context entities belong together in one file (for example `backend/app/model/medical.py`).
+- When introducing a new entity that extends an existing domain cluster, add it to that cluster file instead of creating a separate model file.
+- Split across files only when there is a clear technical reason; if so, document that reason in the change notes.
 
 ## Required updates (minimum)
 

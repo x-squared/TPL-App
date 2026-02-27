@@ -4,7 +4,7 @@ from jose import JWTError, jwt
 from sqlalchemy.orm import Session, joinedload
 
 from .database import get_db
-from .models import User
+from .models import AccessPermission, Code, User
 
 # TODO: move to environment variable
 SECRET_KEY = "tpl-app-dev-secret-key-change-in-production"
@@ -34,7 +34,7 @@ def get_current_user(
 
     user = (
         db.query(User)
-        .options(joinedload(User.role))
+        .options(joinedload(User.role), joinedload(User.roles))
         .filter(User.ext_id == ext_id)
         .first()
     )
@@ -44,3 +44,40 @@ def get_current_user(
             detail="User not found",
         )
     return user
+
+
+def get_user_permission_keys(db: Session, user: User) -> list[str]:
+    role_ids = set(user.role_ids)
+    if not role_ids:
+        return []
+    keys = (
+        db.query(AccessPermission.key)
+        .join(AccessPermission.roles)
+        .filter(Code.id.in_(role_ids), Code.type == "ROLE")
+        .distinct()
+        .all()
+    )
+    return sorted(key for (key,) in keys)
+
+
+def require_permission(permission_key: str):
+    def _dependency(
+        current_user: User = Depends(get_current_user),
+        db: Session = Depends(get_db),
+    ) -> User:
+        permissions = set(get_user_permission_keys(db, current_user))
+        if permission_key not in permissions:
+            raise HTTPException(
+                status_code=status.HTTP_403_FORBIDDEN,
+                detail=f"Missing permission: {permission_key}",
+            )
+        return current_user
+
+    return _dependency
+
+
+def require_admin(
+    current_user: User = Depends(get_current_user),
+    db: Session = Depends(get_db),
+) -> User:
+    return require_permission("view.admin")(current_user=current_user, db=db)

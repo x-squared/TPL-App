@@ -1,6 +1,7 @@
 import type React from 'react';
 import type { Code, CoordinationOrigin } from '../../../api';
 import EditableSectionHeader from '../../layout/EditableSectionHeader';
+import ErrorBanner from '../../layout/ErrorBanner';
 
 interface OriginDraft {
   detection_hospital_id: number;
@@ -95,7 +96,7 @@ export default function CoordinationHospitalsSection({
           )}
         </div>
       </div>
-      {originError && <p className="status">{originError}</p>}
+      <ErrorBanner message={originError} />
     </section>
   );
 }

@@ -36,4 +36,8 @@ export const e2eTestsApi = {
       method: 'POST',
       body: JSON.stringify(payload),
     }),
+  createHealthCheck422: () =>
+    request<void>('/e2e-tests/health-check/create-422', {
+      method: 'POST',
+    }),
 };

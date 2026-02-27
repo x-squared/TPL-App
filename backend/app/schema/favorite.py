@@ -46,3 +46,8 @@ class FavoriteResponse(FavoriteBase):
     id: int
     created_at: datetime
     updated_at: datetime | None = None
+    sort_pos: int
+
+
+class FavoriteReorderRequest(BaseModel):
+    favorite_ids: list[int]

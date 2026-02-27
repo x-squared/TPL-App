@@ -1,4 +1,4 @@
-import { request, type AppUser, type Code } from './core';
+import { request, type AppUser, type Code, type Person } from './core';
 
 export interface ColloqiumType {
   id: number;
@@ -6,6 +6,8 @@ export interface ColloqiumType {
   organ_id: number;
   organ: Code | null;
   participants: string;
+  participant_ids: number[];
+  participants_people: Person[];
   changed_by_id: number | null;
   changed_by_user: AppUser | null;
   created_at: string;
@@ -18,6 +20,8 @@ export interface Colloqium {
   colloqium_type: ColloqiumType | null;
   date: string;
   participants: string;
+  participant_ids: number[];
+  participants_people: Person[];
   changed_by_id: number | null;
   changed_by_user: AppUser | null;
   created_at: string;
@@ -28,18 +32,21 @@ export interface ColloqiumCreate {
   colloqium_type_id: number;
   date: string;
   participants?: string;
+  participant_ids?: number[];
 }
 
 export interface ColloqiumUpdate {
   colloqium_type_id?: number;
   date?: string;
   participants?: string;
+  participant_ids?: number[];
 }
 
 export interface ColloqiumTypeUpdate {
   name?: string;
   organ_id?: number;
   participants?: string;
+  participant_ids?: number[];
 }
 
 export interface ColloqiumAgenda {

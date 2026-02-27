@@ -22,6 +22,12 @@ For any new complex view (like patients or colloquiums), follow this structure b
   - Reuse existing shared class patterns before introducing new classes.
   - Prefer extending shared classes over duplicating style blocks across views.
   - Avoid inline styles except for truly dynamic values that cannot be expressed cleanly via classes.
+  - **Visual consistency checklist (required for new tabs/sections):**
+    - Use existing panel and heading classes (`ui-panel-section`, `detail-section-heading`) instead of ad-hoc wrappers.
+    - Use existing button variants (`patients-save-btn`, `patients-cancel-btn`, `patients-add-btn`, `ci-add-btn`) instead of unstyled/default buttons.
+    - Use standard table wrappers/classes (`ui-table-wrap`, `patients-table-wrap`, `data-table`) so spacing, typography, and hover states match.
+    - Keep feature-specific style rules in the feature CSS file (for example `AdminView.css`), and avoid adding feature styles to `App.css` unless shared by multiple views.
+    - Match existing form rhythm: label + input stacks, consistent gaps, and no custom one-off control sizing unless necessary.
 - **Shared rendering utilities**:
   - Centralize repeated display formatting logic (for example dates/times, empty placeholders, labels) in shared utilities under `frontend/src/views/layout/` (or another shared location) instead of duplicating inline logic in components.
   - For date rendering in view output, use shared formatters (for example `dateFormat.ts`) and keep formatting consistent across list/detail/header sections.

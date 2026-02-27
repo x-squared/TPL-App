@@ -30,15 +30,60 @@ lsof -i tcp:8000 || true
 lsof -i tcp:5173 || true
 ```
 
-### 2) Clean DB content but keep SQLite file (optional, quick reset)
+### 2) Database management (schema and data are split)
+
+Use dedicated modules:
+
+- `app.db_schema` for schema (DDL only)
+- `app.db_data` for data operations (DML only)
+- `app.db_admin` as convenience wrapper for common combinations
+
+For full option reference and detailed behavior, see `doc/database-manual.qmd`.
+
+Default for `app.db_admin` is `--mode refresh` (migrate schema + clean data + seed).
+If schema drift cannot be reconciled by `migrate`, `refresh` automatically falls back to schema recreate.
 
 ```{bash}
 cd /Users/stephan/Workspace/TPL-App/backend
 source .venv/bin/activate
-python scripts/clean_sqlite_keep_file.py
+python -m app.db_admin --mode refresh --env DEV
 ```
 
-### 3) Start backend (includes DB initialization + seed profile handling)
+#### Common full commands
+
+**A) Recreate entirely (drop/create schema + seed):**
+
+```{bash}
+cd /Users/stephan/Workspace/TPL-App/backend
+source .venv/bin/activate
+python -m app.db_admin --mode recreate --env DEV
+```
+
+**B) Update schema only (keep current data):**
+
+```{bash}
+cd /Users/stephan/Workspace/TPL-App/backend
+source .venv/bin/activate
+python -m app.db_schema --mode migrate --env DEV
+```
+
+**C) Update schema + clean data + seed (recommended default):**
+
+```{bash}
+cd /Users/stephan/Workspace/TPL-App/backend
+source .venv/bin/activate
+python -m app.db_admin --mode refresh --env DEV
+```
+
+**D) Only clean data (keep schema, no reseed):**
+
+```{bash}
+cd /Users/stephan/Workspace/TPL-App/backend
+source .venv/bin/activate
+python -m app.db_data --mode clean --env DEV
+```
+
+### 3) Start backend
 
 ```{bash}
 cd backend
@@ -114,12 +159,6 @@ export TPL_ENV=DEV
 export TPL_CORS_ORIGINS=http://localhost:5173
 ```
 
-### Disable startup seeding
-
-```{bash}
-export TPL_SEED_ON_STARTUP=false
-```
-
 ### Override seed profile
 
 ```{bash}
@@ -174,19 +213,12 @@ lsof -ti tcp:5173 | xargs -r kill -9
 
 -   `database/tpl_app.db`
 
-### Reset database (delete file, then recreate on next backend start)
-
-```{bash}
-cd /Users/stephan/Workspace/TPL-App
-rm -f database/tpl_app.db
-```
-
-Then restart backend:
+### Reset database (recreate schema + seed explicitly)
 
 ```{bash}
 cd backend
 source .venv/bin/activate
-uvicorn app.main:app --reload
+python -m app.db_admin --mode recreate --env DEV
 ```
 
 ### Clean database content but keep SQLite file
@@ -194,15 +226,15 @@ uvicorn app.main:app --reload
 ```{bash}
 cd /Users/stephan/Workspace/TPL-App/backend
 source .venv/bin/activate
-python scripts/clean_sqlite_keep_file.py
+python -m app.db_data --mode clean --env DEV
 ```
 
-Optional custom DB path:
+Optional custom DB URL/path override:
 
 ```{bash}
 cd /Users/stephan/Workspace/TPL-App/backend
 source .venv/bin/activate
-python scripts/clean_sqlite_keep_file.py --db /Users/stephan/Workspace/TPL-App/database/tpl_app.db
+python -m app.db_data --mode clean --env DEV --db-url sqlite:///../database/tpl_app.db
 ```
 
 ------------------------------------------------------------------------

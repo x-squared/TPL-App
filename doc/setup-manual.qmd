@@ -60,7 +60,6 @@ Important environment variables:
 - `TPL_DATABASE_URL`
 - `TPL_CORS_ORIGINS`
 - `TPL_SEED_PROFILE`
-- `TPL_SEED_ON_STARTUP`
 
 Typical local defaults:
 

@@ -1,6 +1,13 @@
 import { useEffect, useMemo, useState } from 'react';
-import { api, type Colloqium } from '../../../../api';
+import { api, type Colloqium, type Person } from '../../../../api';
+import { toUserErrorMessage } from '../../../../api/error';
 import type { ColloquiumDetailTab } from '../colloquiumDetailViewModelTypes';
+
+const formatParticipants = (people: Person[]) =>
+  people
+    .map((person) => `${person.first_name} ${person.surname}`.trim())
+    .filter((name) => name.length > 0)
+    .join(', ');
 
 export function useColloquiumGeneralDetails(colloqiumId: number) {
   const [colloqium, setColloqium] = useState<Colloqium | null>(null);
@@ -9,6 +16,7 @@ export function useColloquiumGeneralDetails(colloqiumId: number) {
   const [draftName, setDraftName] = useState('');
   const [draftDate, setDraftDate] = useState('');
   const [draftParticipants, setDraftParticipants] = useState('');
+  const [draftParticipantsPeople, setDraftParticipantsPeople] = useState<Person[]>([]);
   const [generalEditing, setGeneralEditing] = useState(false);
   const [savingGeneral, setSavingGeneral] = useState(false);
   const [generalSaveError, setGeneralSaveError] = useState('');
@@ -19,10 +27,12 @@ export function useColloquiumGeneralDetails(colloqiumId: number) {
       try {
         const all = await api.listColloqiums();
         const selected = all.find((item) => item.id === colloqiumId) ?? null;
+        const selectedPeople = selected?.participants_people ?? [];
         setColloqium(selected);
         setDraftName(selected?.colloqium_type?.name ?? '');
         setDraftDate(selected?.date ?? '');
-        setDraftParticipants(selected?.participants ?? '');
+        setDraftParticipants(selected?.participants ?? formatParticipants(selectedPeople));
+        setDraftParticipantsPeople(selectedPeople);
         setGeneralEditing(false);
       } finally {
         setLoading(false);
@@ -35,7 +45,7 @@ export function useColloquiumGeneralDetails(colloqiumId: number) {
     colloqium
       && (
         draftName !== (colloqium.colloqium_type?.name ?? '')
-        || draftParticipants !== (colloqium.participants ?? '')
+        || JSON.stringify(draftParticipantsPeople.map((person) => person.id)) !== JSON.stringify((colloqium.participant_ids ?? []))
         || (draftDate || '') !== (colloqium.date ?? '')
       ),
   );
@@ -53,9 +63,9 @@ export function useColloquiumGeneralDetails(colloqiumId: number) {
           colloqium_type: { ...(nextColloqium.colloqium_type ?? updatedType), ...updatedType },
         };
       }
-      const colloqiumPayload: { date?: string; participants?: string } = {};
-      if (draftParticipants !== (colloqium.participants ?? '')) {
-        colloqiumPayload.participants = draftParticipants;
+      const colloqiumPayload: { date?: string; participant_ids?: number[] } = {};
+      if (JSON.stringify(draftParticipantsPeople.map((person) => person.id)) !== JSON.stringify((colloqium.participant_ids ?? []))) {
+        colloqiumPayload.participant_ids = draftParticipantsPeople.map((person) => person.id);
       }
       if ((draftDate || '') !== (colloqium.date ?? '')) {
         colloqiumPayload.date = draftDate;
@@ -69,9 +79,12 @@ export function useColloquiumGeneralDetails(colloqiumId: number) {
         };
       }
       setColloqium(nextColloqium);
+      const refreshedPeople = nextColloqium.participants_people ?? [];
+      setDraftParticipants(nextColloqium.participants ?? formatParticipants(refreshedPeople));
+      setDraftParticipantsPeople(refreshedPeople);
       setGeneralEditing(false);
     } catch (error) {
-      setGeneralSaveError(error instanceof Error ? error.message : 'Could not save colloquium details.');
+      setGeneralSaveError(toUserErrorMessage(error, 'Could not save colloquium details.'));
     } finally {
       setSavingGeneral(false);
     }
@@ -86,15 +99,22 @@ export function useColloquiumGeneralDetails(colloqiumId: number) {
     if (!colloqium) return;
     setDraftName(colloqium.colloqium_type?.name ?? '');
     setDraftDate(colloqium.date ?? '');
-    setDraftParticipants(colloqium.participants ?? '');
+    const colloqiumPeople = colloqium.participants_people ?? [];
+    setDraftParticipants(colloqium.participants ?? formatParticipants(colloqiumPeople));
+    setDraftParticipantsPeople(colloqiumPeople);
     setGeneralSaveError('');
     setGeneralEditing(false);
   };
+
+  useEffect(() => {
+    setDraftParticipants(formatParticipants(draftParticipantsPeople));
+  }, [draftParticipantsPeople]);
 
   const syncDraftFromPayload = useMemo(() => ({
     setDraftName,
     setDraftDate,
     setDraftParticipants,
+    setDraftParticipantsPeople,
   }), []);
 
   return {
@@ -108,6 +128,8 @@ export function useColloquiumGeneralDetails(colloqiumId: number) {
     setDraftDate,
     draftParticipants,
     setDraftParticipants,
+    draftParticipantsPeople,
+    setDraftParticipantsPeople,
     generalEditing,
     savingGeneral,
     generalSaveError,

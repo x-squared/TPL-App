@@ -1,8 +1,11 @@
-from fastapi import APIRouter, Depends, HTTPException
-from sqlalchemy.orm import Session, joinedload
+from fastapi import APIRouter, Depends
+from sqlalchemy.orm import Session
 
 from ..database import get_db
-from ..models import MedicalValueTemplate
+from ..features.medical_values import (
+    get_medical_value_template_or_404,
+    list_medical_value_templates as list_medical_value_templates_service,
+)
 from ..schemas import MedicalValueTemplateResponse
 
 router = APIRouter(prefix="/medical-value-templates", tags=["medical-value-templates"])
@@ -10,28 +13,9 @@ router = APIRouter(prefix="/medical-value-templates", tags=["medical-value-templ
 
 @router.get("/", response_model=list[MedicalValueTemplateResponse])
 def list_medical_value_templates(db: Session = Depends(get_db)):
-    return (
-        db.query(MedicalValueTemplate)
-        .options(
-            joinedload(MedicalValueTemplate.datatype),
-            joinedload(MedicalValueTemplate.medical_value_group),
-        )
-        .order_by(MedicalValueTemplate.pos)
-        .all()
-    )
+    return list_medical_value_templates_service(db)
 
 
 @router.get("/{template_id}", response_model=MedicalValueTemplateResponse)
 def get_medical_value_template(template_id: int, db: Session = Depends(get_db)):
-    mv = (
-        db.query(MedicalValueTemplate)
-        .options(
-            joinedload(MedicalValueTemplate.datatype),
-            joinedload(MedicalValueTemplate.medical_value_group),
-        )
-        .filter(MedicalValueTemplate.id == template_id)
-        .first()
-    )
-    if not mv:
-        raise HTTPException(status_code=404, detail="Medical value template not found")
-    return mv
+    return get_medical_value_template_or_404(template_id, db)

@@ -1,5 +1,5 @@
 import type React from 'react';
-import type { Colloqium, ColloqiumAgenda, PatientListItem } from '../../../api';
+import type { Colloqium, ColloqiumAgenda, PatientListItem, Person } from '../../../api';
 import type { AgendaDraft } from '../tabs/protocol/ColloquiumProtocolTab';
 import ColloquiumProtocolTab from '../tabs/protocol/ColloquiumProtocolTab';
 import ColloquiumDetailSection from '../tabs/colloquium/ColloquiumDetailSection';
@@ -18,6 +18,7 @@ interface Props {
   draftName: string;
   draftDate: string;
   draftParticipants: string;
+  draftParticipantsPeople: Person[];
   loadingAgendas: boolean;
   agendas: ColloqiumAgenda[];
   agendaDrafts: Record<number, AgendaDraft>;
@@ -63,7 +64,7 @@ interface Props {
   generalSaveError: string;
   setDraftName: (value: string) => void;
   setDraftDate: (value: string) => void;
-  setDraftParticipants: (value: string) => void;
+  setDraftParticipantsPeople: (value: Person[]) => void;
   saveGeneralDetails: () => void;
   startGeneralEditing: () => void;
   cancelGeneralEditing: () => void;
@@ -97,6 +98,7 @@ export default function ColloquiumDetailTabs({
   draftName,
   draftDate,
   draftParticipants,
+  draftParticipantsPeople,
   loadingAgendas,
   agendas,
   agendaDrafts,
@@ -117,7 +119,7 @@ export default function ColloquiumDetailTabs({
   generalSaveError,
   setDraftName,
   setDraftDate,
-  setDraftParticipants,
+  setDraftParticipantsPeople,
   saveGeneralDetails,
   startGeneralEditing,
   cancelGeneralEditing,
@@ -176,6 +178,7 @@ export default function ColloquiumDetailTabs({
           draftName={draftName}
           draftDate={draftDate}
           draftParticipants={draftParticipants}
+          draftParticipantsPeople={draftParticipantsPeople}
           loadingAgendas={loadingAgendas}
           agendas={agendas}
           editingAgendaId={editingAgendaId}
@@ -210,7 +213,7 @@ export default function ColloquiumDetailTabs({
           onAgendaFormChange={(patch) => setAgendaForm((prev) => ({ ...prev, ...patch }))}
           onChangeName={setDraftName}
           onChangeDate={setDraftDate}
-          onChangeParticipants={setDraftParticipants}
+          onChangeParticipantsPeople={setDraftParticipantsPeople}
           onSaveGeneralDetails={saveGeneralDetails}
           onStartGeneralEditing={startGeneralEditing}
           onCancelGeneralEditing={cancelGeneralEditing}
@@ -225,10 +228,12 @@ export default function ColloquiumDetailTabs({
             draftName={draftName}
             draftDate={draftDate}
             draftParticipants={draftParticipants}
+            draftParticipantsPeople={draftParticipantsPeople}
             loadingAgendas={loadingAgendas}
             agendas={agendas}
             agendaDrafts={agendaDrafts}
             patientsById={patientsById}
+            onChangeDraftParticipantsPeople={setDraftParticipantsPeople}
             onChangeAgendaDraft={(agendaId, patch) =>
               setAgendaDrafts((prev) => ({
                 ...prev,

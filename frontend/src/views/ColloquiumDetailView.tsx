@@ -52,6 +52,7 @@ export default function ColloquiumDetailView({
       draftName={model.draftName}
       draftDate={model.draftDate}
       draftParticipants={model.draftParticipants}
+      draftParticipantsPeople={model.draftParticipantsPeople}
       loadingAgendas={model.loadingAgendas}
       agendas={model.agendas}
       agendaDrafts={model.agendaDrafts}
@@ -72,7 +73,7 @@ export default function ColloquiumDetailView({
       generalSaveError={model.generalSaveError}
       setDraftName={model.setDraftName}
       setDraftDate={model.setDraftDate}
-      setDraftParticipants={model.setDraftParticipants}
+      setDraftParticipantsPeople={model.setDraftParticipantsPeople}
       saveGeneralDetails={model.saveGeneralDetails}
       startGeneralEditing={model.startGeneralEditing}
       cancelGeneralEditing={model.cancelGeneralEditing}

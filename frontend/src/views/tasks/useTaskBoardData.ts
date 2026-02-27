@@ -1,5 +1,6 @@
 import { useCallback, useEffect, useState } from 'react';
 import { api, type Code, type Episode, type Patient, type Task, type TaskGroup } from '../../api';
+import { toUserErrorMessage } from '../../api/error';
 import type { TaskBoardCriteria } from './taskBoardTypes';
 
 interface TaskBoardDataState {
@@ -125,7 +126,7 @@ export default function useTaskBoardData(criteria: TaskBoardCriteria, statusKeys
         setState((prev) => ({
           ...prev,
           loading: false,
-          error: err instanceof Error ? err.message : 'Could not load tasks.',
+          error: toUserErrorMessage(err, 'Could not load tasks.'),
         }));
       }
     };

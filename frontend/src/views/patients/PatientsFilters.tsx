@@ -11,9 +11,6 @@ interface Props {
   setFilterFirstName: (value: string) => void;
   filterDob: string;
   setFilterDob: (value: string) => void;
-  filterBloodType: string;
-  setFilterBloodType: (value: string) => void;
-  bloodTypeCatalogues: Code[];
   filterOrgan: string;
   setFilterOrgan: (value: string) => void;
   organCodes: Code[];
@@ -32,9 +29,6 @@ export default function PatientsFilters({
   setFilterFirstName,
   filterDob,
   setFilterDob,
-  filterBloodType,
-  setFilterBloodType,
-  bloodTypeCatalogues,
   filterOrgan,
   setFilterOrgan,
   organCodes,
@@ -53,10 +47,6 @@ export default function PatientsFilters({
       <input type="text" placeholder="Name" value={filterName} onChange={(e) => setFilterName(e.target.value)} />
       <input type="text" placeholder="First name" value={filterFirstName} onChange={(e) => setFilterFirstName(e.target.value)} />
       <input type="text" placeholder="Date of birth" value={filterDob} onChange={(e) => setFilterDob(e.target.value)} />
-      <select className="filter-select" value={filterBloodType} onChange={(e) => setFilterBloodType(e.target.value)}>
-        <option value="">Blood type...</option>
-        {bloodTypeCatalogues.map((c) => <option key={c.id} value={c.id}>{c.name_default}</option>)}
-      </select>
       <div className="filter-episode-filters">
         <select className="filter-select" value={filterOrgan} onChange={(e) => setFilterOrgan(e.target.value)}>
           <option value="">Organ...</option>

@@ -4,7 +4,7 @@ from typing import Literal
 
 from pydantic import BaseModel
 
-ReportSourceKey = Literal["PATIENT", "EPISODE", "COORDINATION"]
+ReportSourceKey = Literal["PATIENT", "EPISODE", "MEDICAL_VALUE", "COORDINATION"]
 ReportValueType = Literal["string", "number", "date", "datetime", "boolean"]
 ReportOperatorKey = Literal["eq", "contains", "gte", "lte"]
 ReportSortDirection = Literal["asc", "desc"]

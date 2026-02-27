@@ -10,6 +10,7 @@ import {
   type CoordinationTimeLog,
   type Patient,
 } from '../../../api';
+import { toUserErrorMessage } from '../../../api/error';
 
 export type CoordinationDetailTab = 'coordination' | 'protocol' | 'time-log';
 
@@ -156,7 +157,7 @@ export function useCoordinationDetailViewModel(
         setOrigin(null);
       }
     } catch (err) {
-      setError(err instanceof Error ? err.message : 'Failed to load coordination');
+      setError(toUserErrorMessage(err, 'Failed to load coordination'));
     } finally {
       setLoading(false);
     }
@@ -220,7 +221,7 @@ export function useCoordinationDetailViewModel(
       setPendingStopAt(null);
       setTimeLogs(await api.listCoordinationTimeLogs(coordinationId));
     } catch (err) {
-      setLogError(err instanceof Error ? err.message : 'Failed to save time log');
+      setLogError(toUserErrorMessage(err, 'Failed to save time log'));
     }
   };
 
@@ -357,7 +358,7 @@ export function useCoordinationDetailViewModel(
       setTimeLogs(await api.listCoordinationTimeLogs(coordinationId));
       closeLogEditor();
     } catch (err) {
-      setLogError(err instanceof Error ? err.message : 'Failed to save time log');
+      setLogError(toUserErrorMessage(err, 'Failed to save time log'));
     }
   };
 

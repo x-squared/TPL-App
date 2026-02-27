@@ -1,13 +1,13 @@
 from contextlib import asynccontextmanager
+import datetime as dt
 
 from fastapi import FastAPI
 from fastapi.middleware.cors import CORSMiddleware
 from sqlalchemy import text
 
 from .config import get_config
-from .database import Base, SessionLocal, engine
+from .database import Base, engine
 from .routers import register_routers
-from .seed import run_seed_profile
 
 
 def ensure_diagnosis_is_main_column() -> None:
@@ -48,73 +48,49 @@ def ensure_episode_organ_columns() -> None:
         )
 
 
-def ensure_medical_value_group_schema() -> None:
+def ensure_favorite_sort_pos_column() -> None:
     with engine.begin() as conn:
+        columns = conn.execute(text("PRAGMA table_info('FAVORITE')")).mappings().all()
+        if not columns:
+            return
+        existing = {column["name"] for column in columns}
+        if "SORT_POS" not in existing:
+            conn.execute(text("ALTER TABLE FAVORITE ADD COLUMN SORT_POS INTEGER NOT NULL DEFAULT 0"))
         conn.execute(
             text(
-                """
-                CREATE TABLE IF NOT EXISTS MEDICAL_VALUE_GROUP (
-                  ID INTEGER PRIMARY KEY,
-                  KEY VARCHAR(48) NOT NULL UNIQUE,
-                  NAME_DEFAULT VARCHAR(128) NOT NULL DEFAULT '',
-                  POS INTEGER NOT NULL DEFAULT 0,
-                  RENEW_DATE DATE NULL,
-                  CHANGED_BY INTEGER NULL,
-                  CREATED_AT DATETIME DEFAULT CURRENT_TIMESTAMP,
-                  UPDATED_AT DATETIME NULL
-                )
-                """
+                "UPDATE FAVORITE "
+                "SET SORT_POS = COALESCE((SELECT COUNT(*) FROM FAVORITE f2 WHERE f2.USER_ID = FAVORITE.USER_ID AND (f2.CREATED_AT < FAVORITE.CREATED_AT OR (f2.CREATED_AT = FAVORITE.CREATED_AT AND f2.ID <= FAVORITE.ID))), 0) "
+                "WHERE SORT_POS IS NULL OR SORT_POS = 0"
             )
         )
+
+
+def ensure_information_valid_from_column() -> None:
+    min_valid_from = dt.date.today() + dt.timedelta(days=1)
+    while min_valid_from.weekday() >= 5:
+        min_valid_from += dt.timedelta(days=1)
+    with engine.begin() as conn:
+        columns = conn.execute(text("PRAGMA table_info('INFORMATION')")).mappings().all()
+        if not columns:
+            return
+        existing = {column["name"] for column in columns}
+        if "VALID_FROM" not in existing:
+            conn.execute(text("ALTER TABLE INFORMATION ADD COLUMN VALID_FROM DATE"))
         conn.execute(
-            text("CREATE UNIQUE INDEX IF NOT EXISTS ix_medical_value_group_key ON MEDICAL_VALUE_GROUP(KEY)")
+            text("UPDATE INFORMATION SET VALID_FROM = COALESCE(VALID_FROM, :min_valid_from)"),
+            {"min_valid_from": min_valid_from.isoformat()},
         )
 
-        template_columns = conn.execute(text("PRAGMA table_info('MEDICAL_VALUE_TEMPLATE')")).mappings().all()
-        template_existing = {column["name"] for column in template_columns}
-        if "MEDICAL_VALUE_GROUP_ID" not in template_existing:
-            conn.execute(text("ALTER TABLE MEDICAL_VALUE_TEMPLATE ADD COLUMN MEDICAL_VALUE_GROUP_ID INTEGER"))
 
-        value_columns = conn.execute(text("PRAGMA table_info('MEDICAL_VALUE')")).mappings().all()
-        value_existing = {column["name"] for column in value_columns}
-        if "MEDICAL_VALUE_GROUP_ID" not in value_existing:
-            conn.execute(text("ALTER TABLE MEDICAL_VALUE ADD COLUMN MEDICAL_VALUE_GROUP_ID INTEGER"))
-
-        defaults = [
-            ("GENERAL", "Medical Values", 10),
-            ("CARDIOLOGY", "Cardiological Data", 20),
-            ("ORGAN_SPECIFIC", "Organ Specific Data", 30),
-            ("USER_CAPTURED", "User Captured Values", 40),
-            ("DONOR", "Donor Data", 50),
-            ("UNGROUPED", "Ungrouped", 99),
-        ]
-        for key, name_default, pos in defaults:
-            conn.execute(
-                text(
-                    "INSERT OR IGNORE INTO MEDICAL_VALUE_GROUP(KEY, NAME_DEFAULT, POS) "
-                    "VALUES (:key, :name_default, :pos)"
-                ),
-                {"key": key, "name_default": name_default, "pos": pos},
-            )
-
-        conn.execute(
-            text(
-                "UPDATE MEDICAL_VALUE_TEMPLATE "
-                "SET MEDICAL_VALUE_GROUP_ID = (SELECT ID FROM MEDICAL_VALUE_GROUP WHERE KEY = 'UNGROUPED' LIMIT 1) "
-                "WHERE MEDICAL_VALUE_GROUP_ID IS NULL"
-            )
-        )
-        conn.execute(
-            text(
-                "UPDATE MEDICAL_VALUE "
-                "SET MEDICAL_VALUE_GROUP_ID = COALESCE("
-                "  MEDICAL_VALUE_GROUP_ID,"
-                "  (SELECT MEDICAL_VALUE_GROUP_ID FROM MEDICAL_VALUE_TEMPLATE WHERE MEDICAL_VALUE_TEMPLATE.ID = MEDICAL_VALUE.MEDICAL_VALUE_TEMPLATE_ID),"
-                "  (SELECT ID FROM MEDICAL_VALUE_GROUP WHERE KEY = 'USER_CAPTURED' LIMIT 1)"
-                ") "
-                "WHERE MEDICAL_VALUE_GROUP_ID IS NULL"
-            )
-        )
+def ensure_information_withdrawn_column() -> None:
+    with engine.begin() as conn:
+        columns = conn.execute(text("PRAGMA table_info('INFORMATION')")).mappings().all()
+        if not columns:
+            return
+        existing = {column["name"] for column in columns}
+        if "WITHDRAWN" not in existing:
+            conn.execute(text("ALTER TABLE INFORMATION ADD COLUMN WITHDRAWN BOOLEAN NOT NULL DEFAULT 0"))
+        conn.execute(text("UPDATE INFORMATION SET WITHDRAWN = COALESCE(WITHDRAWN, 0)"))
 
 
 @asynccontextmanager
@@ -122,24 +98,9 @@ async def lifespan(app: FastAPI):
     Base.metadata.create_all(bind=engine)
     ensure_diagnosis_is_main_column()
     ensure_episode_organ_columns()
-    ensure_medical_value_group_schema()
-    cfg = get_config()
-    db = SessionLocal()
-    try:
-        if cfg.seed_on_startup:
-            result = run_seed_profile(db, app_env=cfg.env, seed_profile=cfg.seed_profile)
-            print(
-                "[seed] env="
-                + result["environment"]
-                + " categories="
-                + ",".join(result["categories"])
-                + " jobs="
-                + ",".join(result["executed_jobs"])
-            )
-        else:
-            print("[seed] startup seeding disabled (TPL_SEED_ON_STARTUP=false)")
-    finally:
-        db.close()
+    ensure_favorite_sort_pos_column()
+    ensure_information_valid_from_column()
+    ensure_information_withdrawn_column()
     yield
 
 

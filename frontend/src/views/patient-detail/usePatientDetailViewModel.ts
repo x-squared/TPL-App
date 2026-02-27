@@ -23,7 +23,6 @@ export function usePatientDetailViewModel(
     patientId,
     core.patient,
     core.refreshPatient,
-    episodes.organCodes,
   );
 
   const tabsProps: PatientDetailTabsProps | null = core.patient
@@ -46,7 +45,6 @@ export function usePatientDetailViewModel(
         setField: core.setField,
         languages: core.languages,
         sexCodes: core.sexCodes,
-        bloodTypes: core.bloodTypes,
         coordUsers: core.coordUsers,
       },
       contacts,

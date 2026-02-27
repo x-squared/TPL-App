@@ -1,37 +1,23 @@
-from fastapi import APIRouter, Depends, HTTPException
-from sqlalchemy.orm import Session, joinedload
+from fastapi import APIRouter, Depends
+from sqlalchemy.orm import Session
 
 from ..auth import get_current_user
 from ..database import get_db
-from ..models import Diagnosis, Patient, User
+from ..features.diagnoses import (
+    create_diagnosis as create_diagnosis_service,
+    delete_diagnosis as delete_diagnosis_service,
+    list_diagnoses as list_diagnoses_service,
+    update_diagnosis as update_diagnosis_service,
+)
+from ..models import User
 from ..schemas import DiagnosisCreate, DiagnosisResponse, DiagnosisUpdate
 
 router = APIRouter(prefix="/patients/{patient_id}/diagnoses", tags=["diagnoses"])
 
 
-def _get_patient_or_404(patient_id: int, db: Session) -> Patient:
-    patient = db.query(Patient).filter(Patient.id == patient_id).first()
-    if not patient:
-        raise HTTPException(status_code=404, detail="Patient not found")
-    return patient
-
-
-def _clear_other_main_diagnoses(patient_id: int, db: Session, keep_id: int | None = None) -> None:
-    query = db.query(Diagnosis).filter(Diagnosis.patient_id == patient_id, Diagnosis.is_main.is_(True))
-    if keep_id is not None:
-        query = query.filter(Diagnosis.id != keep_id)
-    query.update({Diagnosis.is_main: False}, synchronize_session=False)
-
-
 @router.get("/", response_model=list[DiagnosisResponse])
 def list_diagnoses(patient_id: int, db: Session = Depends(get_db)):
-    _get_patient_or_404(patient_id, db)
-    return (
-        db.query(Diagnosis)
-        .options(joinedload(Diagnosis.catalogue), joinedload(Diagnosis.changed_by_user))
-        .filter(Diagnosis.patient_id == patient_id)
-        .all()
-    )
+    return list_diagnoses_service(patient_id=patient_id, db=db)
 
 
 @router.post("/", response_model=DiagnosisResponse, status_code=201)
@@ -41,28 +27,12 @@ def create_diagnosis(
     db: Session = Depends(get_db),
     current_user: User = Depends(get_current_user),
 ):
-    _get_patient_or_404(patient_id, db)
-    has_existing = (
-        db.query(Diagnosis.id)
-        .filter(Diagnosis.patient_id == patient_id)
-        .first()
-        is not None
-    )
-    payload_data = payload.model_dump()
-    if not has_existing:
-        # First diagnosis for a patient must always be the main diagnosis.
-        payload_data["is_main"] = True
-    if payload_data.get("is_main"):
-        _clear_other_main_diagnoses(patient_id, db)
-    diagnosis = Diagnosis(
+    return create_diagnosis_service(
         patient_id=patient_id,
-        **payload_data,
+        payload=payload,
         changed_by_id=current_user.id,
+        db=db,
     )
-    db.add(diagnosis)
-    db.commit()
-    db.refresh(diagnosis)
-    return diagnosis
 
 
 @router.patch("/{diagnosis_id}", response_model=DiagnosisResponse)
@@ -73,21 +43,13 @@ def update_diagnosis(
     db: Session = Depends(get_db),
     current_user: User = Depends(get_current_user),
 ):
-    diagnosis = (
-        db.query(Diagnosis)
-        .filter(Diagnosis.id == diagnosis_id, Diagnosis.patient_id == patient_id)
-        .first()
+    return update_diagnosis_service(
+        patient_id=patient_id,
+        diagnosis_id=diagnosis_id,
+        payload=payload,
+        changed_by_id=current_user.id,
+        db=db,
     )
-    if not diagnosis:
-        raise HTTPException(status_code=404, detail="Diagnosis not found")
-    if payload.is_main is True:
-        _clear_other_main_diagnoses(patient_id, db, keep_id=diagnosis.id)
-    for key, value in payload.model_dump(exclude_unset=True).items():
-        setattr(diagnosis, key, value)
-    diagnosis.changed_by_id = current_user.id
-    db.commit()
-    db.refresh(diagnosis)
-    return diagnosis
 
 
 @router.delete("/{diagnosis_id}", status_code=204)
@@ -97,12 +59,4 @@ def delete_diagnosis(
     db: Session = Depends(get_db),
     current_user: User = Depends(get_current_user),
 ):
-    diagnosis = (
-        db.query(Diagnosis)
-        .filter(Diagnosis.id == diagnosis_id, Diagnosis.patient_id == patient_id)
-        .first()
-    )
-    if not diagnosis:
-        raise HTTPException(status_code=404, detail="Diagnosis not found")
-    db.delete(diagnosis)
-    db.commit()
+    delete_diagnosis_service(patient_id=patient_id, diagnosis_id=diagnosis_id, db=db)

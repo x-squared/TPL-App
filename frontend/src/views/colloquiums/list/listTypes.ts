@@ -1,3 +1,5 @@
+import type { Person } from '../../../api';
+
 export interface ColloquiumsFilterState {
   typeId: string;
   anchorDate: string;
@@ -7,6 +9,7 @@ export interface ColloquiumsFilterState {
 export interface ColloquiumCreateFormState {
   colloqium_type_id: string;
   date: string;
-  participants: string;
+  participant_ids: number[];
+  participants_people: Person[];
 }
 

@@ -2,7 +2,7 @@ from fastapi import APIRouter, Depends, Query
 from sqlalchemy.orm import Session
 
 from ..database import get_db
-from ..models import Code
+from ..features.reference import list_codes as list_codes_service
 from ..schemas import CodeResponse
 
 router = APIRouter(prefix="/codes", tags=["codes"])
@@ -13,7 +13,4 @@ def list_codes(
     type: str | None = Query(None),
     db: Session = Depends(get_db),
 ):
-    query = db.query(Code)
-    if type:
-        query = query.filter(Code.type == type)
-    return query.order_by(Code.type, Code.pos).all()
+    return list_codes_service(code_type=type, db=db)

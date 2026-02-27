@@ -74,6 +74,14 @@ class Favorite(Base):
         comment="Referenced coordination id, if favorite type is COORDINATION.",
         info={"label": "Coordination"},
     )
+    sort_pos = Column(
+        "SORT_POS",
+        Integer,
+        nullable=False,
+        default=0,
+        comment="Sort position of the favorite within one user list.",
+        info={"label": "Sort Position"},
+    )
     created_at = Column(
         "CREATED_AT",
         DateTime(timezone=True),

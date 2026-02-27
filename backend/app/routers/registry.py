@@ -2,6 +2,8 @@ from fastapi import FastAPI
 
 from . import (
     absences,
+    admin_access,
+    admin_people,
     auth,
     catalogues,
     e2e_tests,
@@ -11,14 +13,9 @@ from . import (
     coordination_donors,
     coordination_episodes,
     coordination_organ_effects,
+    coordination_protocol_events,
     coordination_procurements,
-    coordination_procurement_hearts,
-    coordination_procurement_heart_valves,
-    coordination_procurement_intestines,
-    coordination_procurement_islets,
-    coordination_procurement_kidneys,
-    coordination_procurement_livers,
-    coordination_procurement_pancreases,
+    coordination_procurement_flex,
     coordination_time_logs,
     coordination_origins,
     coordinations,
@@ -27,15 +24,18 @@ from . import (
     diagnoses,
     episodes,
     favorites,
+    information,
     medical_data,
     medical_value_groups,
     medical_values,
+    persons,
     patients,
     reports_router as reports,
     task_group_templates,
     task_groups,
     task_templates,
     tasks,
+    support_ticket,
     users,
 )
 
@@ -43,6 +43,8 @@ from . import (
 def register_routers(app: FastAPI) -> None:
     """Register all API routers."""
     app.include_router(auth.router, prefix="/api")
+    app.include_router(admin_access.router, prefix="/api")
+    app.include_router(admin_people.router, prefix="/api")
     app.include_router(e2e_tests.router, prefix="/api")
     app.include_router(patients.router, prefix="/api")
     app.include_router(reports.router, prefix="/api")
@@ -51,9 +53,11 @@ def register_routers(app: FastAPI) -> None:
     app.include_router(diagnoses.router, prefix="/api")
     app.include_router(episodes.router, prefix="/api")
     app.include_router(favorites.router, prefix="/api")
+    app.include_router(information.router, prefix="/api")
     app.include_router(medical_data.router, prefix="/api")
     app.include_router(medical_value_groups.router, prefix="/api")
     app.include_router(medical_values.router, prefix="/api")
+    app.include_router(persons.router, prefix="/api")
     app.include_router(codes.router, prefix="/api")
     app.include_router(catalogues.router, prefix="/api")
     app.include_router(users.router, prefix="/api")
@@ -64,17 +68,13 @@ def register_routers(app: FastAPI) -> None:
     app.include_router(coordination_donors.router, prefix="/api")
     app.include_router(coordination_episodes.router, prefix="/api")
     app.include_router(coordination_organ_effects.router, prefix="/api")
+    app.include_router(coordination_protocol_events.router, prefix="/api")
     app.include_router(coordination_procurements.router, prefix="/api")
-    app.include_router(coordination_procurement_hearts.router, prefix="/api")
-    app.include_router(coordination_procurement_heart_valves.router, prefix="/api")
-    app.include_router(coordination_procurement_intestines.router, prefix="/api")
-    app.include_router(coordination_procurement_islets.router, prefix="/api")
-    app.include_router(coordination_procurement_kidneys.router, prefix="/api")
-    app.include_router(coordination_procurement_livers.router, prefix="/api")
-    app.include_router(coordination_procurement_pancreases.router, prefix="/api")
+    app.include_router(coordination_procurement_flex.router, prefix="/api")
     app.include_router(coordination_time_logs.router, prefix="/api")
     app.include_router(coordination_origins.router, prefix="/api")
     app.include_router(task_group_templates.router, prefix="/api")
     app.include_router(task_groups.router, prefix="/api")
     app.include_router(task_templates.router, prefix="/api")
     app.include_router(tasks.router, prefix="/api")
+    app.include_router(support_ticket.router, prefix="/api")

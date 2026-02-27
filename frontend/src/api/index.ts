@@ -1,10 +1,15 @@
-export { getToken, setToken, clearToken, authApi, codesApi, medicalValueTemplatesApi, medicalValueGroupsApi, usersApi, adminAccessApi } from './core';
+export { getToken, setToken, clearToken, authApi, codesApi, medicalValueTemplatesApi, medicalValueGroupsApi, usersApi, adminAccessApi, personsApi, adminPeopleApi, supportTicketApi } from './core';
 export type {
   AppUser,
   AccessControlMatrix,
   AccessPermission,
+  Person,
+  PersonCreate,
+  PersonUpdate,
+  PersonTeam,
   Code,
   HealthInfo,
+  SupportTicketConfig,
   DatatypeDefinition,
   MedicalValueGroupInstance,
   MedicalValueTemplate,
@@ -46,10 +51,14 @@ export type {
   CoordinationTimeLog,
   CoordinationTimeLogCreate,
   CoordinationTimeLogUpdate,
+  CoordinationProtocolEventLog,
+  CoordinationProtocolEventLogCreate,
   CoordinationEpisode,
 } from './coordinations';
 export { favoritesApi } from './favorites';
 export type { Favorite, FavoriteCreate, FavoriteTypeKey } from './favorites';
+export { informationApi } from './information';
+export type { Information, InformationCreate, InformationUpdate } from './information';
 export { reportsApi } from './reports';
 export type {
   ReportSourceKey,
@@ -75,12 +84,13 @@ export type {
   E2ETestRunResponse,
 } from './e2eTests';
 
-import { authApi, codesApi, medicalValueTemplatesApi, medicalValueGroupsApi, usersApi, adminAccessApi } from './core';
+import { authApi, codesApi, medicalValueTemplatesApi, medicalValueGroupsApi, usersApi, adminAccessApi, personsApi, adminPeopleApi, supportTicketApi } from './core';
 import { patientsApi } from './patients';
 import { tasksApi } from './tasks';
 import { colloqiumsApi } from './colloqiums';
 import { coordinationsApi } from './coordinations';
 import { favoritesApi } from './favorites';
+import { informationApi } from './information';
 import { reportsApi } from './reports';
 import { e2eTestsApi } from './e2eTests';
 
@@ -91,11 +101,15 @@ export const api = {
   ...medicalValueGroupsApi,
   ...usersApi,
   ...adminAccessApi,
+  ...personsApi,
+  ...adminPeopleApi,
+  ...supportTicketApi,
   ...patientsApi,
   ...tasksApi,
   ...colloqiumsApi,
   ...coordinationsApi,
   ...favoritesApi,
+  ...informationApi,
   ...reportsApi,
   ...e2eTestsApi,
 };

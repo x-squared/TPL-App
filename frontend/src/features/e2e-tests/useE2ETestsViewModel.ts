@@ -5,11 +5,15 @@ import {
   type E2ETestRunnerKey,
   type E2ETestRunnerOption,
 } from '../../api';
+import { toUserErrorMessage } from '../../api/error';
+import type { E2ETestsTabKey, E2ETestsViewModel } from './types';
 
-export function useE2ETestsViewModel() {
+export function useE2ETestsViewModel(): E2ETestsViewModel {
   const [loading, setLoading] = useState(true);
   const [running, setRunning] = useState(false);
+  const [runningHealthCheck, setRunningHealthCheck] = useState(false);
   const [error, setError] = useState('');
+  const [activeTab, setActiveTab] = useState<E2ETestsTabKey>('e2e-tests');
   const [runners, setRunners] = useState<E2ETestRunnerOption[]>([]);
   const [selectedRunner, setSelectedRunner] = useState<E2ETestRunnerKey>('partner');
   const [outputTailLines, setOutputTailLines] = useState(160);
@@ -25,7 +29,7 @@ export function useE2ETestsViewModel() {
         setSelectedRunner(response.runners[0].key);
       }
     } catch (err) {
-      setError(err instanceof Error ? err.message : 'Failed to load E2E test metadata');
+      setError(toUserErrorMessage(err, 'Failed to load E2E test metadata'));
     } finally {
       setLoading(false);
     }
@@ -45,7 +49,7 @@ export function useE2ETestsViewModel() {
       });
       setLastResult(result);
     } catch (err) {
-      setError(err instanceof Error ? err.message : 'Failed to run E2E tests');
+      setError(toUserErrorMessage(err, 'Failed to run E2E tests'));
     } finally {
       setRunning(false);
     }
@@ -55,10 +59,25 @@ export function useE2ETestsViewModel() {
     setLastResult(null);
   }, []);
 
+  const triggerHealthCheck422 = useCallback(async () => {
+    setRunningHealthCheck(true);
+    setError('');
+    try {
+      await api.createHealthCheck422();
+    } catch (err) {
+      setError(toUserErrorMessage(err, 'Failed to run health check.'));
+    } finally {
+      setRunningHealthCheck(false);
+    }
+  }, []);
+
   return {
     loading,
     running,
+    runningHealthCheck,
     error,
+    activeTab,
+    setActiveTab,
     runners,
     selectedRunner,
     setSelectedRunner,
@@ -66,6 +85,7 @@ export function useE2ETestsViewModel() {
     setOutputTailLines,
     lastResult,
     runTests,
+    triggerHealthCheck422,
     clearResults,
     refreshMetadata: loadMetadata,
   };

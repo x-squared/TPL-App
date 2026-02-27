@@ -2,10 +2,11 @@ from __future__ import annotations
 
 from datetime import date, datetime
 
-from pydantic import BaseModel, ConfigDict
+from pydantic import BaseModel, ConfigDict, field_validator
 
 from .clinical import EpisodeResponse
 from .reference import CatalogueResponse, CodeResponse, UserResponse
+from .tasking import TaskResponse
 
 
 class CoordinationBase(BaseModel):
@@ -133,6 +134,42 @@ class CoordinationTimeLogResponse(CoordinationTimeLogBase):
     updated_at: datetime | None = None
 
 
+class CoordinationProtocolEventLogBase(BaseModel):
+    coordination_id: int
+    organ_id: int
+    event: str
+    time: datetime
+    task_id: int | None = None
+
+
+class CoordinationProtocolEventLogCreate(BaseModel):
+    organ_id: int
+    event: str
+    task_id: int | None = None
+
+    @field_validator("event")
+    @classmethod
+    def _validate_event(cls, value: str) -> str:
+        trimmed = value.strip()
+        if not trimmed:
+            raise ValueError("event must not be empty")
+        if len(trimmed) > 128:
+            raise ValueError("event must be at most 128 characters")
+        return trimmed
+
+
+class CoordinationProtocolEventLogResponse(CoordinationProtocolEventLogBase):
+    model_config = ConfigDict(from_attributes=True)
+
+    id: int
+    organ: CodeResponse | None = None
+    task: TaskResponse | None = None
+    changed_by_id: int | None = None
+    changed_by_user: UserResponse | None = None
+    created_at: datetime
+    updated_at: datetime | None = None
+
+
 class CoordinationEpisodeBase(BaseModel):
     coordination_id: int
     episode_id: int
@@ -215,29 +252,14 @@ class CoordinationProcurementResponse(CoordinationProcurementBase):
     updated_at: datetime | None = None
 
 
-class CoordinationProcurementHeartBase(BaseModel):
-    coordination_id: int
-    cold_perfusion: datetime | None = None
-    procurment_surgeon: str = ""
-    nmp_used: bool = False
-    evlp_used: bool = False
+class CoordinationProcurementFieldTemplateBase(BaseModel):
+    key: str
+    name_default: str = ""
+    pos: int = 0
+    datatype_def_id: int
 
 
-class CoordinationProcurementHeartCreate(BaseModel):
-    cold_perfusion: datetime | None = None
-    procurment_surgeon: str = ""
-    nmp_used: bool = False
-    evlp_used: bool = False
-
-
-class CoordinationProcurementHeartUpdate(BaseModel):
-    cold_perfusion: datetime | None = None
-    procurment_surgeon: str | None = None
-    nmp_used: bool | None = None
-    evlp_used: bool | None = None
-
-
-class CoordinationProcurementHeartResponse(CoordinationProcurementHeartBase):
+class CoordinationProcurementFieldTemplateResponse(CoordinationProcurementFieldTemplateBase):
     model_config = ConfigDict(from_attributes=True)
 
     id: int
@@ -247,169 +269,92 @@ class CoordinationProcurementHeartResponse(CoordinationProcurementHeartBase):
     updated_at: datetime | None = None
 
 
-class CoordinationProcurementLiverBase(BaseModel):
-    coordination_id: int
-    cold_perfusion_abdominal: datetime | None = None
-    procurement_surgeo: str = ""
-    nmp_used: bool = False
-    hope_used: bool = False
+class CoordinationProcurementFieldScopeTemplateBase(BaseModel):
+    field_template_id: int
+    organ_id: int | None = None
+    slot_key: str = "MAIN"
 
 
-class CoordinationProcurementLiverCreate(BaseModel):
-    cold_perfusion_abdominal: datetime | None = None
-    procurement_surgeo: str = ""
-    nmp_used: bool = False
-    hope_used: bool = False
-
-
-class CoordinationProcurementLiverUpdate(BaseModel):
-    cold_perfusion_abdominal: datetime | None = None
-    procurement_surgeo: str | None = None
-    nmp_used: bool | None = None
-    hope_used: bool | None = None
-
-
-class CoordinationProcurementLiverResponse(CoordinationProcurementLiverBase):
+class CoordinationProcurementFieldScopeTemplateResponse(CoordinationProcurementFieldScopeTemplateBase):
     model_config = ConfigDict(from_attributes=True)
 
     id: int
+    organ: CodeResponse | None = None
     changed_by_id: int | None = None
     changed_by_user: UserResponse | None = None
     created_at: datetime
     updated_at: datetime | None = None
 
 
-class CoordinationProcurementKidneyBase(BaseModel):
-    coordination_id: int
-    procurement_surgeon_left: str = ""
-    procurement_surgeon_right: str = ""
-    lifeport_right_used: bool = False
-    lifeport_left_used: bool = False
-    ope_used: bool = False
+class CoordinationProcurementValueBase(BaseModel):
+    slot_id: int
+    field_template_id: int
+    value: str = ""
 
 
-class CoordinationProcurementKidneyCreate(BaseModel):
-    procurement_surgeon_left: str = ""
-    procurement_surgeon_right: str = ""
-    lifeport_right_used: bool = False
-    lifeport_left_used: bool = False
-    ope_used: bool = False
+class CoordinationProcurementValueCreate(BaseModel):
+    value: str = ""
 
 
-class CoordinationProcurementKidneyUpdate(BaseModel):
-    procurement_surgeon_left: str | None = None
-    procurement_surgeon_right: str | None = None
-    lifeport_right_used: bool | None = None
-    lifeport_left_used: bool | None = None
-    ope_used: bool | None = None
-
-
-class CoordinationProcurementKidneyResponse(CoordinationProcurementKidneyBase):
+class CoordinationProcurementValueResponse(CoordinationProcurementValueBase):
     model_config = ConfigDict(from_attributes=True)
 
     id: int
+    field_template: CoordinationProcurementFieldTemplateResponse | None = None
     changed_by_id: int | None = None
     changed_by_user: UserResponse | None = None
     created_at: datetime
     updated_at: datetime | None = None
 
 
-class CoordinationProcurementHeartValvesBase(BaseModel):
-    coordination_id: int
-    procurement_surgeon: str = ""
-    ehb_box_nr: str = ""
-    ehb_nr: str = ""
+class CoordinationProcurementSlotBase(BaseModel):
+    coordination_procurement_organ_id: int
+    slot_key: str = "MAIN"
 
 
-class CoordinationProcurementHeartValvesCreate(BaseModel):
-    procurement_surgeon: str = ""
-    ehb_box_nr: str = ""
-    ehb_nr: str = ""
-
-
-class CoordinationProcurementHeartValvesUpdate(BaseModel):
-    procurement_surgeon: str | None = None
-    ehb_box_nr: str | None = None
-    ehb_nr: str | None = None
-
-
-class CoordinationProcurementHeartValvesResponse(CoordinationProcurementHeartValvesBase):
+class CoordinationProcurementSlotResponse(CoordinationProcurementSlotBase):
     model_config = ConfigDict(from_attributes=True)
 
     id: int
+    values: list[CoordinationProcurementValueResponse] = []
     changed_by_id: int | None = None
     changed_by_user: UserResponse | None = None
     created_at: datetime
     updated_at: datetime | None = None
 
 
-class CoordinationProcurementPancreasBase(BaseModel):
+class CoordinationProcurementOrganBase(BaseModel):
     coordination_id: int
+    organ_id: int
     procurement_surgeon: str = ""
 
 
-class CoordinationProcurementPancreasCreate(BaseModel):
+class CoordinationProcurementOrganCreate(BaseModel):
     procurement_surgeon: str = ""
 
 
-class CoordinationProcurementPancreasUpdate(BaseModel):
+class CoordinationProcurementOrganUpdate(BaseModel):
     procurement_surgeon: str | None = None
 
 
-class CoordinationProcurementPancreasResponse(CoordinationProcurementPancreasBase):
+class CoordinationProcurementOrganResponse(CoordinationProcurementOrganBase):
     model_config = ConfigDict(from_attributes=True)
 
     id: int
+    organ: CodeResponse | None = None
+    slots: list[CoordinationProcurementSlotResponse] = []
     changed_by_id: int | None = None
     changed_by_user: UserResponse | None = None
     created_at: datetime
     updated_at: datetime | None = None
 
 
-class CoordinationProcurementIsletsBase(BaseModel):
-    coordination_id: int
-    procurement_surgeon: str = ""
-
-
-class CoordinationProcurementIsletsCreate(BaseModel):
-    procurement_surgeon: str = ""
-
-
-class CoordinationProcurementIsletsUpdate(BaseModel):
-    procurement_surgeon: str | None = None
-
-
-class CoordinationProcurementIsletsResponse(CoordinationProcurementIsletsBase):
+class CoordinationProcurementFlexResponse(BaseModel):
     model_config = ConfigDict(from_attributes=True)
 
-    id: int
-    changed_by_id: int | None = None
-    changed_by_user: UserResponse | None = None
-    created_at: datetime
-    updated_at: datetime | None = None
-
-
-class CoordinationProcurementIntestinesBase(BaseModel):
-    coordination_id: int
-    procurement_surgeon: str = ""
-
-
-class CoordinationProcurementIntestinesCreate(BaseModel):
-    procurement_surgeon: str = ""
-
-
-class CoordinationProcurementIntestinesUpdate(BaseModel):
-    procurement_surgeon: str | None = None
-
-
-class CoordinationProcurementIntestinesResponse(CoordinationProcurementIntestinesBase):
-    model_config = ConfigDict(from_attributes=True)
-
-    id: int
-    changed_by_id: int | None = None
-    changed_by_user: UserResponse | None = None
-    created_at: datetime
-    updated_at: datetime | None = None
+    procurement: CoordinationProcurementResponse | None = None
+    organs: list[CoordinationProcurementOrganResponse] = []
+    field_templates: list[CoordinationProcurementFieldTemplateResponse] = []
 
 
 class CoordinationOrganEffectBase(BaseModel):

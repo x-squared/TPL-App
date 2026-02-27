@@ -111,46 +111,9 @@ class Coordination(Base):
         uselist=False,
         cascade="all, delete-orphan",
     )
-    procurement_heart = relationship(
-        "CoordinationProcurementHeart",
+    procurement_organs = relationship(
+        "CoordinationProcurementOrgan",
         back_populates="coordination",
-        uselist=False,
-        cascade="all, delete-orphan",
-    )
-    procurement_heart_valves = relationship(
-        "CoordinationProcurementHeartValves",
-        back_populates="coordination",
-        uselist=False,
-        cascade="all, delete-orphan",
-    )
-    procurement_liver = relationship(
-        "CoordinationProcurementLiver",
-        back_populates="coordination",
-        uselist=False,
-        cascade="all, delete-orphan",
-    )
-    procurement_kidney = relationship(
-        "CoordinationProcurementKidney",
-        back_populates="coordination",
-        uselist=False,
-        cascade="all, delete-orphan",
-    )
-    procurement_pancreas = relationship(
-        "CoordinationProcurementPancreas",
-        back_populates="coordination",
-        uselist=False,
-        cascade="all, delete-orphan",
-    )
-    procurement_islets = relationship(
-        "CoordinationProcurementIslets",
-        back_populates="coordination",
-        uselist=False,
-        cascade="all, delete-orphan",
-    )
-    procurement_intestines = relationship(
-        "CoordinationProcurementIntestines",
-        back_populates="coordination",
-        uselist=False,
         cascade="all, delete-orphan",
     )
     coordination_episodes = relationship(
@@ -168,3 +131,29 @@ class Coordination(Base):
         back_populates="coordination",
         cascade="all, delete-orphan",
     )
+    protocol_event_logs = relationship(
+        "CoordinationProtocolEventLog",
+        back_populates="coordination",
+        cascade="all, delete-orphan",
+    )
+
+
+class CoordinationProtocolEventLog(Base):
+    """Per-organ protocol event log entries for a coordination case."""
+
+    __tablename__ = "COORDINATION_PROTOCOL_EVENT_LOG"
+
+    id = Column("ID", Integer, primary_key=True, index=True)
+    coordination_id = Column("COORDINATION_ID", Integer, ForeignKey("COORDINATION.ID"), nullable=False, index=True)
+    organ_id = Column("ORGAN_ID", Integer, ForeignKey("CODE.ID"), nullable=False, index=True)
+    event = Column("EVENT", String(128), nullable=False, default="")
+    time = Column("TIME", DateTime(timezone=True), server_default=func.now(), nullable=False, index=True)
+    task_id = Column("TASK_ID", Integer, ForeignKey("TASK.ID"), nullable=True, index=True)
+    changed_by_id = Column("CHANGED_BY", Integer, ForeignKey("USER.ID"), nullable=True)
+    created_at = Column("CREATED_AT", DateTime(timezone=True), server_default=func.now())
+    updated_at = Column("UPDATED_AT", DateTime(timezone=True), onupdate=func.now())
+
+    coordination = relationship("Coordination", back_populates="protocol_event_logs")
+    organ = relationship("Code", foreign_keys=[organ_id])
+    task = relationship("Task", foreign_keys=[task_id])
+    changed_by_user = relationship("User", foreign_keys=[changed_by_id])

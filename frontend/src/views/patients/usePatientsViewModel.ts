@@ -1,5 +1,6 @@
 import { useEffect, useState } from 'react';
 import { api, type Code, type Patient, type PatientCreate, type PatientListItem } from '../../api';
+import { toUserErrorMessage } from '../../api/error';
 import { formatDate, matchesFilter, matchesWildcardFlexible } from './patientsViewUtils';
 
 export function usePatientsViewModel() {
@@ -16,11 +17,10 @@ export function usePatientsViewModel() {
   const [filterOrgan, setFilterOrgan] = useState('');
   const [filterOpenOnly, setFilterOpenOnly] = useState(false);
   const [organCodes, setOrganCodes] = useState<Code[]>([]);
-  const [filterBloodType, setFilterBloodType] = useState('');
-  const [bloodTypeCatalogues, setBloodTypeCatalogues] = useState<Code[]>([]);
 
   const [expandedContacts, setExpandedContacts] = useState<number | null>(null);
   const [expandedEpisodes, setExpandedEpisodes] = useState<number | null>(null);
+  const [expandedMedical, setExpandedMedical] = useState<number | null>(null);
   const [addingPatient, setAddingPatient] = useState(false);
   const [creatingPatient, setCreatingPatient] = useState(false);
   const [createPatientError, setCreatePatientError] = useState('');
@@ -44,7 +44,6 @@ export function usePatientsViewModel() {
   useEffect(() => {
     void fetchPatients();
     api.listCodes('ORGAN').then(setOrganCodes);
-    api.listCatalogues('BLOOD_TYPE').then(setBloodTypeCatalogues);
   }, []);
 
   const ensurePatientDetails = async (id: number) => {
@@ -61,6 +60,7 @@ export function usePatientsViewModel() {
   const toggleContacts = (id: number) => {
     setExpandedContacts(expandedContacts === id ? null : id);
     setExpandedEpisodes(null);
+    setExpandedMedical(null);
     if (expandedContacts !== id) {
       void ensurePatientDetails(id);
     }
@@ -69,7 +69,17 @@ export function usePatientsViewModel() {
   const toggleEpisodes = (id: number) => {
     setExpandedEpisodes(expandedEpisodes === id ? null : id);
     setExpandedContacts(null);
+    setExpandedMedical(null);
     if (expandedEpisodes !== id) {
+      void ensurePatientDetails(id);
+    }
+  };
+
+  const toggleMedical = (id: number) => {
+    setExpandedMedical(expandedMedical === id ? null : id);
+    setExpandedContacts(null);
+    setExpandedEpisodes(null);
+    if (expandedMedical !== id) {
       void ensurePatientDetails(id);
     }
   };
@@ -89,7 +99,7 @@ export function usePatientsViewModel() {
       setNewPatient({ pid: '', first_name: '', name: '', date_of_birth: '' });
       setAddingPatient(false);
     } catch (err) {
-      setCreatePatientError(err instanceof Error ? err.message : 'Could not create patient.');
+      setCreatePatientError(toUserErrorMessage(err, 'Could not create patient.'));
     } finally {
       setCreatingPatient(false);
     }
@@ -113,7 +123,6 @@ export function usePatientsViewModel() {
       const formatted = formatDate(p.date_of_birth);
       if (!matchesFilter(formatted, filterDob)) return false;
     }
-    if (filterBloodType && p.blood_type_id !== Number(filterBloodType)) return false;
     if (filterOrgan || filterOpenOnly) {
       const organId = filterOrgan ? Number(filterOrgan) : null;
       if (filterOpenOnly && organId !== null) {
@@ -158,11 +167,9 @@ export function usePatientsViewModel() {
     filterOpenOnly,
     setFilterOpenOnly,
     organCodes,
-    filterBloodType,
-    setFilterBloodType,
-    bloodTypeCatalogues,
     expandedContacts,
     expandedEpisodes,
+    expandedMedical,
     addingPatient,
     setAddingPatient,
     creatingPatient,
@@ -175,6 +182,7 @@ export function usePatientsViewModel() {
     ensurePatientDetails,
     toggleContacts,
     toggleEpisodes,
+    toggleMedical,
     handleCreatePatient,
     filteredPatients,
   };

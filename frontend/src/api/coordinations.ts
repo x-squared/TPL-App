@@ -106,6 +106,26 @@ export interface CoordinationTimeLogUpdate {
   comment?: string;
 }
 
+export interface CoordinationProtocolEventLog {
+  id: number;
+  coordination_id: number;
+  organ_id: number;
+  organ: Code | null;
+  event: string;
+  time: string;
+  task_id: number | null;
+  changed_by_id: number | null;
+  changed_by_user: AppUser | null;
+  created_at: string;
+  updated_at: string | null;
+}
+
+export interface CoordinationProtocolEventLogCreate {
+  organ_id: number;
+  event: string;
+  task_id?: number | null;
+}
+
 export interface CoordinationEpisodeLinkedEpisode {
   id: number;
   patient_id: number;
@@ -170,6 +190,14 @@ export const coordinationsApi = {
     }),
   deleteCoordinationTimeLog: (coordinationId: number, logId: number) =>
     request<void>(`/coordinations/${coordinationId}/time-logs/${logId}`, { method: 'DELETE' }),
+
+  listCoordinationProtocolEvents: (coordinationId: number, organId: number) =>
+    request<CoordinationProtocolEventLog[]>(`/coordinations/${coordinationId}/protocol-events/?organ_id=${organId}`),
+  createCoordinationProtocolEvent: (coordinationId: number, data: CoordinationProtocolEventLogCreate) =>
+    request<CoordinationProtocolEventLog>(`/coordinations/${coordinationId}/protocol-events/`, {
+      method: 'POST',
+      body: JSON.stringify(data),
+    }),
 
   listCoordinationEpisodes: (coordinationId: number) =>
     request<CoordinationEpisode[]>(`/coordinations/${coordinationId}/episodes/`),

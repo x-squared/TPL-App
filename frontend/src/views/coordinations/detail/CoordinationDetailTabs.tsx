@@ -1,12 +1,14 @@
 import type React from 'react';
 import { useEffect, useMemo, useState } from 'react';
 import type { Code, Coordination, CoordinationDonor, CoordinationEpisode, CoordinationOrigin, Patient } from '../../../api';
-import InlineDeleteActions from '../../layout/InlineDeleteActions';
-import { formatDateDdMmYyyy, formatDateTimeDdMmYyyy } from '../../layout/dateFormat';
+import { toUserErrorMessage } from '../../../api/error';
+import { formatDateDdMmYyyy } from '../../layout/dateFormat';
 import CoordinationBasicDataSection from './CoordinationBasicDataSection';
 import CoordinationDonorDataSection from './CoordinationDonorDataSection';
 import CoordinationHospitalsSection from './CoordinationHospitalsSection';
 import CoordinationProtocolOverviewSection from './CoordinationProtocolOverviewSection';
+import CoordinationProtocolTab from './CoordinationProtocolTab';
+import CoordinationTimeLogSection from './CoordinationTimeLogSection';
 import type { CoordinationDetailTab } from './useCoordinationDetailViewModel';
 
 interface UserOption {
@@ -79,10 +81,6 @@ const formatElapsed = (sec: number): string => {
 };
 
 const toInputDate = (value: string | null | undefined): string => (value ? value.slice(0, 10) : '');
-
-const fmtDateTime = (value: string | null): string => {
-  return formatDateTimeDdMmYyyy(value);
-};
 
 export default function CoordinationDetailTabs({
   tab,
@@ -267,7 +265,7 @@ export default function CoordinationDetailTabs({
       });
       setCoreEditing(false);
     } catch (err) {
-      setCoreError(err instanceof Error ? err.message : 'Failed to save basic data');
+      setCoreError(toUserErrorMessage(err, 'Failed to save basic data'));
     } finally {
       setCoreSaving(false);
     }
@@ -290,7 +288,7 @@ export default function CoordinationDetailTabs({
       });
       setDonorEditing(false);
     } catch (err) {
-      setDonorError(err instanceof Error ? err.message : 'Failed to save donor data');
+      setDonorError(toUserErrorMessage(err, 'Failed to save donor data'));
     } finally {
       setDonorSaving(false);
     }
@@ -306,7 +304,7 @@ export default function CoordinationDetailTabs({
       });
       setOriginEditing(false);
     } catch (err) {
-      setOriginError(err instanceof Error ? err.message : 'Failed to save hospitals');
+      setOriginError(toUserErrorMessage(err, 'Failed to save hospitals'));
     } finally {
       setOriginSaving(false);
     }
@@ -442,187 +440,34 @@ export default function CoordinationDetailTabs({
 
     if (tab === 'protocol') {
       return (
-        <section className="detail-section ui-panel-section">
-          <div className="detail-section-heading">
-            <h2>Protocol</h2>
-          </div>
-          <p className="detail-empty">Protocol details are shown in the Coordination tab.</p>
-        </section>
+        <CoordinationProtocolTab
+          coordinationId={coordination.id}
+          groups={protocolEntriesByOrgan}
+          onOpenPatientEpisode={onOpenPatientEpisode}
+        />
       );
     }
 
     return (
-      <section className="detail-section ui-panel-section">
-        <div className="detail-section-heading">
-          <h2>Time log</h2>
-          {!hasEditorOpen && !running && (
-            <button className="ci-add-btn" onClick={onOpenAddLog}>
-              + Add
-            </button>
-          )}
-        </div>
-        <div className="coord-time-totals">
-          <span className="detail-label">Total time per user</span>
-          {totalsByUser.length === 0 ? (
-            <p className="detail-empty">No completed time intervals yet.</p>
-          ) : (
-            <div className="coord-time-total-list">
-              {totalsByUser.map(([userName, seconds]) => (
-                <div key={userName} className="coord-time-total-row">
-                  <span>{userName}</span>
-                  <strong>{formatElapsed(seconds)}</strong>
-                </div>
-              ))}
-            </div>
-          )}
-        </div>
-        <div className="ui-table-wrap">
-          <table className="data-table">
-            <thead>
-              <tr>
-                <th>User</th>
-                <th>Start</th>
-                <th>End</th>
-                <th>Comment</th>
-                <th></th>
-              </tr>
-            </thead>
-            <tbody>
-              {addingLog && (
-                <tr className="ci-editing-row">
-                  <td>
-                    <select
-                      className="detail-input ci-inline-input coord-time-user-input"
-                      value={logDraft.user_id || ''}
-                      onChange={(e) => setLogDraft((prev) => ({ ...prev, user_id: Number(e.target.value) }))}
-                    >
-                      <option value="">Select user</option>
-                      {users.map((u) => (
-                        <option key={u.id} value={u.id}>
-                          {u.name}
-                        </option>
-                      ))}
-                    </select>
-                  </td>
-                  <td>
-                    <input
-                      className="detail-input ci-inline-input coord-time-datetime-input"
-                      type="datetime-local"
-                      step={1}
-                      value={logDraft.start}
-                      onChange={(e) => setLogDraft((prev) => ({ ...prev, start: e.target.value }))}
-                    />
-                  </td>
-                  <td>
-                    <input
-                      className="detail-input ci-inline-input coord-time-datetime-input"
-                      type="datetime-local"
-                      step={1}
-                      value={logDraft.end}
-                      onChange={(e) => setLogDraft((prev) => ({ ...prev, end: e.target.value }))}
-                    />
-                  </td>
-                  <td>
-                    <input
-                      className="detail-input ci-inline-input"
-                      value={logDraft.comment}
-                      placeholder="Comment"
-                      onChange={(e) => setLogDraft((prev) => ({ ...prev, comment: e.target.value }))}
-                    />
-                  </td>
-                  <td className="coord-time-actions">
-                    <button className="ci-save-inline" onClick={onSaveLogDraft} title="Save" aria-label="Save">
-                      ✓
-                    </button>
-                    <button className="ci-cancel-inline" onClick={onCloseLogEditor} title="Cancel" aria-label="Cancel">
-                      ✕
-                    </button>
-                  </td>
-                </tr>
-              )}
-              {timeLogs.length === 0 && !addingLog ? (
-                <tr>
-                  <td colSpan={5} className="status">No time logs found.</td>
-                </tr>
-              ) : null}
-              {timeLogs.map((log) => (
-                editingLogId === log.id ? (
-                  <tr key={log.id} className="ci-editing-row">
-                    <td>
-                      <select
-                        className="detail-input ci-inline-input coord-time-user-input"
-                        value={logDraft.user_id || ''}
-                        onChange={(e) => setLogDraft((prev) => ({ ...prev, user_id: Number(e.target.value) }))}
-                      >
-                        <option value="">Select user</option>
-                        {users.map((u) => (
-                          <option key={u.id} value={u.id}>
-                            {u.name}
-                          </option>
-                        ))}
-                      </select>
-                    </td>
-                    <td>
-                      <input
-                        className="detail-input ci-inline-input coord-time-datetime-input"
-                        type="datetime-local"
-                        step={1}
-                        value={logDraft.start}
-                        onChange={(e) => setLogDraft((prev) => ({ ...prev, start: e.target.value }))}
-                      />
-                    </td>
-                    <td>
-                      <input
-                        className="detail-input ci-inline-input coord-time-datetime-input"
-                        type="datetime-local"
-                        step={1}
-                        value={logDraft.end}
-                        onChange={(e) => setLogDraft((prev) => ({ ...prev, end: e.target.value }))}
-                      />
-                    </td>
-                    <td>
-                      <input
-                        className="detail-input ci-inline-input"
-                        value={logDraft.comment}
-                        placeholder="Comment"
-                        onChange={(e) => setLogDraft((prev) => ({ ...prev, comment: e.target.value }))}
-                      />
-                    </td>
-                    <td className="coord-time-actions">
-                      <button className="ci-save-inline" onClick={onSaveLogDraft} title="Save" aria-label="Save">
-                        ✓
-                      </button>
-                      <button className="ci-cancel-inline" onClick={onCloseLogEditor} title="Cancel" aria-label="Cancel">
-                        ✕
-                      </button>
-                    </td>
-                  </tr>
-                ) : (
-                  <tr key={log.id}>
-                    <td>{log.user?.name ?? `#${log.user_id}`}</td>
-                    <td>{fmtDateTime(log.start)}</td>
-                    <td>{fmtDateTime(log.end)}</td>
-                    <td>{log.comment || '–'}</td>
-                    <td className="coord-time-actions">
-                      <InlineDeleteActions
-                        confirming={confirmDeleteLogId === log.id}
-                        onEdit={() => onOpenEditLog(log)}
-                        onRequestDelete={() => setConfirmDeleteLogId(log.id)}
-                        onConfirmDelete={() => {
-                          onDeleteLog(log.id);
-                          setConfirmDeleteLogId(null);
-                        }}
-                        onCancelDelete={() => setConfirmDeleteLogId(null)}
-                      />
-                    </td>
-                  </tr>
-                )
-              ))}
-            </tbody>
-          </table>
-        </div>
-        {logError && <p className="patients-add-error">{logError}</p>}
-      </section>
+      <CoordinationTimeLogSection
+        timeLogs={timeLogs}
+        users={users}
+        addingLog={addingLog}
+        editingLogId={editingLogId}
+        logDraft={logDraft}
+        setLogDraft={setLogDraft}
+        logError={logError}
+        onOpenAddLog={onOpenAddLog}
+        onOpenEditLog={onOpenEditLog}
+        onCloseLogEditor={onCloseLogEditor}
+        onSaveLogDraft={onSaveLogDraft}
+        onDeleteLog={onDeleteLog}
+        confirmDeleteLogId={confirmDeleteLogId}
+        setConfirmDeleteLogId={setConfirmDeleteLogId}
+        hasEditorOpen={hasEditorOpen || running}
+        totalsByUser={totalsByUser}
+        formatElapsed={formatElapsed}
+      />
     );
   })();
 

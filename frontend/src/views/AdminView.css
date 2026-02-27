@@ -1,0 +1,93 @@
+.admin-people-grid {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 0.75rem;
+}
+
+.admin-people-card {
+  margin-bottom: 1.25rem;
+}
+
+.admin-people-form {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 0.5rem;
+  margin-bottom: 0.65rem;
+}
+
+.admin-people-form label {
+  display: flex;
+  flex-direction: column;
+  gap: 0.25rem;
+}
+
+.admin-people-form label span {
+  font-size: 0.78rem;
+  color: #5d6478;
+}
+
+.admin-people-actions-cell {
+  text-align: right;
+}
+
+.admin-team-member-actions {
+  margin-top: 0.6rem;
+}
+
+.admin-access-controls {
+  display: flex;
+  align-items: flex-end;
+  gap: 0.6rem;
+  margin-bottom: 0.75rem;
+  flex-wrap: wrap;
+}
+
+.admin-access-role-field {
+  display: flex;
+  flex-direction: column;
+  gap: 0.25rem;
+  min-width: 18rem;
+}
+
+.admin-access-role-field span {
+  font-size: 0.78rem;
+  color: #5d6478;
+}
+
+.admin-access-permission-key {
+  color: #667089;
+  font-size: 0.8rem;
+}
+
+.admin-access-permission-line {
+  display: inline-flex;
+  align-items: baseline;
+  gap: 0.45rem;
+}
+
+.admin-access-allowed-cell {
+  width: 6rem;
+  text-align: center;
+}
+
+.admin-access-checkbox-wrap {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  cursor: pointer;
+}
+
+@media (max-width: 980px) {
+  .admin-people-grid {
+    grid-template-columns: 1fr;
+  }
+
+  .admin-people-form {
+    grid-template-columns: 1fr;
+  }
+
+  .admin-access-role-field {
+    min-width: 0;
+    width: 100%;
+  }
+}

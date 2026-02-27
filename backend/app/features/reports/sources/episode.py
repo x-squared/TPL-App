@@ -64,13 +64,6 @@ def build_episode_source() -> SourceDef:
                 FieldDef("patient_lang", "Patient Language", "string", ("eq", "contains"), lambda row: row.patient.lang if row.patient else ""),
                 FieldDef("patient_translate", "Patient Translate", "boolean", ("eq",), lambda row: row.patient.translate if row.patient else False),
                 FieldDef(
-                    "patient_blood_type_name",
-                    "Patient Blood Type",
-                    "string",
-                    ("eq", "contains"),
-                    lambda row: row.patient.blood_type.name_default if row.patient and row.patient.blood_type else "",
-                ),
-                FieldDef(
                     "patient_sex_name",
                     "Patient Sex",
                     "string",
@@ -85,7 +78,6 @@ def build_episode_source() -> SourceDef:
         return (
             db.query(Episode)
             .options(
-                joinedload(Episode.patient).joinedload(Patient.blood_type),
                 joinedload(Episode.patient).joinedload(Patient.sex),
                 joinedload(Episode.organ),
                 selectinload(Episode.organs),

@@ -62,17 +62,25 @@ RECORDS = RECORDS + DIAGNOSIS_DONOR
 
 # --- BLOOD TYPE ----
 BLOOD_TYPE = [
-    {"type": "BLOOD_TYPE", "key": "O", "pos": 1, "ext_sys": "", "ext_key": "", "name_default": "O"},
+    {"type": "BLOOD_TYPE", "key": "O-", "pos": 1, "ext_sys": "", "ext_key": "", "name_default": "O-"},
     {"type": "BLOOD_TYPE", "key": "O+", "pos": 2, "ext_sys": "", "ext_key": "", "name_default": "O+"},
     {"type": "BLOOD_TYPE", "key": "A-", "pos": 3, "ext_sys": "", "ext_key": "", "name_default": "A-"},
     {"type": "BLOOD_TYPE", "key": "A+", "pos": 4, "ext_sys": "", "ext_key": "", "name_default": "A+"},
-    {"type": "BLOOD_TYPE", "key": "B", "pos": 5, "ext_sys": "", "ext_key": "", "name_default": "B"},
+    {"type": "BLOOD_TYPE", "key": "B-", "pos": 5, "ext_sys": "", "ext_key": "", "name_default": "B-"},
     {"type": "BLOOD_TYPE", "key": "B+", "pos": 6, "ext_sys": "", "ext_key": "", "name_default": "B+"},
     {"type": "BLOOD_TYPE", "key": "AB-", "pos": 7, "ext_sys": "", "ext_key": "", "name_default": "AB-"},
     {"type": "BLOOD_TYPE", "key": "AB+", "pos": 8, "ext_sys": "", "ext_key": "", "name_default": "AB+"},
 ]
 
 RECORDS = RECORDS + BLOOD_TYPE
+
+# --- POS / NEG ----
+POS_NEG = [
+    {"type": "POS_NEG", "key": "POS", "pos": 1, "ext_sys": "", "ext_key": "", "name_default": "Positive"},
+    {"type": "POS_NEG", "key": "NEG", "pos": 2, "ext_sys": "", "ext_key": "", "name_default": "Negative"},
+]
+
+RECORDS = RECORDS + POS_NEG
 
 # ---- HOSPITAL ----
 HOSPITAL = [

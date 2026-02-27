@@ -22,7 +22,6 @@ export default function PatientTab(props: PatientTabProps) {
         formatDate={formatDate}
         languages={core.languages}
         sexCodes={core.sexCodes}
-        bloodTypes={core.bloodTypes}
         coordUsers={core.coordUsers}
       />
 

@@ -1,42 +1,18 @@
-from fastapi import APIRouter, Depends, HTTPException
-from sqlalchemy.orm import Session, joinedload
+from fastapi import APIRouter, Depends
+from sqlalchemy.orm import Session
 
 from ..auth import require_permission
 from ..database import get_db
-from ..models import Catalogue, Coordination, CoordinationOrigin, User
+from ..features.coordination_origins import (
+    delete_coordination_origin as delete_coordination_origin_service,
+    get_coordination_origin as get_coordination_origin_service,
+    update_coordination_origin as update_coordination_origin_service,
+    upsert_coordination_origin as upsert_coordination_origin_service,
+)
+from ..models import CoordinationOrigin, User
 from ..schemas import CoordinationOriginCreate, CoordinationOriginResponse, CoordinationOriginUpdate
 
 router = APIRouter(prefix="/coordinations/{coordination_id}/origin", tags=["coordination_origin"])
-
-
-def _ensure_coordination_exists(coordination_id: int, db: Session) -> None:
-    item = db.query(Coordination).filter(Coordination.id == coordination_id).first()
-    if not item:
-        raise HTTPException(status_code=404, detail="Coordination not found")
-
-
-def _query_with_joins(db: Session):
-    return db.query(CoordinationOrigin).options(
-        joinedload(CoordinationOrigin.detection_hospital),
-        joinedload(CoordinationOrigin.procurement_hospital),
-        joinedload(CoordinationOrigin.changed_by_user),
-    )
-
-
-def _validate_catalogue(catalogue_id: int | None, expected_type: str, field_name: str, db: Session) -> None:
-    if catalogue_id is None:
-        return
-    entry = db.query(Catalogue).filter(Catalogue.id == catalogue_id, Catalogue.type == expected_type).first()
-    if not entry:
-        raise HTTPException(
-            status_code=422,
-            detail=f"{field_name} must reference CATALOGUE.{expected_type}",
-        )
-
-
-def _validate_payload(*, detection_hospital_id: int | None, procurement_hospital_id: int | None, db: Session) -> None:
-    _validate_catalogue(detection_hospital_id, "HOSPITAL", "detection_hospital_id", db)
-    _validate_catalogue(procurement_hospital_id, "HOSPITAL", "procurement_hospital_id", db)
 
 
 def _compute_organs_declined(_: CoordinationOrigin, __: Session) -> bool:
@@ -55,14 +31,7 @@ def get_coordination_origin(
     db: Session = Depends(get_db),
     _: User = Depends(require_permission("view.donations")),
 ):
-    _ensure_coordination_exists(coordination_id, db)
-    item = (
-        _query_with_joins(db)
-        .filter(CoordinationOrigin.coordination_id == coordination_id)
-        .first()
-    )
-    if not item:
-        raise HTTPException(status_code=404, detail="Coordination origin not found")
+    item = get_coordination_origin_service(coordination_id=coordination_id, db=db)
     return _to_response(item, db)
 
 
@@ -73,29 +42,11 @@ def upsert_coordination_origin(
     db: Session = Depends(get_db),
     current_user: User = Depends(require_permission("edit.donations")),
 ):
-    _ensure_coordination_exists(coordination_id, db)
-    _validate_payload(
-        detection_hospital_id=payload.detection_hospital_id,
-        procurement_hospital_id=payload.procurement_hospital_id,
+    refreshed = upsert_coordination_origin_service(
+        coordination_id=coordination_id,
+        payload=payload,
+        changed_by_id=current_user.id,
         db=db,
-    )
-    item = db.query(CoordinationOrigin).filter(CoordinationOrigin.coordination_id == coordination_id).first()
-    if not item:
-        item = CoordinationOrigin(
-            coordination_id=coordination_id,
-            changed_by_id=current_user.id,
-            **payload.model_dump(),
-        )
-        db.add(item)
-    else:
-        for key, value in payload.model_dump().items():
-            setattr(item, key, value)
-        item.changed_by_id = current_user.id
-    db.commit()
-    refreshed = (
-        _query_with_joins(db)
-        .filter(CoordinationOrigin.coordination_id == coordination_id)
-        .first()
     )
     return _to_response(refreshed, db)
 
@@ -107,25 +58,11 @@ def update_coordination_origin(
     db: Session = Depends(get_db),
     current_user: User = Depends(require_permission("edit.donations")),
 ):
-    _ensure_coordination_exists(coordination_id, db)
-    item = db.query(CoordinationOrigin).filter(CoordinationOrigin.coordination_id == coordination_id).first()
-    if not item:
-        raise HTTPException(status_code=404, detail="Coordination origin not found")
-
-    data = payload.model_dump(exclude_unset=True)
-    _validate_payload(
-        detection_hospital_id=data.get("detection_hospital_id"),
-        procurement_hospital_id=data.get("procurement_hospital_id"),
+    refreshed = update_coordination_origin_service(
+        coordination_id=coordination_id,
+        payload=payload,
+        changed_by_id=current_user.id,
         db=db,
-    )
-    for key, value in data.items():
-        setattr(item, key, value)
-    item.changed_by_id = current_user.id
-    db.commit()
-    refreshed = (
-        _query_with_joins(db)
-        .filter(CoordinationOrigin.coordination_id == coordination_id)
-        .first()
     )
     return _to_response(refreshed, db)
 
@@ -136,9 +73,5 @@ def delete_coordination_origin(
     db: Session = Depends(get_db),
     current_user: User = Depends(require_permission("edit.donations")),
 ):
-    _ensure_coordination_exists(coordination_id, db)
-    item = db.query(CoordinationOrigin).filter(CoordinationOrigin.coordination_id == coordination_id).first()
-    if not item:
-        raise HTTPException(status_code=404, detail="Coordination origin not found")
-    db.delete(item)
-    db.commit()
+    _ = current_user
+    delete_coordination_origin_service(coordination_id=coordination_id, db=db)

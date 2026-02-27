@@ -64,6 +64,20 @@ class ColloqiumType(Base):
     organ = relationship("Code", foreign_keys=[organ_id])
     changed_by_user = relationship("User", foreign_keys=[changed_by_id])
     colloqiums = relationship("Colloqium", back_populates="colloqium_type")
+    participant_links = relationship(
+        "ColloqiumTypeParticipant",
+        back_populates="colloqium_type",
+        cascade="all, delete-orphan",
+        order_by="ColloqiumTypeParticipant.pos.asc()",
+    )
+
+    @property
+    def participant_ids(self) -> list[int]:
+        return [link.person_id for link in (self.participant_links or []) if link.person_id is not None]
+
+    @property
+    def participants_people(self) -> list["Person"]:
+        return [link.person for link in (self.participant_links or []) if link.person is not None]
 
 
 class Colloqium(Base):
@@ -126,6 +140,20 @@ class Colloqium(Base):
     colloqium_type = relationship("ColloqiumType", back_populates="colloqiums")
     changed_by_user = relationship("User", foreign_keys=[changed_by_id])
     agendas = relationship("ColloqiumAgenda", back_populates="colloqium", cascade="all, delete-orphan")
+    participant_links = relationship(
+        "ColloqiumParticipant",
+        back_populates="colloqium",
+        cascade="all, delete-orphan",
+        order_by="ColloqiumParticipant.pos.asc()",
+    )
+
+    @property
+    def participant_ids(self) -> list[int]:
+        return [link.person_id for link in (self.participant_links or []) if link.person_id is not None]
+
+    @property
+    def participants_people(self) -> list["Person"]:
+        return [link.person for link in (self.participant_links or []) if link.person is not None]
 
 
 class ColloqiumAgenda(Base):
@@ -202,3 +230,85 @@ class ColloqiumAgenda(Base):
     colloqium = relationship("Colloqium", back_populates="agendas")
     episode = relationship("Episode")
     changed_by_user = relationship("User", foreign_keys=[changed_by_id])
+
+
+class ColloqiumTypeParticipant(Base):
+    __tablename__ = "COLLOQIUM_TYPE_PARTICIPANT"
+    __table_args__ = (UniqueConstraint("COLLOQIUM_TYPE_ID", "PERSON_ID"),)
+
+    id = Column(
+        "ID",
+        Integer,
+        primary_key=True,
+        index=True,
+        comment="Technical primary key of the colloquium type participant link.",
+        info={"label": "ID"},
+    )
+    colloqium_type_id = Column(
+        "COLLOQIUM_TYPE_ID",
+        Integer,
+        ForeignKey("COLLOQIUM_TYPE.ID"),
+        nullable=False,
+        comment="Owning colloquium type.",
+        info={"label": "Colloquium Type"},
+    )
+    person_id = Column(
+        "PERSON_ID",
+        Integer,
+        ForeignKey("PERSON.ID"),
+        nullable=False,
+        comment="Linked person.",
+        info={"label": "Person"},
+    )
+    pos = Column(
+        "POS",
+        Integer,
+        nullable=False,
+        default=1,
+        comment="Sort position among participants.",
+        info={"label": "Position"},
+    )
+
+    colloqium_type = relationship("ColloqiumType", back_populates="participant_links")
+    person = relationship("Person")
+
+
+class ColloqiumParticipant(Base):
+    __tablename__ = "COLLOQIUM_PARTICIPANT"
+    __table_args__ = (UniqueConstraint("COLLOQIUM_ID", "PERSON_ID"),)
+
+    id = Column(
+        "ID",
+        Integer,
+        primary_key=True,
+        index=True,
+        comment="Technical primary key of the colloquium participant link.",
+        info={"label": "ID"},
+    )
+    colloqium_id = Column(
+        "COLLOQIUM_ID",
+        Integer,
+        ForeignKey("COLLOQIUM.ID"),
+        nullable=False,
+        comment="Owning colloquium instance.",
+        info={"label": "Colloquium"},
+    )
+    person_id = Column(
+        "PERSON_ID",
+        Integer,
+        ForeignKey("PERSON.ID"),
+        nullable=False,
+        comment="Linked person.",
+        info={"label": "Person"},
+    )
+    pos = Column(
+        "POS",
+        Integer,
+        nullable=False,
+        default=1,
+        comment="Sort position among participants.",
+        info={"label": "Position"},
+    )
+
+    colloqium = relationship("Colloqium", back_populates="participant_links")
+    person = relationship("Person")

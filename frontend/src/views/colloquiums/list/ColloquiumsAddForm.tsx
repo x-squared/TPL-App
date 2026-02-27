@@ -1,4 +1,6 @@
 import type { ColloqiumType } from '../../../api';
+import ErrorBanner from '../../layout/ErrorBanner';
+import PersonMultiSelect from '../../layout/PersonMultiSelect';
 import type { ColloquiumCreateFormState } from './listTypes';
 
 interface Props {
@@ -27,7 +29,16 @@ export default function ColloquiumsAddForm({
       <select
         className="filter-select"
         value={form.colloqium_type_id}
-        onChange={(e) => onChange({ ...form, colloqium_type_id: e.target.value })}
+        onChange={(e) => {
+          const value = e.target.value;
+          const selectedType = types.find((type) => String(type.id) === value);
+          onChange({
+            ...form,
+            colloqium_type_id: value,
+            participant_ids: selectedType?.participant_ids ?? [],
+            participants_people: selectedType?.participants_people ?? [],
+          });
+        }}
       >
         <option value="">Type *</option>
         {types.map((t) => (
@@ -41,11 +52,14 @@ export default function ColloquiumsAddForm({
         value={form.date}
         onChange={(e) => onChange({ ...form, date: e.target.value })}
       />
-      <input
-        type="text"
-        placeholder="Participants"
-        value={form.participants}
-        onChange={(e) => onChange({ ...form, participants: e.target.value })}
+      <PersonMultiSelect
+        selectedPeople={form.participants_people}
+        onChange={(next) => onChange({
+          ...form,
+          participant_ids: next.map((person) => person.id),
+          participants_people: next,
+        })}
+        disabled={creating}
       />
       <div className="patients-add-actions">
         <button className="patients-save-btn" onClick={onSave} disabled={!canSave}>
@@ -55,7 +69,7 @@ export default function ColloquiumsAddForm({
           Cancel
         </button>
       </div>
-      {error && <p className="patients-add-error">{error}</p>}
+      <ErrorBanner message={error} />
     </div>
   );
 }

@@ -1,6 +1,7 @@
 import type React from 'react';
 import type { Coordination } from '../../../api';
 import EditableSectionHeader from '../../layout/EditableSectionHeader';
+import ErrorBanner from '../../layout/ErrorBanner';
 import { formatDateDdMmYyyy } from '../../layout/dateFormat';
 
 interface CoreDraft {
@@ -115,7 +116,7 @@ export default function CoordinationBasicDataSection({
           <div className="detail-value coord-comment-value">{coordination.comment || '–'}</div>
         )}
       </div>
-      {coreError && <p className="status">{coreError}</p>}
+      <ErrorBanner message={coreError} />
     </section>
   );
 }

@@ -1,0 +1,22 @@
+---
+description: Labeling pattern for editable fields and date inputs
+globs: frontend/src/**/*.{tsx,css}
+alwaysApply: false
+---
+
+# Editable Field Labeling
+
+When asked to introduce a label for an editable field, follow this order:
+
+1. **Preferred**: indicate the label inside the field (placeholder / inline control label) when the control type supports it and usability is not harmed.
+2. **If inline is not feasible** (common for date-like value fields): add a **very small, subtle label directly above that specific field**.
+
+Rules for the fallback micro-label:
+
+- Keep the form row on one line unless explicitly requested otherwise.
+- Anchor the label to the target field container so it appears above that field (not at far left/right of the whole row).
+- Use small helper-text styling (low visual weight, e.g. around `0.62rem`, muted color).
+- Do not introduce large section labels or extra vertical spacing.
+
+Example intent:
+- `Renewal` above renewal date input, while all capture inputs remain on the same line.

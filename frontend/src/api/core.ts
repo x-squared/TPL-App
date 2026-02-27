@@ -1,3 +1,6 @@
+import { ApiError } from './error';
+import { recordErrorLog } from './errorLog';
+
 const BASE = '/api';
 const TOKEN_KEY = 'tpl_token';
 
@@ -16,6 +19,10 @@ export interface HealthInfo {
   status: string;
   env?: string;
   dev_tools_enabled?: boolean;
+}
+
+export interface SupportTicketConfig {
+  support_email: string;
 }
 
 export interface Code {
@@ -46,10 +53,52 @@ export async function request<T>(path: string, init?: RequestInit): Promise<T> {
   if (token) {
     headers['Authorization'] = `Bearer ${token}`;
   }
-  const res = await fetch(`${BASE}${path}`, { headers, ...init });
+  let res: Response;
+  try {
+    res = await fetch(`${BASE}${path}`, { headers, ...init });
+  } catch (error) {
+    if (error instanceof DOMException && error.name === 'AbortError') {
+      recordErrorLog({
+        source: 'http',
+        message: 'The request was cancelled.',
+        path,
+        method: init?.method ?? 'GET',
+      });
+      throw new Error('The request was cancelled.');
+    }
+    recordErrorLog({
+      source: 'http',
+      message: 'Could not reach the server. Please check your connection and try again.',
+      path,
+      method: init?.method ?? 'GET',
+    });
+    throw new Error('Could not reach the server. Please check your connection and try again.');
+  }
   if (!res.ok) {
-    const detail = await res.text();
-    throw new Error(`API ${res.status}: ${detail}`);
+    const contentType = res.headers.get('content-type') ?? '';
+    let detail: unknown = null;
+    if (contentType.includes('application/json')) {
+      try {
+        detail = await res.json();
+      } catch {
+        detail = null;
+      }
+    } else {
+      detail = await res.text();
+    }
+    const message =
+      typeof detail === 'string' && detail.trim()
+        ? detail
+        : `Request failed with status ${res.status}`;
+    recordErrorLog({
+      source: 'http',
+      status: res.status,
+      message,
+      path,
+      method: init?.method ?? 'GET',
+      detail,
+    });
+    throw new ApiError(res.status, detail, message);
   }
   if (res.status === 204) return undefined as T;
   return res.json();
@@ -139,6 +188,39 @@ export interface AccessControlMatrix {
   role_permissions: Record<string, string[]>;
 }
 
+export interface Person {
+  id: number;
+  first_name: string;
+  surname: string;
+  user_id: string | null;
+  changed_by_id: number | null;
+  changed_by_user: AppUser | null;
+  created_at: string;
+  updated_at: string | null;
+}
+
+export interface PersonCreate {
+  first_name: string;
+  surname: string;
+  user_id?: string | null;
+}
+
+export interface PersonUpdate {
+  first_name?: string;
+  surname?: string;
+  user_id?: string | null;
+}
+
+export interface PersonTeam {
+  id: number;
+  name: string;
+  members?: Person[];
+  changed_by_id: number | null;
+  changed_by_user: AppUser | null;
+  created_at: string;
+  updated_at: string | null;
+}
+
 export const authApi = {
   login: (ext_id: string) =>
     request<{ token: string; user: AppUser }>('/auth/login', {
@@ -175,6 +257,10 @@ export const usersApi = {
     request<AppUser[]>(`/users/${roleKey ? `?role_key=${encodeURIComponent(roleKey)}` : ''}`),
 };
 
+export const supportTicketApi = {
+  getSupportTicketConfig: () => request<SupportTicketConfig>('/support-ticket/config'),
+};
+
 export const adminAccessApi = {
   getAccessControlMatrix: () => request<AccessControlMatrix>('/admin/access/matrix'),
   updateRolePermissions: (roleKey: string, permissionKeys: string[]) =>
@@ -182,4 +268,43 @@ export const adminAccessApi = {
       method: 'PUT',
       body: JSON.stringify({ permission_keys: permissionKeys }),
     }),
+};
+
+export const personsApi = {
+  searchPersons: (query: string) =>
+    request<Person[]>(`/persons/search?query=${encodeURIComponent(query)}`),
+  createPerson: (data: PersonCreate) =>
+    request<Person>('/persons/', { method: 'POST', body: JSON.stringify(data) }),
+};
+
+export const adminPeopleApi = {
+  listAdminPeople: (query?: string) =>
+    request<Person[]>(`/admin/people/${query ? `?query=${encodeURIComponent(query)}` : ''}`),
+  createAdminPerson: (data: PersonCreate) =>
+    request<Person>('/admin/people/', { method: 'POST', body: JSON.stringify(data) }),
+  updateAdminPerson: (id: number, data: PersonUpdate) =>
+    request<Person>(`/admin/people/${id}`, { method: 'PATCH', body: JSON.stringify(data) }),
+  deleteAdminPerson: (id: number) =>
+    request<void>(`/admin/people/${id}`, { method: 'DELETE' }),
+  listPersonTeams: (includeMembers = false) =>
+    request<PersonTeam[]>(`/admin/people/teams${includeMembers ? '?include_members=true' : ''}`),
+  getPersonTeam: (id: number) =>
+    request<PersonTeam>(`/admin/people/teams/${id}`),
+  createPersonTeam: (name: string, memberIds: number[]) =>
+    request<PersonTeam>('/admin/people/teams', {
+      method: 'POST',
+      body: JSON.stringify({ name, member_ids: memberIds }),
+    }),
+  updatePersonTeam: (id: number, name: string) =>
+    request<PersonTeam>(`/admin/people/teams/${id}`, {
+      method: 'PATCH',
+      body: JSON.stringify({ name }),
+    }),
+  setPersonTeamMembers: (id: number, memberIds: number[]) =>
+    request<PersonTeam>(`/admin/people/teams/${id}/members`, {
+      method: 'PUT',
+      body: JSON.stringify({ member_ids: memberIds }),
+    }),
+  deletePersonTeam: (id: number) =>
+    request<void>(`/admin/people/teams/${id}`, { method: 'DELETE' }),
 };

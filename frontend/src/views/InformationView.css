@@ -1,0 +1,125 @@
+.info-editor {
+  display: flex;
+  flex-direction: column;
+  gap: 0.35rem;
+}
+
+.info-editor-toolbar {
+  display: inline-flex;
+  gap: 0.25rem;
+}
+
+.info-editor-btn {
+  border: 1px solid #c2c7d8;
+  background: #f5f5fa;
+  color: #222;
+  border-radius: 4px;
+  min-width: 1.65rem;
+  height: 1.65rem;
+  font-size: 0.8rem;
+  cursor: pointer;
+}
+
+.info-editor-btn:hover {
+  background: #ececf4;
+}
+
+.info-editor-area {
+  min-height: 5.2rem;
+  border: 1px solid #222;
+  border-radius: 4px;
+  background: #fff;
+  color: #222;
+  padding: 0.4rem 0.55rem;
+  font-size: 0.85rem;
+  line-height: 1.3;
+  direction: ltr;
+  text-align: left;
+  unicode-bidi: plaintext;
+}
+
+.info-editor-count {
+  color: #666;
+}
+
+.info-text-render {
+  white-space: normal;
+  max-width: 56rem;
+}
+
+.info-hide-read-filter {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.4rem;
+  margin-bottom: 0.55rem;
+  color: #444;
+  font-size: 0.85rem;
+}
+
+.info-read-col {
+  width: 3.1rem;
+  text-align: center;
+}
+
+.info-date-col {
+  width: 8.8rem;
+}
+
+.info-valid-from-col {
+  width: 8.8rem;
+}
+
+.info-author-col {
+  width: 10.5rem;
+}
+
+.info-text-col {
+  min-width: 26rem;
+}
+
+.info-read-badge {
+  width: 0.85rem;
+  height: 0.85rem;
+  border-radius: 50%;
+  border: 1px solid transparent;
+  display: inline-block;
+  padding: 0;
+}
+
+.info-read-badge-unread-valid {
+  background: #e33a3a;
+  border-color: #a11f1f;
+}
+
+.info-read-badge-unread-future {
+  background: #f2c94c;
+  border-color: #b28b0c;
+}
+
+.info-read-badge-read {
+  background: #d7dbe8;
+  border-color: #a9b0c6;
+}
+
+.info-read-badge-withdrawn-unread {
+  background: #000;
+  border-color: #000;
+}
+
+.info-read-badge-withdrawn-read {
+  background: #d7dbe8;
+  border-color: #000;
+  border-width: 2px;
+}
+
+button.info-read-badge {
+  cursor: pointer;
+}
+
+button.info-read-badge:disabled {
+  cursor: default;
+}
+
+.info-row-read {
+  opacity: 0.82;
+}

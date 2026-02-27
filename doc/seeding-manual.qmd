@@ -17,10 +17,10 @@ This prevents demo data from accidentally being loaded in production.
 Seeding is implemented with:
 
 - A **seed job registry** in `backend/app/seed/__init__.py`
+- **Loader modules** in `backend/app/seed/loaders/core/` and `backend/app/seed/loaders/sample/`
 - A **runner framework** in `backend/app/seed/loader.py`
 - **Environment/profile resolution** in `backend/app/seed/profiles.py`
 - **Central environment-aware app config** in `backend/app/config.py`
-- Startup integration in `backend/app/main.py`
 
 Datasets are organized by category under:
 
@@ -48,7 +48,14 @@ Examples in current registry:
 - `core.catalogues`
 - `core.users` (baseline users, including SAMPLE and QATEST_*)
 - `core.colloqium_types`
+- `core.medical_value_groups`
 - `core.medical_value_templates`
+
+Medical value core seeds now define a template universe with:
+
+- group applicability flags (`is_static`, organ flags, donor flag)
+- ordered template values per group
+- a static blood type template (`STATIC_BLOOD_TYPE`) using `DATATYPE=BLOOD_TYPE`
 
 ### Sample
 
@@ -92,15 +99,6 @@ Allowed values:
 - `CORE_SAMPLE`
 - `CORE_TEST`
 
-### 3) `TPL_SEED_ON_STARTUP`
-
-- `true` (default): run seeding during app startup
-- `false`: skip seeding on startup
-
-Truthy/falsey handling:
-
-- falsey values: `0`, `false`, `no` (case-insensitive)
-
 ## Practical Examples
 
 ### DEV with demo data (default behavior)
@@ -120,12 +118,6 @@ export TPL_ENV=PROD
 ```{bash}
 export TPL_ENV=DEV
 export TPL_SEED_PROFILE=CORE_TEST
-```
-
-### Disable startup seeding completely
-
-```{bash}
-export TPL_SEED_ON_STARTUP=false
 ```
 
 ## Manual Seed CLI
@@ -152,23 +144,18 @@ python -m app.seed run --env DEV
 python -m app.seed run --env PROD --profile CORE
 ```
 
-## Startup Logging
+## Runtime Execution
 
-On startup, the app prints a compact seed summary:
-
-- resolved environment
-- included categories
-- executed job keys
-
-This helps verify quickly that the expected profile ran.
+Seeding is executed explicitly via CLI (`python -m app.seed ...`) and DB admin/data scripts.
+There is no automatic startup seeding in `backend/app/main.py`.
 
 ## How To Add A New Seed Job
 
-1. Implement loader function in `backend/app/seed/__init__.py` (or importable helper module).
+1. Implement loader function in `backend/app/seed/loaders/core/` or `backend/app/seed/loaders/sample/`.
 2. Add a `SeedJob(...)` entry in `get_seed_jobs()`.
 3. Assign correct category (`core` / `sample` / `test`).
 4. Verify dependencies by order in `get_seed_jobs()`.
-5. Start app with the relevant `TPL_ENV` and check startup log.
+5. Run `python -m app.seed run --env <ENV>` and verify executed job keys.
 
 ## Conventions
 

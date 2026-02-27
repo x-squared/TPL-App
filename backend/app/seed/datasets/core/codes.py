@@ -13,6 +13,7 @@ DATATYPE = [
     {"type": "DATATYPE", "key": "CM", "pos": 7, "ext_sys": "", "ext_key": "", "name_default": "Zentimeter"},
     {"type": "DATATYPE", "key": "BLOOD_TYPE", "pos": 8, "ext_sys": "CATALOGUE", "ext_key": "BLOOD_TYPE", "name_default": "Blutgruppe"},
     {"type": "DATATYPE", "key": "BP", "pos": 9, "ext_sys": "", "ext_key": "", "name_default": "Blutdruck"},
+    {"type": "DATATYPE", "key": "POS_NEG", "pos": 10, "ext_sys": "CATALOGUE", "ext_key": "POS_NEG", "name_default": "Positiv/Negativ"},
 ]
 
 RECORDS = RECORDS + DATATYPE
@@ -20,8 +21,10 @@ RECORDS = RECORDS + DATATYPE
 # --- ROLES ----
 ROLES = [
     {"type": "ROLE", "key": "KOORD", "pos": 1, "ext_sys": "", "ext_key": "", "name_default": "Koordinator"},
-    {"type": "ROLE", "key": "ARZT", "pos": 2, "ext_sys": "", "ext_key": "", "name_default": "Arzt"},
-    {"type": "ROLE", "key": "SYSTEM", "pos": 3, "ext_sys": "", "ext_key": "", "name_default": "System"},
+    {"type": "ROLE", "key": "KOORD_DONATION", "pos": 2, "ext_sys": "", "ext_key": "", "name_default": "Koordinator (Donation Edit)"},
+    {"type": "ROLE", "key": "ARZT", "pos": 3, "ext_sys": "", "ext_key": "", "name_default": "Arzt"},
+    {"type": "ROLE", "key": "SYSTEM", "pos": 4, "ext_sys": "", "ext_key": "", "name_default": "System"},
+    {"type": "ROLE", "key": "ADMIN", "pos": 5, "ext_sys": "", "ext_key": "", "name_default": "Admin"},
 ]
 
 RECORDS = RECORDS + ROLES

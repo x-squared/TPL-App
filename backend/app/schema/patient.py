@@ -11,7 +11,7 @@ from .clinical import (
     EpisodeResponse,
     MedicalValueResponse,
 )
-from .reference import CatalogueResponse, CodeResponse, UserResponse
+from .reference import CodeResponse, UserResponse
 
 
 class PatientBase(BaseModel):
@@ -23,7 +23,6 @@ class PatientBase(BaseModel):
     ahv_nr: str = ""
     lang: str = ""
     sex_id: int | None = None
-    blood_type_id: int | None = None
     resp_coord_id: int | None = None
     translate: bool = False
 
@@ -41,7 +40,6 @@ class PatientUpdate(BaseModel):
     ahv_nr: str | None = None
     lang: str | None = None
     sex_id: int | None = None
-    blood_type_id: int | None = None
     resp_coord_id: int | None = None
     translate: bool | None = None
 
@@ -51,7 +49,6 @@ class PatientResponse(PatientBase):
 
     id: int
     sex: CodeResponse | None = None
-    blood_type: CatalogueResponse | None = None
     resp_coord: UserResponse | None = None
     contact_infos: list[ContactInfoResponse] = []
     absences: list[AbsenceResponse] = []
@@ -62,6 +59,11 @@ class PatientResponse(PatientBase):
     changed_by_user: UserResponse | None = None
     created_at: datetime
     updated_at: datetime | None = None
+
+
+class PatientListStaticMedicalValue(BaseModel):
+    name: str
+    value: str
 
 
 class PatientListResponse(BaseModel):
@@ -77,8 +79,6 @@ class PatientListResponse(BaseModel):
     lang: str = ""
     sex_id: int | None = None
     sex: CodeResponse | None = None
-    blood_type_id: int | None = None
-    blood_type: CatalogueResponse | None = None
     resp_coord_id: int | None = None
     resp_coord: UserResponse | None = None
     translate: bool = False
@@ -87,3 +87,4 @@ class PatientListResponse(BaseModel):
     open_episode_indicators: list[str] = []
     episode_organ_ids: list[int] = []
     open_episode_organ_ids: list[int] = []
+    static_medical_values: list[PatientListStaticMedicalValue] = []

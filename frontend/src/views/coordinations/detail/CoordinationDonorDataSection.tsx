@@ -1,6 +1,7 @@
 import type React from 'react';
 import type { Code, CoordinationDonor } from '../../../api';
 import EditableSectionHeader from '../../layout/EditableSectionHeader';
+import ErrorBanner from '../../layout/ErrorBanner';
 import { formatDateDdMmYyyy } from '../../layout/dateFormat';
 
 interface DonorDraft {
@@ -214,7 +215,7 @@ export default function CoordinationDonorDataSection({
           )}
         </div>
       </div>
-      {donorError && <p className="status">{donorError}</p>}
+      <ErrorBanner message={donorError} />
     </section>
   );
 }

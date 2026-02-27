@@ -11,7 +11,6 @@ export function usePatientCore(patientId: number, initialTab: PatientDetailTab =
   const [saving, setSaving] = useState(false);
   const [languages, setLanguages] = useState<Code[]>([]);
   const [sexCodes, setSexCodes] = useState<Code[]>([]);
-  const [bloodTypes, setBloodTypes] = useState<Code[]>([]);
   const [coordUsers, setCoordUsers] = useState<AppUser[]>([]);
 
   const [form, setForm] = useState<PatientFormState>({
@@ -23,7 +22,6 @@ export function usePatientCore(patientId: number, initialTab: PatientDetailTab =
     ahv_nr: '',
     lang: '',
     sex_id: null as number | null,
-    blood_type_id: null as number | null,
     resp_coord_id: null as number | null,
     translate: false,
   });
@@ -36,7 +34,6 @@ export function usePatientCore(patientId: number, initialTab: PatientDetailTab =
       .finally(() => setLoading(false));
     api.listCatalogues('LANGUAGE').then(setLanguages);
     api.listCodes('SEX').then(setSexCodes);
-    api.listCatalogues('BLOOD_TYPE').then(setBloodTypes);
     api.listUsers('KOORD').then(setCoordUsers);
   }, [patientId]);
 
@@ -55,7 +52,6 @@ export function usePatientCore(patientId: number, initialTab: PatientDetailTab =
       ahv_nr: patient.ahv_nr ?? '',
       lang: patient.lang ?? '',
       sex_id: patient.sex_id ?? null,
-      blood_type_id: patient.blood_type_id ?? null,
       resp_coord_id: patient.resp_coord_id ?? null,
       translate: patient.translate ?? false,
     });
@@ -79,7 +75,6 @@ export function usePatientCore(patientId: number, initialTab: PatientDetailTab =
         ahv_nr: form.ahv_nr,
         lang: form.lang,
         sex_id: form.sex_id,
-        blood_type_id: form.blood_type_id,
         resp_coord_id: form.resp_coord_id,
         translate: form.translate,
       };
@@ -104,7 +99,6 @@ export function usePatientCore(patientId: number, initialTab: PatientDetailTab =
     saving,
     languages,
     sexCodes,
-    bloodTypes,
     coordUsers,
     form,
     setForm,

@@ -7,12 +7,12 @@
 
 .coord-panel-wrap {
   border-radius: 8px;
-  padding: 0.2rem 0.35rem 0.5rem;
+  padding: 0;
 }
 
 .coord-panel-wrap-protocol {
   transition: background-color 0.2s ease;
-  padding: 0.55rem 0.65rem 0.85rem;
+  padding: 0;
 }
 
 .coord-panel-wrap-protocol .detail-tabs {
@@ -234,4 +234,140 @@
   font-weight: 600;
   letter-spacing: 0.01em;
   vertical-align: middle;
+}
+
+.coord-protocol-shell {
+  margin-top: 0.8rem;
+}
+
+.coord-protocol-organ-tabs {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.45rem;
+  margin-bottom: 0.75rem;
+}
+
+.coord-protocol-organ-tab {
+  border: 1px solid #9ea4bb;
+  border-radius: 6px;
+  background: #f6f7fc;
+  color: #3f4660;
+  font-size: 0.96rem;
+  font-weight: 600;
+  padding: 0.3rem 0.8rem;
+  cursor: pointer;
+}
+
+.coord-protocol-organ-tab:hover {
+  background: #edf0f9;
+  border-color: #7f88a8;
+}
+
+.coord-protocol-organ-tab.active {
+  background: #2f3d66;
+  border-color: #1f2a4c;
+  color: #fff;
+}
+
+.coord-protocol-layout {
+  display: grid;
+  grid-template-columns: 40% 60%;
+  gap: 0.75rem;
+  align-items: stretch;
+}
+
+.coord-protocol-right {
+  display: grid;
+  gap: 0.75rem;
+  grid-template-rows: minmax(10rem, 1fr) minmax(10rem, 1fr);
+}
+
+.coord-protocol-pane {
+  border: 1px solid #222;
+  border-radius: 6px;
+  padding: 0.6rem 0.75rem 0.7rem;
+  background: transparent;
+  min-height: 100%;
+}
+
+.coord-protocol-pane-title {
+  margin: 0 0 0.45rem;
+}
+
+.coord-protocol-data-pane {
+  display: grid;
+  gap: 0.55rem;
+  align-content: start;
+}
+
+.coord-protocol-data-input.committed {
+  background: #eef0f6;
+  border-color: #b3b9cd;
+}
+
+.coord-protocol-data-input.pending {
+  background: #fde8e8;
+  border: 2px solid #b83232;
+}
+
+.coord-protocol-data-separator {
+  margin-top: 0.2rem;
+  border-top: 1px solid #b9bfd1;
+}
+
+.coord-protocol-compact-list {
+  margin: 0;
+  padding-left: 1.1rem;
+  display: grid;
+  gap: 0.35rem;
+}
+
+.coord-event-input-row {
+  margin-bottom: 0.55rem;
+  border-radius: 4px;
+}
+
+.coord-event-input-row.alert {
+  background: #fde8e8;
+}
+
+.coord-event-input {
+  width: 100%;
+}
+
+.coord-event-input.alert {
+  background: #fde8e8;
+  border: 2px solid #b83232;
+}
+
+.coord-event-log-list {
+  height: 6.2rem;
+  overflow-y: scroll;
+  overflow-x: hidden;
+}
+
+.coord-event-log-list-items {
+  padding-left: 0;
+}
+
+.coord-event-log-item {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 0.65rem;
+  min-height: 1.8rem;
+}
+
+.coord-event-log-time {
+  font-size: 0.74rem;
+  color: #5f6680;
+  white-space: nowrap;
+}
+
+.coord-event-log-text {
+  font-size: 0.86rem;
+  color: #222;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
 }

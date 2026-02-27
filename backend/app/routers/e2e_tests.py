@@ -113,3 +113,22 @@ def run_e2e_tests(
         output_tail=output_tail,
         report_excerpt=report_excerpt,
     )
+
+
+@router.post("/health-check/create-422")
+def create_health_check_422(
+    db: Session = Depends(get_db),
+    current_user: User = Depends(get_current_user),
+):
+    _ = (db, current_user)
+    _ensure_dev_tools_enabled()
+    raise HTTPException(
+        status_code=422,
+        detail=[
+            {
+                "loc": ["body", "health_check"],
+                "msg": "Health check test endpoint intentionally triggered a 422 error.",
+                "type": "value_error",
+            }
+        ],
+    )

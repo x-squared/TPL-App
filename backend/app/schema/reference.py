@@ -28,6 +28,8 @@ class UserBase(BaseModel):
     ext_id: str
     name: str
     role_id: int | None = None
+    role_ids: list[int] = []
+    permissions: list[str] = []
 
 
 class UserCreate(UserBase):
@@ -39,6 +41,7 @@ class UserResponse(UserBase):
 
     id: int
     role: CodeResponse | None = None
+    roles: list[CodeResponse] = []
 
 
 class CatalogueBase(BaseModel):

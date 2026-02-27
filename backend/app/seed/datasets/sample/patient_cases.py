@@ -12,6 +12,7 @@ PATIENTS = [
         "ahv_nr": "756.9214.3658.92",
         "lang": "Deutsch",
         "translate": False,
+        "blood_type_key": "A+",
         "changed_by_id": 2,
     },
     {
@@ -22,6 +23,7 @@ PATIENTS = [
         "ahv_nr": "756.1111.2222.33",
         "lang": "Deutsch",
         "translate": False,
+        "blood_type_key": "O+",
         "changed_by_id": 2,
     },
     {
@@ -32,6 +34,7 @@ PATIENTS = [
         "ahv_nr": "756.4444.5555.66",
         "lang": "Deutsch",
         "translate": False,
+        "blood_type_key": "AB+",
         "changed_by_id": 2,
     },
 ]

@@ -1,4 +1,5 @@
 import type { ColloqiumAgenda, ColloqiumType } from '../../../api';
+import ErrorBanner from '../../layout/ErrorBanner';
 
 interface Props {
   loadingEpisodeColloqiums: boolean;
@@ -121,7 +122,7 @@ export default function EpisodeColloquiumSection({
                 />
               </label>
             </div>
-            {assignError && <p className="episode-detail-error">{assignError}</p>}
+            <ErrorBanner message={assignError} />
             <div className="ci-add-actions">
               <button
                 className="save-btn"

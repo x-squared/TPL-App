@@ -125,6 +125,11 @@ python -m app.db_admin --mode refresh --env DEV
 
 Then restart backend and re-login in frontend so the token/user payload is refreshed.
 
+Behavior notes:
+
+- role-permission mappings edited in Admin are persisted in DB and are not overwritten by server startup.
+- if you recreate the database from scratch, seed defaults are applied again as baseline.
+
 ## 8) Testing checklist
 
 Minimum manual checks:
@@ -140,11 +145,12 @@ Minimum manual checks:
    - admin access API returns forbidden
 4. Change role mapping in Admin tab:
    - save succeeds
-   - re-login reflects changed permissions
+   - current session updates automatically
+   - re-login also reflects changed permissions
 
 ## 9) Troubleshooting
 
 - **Nav item missing unexpectedly**: verify user has corresponding `view.*` permission.
 - **403 on write despite visible page**: user likely lacks `edit.*` permission.
-- **Admin updates not reflected**: re-login to refresh user permissions in client state.
+- **Admin updates not reflected**: refresh the page or re-login to refresh user permissions in client state.
 - **Role exists but no permissions**: verify seed/access matrix consistency and rerun DB refresh.

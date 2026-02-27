@@ -1,6 +1,7 @@
 import { useEffect, useMemo, useState } from 'react';
 
 import { api, type AccessControlMatrix } from '../../../api';
+import { toUserErrorMessage } from '../../../api/error';
 
 export function useAdminAccessRules() {
   const [matrix, setMatrix] = useState<AccessControlMatrix | null>(null);
@@ -28,7 +29,7 @@ export function useAdminAccessRules() {
         if (!mounted) {
           return;
         }
-        setError(err instanceof Error ? err.message : 'Could not load access matrix.');
+        setError(toUserErrorMessage(err, 'Could not load access matrix.'));
       })
       .finally(() => {
         if (mounted) {
@@ -83,8 +84,9 @@ export function useAdminAccessRules() {
       const payload = await api.updateRolePermissions(selectedRoleKey, selectedPermissionKeys);
       setMatrix(payload);
       setStatus(`Saved access rules for ${selectedRoleKey}.`);
+      window.dispatchEvent(new CustomEvent('tpl:permissions-updated'));
     } catch (err: unknown) {
-      setError(err instanceof Error ? err.message : 'Could not save access rules.');
+      setError(toUserErrorMessage(err, 'Could not save access rules.'));
     } finally {
       setSaving(false);
     }

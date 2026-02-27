@@ -1,5 +1,6 @@
 import type React from 'react';
 import type { PatientCreate } from '../../api';
+import ErrorBanner from '../layout/ErrorBanner';
 
 interface Props {
   newPatient: PatientCreate;
@@ -64,7 +65,7 @@ export default function PatientsAddForm({
           Cancel
         </button>
       </div>
-      {createPatientError && <p className="patients-add-error">{createPatientError}</p>}
+      <ErrorBanner message={createPatientError} />
     </div>
   );
 }

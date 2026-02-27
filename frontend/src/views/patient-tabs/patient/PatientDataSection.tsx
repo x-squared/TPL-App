@@ -17,7 +17,6 @@ type PatientDataSectionProps = {
   | 'setField'
   | 'languages'
   | 'sexCodes'
-  | 'bloodTypes'
   | 'coordUsers'
 >;
 
@@ -34,7 +33,6 @@ export default function PatientDataSection({
   formatDate,
   languages,
   sexCodes,
-  bloodTypes,
   coordUsers,
 }: PatientDataSectionProps) {
   return (
@@ -154,23 +152,6 @@ export default function PatientDataSection({
             </select>
           ) : (
             <span className="detail-value">{patient.sex?.name_default ?? '–'}</span>
-          )}
-        </div>
-        <div className="detail-field">
-          <span className="detail-label">Blood Type</span>
-          {editing ? (
-            <select
-              className="detail-input"
-              value={form.blood_type_id ?? ''}
-                  onChange={(e) => setForm((f) => ({ ...f, blood_type_id: e.target.value ? Number(e.target.value) : null }))}
-            >
-              <option value="">–</option>
-              {bloodTypes.map((bt: any) => (
-                <option key={bt.id} value={bt.id}>{bt.name_default}</option>
-              ))}
-            </select>
-          ) : (
-            <span className="detail-value">{patient.blood_type?.name_default ?? '–'}</span>
           )}
         </div>
         <div className="detail-field">

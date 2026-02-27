@@ -1,6 +1,6 @@
 import { request } from './core';
 
-export type ReportSourceKey = 'PATIENT' | 'EPISODE' | 'COORDINATION';
+export type ReportSourceKey = 'PATIENT' | 'EPISODE' | 'MEDICAL_VALUE' | 'COORDINATION';
 export type ReportValueType = 'string' | 'number' | 'date' | 'datetime' | 'boolean';
 export type ReportOperatorKey = 'eq' | 'contains' | 'gte' | 'lte';
 export type ReportSortDirection = 'asc' | 'desc';

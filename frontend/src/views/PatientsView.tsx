@@ -30,11 +30,9 @@ export default function PatientsView({ onSelectPatient }: Props) {
     filterOpenOnly,
     setFilterOpenOnly,
     organCodes,
-    filterBloodType,
-    setFilterBloodType,
-    bloodTypeCatalogues,
     expandedContacts,
     expandedEpisodes,
+    expandedMedical,
     addingPatient,
     setAddingPatient,
     creatingPatient,
@@ -46,6 +44,7 @@ export default function PatientsView({ onSelectPatient }: Props) {
     setNewPatient,
     toggleContacts,
     toggleEpisodes,
+    toggleMedical,
     handleCreatePatient,
     filteredPatients,
   } = usePatientsViewModel();
@@ -82,9 +81,6 @@ export default function PatientsView({ onSelectPatient }: Props) {
         setFilterFirstName={setFilterFirstName}
         filterDob={filterDob}
         setFilterDob={setFilterDob}
-        filterBloodType={filterBloodType}
-        setFilterBloodType={setFilterBloodType}
-        bloodTypeCatalogues={bloodTypeCatalogues}
         filterOrgan={filterOrgan}
         setFilterOrgan={setFilterOrgan}
         organCodes={organCodes}
@@ -101,11 +97,13 @@ export default function PatientsView({ onSelectPatient }: Props) {
           filteredPatients={filteredPatients}
           expandedContacts={expandedContacts}
           expandedEpisodes={expandedEpisodes}
+          expandedMedical={expandedMedical}
           selectedTaskPatientId={selectedTaskPatientId}
           setSelectedTaskPatientId={setSelectedTaskPatientId}
           onSelectPatient={onSelectPatient}
           toggleEpisodes={toggleEpisodes}
           toggleContacts={toggleContacts}
+          toggleMedical={toggleMedical}
           loadingDetails={loadingDetails}
           patientDetails={patientDetails}
         />

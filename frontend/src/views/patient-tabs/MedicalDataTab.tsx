@@ -1,26 +1,13 @@
 import './MedicalDataTab.css';
-import BasicDataSection from './medical/BasicDataSection';
 import DiagnosesSection from './medical/DiagnosesSection';
 import MedicalValuesSection from './medical/MedicalValuesSection';
 import type { MedicalDataTabProps } from './medical/types';
 
 export default function MedicalDataTab(props: MedicalDataTabProps) {
-  const { patient, formatDate, core, diagnoses, medicalValues } = props;
+  const { patient, formatDate, diagnoses, medicalValues } = props;
 
   return (
     <>
-      <BasicDataSection
-        patient={patient}
-        editing={core.editing}
-        startEditing={core.startEditing}
-        saving={core.saving}
-        handleSave={core.handleSave}
-        cancelEditing={core.cancelEditing}
-        form={core.form}
-        setForm={core.setForm}
-        bloodTypes={core.bloodTypes}
-      />
-
       <DiagnosesSection
         patient={patient}
         addingDiag={diagnoses.addingDiag}
