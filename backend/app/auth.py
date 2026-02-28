@@ -34,7 +34,7 @@ def get_current_user(
 
     user = (
         db.query(User)
-        .options(joinedload(User.role), joinedload(User.roles))
+        .options(joinedload(User.role), joinedload(User.roles), joinedload(User.person))
         .filter(User.ext_id == ext_id)
         .first()
     )

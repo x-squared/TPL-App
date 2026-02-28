@@ -5,10 +5,14 @@ from .coordination_episode import CoordinationEpisode
 from .coordination_organ_effect import CoordinationOrganEffect
 from .coordination_procurement import (
     CoordinationProcurement,
+    CoordinationProcurementFieldGroupTemplate,
     CoordinationProcurementFieldScopeTemplate,
     CoordinationProcurementFieldTemplate,
     CoordinationProcurementOrgan,
     CoordinationProcurementSlot,
+    CoordinationProcurementValuePerson,
+    CoordinationProcurementValueTeam,
+    CoordinationProcurementValueEpisode,
     CoordinationProcurementValue,
 )
 from .coordination_time_log import CoordinationTimeLog
@@ -66,11 +70,15 @@ __all__ = [
     "CoordinationEpisode",
     "CoordinationOrganEffect",
     "CoordinationProcurement",
+    "CoordinationProcurementFieldGroupTemplate",
     "CoordinationProcurementOrgan",
     "CoordinationProcurementSlot",
     "CoordinationProcurementFieldTemplate",
     "CoordinationProcurementFieldScopeTemplate",
     "CoordinationProcurementValue",
+    "CoordinationProcurementValuePerson",
+    "CoordinationProcurementValueTeam",
+    "CoordinationProcurementValueEpisode",
     "CoordinationTimeLog",
     "CoordinationOrigin",
     "TaskGroupTemplate",

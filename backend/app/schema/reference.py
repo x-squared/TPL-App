@@ -40,6 +40,7 @@ class UserResponse(UserBase):
     model_config = ConfigDict(from_attributes=True)
 
     id: int
+    person_id: int
     role: CodeResponse | None = None
     roles: list[CodeResponse] = []
 

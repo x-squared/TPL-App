@@ -1,8 +1,9 @@
-from sqlalchemy import Column, Date, DateTime, ForeignKey, Integer, String
+from sqlalchemy import Column, Date, DateTime, Enum as SqlEnum, ForeignKey, Integer, String
 from sqlalchemy.orm import relationship
 from sqlalchemy.sql import func
 
 from ..database import Base
+from ..enums import CoordinationStatusKey
 
 
 class Coordination(Base):
@@ -39,6 +40,19 @@ class Coordination(Base):
         nullable=False,
         comment="Status reference (`CODE.COORDINATION_STATUS`).",
         info={"label": "Status"},
+    )
+    status_key = Column(
+        "STATUS_KEY",
+        SqlEnum(
+            CoordinationStatusKey,
+            native_enum=False,
+            validate_strings=True,
+            values_callable=lambda enum_cls: [entry.value for entry in enum_cls],
+            length=16,
+        ),
+        nullable=True,
+        comment="Status enum key mirror of `status_id`.",
+        info={"label": "Status Key"},
     )
     donor_nr = Column(
         "DONOR_NR",

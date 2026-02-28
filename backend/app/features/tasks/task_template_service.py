@@ -3,6 +3,7 @@ from __future__ import annotations
 from fastapi import HTTPException
 from sqlalchemy.orm import Session, joinedload
 
+from ...enums import PriorityKey
 from ...models import Code, TaskGroupTemplate, TaskTemplate
 from ...schemas import TaskTemplateCreate, TaskTemplateUpdate
 
@@ -55,12 +56,18 @@ def create_task_template(*, payload: TaskTemplateCreate, changed_by_id: int, db:
     priority = (
         _get_code_or_422(db=db, code_id=payload.priority_id, code_type="PRIORITY", field_name="priority_id")
         if payload.priority_id is not None
-        else _get_default_code_or_422(db=db, code_type="PRIORITY", code_key="NORMAL", field_name="priority_id")
+        else _get_default_code_or_422(
+            db=db,
+            code_type="PRIORITY",
+            code_key=PriorityKey.NORMAL.value,
+            field_name="priority_id",
+        )
     )
     template = TaskTemplate(
         task_group_template_id=payload.task_group_template_id,
         description=payload.description,
         priority_id=priority.id,
+        priority_key=priority.key,
         due_days_default=payload.due_days_default,
         is_active=payload.is_active,
         sort_pos=payload.sort_pos,
@@ -85,7 +92,8 @@ def update_task_template(
     if "task_group_template_id" in data:
         _get_task_group_template_or_422(db=db, task_group_template_id=data["task_group_template_id"])
     if "priority_id" in data and data["priority_id"] is not None:
-        _get_code_or_422(db=db, code_id=data["priority_id"], code_type="PRIORITY", field_name="priority_id")
+        priority = _get_code_or_422(db=db, code_id=data["priority_id"], code_type="PRIORITY", field_name="priority_id")
+        data["priority_key"] = priority.key
     for key, value in data.items():
         setattr(template, key, value)
     template.changed_by_id = changed_by_id

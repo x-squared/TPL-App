@@ -3,6 +3,7 @@ from fastapi import FastAPI
 from . import (
     absences,
     admin_access,
+    admin_procurement_config,
     admin_people,
     auth,
     catalogues,
@@ -44,6 +45,7 @@ def register_routers(app: FastAPI) -> None:
     """Register all API routers."""
     app.include_router(auth.router, prefix="/api")
     app.include_router(admin_access.router, prefix="/api")
+    app.include_router(admin_procurement_config.router, prefix="/api")
     app.include_router(admin_people.router, prefix="/api")
     app.include_router(e2e_tests.router, prefix="/api")
     app.include_router(patients.router, prefix="/api")

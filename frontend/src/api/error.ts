@@ -21,7 +21,7 @@ function statusFallback(status: number): string {
   if (status === 401) return 'Your session has expired. Please log in again.';
   if (status === 403) return 'You are not allowed to perform this action.';
   if (status === 404) return 'The requested resource was not found.';
-  if (status === 409) return 'The request conflicts with existing data.';
+  if (status === 409) return 'Data was changed in another window/session. Reload and try again.';
   if (status === 422) return 'Please correct the input values.';
   if (status >= 500) return 'The server reported an internal error. Please try again.';
   return 'The request failed. Please try again.';

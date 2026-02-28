@@ -279,7 +279,7 @@
 .coord-protocol-right {
   display: grid;
   gap: 0.75rem;
-  grid-template-rows: minmax(10rem, 1fr) minmax(10rem, 1fr);
+  grid-template-rows: auto minmax(10rem, 1fr);
 }
 
 .coord-protocol-pane {
@@ -315,6 +315,42 @@
   border-top: 1px solid #b9bfd1;
 }
 
+.coord-proc-group-card {
+  border: 1px solid #bcc2d6;
+  border-radius: 8px;
+  background: transparent;
+  padding: 0.55rem 0.65rem 0.7rem;
+}
+
+.coord-proc-group-card.pending {
+  border: 2px solid #8b2f2f;
+}
+
+.coord-proc-group-card.done {
+  border: 1px solid #bcc2d6;
+}
+
+.coord-proc-group-header h4 {
+  margin: 0 0 0.45rem;
+  font-size: 0.9rem;
+  color: #2f3550;
+}
+
+.coord-proc-group-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(12rem, 1fr));
+  gap: 0.5rem 0.75rem;
+}
+
+.coord-proc-field-wide {
+  grid-column: 1 / -1;
+}
+
+.coord-proc-team-picker {
+  display: grid;
+  gap: 0.4rem;
+}
+
 .coord-protocol-compact-list {
   margin: 0;
   padding-left: 1.1rem;
@@ -341,7 +377,7 @@
 }
 
 .coord-event-log-list {
-  height: 6.2rem;
+  height: calc(3 * 1.8rem);
   overflow-y: scroll;
   overflow-x: hidden;
 }
@@ -356,6 +392,10 @@
   justify-content: space-between;
   gap: 0.65rem;
   min-height: 1.8rem;
+}
+
+.coord-protocol-event-pane {
+  min-height: auto;
 }
 
 .coord-event-log-time {

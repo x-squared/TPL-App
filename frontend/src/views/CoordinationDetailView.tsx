@@ -114,6 +114,7 @@ export default function CoordinationDetailView({
         onSaveCoordination={(patch) => model.saveCoordination(patch)}
         onSaveDonor={(patch) => model.saveDonor(patch)}
         onSaveOrigin={(patch) => model.saveOrigin(patch)}
+        onRefresh={model.refresh}
         onOpenPatientEpisode={onOpenPatientEpisode}
       />
     </div>

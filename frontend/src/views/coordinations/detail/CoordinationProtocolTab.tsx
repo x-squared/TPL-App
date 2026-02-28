@@ -16,6 +16,7 @@ interface CoordinationProtocolTabProps {
 }
 
 export default function CoordinationProtocolTab({ coordinationId, groups, onOpenPatientEpisode }: CoordinationProtocolTabProps) {
+  void onOpenPatientEpisode;
   const sortedGroups = useMemo(
     () => [...groups].sort((a, b) => a.organ.name_default.localeCompare(b.organ.name_default)),
     [groups],
@@ -54,7 +55,7 @@ export default function CoordinationProtocolTab({ coordinationId, groups, onOpen
       </nav>
       <div className="coord-protocol-layout">
         <div className="coord-protocol-left">
-          <CoordinationProtocolDataPanel />
+          <CoordinationProtocolDataPanel coordinationId={coordinationId} organId={activeGroup.organ.id} />
         </div>
         <div className="coord-protocol-right">
           <CoordinationProtocolEventLogPanel

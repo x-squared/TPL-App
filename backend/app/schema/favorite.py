@@ -1,12 +1,10 @@
 from __future__ import annotations
 
 from datetime import datetime
-from typing import Literal
 
 from pydantic import BaseModel, ConfigDict, model_validator
 
-
-FavoriteTypeKey = Literal["PATIENT", "EPISODE", "COLLOQUIUM", "COORDINATION"]
+from ..enums import FavoriteTypeKey
 
 
 class FavoriteBase(BaseModel):
@@ -29,13 +27,13 @@ class FavoriteCreate(BaseModel):
 
     @model_validator(mode="after")
     def validate_target(self):
-        if self.favorite_type_key == "PATIENT" and self.patient_id is None:
+        if self.favorite_type_key == FavoriteTypeKey.PATIENT and self.patient_id is None:
             raise ValueError("patient_id is required for PATIENT favorite")
-        if self.favorite_type_key == "EPISODE" and self.episode_id is None:
+        if self.favorite_type_key == FavoriteTypeKey.EPISODE and self.episode_id is None:
             raise ValueError("episode_id is required for EPISODE favorite")
-        if self.favorite_type_key == "COLLOQUIUM" and self.colloqium_id is None:
+        if self.favorite_type_key == FavoriteTypeKey.COLLOQUIUM and self.colloqium_id is None:
             raise ValueError("colloqium_id is required for COLLOQUIUM favorite")
-        if self.favorite_type_key == "COORDINATION" and self.coordination_id is None:
+        if self.favorite_type_key == FavoriteTypeKey.COORDINATION and self.coordination_id is None:
             raise ValueError("coordination_id is required for COORDINATION favorite")
         return self
 

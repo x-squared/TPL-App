@@ -73,6 +73,7 @@ class Person(Base):
     )
 
     changed_by_user = relationship("User", foreign_keys=[changed_by_id])
+    user = relationship("User", back_populates="person", foreign_keys="User.person_id", uselist=False)
     teams = relationship("PersonTeam", secondary=person_team_member_table, back_populates="members")
 
 

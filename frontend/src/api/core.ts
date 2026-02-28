@@ -221,6 +221,48 @@ export interface PersonTeam {
   updated_at: string | null;
 }
 
+export type ProcurementSlotKey = 'MAIN' | 'LEFT' | 'RIGHT';
+export type ProcurementValueMode = 'SCALAR' | 'PERSON_SINGLE' | 'PERSON_LIST' | 'TEAM_SINGLE' | 'TEAM_LIST' | 'EPISODE';
+
+export interface CoordinationProcurementFieldGroupTemplate {
+  id: number;
+  key: string;
+  name_default: string;
+  comment: string;
+  is_active: boolean;
+  pos: number;
+}
+
+export interface CoordinationProcurementFieldTemplate {
+  id: number;
+  key: string;
+  name_default: string;
+  comment: string;
+  is_active: boolean;
+  pos: number;
+  datatype_def_id: number;
+  datatype_definition: DatatypeDefinition | null;
+  group_template_id: number | null;
+  group_template: CoordinationProcurementFieldGroupTemplate | null;
+  value_mode: ProcurementValueMode;
+}
+
+export interface CoordinationProcurementFieldScopeTemplate {
+  id: number;
+  field_template_id: number;
+  organ_id: number | null;
+  organ: Code | null;
+  slot_key: ProcurementSlotKey;
+}
+
+export interface ProcurementAdminConfig {
+  field_group_templates: CoordinationProcurementFieldGroupTemplate[];
+  field_templates: CoordinationProcurementFieldTemplate[];
+  field_scope_templates: CoordinationProcurementFieldScopeTemplate[];
+  datatype_definitions: DatatypeDefinition[];
+  organs: Code[];
+}
+
 export const authApi = {
   login: (ext_id: string) =>
     request<{ token: string; user: AppUser }>('/auth/login', {
@@ -273,6 +315,8 @@ export const adminAccessApi = {
 export const personsApi = {
   searchPersons: (query: string) =>
     request<Person[]>(`/persons/search?query=${encodeURIComponent(query)}`),
+  listTeams: () =>
+    request<PersonTeam[]>('/persons/teams'),
   createPerson: (data: PersonCreate) =>
     request<Person>('/persons/', { method: 'POST', body: JSON.stringify(data) }),
 };
@@ -307,4 +351,68 @@ export const adminPeopleApi = {
     }),
   deletePersonTeam: (id: number) =>
     request<void>(`/admin/people/teams/${id}`, { method: 'DELETE' }),
+};
+
+export const adminProcurementConfigApi = {
+  getProcurementAdminConfig: () =>
+    request<ProcurementAdminConfig>('/admin/procurement-config/'),
+  createProcurementFieldGroupTemplate: (data: { key: string; name_default: string; comment: string; is_active?: boolean; pos: number }) =>
+    request<CoordinationProcurementFieldGroupTemplate>('/admin/procurement-config/groups', {
+      method: 'POST',
+      body: JSON.stringify(data),
+    }),
+  updateProcurementFieldGroupTemplate: (
+    id: number,
+    data: { key?: string; name_default?: string; comment?: string; is_active?: boolean; pos?: number },
+  ) =>
+    request<CoordinationProcurementFieldGroupTemplate>(`/admin/procurement-config/groups/${id}`, {
+      method: 'PATCH',
+      body: JSON.stringify(data),
+    }),
+  deleteProcurementFieldGroupTemplate: (id: number) =>
+    request<void>(`/admin/procurement-config/groups/${id}`, { method: 'DELETE' }),
+  createProcurementFieldTemplate: (data: {
+    key: string;
+    name_default: string;
+    comment: string;
+    is_active?: boolean;
+    pos: number;
+    datatype_def_id: number;
+    group_template_id?: number | null;
+    value_mode: ProcurementValueMode;
+  }) =>
+    request<CoordinationProcurementFieldTemplate>('/admin/procurement-config/fields', {
+      method: 'POST',
+      body: JSON.stringify(data),
+    }),
+  updateProcurementFieldTemplate: (
+    id: number,
+    data: {
+      key?: string;
+      name_default?: string;
+      comment?: string;
+      is_active?: boolean;
+      pos?: number;
+      datatype_def_id?: number;
+      group_template_id?: number | null;
+      value_mode?: ProcurementValueMode;
+    },
+  ) =>
+    request<CoordinationProcurementFieldTemplate>(`/admin/procurement-config/fields/${id}`, {
+      method: 'PATCH',
+      body: JSON.stringify(data),
+    }),
+  deleteProcurementFieldTemplate: (id: number) =>
+    request<void>(`/admin/procurement-config/fields/${id}`, { method: 'DELETE' }),
+  createProcurementFieldScopeTemplate: (data: {
+    field_template_id: number;
+    organ_id?: number | null;
+    slot_key: ProcurementSlotKey;
+  }) =>
+    request<CoordinationProcurementFieldScopeTemplate>('/admin/procurement-config/scopes', {
+      method: 'POST',
+      body: JSON.stringify(data),
+    }),
+  deleteProcurementFieldScopeTemplate: (id: number) =>
+    request<void>(`/admin/procurement-config/scopes/${id}`, { method: 'DELETE' }),
 };

@@ -41,6 +41,7 @@ Each seed job has:
 
 Loaded for all environments by default.
 Includes baseline users: `SYSTEM`, `SAMPLE`, `QATEST_TKOORD`, `QATEST_TARZT`, `QATEST_SYSTEM`.
+Core user seed now ensures each `USER` is linked to exactly one `PERSON`, and seeded user display names are derived from person first/surname data.
 
 Examples in current registry:
 
@@ -50,6 +51,8 @@ Examples in current registry:
 - `core.colloqium_types`
 - `core.medical_value_groups`
 - `core.medical_value_templates`
+- `core.coordination_procurement_field_templates` (includes grouped layout metadata via `group_key` and complex value mode via `value_mode`)
+- `core.coordination_procurement_field_scopes`
 
 Medical value core seeds now define a template universe with:
 

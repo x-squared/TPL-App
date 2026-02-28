@@ -62,7 +62,7 @@ export default function CoordinationProtocolEventLogPanel({
   };
 
   return (
-    <section className="coord-protocol-pane">
+    <section className="coord-protocol-pane coord-protocol-event-pane">
       <div className={`coord-event-input-row ${focused ? 'alert' : ''}`}>
         <input
           className={`detail-input coord-event-input ${focused ? 'alert' : ''}`}

@@ -1,7 +1,7 @@
 import type { Code, DatatypeDefinition } from '../api';
 
 interface DatatypeConfig {
-  inputType: 'number' | 'text' | 'date' | 'boolean' | 'catalogue';
+  inputType: 'number' | 'text' | 'date' | 'datetime' | 'boolean' | 'catalogue';
   step?: string;
   unit?: string;
   placeholder?: string;
@@ -12,6 +12,7 @@ const KNOWN: Record<string, DatatypeConfig> = {
   DECIMAL:  { inputType: 'number', step: 'any' },
   STRING:   { inputType: 'text' },
   DATE:     { inputType: 'date' },
+  TIMESTAMP:{ inputType: 'datetime' },
   BOOLEAN:  { inputType: 'boolean' },
   KG:       { inputType: 'number', step: 'any', unit: 'kg' },
   CM:       { inputType: 'number', step: '1', unit: 'cm' },
@@ -35,6 +36,7 @@ export function getConfigFromMetadata(
   const inputType: DatatypeConfig['inputType'] =
     kind === 'number' ? 'number'
       : kind === 'date' ? 'date'
+        : kind === 'datetime' ? 'datetime'
         : kind === 'boolean' ? 'boolean'
           : kind === 'catalogue' ? 'catalogue'
             : 'text';
@@ -60,6 +62,12 @@ function formatDateValue(iso: string): string {
   return `${String(d.getDate()).padStart(2, '0')}.${String(d.getMonth() + 1).padStart(2, '0')}.${d.getFullYear()}`;
 }
 
+function formatDateTimeValue(iso: string): string {
+  const d = new Date(iso);
+  if (isNaN(d.getTime())) return iso;
+  return `${String(d.getDate()).padStart(2, '0')}.${String(d.getMonth() + 1).padStart(2, '0')}.${d.getFullYear()} ${String(d.getHours()).padStart(2, '0')}:${String(d.getMinutes()).padStart(2, '0')}`;
+}
+
 export function formatValue(
   value: string | null | undefined,
   dt: Code | null | undefined,
@@ -77,6 +85,9 @@ export function formatValue(
   }
   if (cfg.inputType === 'date') {
     return formatDateValue(value);
+  }
+  if (cfg.inputType === 'datetime') {
+    return formatDateTimeValue(value);
   }
   if (cfg.unit) {
     return `${value} ${cfg.unit}`;
@@ -102,6 +113,8 @@ export function validateValue(
     case 'BP':
       return /^\d{2,3}\/\d{2,3}$/.test(value);
     case 'DATE':
+      return !isNaN(Date.parse(value));
+    case 'TIMESTAMP':
       return !isNaN(Date.parse(value));
     case 'BOOLEAN':
       return value === 'true' || value === 'false';

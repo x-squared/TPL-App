@@ -3,6 +3,7 @@ from __future__ import annotations
 from fastapi import HTTPException
 from sqlalchemy.orm import Session
 
+from ...enums import FavoriteTypeKey
 from ...models import Colloqium, Coordination, CoordinationDonor, Episode, Favorite, Patient
 from ...schemas import FavoriteCreate
 
@@ -14,14 +15,14 @@ def _format_date_dd_mm_yyyy(value):
 
 
 def _derive_name(payload: FavoriteCreate, db: Session) -> str:
-    if payload.favorite_type_key == "PATIENT" and payload.patient_id is not None:
+    if payload.favorite_type_key == FavoriteTypeKey.PATIENT and payload.patient_id is not None:
         patient = db.query(Patient).filter(Patient.id == payload.patient_id).first()
         if patient:
             full_name = f"{patient.first_name} {patient.name}".strip()
             birthday = _format_date_dd_mm_yyyy(patient.date_of_birth)
             pid = patient.pid or "–"
             return f"{full_name} ({birthday}), {pid}"
-    if payload.favorite_type_key == "EPISODE" and payload.episode_id is not None:
+    if payload.favorite_type_key == FavoriteTypeKey.EPISODE and payload.episode_id is not None:
         episode = db.query(Episode).filter(Episode.id == payload.episode_id).first()
         if episode:
             if episode.patient:
@@ -38,12 +39,12 @@ def _derive_name(payload: FavoriteCreate, db: Session) -> str:
                 organ = episode.organ.name_default if episode.organ else "Unknown organ"
             start = _format_date_dd_mm_yyyy(episode.start)
             return f"{patient_name}, {organ}, {start}"
-    if payload.favorite_type_key == "COLLOQUIUM" and payload.colloqium_id is not None:
+    if payload.favorite_type_key == FavoriteTypeKey.COLLOQUIUM and payload.colloqium_id is not None:
         colloqium = db.query(Colloqium).filter(Colloqium.id == payload.colloqium_id).first()
         if colloqium:
             colloqium_type_name = colloqium.colloqium_type.name if colloqium.colloqium_type else "Colloquium"
             return f"{colloqium_type_name} ({colloqium.date})"
-    if payload.favorite_type_key == "COORDINATION" and payload.coordination_id is not None:
+    if payload.favorite_type_key == FavoriteTypeKey.COORDINATION and payload.coordination_id is not None:
         coordination = db.query(Coordination).filter(Coordination.id == payload.coordination_id).first()
         if coordination:
             donor = (
@@ -62,13 +63,13 @@ def _find_existing(user_id: int, payload: FavoriteCreate, db: Session) -> Favori
         Favorite.user_id == user_id,
         Favorite.favorite_type_key == payload.favorite_type_key,
     )
-    if payload.favorite_type_key == "PATIENT":
+    if payload.favorite_type_key == FavoriteTypeKey.PATIENT:
         query = query.filter(Favorite.patient_id == payload.patient_id)
-    elif payload.favorite_type_key == "EPISODE":
+    elif payload.favorite_type_key == FavoriteTypeKey.EPISODE:
         query = query.filter(Favorite.episode_id == payload.episode_id)
-    elif payload.favorite_type_key == "COLLOQUIUM":
+    elif payload.favorite_type_key == FavoriteTypeKey.COLLOQUIUM:
         query = query.filter(Favorite.colloqium_id == payload.colloqium_id)
-    elif payload.favorite_type_key == "COORDINATION":
+    elif payload.favorite_type_key == FavoriteTypeKey.COORDINATION:
         query = query.filter(Favorite.coordination_id == payload.coordination_id)
     return query.first()
 

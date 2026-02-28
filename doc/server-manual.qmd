@@ -4,7 +4,7 @@ This manual explains how to configure and start the TPL backend server.
 
 For detailed seeding behavior (core/sample/test data), see `doc/seeding-manual.qmd`.
 For specification-to-test workflow, see `doc/specification-manual.qmd`.
-For role/permission behavior and management, see `doc/access-control-manual.qmd`.
+For end-to-end security architecture and controls, see `doc/security-manual.qmd`.
 
 ## 1) What "server" means in this project
 

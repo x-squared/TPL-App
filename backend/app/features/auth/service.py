@@ -10,6 +10,8 @@ from ...schemas import UserResponse
 
 def serialize_user(*, db: Session, user: User) -> UserResponse:
     payload = UserResponse.model_validate(user).model_dump()
+    if user.person:
+        payload["name"] = f"{user.person.first_name} {user.person.surname}".strip()
     payload["permissions"] = get_user_permission_keys(db, user)
     return UserResponse.model_validate(payload)
 
@@ -17,7 +19,7 @@ def serialize_user(*, db: Session, user: User) -> UserResponse:
 def login_by_ext_id(*, ext_id: str, db: Session) -> tuple[str, UserResponse]:
     user = (
         db.query(User)
-        .options(joinedload(User.role), joinedload(User.roles))
+        .options(joinedload(User.role), joinedload(User.roles), joinedload(User.person))
         .filter(User.ext_id == ext_id)
         .first()
     )

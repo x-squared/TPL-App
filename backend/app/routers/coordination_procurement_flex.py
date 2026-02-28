@@ -3,6 +3,7 @@ from sqlalchemy.orm import Session
 
 from ..auth import require_permission
 from ..database import get_db
+from ..enums import ProcurementSlotKey
 from ..features.coordination_procurement_flex import (
     get_procurement_flex as get_procurement_flex_service,
     update_procurement_organ as update_procurement_organ_service,
@@ -69,7 +70,7 @@ def update_procurement_organ(
 def upsert_procurement_value(
     coordination_id: int,
     organ_id: int,
-    slot_key: str,
+    slot_key: ProcurementSlotKey,
     field_template_id: int,
     payload: CoordinationProcurementValueCreate,
     db: Session = Depends(get_db),

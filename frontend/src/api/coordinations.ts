@@ -1,4 +1,4 @@
-import { request, type AppUser, type Code } from './core';
+import { request, type AppUser, type Code, type DatatypeDefinition, type Person, type PersonTeam } from './core';
 
 export interface Coordination {
   id: number;
@@ -49,6 +49,10 @@ export interface CoordinationDonor {
   diagnosis_id: number | null;
   death_kind_id: number | null;
   death_kind: Code | null;
+  changed_by_id: number | null;
+  changed_by_user: AppUser | null;
+  created_at: string;
+  updated_at: string | null;
 }
 
 export interface CoordinationDonorUpsert {
@@ -71,6 +75,10 @@ export interface CoordinationOrigin {
   detection_hospital: Code | null;
   procurement_hospital: Code | null;
   organs_declined: boolean;
+  changed_by_id: number | null;
+  changed_by_user: AppUser | null;
+  created_at: string;
+  updated_at: string | null;
 }
 
 export interface CoordinationOriginUpsert {
@@ -152,6 +160,84 @@ export interface CoordinationEpisode {
   updated_at: string | null;
 }
 
+export type ProcurementSlotKey = 'MAIN' | 'LEFT' | 'RIGHT';
+export type ProcurementValueMode = 'SCALAR' | 'PERSON_SINGLE' | 'PERSON_LIST' | 'TEAM_SINGLE' | 'TEAM_LIST' | 'EPISODE';
+
+export interface CoordinationProcurementFieldGroupTemplate {
+  id: number;
+  key: string;
+  name_default: string;
+  pos: number;
+}
+
+export interface CoordinationProcurementFieldTemplate {
+  id: number;
+  key: string;
+  name_default: string;
+  pos: number;
+  group_template_id: number | null;
+  group_template: CoordinationProcurementFieldGroupTemplate | null;
+  value_mode: ProcurementValueMode;
+  datatype_def_id: number;
+  datatype_definition: DatatypeDefinition | null;
+}
+
+export interface CoordinationProcurementValuePerson {
+  id: number;
+  pos: number;
+  person: Person | null;
+}
+
+export interface CoordinationProcurementValueTeam {
+  id: number;
+  pos: number;
+  team: PersonTeam | null;
+}
+
+export interface CoordinationProcurementValue {
+  id: number;
+  slot_id: number;
+  field_template_id: number;
+  value: string;
+  field_template: CoordinationProcurementFieldTemplate | null;
+  persons: CoordinationProcurementValuePerson[];
+  teams: CoordinationProcurementValueTeam[];
+  episode_ref: {
+    id: number;
+    episode_id: number;
+    episode: CoordinationEpisodeLinkedEpisode | null;
+  } | null;
+}
+
+export interface CoordinationProcurementSlot {
+  id: number;
+  coordination_procurement_organ_id: number;
+  slot_key: ProcurementSlotKey;
+  values: CoordinationProcurementValue[];
+}
+
+export interface CoordinationProcurementOrgan {
+  id: number;
+  coordination_id: number;
+  organ_id: number;
+  procurement_surgeon: string;
+  organ: Code | null;
+  slots: CoordinationProcurementSlot[];
+}
+
+export interface CoordinationProcurementFlex {
+  field_group_templates: CoordinationProcurementFieldGroupTemplate[];
+  field_templates: CoordinationProcurementFieldTemplate[];
+  organs: CoordinationProcurementOrgan[];
+}
+
+export interface CoordinationProcurementValueUpsert {
+  value?: string;
+  person_ids?: number[];
+  team_ids?: number[];
+  episode_id?: number | null;
+}
+
 export const coordinationsApi = {
   listCoordinations: () => request<Coordination[]>('/coordinations/'),
   createCoordination: (data: CoordinationCreate) =>
@@ -201,4 +287,17 @@ export const coordinationsApi = {
 
   listCoordinationEpisodes: (coordinationId: number) =>
     request<CoordinationEpisode[]>(`/coordinations/${coordinationId}/episodes/`),
+  getCoordinationProcurementFlex: (coordinationId: number) =>
+    request<CoordinationProcurementFlex>(`/coordinations/${coordinationId}/procurement-flex/`),
+  upsertCoordinationProcurementValue: (
+    coordinationId: number,
+    organId: number,
+    slotKey: ProcurementSlotKey,
+    fieldTemplateId: number,
+    data: CoordinationProcurementValueUpsert,
+  ) =>
+    request<CoordinationProcurementValue>(
+      `/coordinations/${coordinationId}/procurement-flex/organs/${organId}/slots/${encodeURIComponent(slotKey)}/values/${fieldTemplateId}`,
+      { method: 'PUT', body: JSON.stringify(data) },
+    ),
 };

@@ -118,3 +118,32 @@ python -m app.db_schema --mode verify --env PROD
 - If schema is older than current models, `db_data seed` may fail; run schema step first.
 - `--db-url` allows targeting a non-default database.
 - For SQLite, "clean" keeps the file and clears all table rows.
+
+## Strong Enum Migration Path (carried out)
+
+To reduce drift for stable technical vocabularies while keeping DB compatibility, use this migration path.
+
+### Phase 1 (completed)
+
+- Introduce backend enums in `backend/app/enums.py` for:
+  - `COORDINATION_STATUS`
+  - `FAVORITE_TYPE`
+  - `TASK_SCOPE`
+  - `TASK_STATUS`
+  - `PRIORITY`
+- Replace magic string keys in services with enum constants.
+- Keep existing `CODE` table references and foreign keys unchanged (no API break).
+- Align core seed data to enum constants in `backend/app/seed/datasets/core/codes.py`.
+- Enforce startup alignment check between enum definitions and existing `CODE` rows.
+
+### Phase 2 (completed, compatibility mode)
+
+- Added enum-key persistence columns for strong enum domains:
+  - `COORDINATION.STATUS_KEY`
+  - `TASK_GROUP_TEMPLATE.SCOPE_KEY`
+  - `TASK_TEMPLATE.PRIORITY_KEY`
+  - `TASK.PRIORITY_KEY`
+  - `TASK.STATUS_KEY`
+- Added startup migration/backfill in `backend/app/main.py` to keep key/id mirrors aligned in both directions.
+- Updated service write paths and seed loaders so new/updated rows write enum keys deterministically.
+- Kept `*_id -> CODE.ID` fields and API contracts for backward compatibility while transitioning consumers to key-based semantics.

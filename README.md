@@ -8,7 +8,7 @@ Full-stack web application with a **FastAPI** backend, **React + TypeScript** fr
 - CLI cookbook / Quarto usage: `doc/diy-manual.qmd`
 - Database lifecycle and commands: `doc/database-manual.qmd`
 - Server operations: `doc/server-manual.qmd`
-- Access control and RBAC: `doc/access-control-manual.qmd`
+- Security architecture and RBAC: `doc/security-manual.qmd`
 - External interfaces architecture: `doc/interface-manual.qmd`
 - Client operations: `doc/client-manual.qmd`
 - Report builder usage and internals: `doc/report-builder-manual.qmd`

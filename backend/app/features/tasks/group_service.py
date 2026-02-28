@@ -4,6 +4,7 @@ from fastapi import HTTPException
 from sqlalchemy import or_
 from sqlalchemy.orm import Session, aliased, joinedload
 
+from ...enums import TaskScopeKey
 from ...models import Code, ColloqiumAgenda, Episode, Patient, TaskGroup, TaskGroupTemplate
 from ...schemas import TaskGroupCreate, TaskGroupUpdate
 
@@ -84,7 +85,7 @@ def validate_task_group_links(
     template_scope = db.query(Code).filter(Code.id == template.scope_id, Code.type == "TASK_SCOPE").first()
     if not template_scope:
         raise HTTPException(status_code=422, detail="Template scope_id must reference CODE with type TASK_SCOPE")
-    if template_scope.key == "EPISODE" and episode_id is None:
+    if template_scope.key == TaskScopeKey.EPISODE.value and episode_id is None:
         raise HTTPException(status_code=422, detail="episode_id is required for templates with TASK_SCOPE.EPISODE")
     if template.organ_id is not None:
         if episode_id is None:

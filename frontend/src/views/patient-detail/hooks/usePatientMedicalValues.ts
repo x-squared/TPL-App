@@ -253,7 +253,13 @@ export function usePatientMedicalValues(
     }
     return createElement('input', {
       className,
-      type: cfg.inputType === 'number' ? 'number' : cfg.inputType === 'date' ? 'date' : 'text',
+      type: cfg.inputType === 'number'
+        ? 'number'
+        : cfg.inputType === 'date'
+          ? 'date'
+          : cfg.inputType === 'datetime'
+            ? 'datetime-local'
+            : 'text',
       step: cfg.step,
       placeholder: cfg.placeholder,
       value,

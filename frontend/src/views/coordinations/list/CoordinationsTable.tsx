@@ -85,7 +85,15 @@ export default function CoordinationsTable({
           {adding && (
             <tr>
               <td colSpan={8}>
-                <div className="patients-add-form">
+                <form
+                  className="patients-add-form"
+                  onSubmit={(event) => {
+                    event.preventDefault();
+                    if (!creating) {
+                      onSave();
+                    }
+                  }}
+                >
                   <input
                     type="date"
                     value={startDateInput}
@@ -140,15 +148,15 @@ export default function CoordinationsTable({
                     onChange={(e) => onFieldChange('comment', e.target.value)}
                   />
                   <div className="patients-add-actions">
-                    <button className="patients-save-btn" onClick={onSave} disabled={creating}>
+                    <button className="patients-save-btn" type="submit" disabled={creating}>
                       {creating ? 'Saving...' : 'Save'}
                     </button>
-                    <button className="patients-cancel-btn" onClick={onCancel} disabled={creating}>
+                    <button className="patients-cancel-btn" type="button" onClick={onCancel} disabled={creating}>
                       Cancel
                     </button>
                   </div>
                   <ErrorBanner message={createError} />
-                </div>
+                </form>
               </td>
             </tr>
           )}

@@ -1,8 +1,9 @@
-from sqlalchemy import Boolean, Column, Date, DateTime, ForeignKey, Integer, String, UniqueConstraint
+from sqlalchemy import Boolean, Column, Date, DateTime, Enum as SqlEnum, ForeignKey, Integer, String, UniqueConstraint
 from sqlalchemy.orm import relationship
 from sqlalchemy.sql import func
 
 from ..database import Base
+from ..enums import PriorityKey, TaskScopeKey, TaskStatusKey
 
 
 class TaskGroupTemplate(Base):
@@ -47,6 +48,19 @@ class TaskGroupTemplate(Base):
         nullable=False,
         comment="Template scope reference (`CODE.TASK_SCOPE`).",
         info={"label": "Task Scope"},
+    )
+    scope_key = Column(
+        "SCOPE_KEY",
+        SqlEnum(
+            TaskScopeKey,
+            native_enum=False,
+            validate_strings=True,
+            values_callable=lambda enum_cls: [entry.value for entry in enum_cls],
+            length=16,
+        ),
+        nullable=True,
+        comment="Template scope enum key mirror of `scope_id`.",
+        info={"label": "Task Scope Key"},
     )
     organ_id = Column(
         "ORGAN_ID",
@@ -146,6 +160,19 @@ class TaskTemplate(Base):
         nullable=False,
         comment="Default priority reference (`CODE.PRIORITY`).",
         info={"label": "Default Priority"},
+    )
+    priority_key = Column(
+        "PRIORITY_KEY",
+        SqlEnum(
+            PriorityKey,
+            native_enum=False,
+            validate_strings=True,
+            values_callable=lambda enum_cls: [entry.value for entry in enum_cls],
+            length=16,
+        ),
+        nullable=True,
+        comment="Default priority enum key mirror of `priority_id`.",
+        info={"label": "Default Priority Key"},
     )
     due_days_default = Column(
         "DUE_DAYS_DEFAULT",
@@ -330,6 +357,19 @@ class Task(Base):
         comment="Priority reference (`CODE.PRIORITY`) of the task.",
         info={"label": "Task Priority"},
     )
+    priority_key = Column(
+        "PRIORITY_KEY",
+        SqlEnum(
+            PriorityKey,
+            native_enum=False,
+            validate_strings=True,
+            values_callable=lambda enum_cls: [entry.value for entry in enum_cls],
+            length=16,
+        ),
+        nullable=True,
+        comment="Task priority enum key mirror of `priority_id`.",
+        info={"label": "Task Priority Key"},
+    )
     assigned_to_id = Column(
         "ASSIGNED_TO",
         Integer,
@@ -352,6 +392,19 @@ class Task(Base):
         nullable=False,
         comment="Status reference (`CODE.TASK_STATUS`) of the task.",
         info={"label": "Task Status"},
+    )
+    status_key = Column(
+        "STATUS_KEY",
+        SqlEnum(
+            TaskStatusKey,
+            native_enum=False,
+            validate_strings=True,
+            values_callable=lambda enum_cls: [entry.value for entry in enum_cls],
+            length=16,
+        ),
+        nullable=True,
+        comment="Task status enum key mirror of `status_id`.",
+        info={"label": "Task Status Key"},
     )
     closed_at = Column(
         "CLOSED_AT",
@@ -407,5 +460,5 @@ class Task(Base):
 
     @property
     def closed(self) -> bool:
-        status_key = self.status.key if self.status else None
+        status_key = self.status_key or (self.status.key if self.status else None)
         return self.closed_at is not None and status_key in {"COMPLETED", "CANCELLED"}

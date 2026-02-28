@@ -3,7 +3,7 @@ from __future__ import annotations
 from fastapi import HTTPException
 from sqlalchemy.orm import Session, joinedload
 
-from ...models import TaskGroupTemplate
+from ...models import Code, TaskGroupTemplate
 from ...schemas import TaskGroupTemplateCreate, TaskGroupTemplateUpdate
 from .template_instantiation_service import validate_template_links
 
@@ -34,7 +34,10 @@ def create_task_group_template(*, payload: TaskGroupTemplateCreate, changed_by_i
     existing = db.query(TaskGroupTemplate).filter(TaskGroupTemplate.key == payload.key).first()
     if existing:
         raise HTTPException(status_code=422, detail="key already exists")
-    template = TaskGroupTemplate(**payload.model_dump(), changed_by_id=changed_by_id)
+    scope = db.query(Code).filter(Code.id == payload.scope_id, Code.type == "TASK_SCOPE").first()
+    if not scope:
+        raise HTTPException(status_code=422, detail="scope_id must reference CODE with type TASK_SCOPE")
+    template = TaskGroupTemplate(**payload.model_dump(), scope_key=scope.key, changed_by_id=changed_by_id)
     db.add(template)
     db.commit()
     return _task_group_template_query(db).filter(TaskGroupTemplate.id == template.id).first()
@@ -59,6 +62,11 @@ def update_task_group_template(
     organ_id = data.get("organ_id", template.organ_id)
     tpl_phase_id = data.get("tpl_phase_id", template.tpl_phase_id)
     validate_template_links(db=db, scope_id=scope_id, organ_id=organ_id, tpl_phase_id=tpl_phase_id)
+    if "scope_id" in data and data["scope_id"] is not None:
+        scope = db.query(Code).filter(Code.id == data["scope_id"], Code.type == "TASK_SCOPE").first()
+        if not scope:
+            raise HTTPException(status_code=422, detail="scope_id must reference CODE with type TASK_SCOPE")
+        data["scope_key"] = scope.key
     for key, value in data.items():
         setattr(template, key, value)
     template.changed_by_id = changed_by_id

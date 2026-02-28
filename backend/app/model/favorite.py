@@ -1,8 +1,9 @@
-from sqlalchemy import Column, DateTime, ForeignKey, Integer, String
+from sqlalchemy import Column, DateTime, Enum as SqlEnum, ForeignKey, Integer, String
 from sqlalchemy.orm import relationship
 from sqlalchemy.sql import func
 
 from ..database import Base
+from ..enums import FavoriteTypeKey
 
 
 class Favorite(Base):
@@ -29,7 +30,13 @@ class Favorite(Base):
     )
     favorite_type_key = Column(
         "FAVORITE_TYPE_KEY",
-        String(24),
+        SqlEnum(
+            FavoriteTypeKey,
+            native_enum=False,
+            validate_strings=True,
+            values_callable=lambda enum_cls: [entry.value for entry in enum_cls],
+            length=24,
+        ),
         nullable=False,
         index=True,
         comment="Target kind key (PATIENT, EPISODE, COLLOQUIUM, COORDINATION).",

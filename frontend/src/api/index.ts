@@ -1,4 +1,4 @@
-export { getToken, setToken, clearToken, authApi, codesApi, medicalValueTemplatesApi, medicalValueGroupsApi, usersApi, adminAccessApi, personsApi, adminPeopleApi, supportTicketApi } from './core';
+export { getToken, setToken, clearToken, authApi, codesApi, medicalValueTemplatesApi, medicalValueGroupsApi, usersApi, adminAccessApi, personsApi, adminPeopleApi, adminProcurementConfigApi, supportTicketApi } from './core';
 export type {
   AppUser,
   AccessControlMatrix,
@@ -11,6 +11,12 @@ export type {
   HealthInfo,
   SupportTicketConfig,
   DatatypeDefinition,
+  ProcurementSlotKey,
+  ProcurementValueMode,
+  CoordinationProcurementFieldGroupTemplate,
+  CoordinationProcurementFieldTemplate,
+  CoordinationProcurementFieldScopeTemplate,
+  ProcurementAdminConfig,
   MedicalValueGroupInstance,
   MedicalValueTemplate,
   MedicalValueGroup,
@@ -54,6 +60,9 @@ export type {
   CoordinationProtocolEventLog,
   CoordinationProtocolEventLogCreate,
   CoordinationEpisode,
+  CoordinationProcurementFlex,
+  CoordinationProcurementValue,
+  CoordinationProcurementValueUpsert,
 } from './coordinations';
 export { favoritesApi } from './favorites';
 export type { Favorite, FavoriteCreate, FavoriteTypeKey } from './favorites';
@@ -84,7 +93,7 @@ export type {
   E2ETestRunResponse,
 } from './e2eTests';
 
-import { authApi, codesApi, medicalValueTemplatesApi, medicalValueGroupsApi, usersApi, adminAccessApi, personsApi, adminPeopleApi, supportTicketApi } from './core';
+import { authApi, codesApi, medicalValueTemplatesApi, medicalValueGroupsApi, usersApi, adminAccessApi, personsApi, adminPeopleApi, adminProcurementConfigApi, supportTicketApi } from './core';
 import { patientsApi } from './patients';
 import { tasksApi } from './tasks';
 import { colloqiumsApi } from './colloqiums';
@@ -103,6 +112,7 @@ export const api = {
   ...adminAccessApi,
   ...personsApi,
   ...adminPeopleApi,
+  ...adminProcurementConfigApi,
   ...supportTicketApi,
   ...patientsApi,
   ...tasksApi,

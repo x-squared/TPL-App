@@ -39,6 +39,7 @@ def sync_task_templates(db: Session) -> None:
         key = raw["key"]
         template = TaskGroupTemplate(
             scope_id=scope.id,
+            scope_key=scope.key,
             organ_id=organ_id,
             tpl_phase_id=tpl_phase_id,
             **raw,
@@ -64,6 +65,7 @@ def sync_task_templates(db: Session) -> None:
             TaskTemplate(
                 task_group_template_id=task_group_template.id,
                 priority_id=priority.id,
+                priority_key=priority.key,
                 **raw,
             )
         )

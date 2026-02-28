@@ -5,6 +5,7 @@ from datetime import date, timedelta
 from fastapi import HTTPException
 from sqlalchemy.orm import Session, joinedload
 
+from ...enums import TaskStatusKey, TaskScopeKey
 from ...models import Code, Episode, Patient, Task, TaskGroup, TaskGroupTemplate
 from ...schemas import TaskGroupTemplateInstantiateRequest
 from .group_service import episode_organ_ids
@@ -73,8 +74,8 @@ def instantiate_task_group_template(
         if episode.patient_id != payload.patient_id:
             raise HTTPException(status_code=422, detail="episode_id must belong to patient_id")
 
-    scope_key = template.scope.key if template.scope else None
-    if scope_key == "EPISODE" and episode is None:
+    scope_key = template.scope_key or (template.scope.key if template.scope else None)
+    if scope_key == TaskScopeKey.EPISODE.value and episode is None:
         raise HTTPException(status_code=422, detail="episode_id is required for templates with TASK_SCOPE.EPISODE")
 
     if template.organ_id is not None:
@@ -110,7 +111,7 @@ def instantiate_task_group_template(
     pending_status = get_default_code_or_422(
         db=db,
         code_type="TASK_STATUS",
-        code_key="PENDING",
+        code_key=TaskStatusKey.PENDING.value,
         field_name="status_id",
     )
 
@@ -128,9 +129,11 @@ def instantiate_task_group_template(
                 task_group_id=task_group.id,
                 description=item.description,
                 priority_id=item.priority_id,
+                priority_key=item.priority_key or (item.priority.key if item.priority else None),
                 assigned_to_id=None,
                 until=until,
                 status_id=pending_status.id,
+                status_key=pending_status.key,
                 closed_at=None,
                 closed_by_id=None,
                 comment="",

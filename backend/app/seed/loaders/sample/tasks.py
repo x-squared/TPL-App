@@ -94,7 +94,9 @@ def sync_tasks(db: Session) -> None:
             Task(
                 task_group_id=task_group.id,
                 priority_id=priority.id,
+                priority_key=priority.key,
                 status_id=status.id,
+                status_key=status.key,
                 assigned_to_id=assigned_to_id,
                 closed_by_id=closed_by_id,
                 **raw,

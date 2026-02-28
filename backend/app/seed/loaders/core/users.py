@@ -2,7 +2,40 @@ from typing import Any
 
 from sqlalchemy.orm import Session
 
-from ....models import Code, User
+from ....models import Code, Person, User
+
+
+def _split_display_name(name: str | None, ext_id: str) -> tuple[str, str]:
+    raw = (name or "").strip()
+    if raw:
+        parts = raw.split(" ", 1)
+        return parts[0], (parts[1] if len(parts) > 1 else ext_id)
+    return ext_id, "User"
+
+
+def _resolve_person_for_user(*, db: Session, raw: dict[str, Any], existing: User | None) -> Person:
+    first_name = raw.pop("first_name", None)
+    surname = raw.pop("surname", None)
+    person_user_id = raw.pop("person_user_id", None)
+    display_name = raw.get("name")
+    ext_id = raw.get("ext_id", "")
+    if not first_name or not surname:
+        fallback_first, fallback_surname = _split_display_name(display_name, ext_id)
+        first_name = first_name or fallback_first
+        surname = surname or fallback_surname
+    person = existing.person if existing and existing.person_id else None
+    if person is None and person_user_id:
+        person = db.query(Person).filter(Person.user_id == person_user_id).first()
+    if person is None:
+        person = Person(first_name=first_name, surname=surname, user_id=person_user_id)
+        db.add(person)
+        db.flush()
+    else:
+        person.first_name = first_name
+        person.surname = surname
+        if person_user_id is not None:
+            person.user_id = person_user_id
+    return person
 
 
 def _save_user_entry(db: Session, entry: dict[str, Any]) -> None:
@@ -23,12 +56,16 @@ def _save_user_entry(db: Session, entry: dict[str, Any]) -> None:
     if not ext_id:
         return
     existing = db.query(User).filter(User.ext_id == ext_id).first()
+    person = _resolve_person_for_user(db=db, raw=raw, existing=existing)
+    display_name = f"{person.first_name} {person.surname}".strip()
+    raw["name"] = display_name
     if existing:
         existing.name = raw.get("name", existing.name)
+        existing.person_id = person.id
         existing.role_id = primary_role.id if primary_role else None
         existing.roles = roles
         return
-    db.add(User(role_id=primary_role.id if primary_role else None, roles=roles, **raw))
+    db.add(User(role_id=primary_role.id if primary_role else None, roles=roles, person_id=person.id, **raw))
 
 
 def sync_users_core(db: Session) -> None:

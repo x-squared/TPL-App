@@ -4,7 +4,10 @@ from datetime import date, datetime
 
 from pydantic import BaseModel, ConfigDict, field_validator
 
+from ..enums import ProcurementSlotKey, ProcurementValueMode
 from .clinical import EpisodeResponse
+from .clinical_medical_values import DatatypeDefinitionResponse
+from .person import PersonResponse, PersonTeamListResponse
 from .reference import CatalogueResponse, CodeResponse, UserResponse
 from .tasking import TaskResponse
 
@@ -255,7 +258,11 @@ class CoordinationProcurementResponse(CoordinationProcurementBase):
 class CoordinationProcurementFieldTemplateBase(BaseModel):
     key: str
     name_default: str = ""
+    comment: str = ""
+    is_active: bool = True
     pos: int = 0
+    group_template_id: int | None = None
+    value_mode: ProcurementValueMode = ProcurementValueMode.SCALAR
     datatype_def_id: int
 
 
@@ -269,10 +276,40 @@ class CoordinationProcurementFieldTemplateResponse(CoordinationProcurementFieldT
     updated_at: datetime | None = None
 
 
+class CoordinationProcurementFieldGroupTemplateBase(BaseModel):
+    key: str
+    name_default: str = ""
+    comment: str = ""
+    is_active: bool = True
+    pos: int = 0
+
+
+class CoordinationProcurementFieldGroupTemplateResponse(CoordinationProcurementFieldGroupTemplateBase):
+    model_config = ConfigDict(from_attributes=True)
+
+    id: int
+    changed_by_id: int | None = None
+    changed_by_user: UserResponse | None = None
+    created_at: datetime
+    updated_at: datetime | None = None
+
+
+class CoordinationProcurementFieldGroupTemplateCreate(CoordinationProcurementFieldGroupTemplateBase):
+    pass
+
+
+class CoordinationProcurementFieldGroupTemplateUpdate(BaseModel):
+    key: str | None = None
+    name_default: str | None = None
+    comment: str | None = None
+    is_active: bool | None = None
+    pos: int | None = None
+
+
 class CoordinationProcurementFieldScopeTemplateBase(BaseModel):
     field_template_id: int
     organ_id: int | None = None
-    slot_key: str = "MAIN"
+    slot_key: ProcurementSlotKey = ProcurementSlotKey.MAIN
 
 
 class CoordinationProcurementFieldScopeTemplateResponse(CoordinationProcurementFieldScopeTemplateBase):
@@ -286,6 +323,10 @@ class CoordinationProcurementFieldScopeTemplateResponse(CoordinationProcurementF
     updated_at: datetime | None = None
 
 
+class CoordinationProcurementFieldScopeTemplateCreate(CoordinationProcurementFieldScopeTemplateBase):
+    pass
+
+
 class CoordinationProcurementValueBase(BaseModel):
     slot_id: int
     field_template_id: int
@@ -294,6 +335,33 @@ class CoordinationProcurementValueBase(BaseModel):
 
 class CoordinationProcurementValueCreate(BaseModel):
     value: str = ""
+    person_ids: list[int] = []
+    team_ids: list[int] = []
+    episode_id: int | None = None
+
+
+class CoordinationProcurementValuePersonResponse(BaseModel):
+    model_config = ConfigDict(from_attributes=True)
+
+    id: int
+    pos: int
+    person: PersonResponse | None = None
+
+
+class CoordinationProcurementValueTeamResponse(BaseModel):
+    model_config = ConfigDict(from_attributes=True)
+
+    id: int
+    pos: int
+    team: PersonTeamListResponse | None = None
+
+
+class CoordinationProcurementValueEpisodeResponse(BaseModel):
+    model_config = ConfigDict(from_attributes=True)
+
+    id: int
+    episode_id: int
+    episode: EpisodeResponse | None = None
 
 
 class CoordinationProcurementValueResponse(CoordinationProcurementValueBase):
@@ -305,11 +373,14 @@ class CoordinationProcurementValueResponse(CoordinationProcurementValueBase):
     changed_by_user: UserResponse | None = None
     created_at: datetime
     updated_at: datetime | None = None
+    persons: list[CoordinationProcurementValuePersonResponse] = []
+    teams: list[CoordinationProcurementValueTeamResponse] = []
+    episode_ref: CoordinationProcurementValueEpisodeResponse | None = None
 
 
 class CoordinationProcurementSlotBase(BaseModel):
     coordination_procurement_organ_id: int
-    slot_key: str = "MAIN"
+    slot_key: ProcurementSlotKey = ProcurementSlotKey.MAIN
 
 
 class CoordinationProcurementSlotResponse(CoordinationProcurementSlotBase):
@@ -354,7 +425,40 @@ class CoordinationProcurementFlexResponse(BaseModel):
 
     procurement: CoordinationProcurementResponse | None = None
     organs: list[CoordinationProcurementOrganResponse] = []
+    field_group_templates: list[CoordinationProcurementFieldGroupTemplateResponse] = []
     field_templates: list[CoordinationProcurementFieldTemplateResponse] = []
+
+
+class CoordinationProcurementFieldTemplateCreate(BaseModel):
+    key: str
+    name_default: str = ""
+    comment: str = ""
+    is_active: bool = True
+    pos: int = 0
+    datatype_def_id: int
+    group_template_id: int | None = None
+    value_mode: ProcurementValueMode = ProcurementValueMode.SCALAR
+
+
+class CoordinationProcurementFieldTemplateUpdate(BaseModel):
+    key: str | None = None
+    name_default: str | None = None
+    comment: str | None = None
+    is_active: bool | None = None
+    pos: int | None = None
+    datatype_def_id: int | None = None
+    group_template_id: int | None = None
+    value_mode: ProcurementValueMode | None = None
+
+
+class CoordinationProcurementAdminConfigResponse(BaseModel):
+    model_config = ConfigDict(from_attributes=True)
+
+    field_group_templates: list[CoordinationProcurementFieldGroupTemplateResponse] = []
+    field_templates: list[CoordinationProcurementFieldTemplateResponse] = []
+    field_scope_templates: list[CoordinationProcurementFieldScopeTemplateResponse] = []
+    datatype_definitions: list[DatatypeDefinitionResponse] = []
+    organs: list[CodeResponse] = []
 
 
 class CoordinationOrganEffectBase(BaseModel):

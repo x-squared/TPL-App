@@ -1,18 +1,27 @@
-import { useState } from 'react';
+import { useEffect, useState } from 'react';
 
 import { useAdminAccessRules } from './admin/hooks/useAdminAccessRules';
 import { useAdminPeopleTeams } from './admin/hooks/useAdminPeopleTeams';
+import { useAdminProcurementConfig } from './admin/hooks/useAdminProcurementConfig';
 import AdminOverviewTab from './admin/tabs/AdminOverviewTab';
 import AdminAccessRulesTab from './admin/tabs/AdminAccessRulesTab';
 import AdminPeopleTeamsTab from './admin/tabs/AdminPeopleTeamsTab';
+import AdminProcurementConfigTab from './admin/tabs/AdminProcurementConfigTab';
 import './AdminView.css';
 
-type AdminTabKey = 'overview' | 'access-rules' | 'people-teams';
+type AdminTabKey = 'overview' | 'access-rules' | 'people-teams' | 'procurement-config';
 
 export default function AdminView() {
   const [activeTab, setActiveTab] = useState<AdminTabKey>('overview');
   const accessRules = useAdminAccessRules();
   const peopleTeams = useAdminPeopleTeams();
+  const procurementConfig = useAdminProcurementConfig();
+
+  useEffect(() => {
+    if (activeTab === 'procurement-config') {
+      void procurementConfig.refresh();
+    }
+  }, [activeTab]);
 
   return (
     <>
@@ -41,6 +50,13 @@ export default function AdminView() {
           type="button"
         >
           People & Teams
+        </button>
+        <button
+          className={`detail-tab ${activeTab === 'procurement-config' ? 'active' : ''}`}
+          onClick={() => setActiveTab('procurement-config')}
+          type="button"
+        >
+          Protocol Config
         </button>
       </nav>
 
@@ -76,6 +92,25 @@ export default function AdminView() {
           onDeleteTeam={peopleTeams.deleteTeam}
           onEnsureTeamMembersLoaded={peopleTeams.ensureTeamMembersLoaded}
           onSetTeamMembers={peopleTeams.setTeamMembers}
+        />
+      )}
+      {activeTab === 'procurement-config' && (
+        <AdminProcurementConfigTab
+          config={procurementConfig.config}
+          loading={procurementConfig.loading}
+          saving={procurementConfig.saving}
+          error={procurementConfig.error}
+          status={procurementConfig.status}
+          scopesByFieldId={procurementConfig.scopesByFieldId}
+          onCreateGroup={procurementConfig.createGroup}
+          onUpdateGroup={procurementConfig.updateGroup}
+          onReorderGroups={procurementConfig.reorderGroups}
+          onDeleteGroup={procurementConfig.deleteGroup}
+          onCreateField={procurementConfig.createField}
+          onUpdateField={procurementConfig.updateField}
+          onReorderFields={procurementConfig.reorderFields}
+          onCreateScope={procurementConfig.createScope}
+          onDeleteScope={procurementConfig.deleteScope}
         />
       )}
     </>

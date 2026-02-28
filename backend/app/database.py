@@ -1,4 +1,4 @@
-from sqlalchemy import create_engine
+from sqlalchemy import Column, Integer, create_engine
 from sqlalchemy.orm import DeclarativeBase, sessionmaker
 
 from .config import get_config
@@ -10,7 +10,7 @@ SessionLocal = sessionmaker(autocommit=False, autoflush=False, bind=engine)
 
 
 class Base(DeclarativeBase):
-    pass
+    row_version = Column("ROW_VERSION", Integer, nullable=False, default=1)
 
 
 def get_db():

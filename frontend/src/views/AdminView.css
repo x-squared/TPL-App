@@ -77,6 +77,128 @@
   cursor: pointer;
 }
 
+.admin-proc-section + .admin-proc-section {
+  margin-top: 1rem;
+}
+
+.admin-proc-action-cell {
+  display: flex;
+  align-items: flex-end;
+}
+
+.admin-proc-block {
+  padding: 0;
+  margin-bottom: 0.8rem;
+}
+
+.admin-proc-block + .admin-proc-block {
+  margin-top: 2.2rem;
+}
+
+.admin-proc-block-heading {
+  margin-bottom: 0.55rem;
+}
+
+.admin-proc-block-heading h2 {
+  margin: 0 0 0.2rem 0;
+}
+
+.admin-proc-block-grid {
+  display: grid;
+  grid-template-columns: 1fr;
+  gap: 0.5rem;
+}
+
+.admin-proc-pane {
+  padding: 0;
+}
+
+.admin-proc-pane h3 {
+  margin: 0 0 0.45rem 0;
+  font-size: 0.82rem;
+  color: #46516e;
+  text-transform: uppercase;
+  letter-spacing: 0.02em;
+}
+
+.admin-proc-define-pane {
+  background: transparent;
+}
+
+.admin-proc-data-pane {
+  background: transparent;
+}
+
+.admin-proc-field-form {
+  grid-template-columns: repeat(auto-fit, minmax(14rem, 1fr));
+  width: 100%;
+}
+
+.admin-proc-define-pane .admin-proc-field-form .detail-input {
+  width: 100%;
+}
+
+.admin-proc-define-pane .admin-people-form {
+  grid-template-columns: repeat(auto-fit, minmax(12rem, 14rem));
+  column-gap: 0.65rem;
+  row-gap: 0.45rem;
+}
+
+.admin-proc-define-pane .admin-people-form label {
+  justify-self: start;
+}
+
+.admin-proc-define-pane .admin-people-form .detail-input {
+  width: 100%;
+  max-width: none;
+}
+
+.admin-proc-define-pane .admin-people-form input[type="number"].detail-input {
+  width: 7rem;
+}
+
+.admin-proc-scope-list {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.3rem;
+  margin-bottom: 0.4rem;
+}
+
+.admin-proc-scope-form {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr) 8rem auto;
+  gap: 0.4rem;
+}
+
+.admin-proc-group-list {
+  margin-top: 0.6rem;
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.35rem;
+}
+
+.data-table tbody tr[draggable="true"] {
+  cursor: grab;
+}
+
+.ci-dragging {
+  opacity: 0.4;
+}
+
+.ci-drag-over {
+  border-top: 2px solid #7c8aff;
+}
+
+.admin-proc-drag-handle {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 1rem;
+  color: #6b748b;
+  cursor: grab;
+  user-select: none;
+}
+
 @media (max-width: 980px) {
   .admin-people-grid {
     grid-template-columns: 1fr;
@@ -89,5 +211,17 @@
   .admin-access-role-field {
     min-width: 0;
     width: 100%;
+  }
+
+  .admin-proc-field-form {
+    grid-template-columns: 1fr;
+  }
+
+  .admin-proc-block-grid {
+    grid-template-columns: 1fr;
+  }
+
+  .admin-proc-scope-form {
+    grid-template-columns: 1fr;
   }
 }

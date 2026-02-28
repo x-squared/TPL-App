@@ -3,10 +3,11 @@ from __future__ import annotations
 from fastapi import HTTPException
 from sqlalchemy.orm import Session, joinedload
 
+from ...enums import CoordinationStatusKey
 from ...models import Code, Coordination
 from ...schemas import CoordinationCreate, CoordinationUpdate
 
-DEFAULT_COORDINATION_STATUS_KEY = "OPEN"
+DEFAULT_COORDINATION_STATUS_KEY = CoordinationStatusKey.OPEN.value
 COORDINATION_STATUS_TYPE = "COORDINATION_STATUS"
 
 
@@ -38,7 +39,7 @@ def _resolve_default_status_id(db: Session) -> int:
     return status.id
 
 
-def _ensure_status_exists(status_id: int, db: Session) -> None:
+def _ensure_status_exists(status_id: int, db: Session) -> Code:
     status = (
         db.query(Code)
         .filter(Code.id == status_id, Code.type == COORDINATION_STATUS_TYPE)
@@ -49,6 +50,7 @@ def _ensure_status_exists(status_id: int, db: Session) -> None:
             status_code=422,
             detail="status_id must reference CODE.COORDINATION_STATUS",
         )
+    return status
 
 
 def list_coordinations(db: Session) -> list[Coordination]:
@@ -57,11 +59,12 @@ def list_coordinations(db: Session) -> list[Coordination]:
 
 def create_coordination(*, payload: CoordinationCreate, changed_by_id: int, db: Session) -> Coordination:
     status_id = payload.status_id if payload.status_id is not None else _resolve_default_status_id(db)
-    _ensure_status_exists(status_id, db)
+    status = _ensure_status_exists(status_id, db)
     item = Coordination(
         start=payload.start,
         end=payload.end,
         status_id=status_id,
+        status_key=status.key,
         donor_nr=payload.donor_nr,
         swtpl_nr=payload.swtpl_nr,
         national_coordinator=payload.national_coordinator,
@@ -87,7 +90,8 @@ def update_coordination(
 
     data = payload.model_dump(exclude_unset=True)
     if "status_id" in data and data["status_id"] is not None:
-        _ensure_status_exists(data["status_id"], db)
+        status = _ensure_status_exists(data["status_id"], db)
+        data["status_key"] = status.key
 
     for key, value in data.items():
         setattr(item, key, value)

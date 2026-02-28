@@ -44,6 +44,17 @@ RECORDS = [
         "catalogue_type": None,
     },
     {
+        "code_key": "TIMESTAMP",
+        "primitive_kind": "datetime",
+        "unit": None,
+        "format_pattern": "yyyy-mm-ddThh:mm",
+        "validation_regex": None,
+        "min_value": None,
+        "max_value": None,
+        "precision": None,
+        "catalogue_type": None,
+    },
+    {
         "code_key": "BOOLEAN",
         "primitive_kind": "boolean",
         "unit": None,

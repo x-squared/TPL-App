@@ -19,10 +19,14 @@ from .model import (
     CoordinationOrganEffect,
     CoordinationProtocolEventLog,
     CoordinationProcurement,
+    CoordinationProcurementFieldGroupTemplate,
     CoordinationProcurementFieldScopeTemplate,
     CoordinationProcurementFieldTemplate,
     CoordinationProcurementOrgan,
     CoordinationProcurementSlot,
+    CoordinationProcurementValuePerson,
+    CoordinationProcurementValueTeam,
+    CoordinationProcurementValueEpisode,
     CoordinationTimeLog,
     CoordinationProcurementValue,
     CoordinationOrigin,
@@ -50,10 +54,11 @@ from .model import (
     TaskTemplate,
     User,
 )
-from .model.utils import apply_entity_metadata_defaults
+from .model.utils import apply_entity_metadata_defaults, apply_optimistic_locking_defaults
 
 # Apply default metadata once after all model classes are imported.
 apply_entity_metadata_defaults()
+apply_optimistic_locking_defaults()
 
 __all__ = [
     "Code",
@@ -70,11 +75,15 @@ __all__ = [
     "CoordinationEpisode",
     "CoordinationOrganEffect",
     "CoordinationProcurement",
+    "CoordinationProcurementFieldGroupTemplate",
     "CoordinationProcurementOrgan",
     "CoordinationProcurementSlot",
     "CoordinationProcurementFieldTemplate",
     "CoordinationProcurementFieldScopeTemplate",
     "CoordinationProcurementValue",
+    "CoordinationProcurementValuePerson",
+    "CoordinationProcurementValueTeam",
+    "CoordinationProcurementValueEpisode",
     "CoordinationTimeLog",
     "CoordinationOrigin",
     "User",

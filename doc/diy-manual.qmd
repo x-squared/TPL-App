@@ -92,7 +92,7 @@ export TPL_ENV=DEV
 uvicorn app.main:app --reload
 ```
 
-### 4) Start frontend
+### 4) Start frontend (not in same terminal as backend)
 
 ```{bash}
 cd frontend

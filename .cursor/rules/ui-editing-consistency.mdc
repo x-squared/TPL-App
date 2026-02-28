@@ -15,6 +15,18 @@ Use one consistent pattern for editable views unless a feature explicitly requir
 - **Autosave scope**: If autosave is requested, limit it to the specifically requested sub-section only.
 - **Buttons**: Reuse existing shared button classes (`edit-btn`, `save-btn`, `cancel-btn`, `ci-add-btn`) and match placement used in recipient views.
 - **Tables**: Use shared table classes (`data-table`, existing table wrappers) and keep default table text color/style consistent; avoid local visual overrides unless required.
+- **Section heading style**:
+  - Use the recipient-view canonical pattern: `h2` for section titles and `h3` for nested subsection titles inside `detail-section-heading`.
+  - Do not skip levels within the same panel hierarchy (`h1 -> h2 -> h3`).
+  - Use shared heading wrappers/classes (`detail-section-heading`, existing feature block heading classes) instead of ad-hoc heading containers.
+  - Keep heading rhythm consistent: concise title + optional short helper text directly below; avoid duplicate top-level titles for the same panel.
+  - Reuse existing heading spacing/typography rules from the feature CSS before adding new one-off heading styles.
+- **Table drag-and-drop pattern**:
+  - Use the established **row-based** DnD pattern used in existing tables (not custom handle-first variants unless explicitly requested).
+  - Keep DnD state as `dragId` + `dragOverId`, apply row classes like `ci-dragging` / `ci-drag-over`, and keep `tr[draggable="true"] { cursor: grab; }`.
+  - Use consistent events: `onDragStart`, `onDragOver` (with `preventDefault`), `onDragLeave`, `onDrop`, `onDragEnd`.
+  - Persist order updates immediately after drop and clear drag state in `onDragEnd` and after `onDrop`.
+  - For grouped tables, preserve grouping semantics while reordering; if a row is dropped into another group, explicitly update its group assignment and then normalize per-group positions.
 - **Styles**: Prefer shared/global styles in common files for repeated patterns; keep view CSS for truly view-specific rules only.
 
 When updating one editable view, check sibling views for divergence and align to this standard where safe.

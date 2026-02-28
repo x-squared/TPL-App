@@ -28,6 +28,15 @@ For any new complex view (like patients or colloquiums), follow this structure b
     - Use standard table wrappers/classes (`ui-table-wrap`, `patients-table-wrap`, `data-table`) so spacing, typography, and hover states match.
     - Keep feature-specific style rules in the feature CSS file (for example `AdminView.css`), and avoid adding feature styles to `App.css` unless shared by multiple views.
     - Match existing form rhythm: label + input stacks, consistent gaps, and no custom one-off control sizing unless necessary.
+- **Section heading style (global default)**:
+  - Follow the recipient-view heading hierarchy consistently:
+    - page heading: `patients-header` with `h1`
+    - section heading: `detail-section-heading` with `h2`
+    - nested subsection heading: `detail-section-heading` with `h3`
+  - Do not skip heading levels inside the same panel hierarchy (`h1 -> h2 -> h3`).
+  - Do not create ad-hoc wrappers for primary section titles when `detail-section-heading` fits.
+  - Use `h4/h5` only for local micro-labels inside an already headed section, not as the primary section heading pattern.
+  - Keep heading text concise; add helper text only when it provides concrete operational value.
 - **Shared rendering utilities**:
   - Centralize repeated display formatting logic (for example dates/times, empty placeholders, labels) in shared utilities under `frontend/src/views/layout/` (or another shared location) instead of duplicating inline logic in components.
   - For date rendering in view output, use shared formatters (for example `dateFormat.ts`) and keep formatting consistent across list/detail/header sections.

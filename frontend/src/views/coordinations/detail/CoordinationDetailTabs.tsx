@@ -1,7 +1,7 @@
 import type React from 'react';
 import { useEffect, useMemo, useState } from 'react';
 import type { Code, Coordination, CoordinationDonor, CoordinationEpisode, CoordinationOrigin, Patient } from '../../../api';
-import { toUserErrorMessage } from '../../../api/error';
+import { ApiError, toUserErrorMessage } from '../../../api/error';
 import { formatDateDdMmYyyy } from '../../layout/dateFormat';
 import CoordinationBasicDataSection from './CoordinationBasicDataSection';
 import CoordinationDonorDataSection from './CoordinationDonorDataSection';
@@ -70,6 +70,7 @@ interface Props {
   onSaveCoordination: (patch: Partial<Coordination>) => Promise<void>;
   onSaveDonor: (patch: Partial<CoordinationDonor>) => Promise<void>;
   onSaveOrigin: (patch: Partial<CoordinationOrigin>) => Promise<void>;
+  onRefresh: () => Promise<void>;
   onOpenPatientEpisode: (patientId: number, episodeId: number) => void;
 }
 
@@ -120,6 +121,7 @@ export default function CoordinationDetailTabs({
   onSaveCoordination,
   onSaveDonor,
   onSaveOrigin,
+  onRefresh,
   onOpenPatientEpisode,
 }: Props) {
   const initialCoreDraft = useMemo(
@@ -265,7 +267,12 @@ export default function CoordinationDetailTabs({
       });
       setCoreEditing(false);
     } catch (err) {
-      setCoreError(toUserErrorMessage(err, 'Failed to save basic data'));
+      const message = toUserErrorMessage(err, 'Failed to save basic data');
+      if (err instanceof ApiError && err.status === 409) {
+        await onRefresh();
+        setCoreEditing(false);
+      }
+      setCoreError(message);
     } finally {
       setCoreSaving(false);
     }
@@ -288,7 +295,12 @@ export default function CoordinationDetailTabs({
       });
       setDonorEditing(false);
     } catch (err) {
-      setDonorError(toUserErrorMessage(err, 'Failed to save donor data'));
+      const message = toUserErrorMessage(err, 'Failed to save donor data');
+      if (err instanceof ApiError && err.status === 409) {
+        await onRefresh();
+        setDonorEditing(false);
+      }
+      setDonorError(message);
     } finally {
       setDonorSaving(false);
     }
@@ -304,7 +316,12 @@ export default function CoordinationDetailTabs({
       });
       setOriginEditing(false);
     } catch (err) {
-      setOriginError(toUserErrorMessage(err, 'Failed to save hospitals'));
+      const message = toUserErrorMessage(err, 'Failed to save hospitals');
+      if (err instanceof ApiError && err.status === 409) {
+        await onRefresh();
+        setOriginEditing(false);
+      }
+      setOriginError(message);
     } finally {
       setOriginSaving(false);
     }

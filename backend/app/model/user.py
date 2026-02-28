@@ -33,6 +33,16 @@ class User(Base):
         comment="External identity of the user used for login mapping.",
         info={"label": "External ID"},
     )
+    person_id = Column(
+        "PERSON_ID",
+        Integer,
+        ForeignKey("PERSON.ID"),
+        nullable=False,
+        unique=True,
+        index=True,
+        comment="Required linked person record providing canonical user person data.",
+        info={"label": "Person"},
+    )
     name = Column(
         "NAME",
         String,
@@ -51,6 +61,7 @@ class User(Base):
 
     role = relationship("Code", foreign_keys=[role_id])
     roles = relationship("Code", secondary=user_role_table)
+    person = relationship("Person", foreign_keys=[person_id], back_populates="user")
     assigned_tasks = relationship("Task", foreign_keys="Task.assigned_to_id", back_populates="assigned_to")
     closed_tasks = relationship("Task", foreign_keys="Task.closed_by_id", back_populates="closed_by")
 

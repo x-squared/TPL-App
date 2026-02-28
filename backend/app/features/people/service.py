@@ -4,7 +4,7 @@ from fastapi import HTTPException
 from sqlalchemy import or_
 from sqlalchemy.orm import Session, joinedload
 
-from ...models import Person, PersonTeam
+from ...models import Person, PersonTeam, User
 from ...schemas import PersonCreate, PersonTeamCreate, PersonTeamUpdate, PersonUpdate
 
 
@@ -31,6 +31,12 @@ def _validate_user_id_uniqueness(*, db: Session, user_id: str | None, exclude_pe
         query = query.filter(Person.id != exclude_person_id)
     if query.first():
         raise HTTPException(status_code=422, detail="user_id already exists")
+
+
+def _sync_linked_user_name(*, person: Person, db: Session) -> None:
+    linked_user = db.query(User).filter(User.person_id == person.id).first()
+    if linked_user:
+        linked_user.name = f"{person.first_name} {person.surname}".strip()
 
 
 def search_people(*, query_text: str, db: Session, limit: int = 20) -> list[Person]:
@@ -72,6 +78,8 @@ def create_person(*, payload: PersonCreate, changed_by_id: int, db: Session) -> 
     _validate_user_id_uniqueness(db=db, user_id=data.get("user_id"))
     item = Person(**data, changed_by_id=changed_by_id)
     db.add(item)
+    db.flush()
+    _sync_linked_user_name(person=item, db=db)
     db.commit()
     return _person_query(db).filter(Person.id == item.id).first()
 
@@ -86,6 +94,7 @@ def update_person(*, person_id: int, payload: PersonUpdate, changed_by_id: int, 
     for key, value in data.items():
         setattr(item, key, value)
     item.changed_by_id = changed_by_id
+    _sync_linked_user_name(person=item, db=db)
     db.commit()
     return _person_query(db).filter(Person.id == person_id).first()
 
@@ -94,6 +103,9 @@ def delete_person(*, person_id: int, db: Session) -> None:
     item = db.query(Person).filter(Person.id == person_id).first()
     if not item:
         raise HTTPException(status_code=404, detail="Person not found")
+    linked_user = db.query(User).filter(User.person_id == person_id).first()
+    if linked_user:
+        raise HTTPException(status_code=422, detail="Cannot delete person linked to a user account")
     db.delete(item)
     db.commit()
 
