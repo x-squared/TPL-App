@@ -61,7 +61,7 @@ export default function TaskBoardFilters({
       </label>
       <label>
         Due Before
-        <input className="ui-filter-input" type="date" value={dueBefore} onChange={(e) => setDueBefore(e.target.value)} />
+        <input className="ui-filter-input" type="datetime-local" value={dueBefore} onChange={(e) => setDueBefore(e.target.value)} />
       </label>
       <label>
         Completed Tasks

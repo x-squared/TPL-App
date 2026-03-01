@@ -20,8 +20,9 @@ TASK_TEMPLATES = [
     {
         "task_group_template_key": "TEST_BASE_TEMPLATE",
         "description": "Unterlagen vor Stichtag pruefen",
+        "kind_key": "TASK",
         "priority_key": "LOW",
-        "due_days_default": -2,
+        "offset_minutes_default": -2880,
         "is_active": True,
         "sort_pos": 1,
         "changed_by_id": 2,
@@ -29,8 +30,9 @@ TASK_TEMPLATES = [
     {
         "task_group_template_key": "TEST_BASE_TEMPLATE",
         "description": "Patientenabgleich am Stichtag",
+        "kind_key": "TASK",
         "priority_key": "NORMAL",
-        "due_days_default": 0,
+        "offset_minutes_default": 0,
         "is_active": True,
         "sort_pos": 2,
         "changed_by_id": 2,
@@ -38,8 +40,9 @@ TASK_TEMPLATES = [
     {
         "task_group_template_key": "TEST_BASE_TEMPLATE",
         "description": "Nachfassen eine Woche nach Stichtag",
+        "kind_key": "TASK",
         "priority_key": "HIGH",
-        "due_days_default": 7,
+        "offset_minutes_default": 10080,
         "is_active": True,
         "sort_pos": 3,
         "changed_by_id": 2,

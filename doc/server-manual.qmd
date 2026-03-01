@@ -139,12 +139,13 @@ If running with `--reload`, code changes trigger automatic restart.
 
 ## 9) Operational notes
 
-- Startup creates database tables via SQLAlchemy metadata.
-- Startup also performs lightweight schema compatibility adjustments (for example, adding missing columns needed by newer code).
-- Startup now also applies medical-value universe migrations:
-  - creates datatype metadata table `MEDICAL_VALUE_DATATYPE`
-  - adds context columns on `MEDICAL_VALUE` (`EPISODE_ID`, `ORGAN_ID`, `IS_DONOR_CONTEXT`, `CONTEXT_KEY`)
-  - backfills patient `BLOOD_TYPE_ID` into static medical values and clears the patient column
+- Startup does not create or mutate database schema/data.
+- Startup performs read-only compatibility checks:
+  - schema compatibility check against SQLAlchemy model metadata (strict mode: tables/columns/types/nullability/indexes/constraints/FKs)
+  - enum/code alignment check for strong enum domains
+- Use explicit DB scripts (`app.db_schema`, `app.db_data`, `app.db_admin`) for all schema and data changes.
+  - optional preflight check: `python -m app.db_schema --mode verify --check-level strict --env <ENV>`
+  - optional procurement runtime backfill: `python -m app.db_data --mode migrate-procurement-runtime --env <ENV>`
 - Startup does not run seeding. Use DB/seed scripts explicitly when data refresh is required.
 
 For all seed design and profile details, always refer to:

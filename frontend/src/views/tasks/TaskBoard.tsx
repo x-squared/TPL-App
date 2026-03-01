@@ -9,21 +9,25 @@ import TaskBoardTable from './TaskBoardTable';
 import { computeGroupState, isCancelledTask, isDoneTask, sortTasks } from './taskBoardUtils';
 import { buildDefaultTaskDescription, findContextManagedGroup } from './taskBoardContext';
 import type {
-  TaskActionState,
   TaskBoardProps,
   TaskBoardRow,
-  TaskCreateFormState,
-  TaskGroupEditFormState,
-  TaskEditFormState,
 } from './taskBoardTypes';
 import useTaskBoardData from './useTaskBoardData';
+import {
+  useTaskBoardActionState,
+  useTaskBoardEditState,
+  useTaskBoardFilters,
+  useTaskBoardGroupState,
+} from './hooks/useTaskBoardUiState';
 
-function todayIso(): string {
+function nowLocalDateTimeIso(): string {
   const now = new Date();
   const y = now.getFullYear();
   const m = String(now.getMonth() + 1).padStart(2, '0');
   const d = String(now.getDate()).padStart(2, '0');
-  return `${y}-${m}-${d}`;
+  const hh = String(now.getHours()).padStart(2, '0');
+  const mm = String(now.getMinutes()).padStart(2, '0');
+  return `${y}-${m}-${d}T${hh}:${mm}:00`;
 }
 
 export default function TaskBoard({
@@ -51,24 +55,10 @@ export default function TaskBoard({
   const [effectiveColloqiumAgendaId, setEffectiveColloqiumAgendaId] = useState<number | null>(
     criteria.colloqiumAgendaId ?? null,
   );
-  const [organFilterId, setOrganFilterId] = useState<number | 'ALL'>('ALL');
-  const [assignedToFilterId, setAssignedToFilterId] = useState<number | 'ALL'>('ALL');
-  const [dueBefore, setDueBefore] = useState('');
-  const [showDoneTasks, setShowDoneTasks] = useState(includeClosedTasks);
-  const [showCancelledTasks, setShowCancelledTasks] = useState(includeClosedTasks);
-  const [showGroupHeadings, setShowGroupHeadings] = useState(showGroupHeadingsDefault);
-  const [actionState, setActionState] = useState<TaskActionState | null>(null);
-  const [actionComment, setActionComment] = useState('');
-  const [actionSaving, setActionSaving] = useState(false);
-  const [editingTaskId, setEditingTaskId] = useState<number | null>(null);
-  const [editForm, setEditForm] = useState<TaskEditFormState | null>(null);
-  const [editSaving, setEditSaving] = useState(false);
-  const [editingGroupId, setEditingGroupId] = useState<number | null>(null);
-  const [groupEditForm, setGroupEditForm] = useState<TaskGroupEditFormState | null>(null);
-  const [groupEditSaving, setGroupEditSaving] = useState(false);
-  const [creatingGroupId, setCreatingGroupId] = useState<number | null>(null);
-  const [createForm, setCreateForm] = useState<TaskCreateFormState | null>(null);
-  const [createSaving, setCreateSaving] = useState(false);
+  const filters = useTaskBoardFilters(includeClosedTasks, showGroupHeadingsDefault);
+  const actionStateModel = useTaskBoardActionState();
+  const editStateModel = useTaskBoardEditState();
+  const groupStateModel = useTaskBoardGroupState();
   const [panelAddSaving, setPanelAddSaving] = useState(false);
   const [preferredTopGroupId, setPreferredTopGroupId] = useState<number | null>(null);
   const [autoCreatedTaskId, setAutoCreatedTaskId] = useState<number | null>(null);
@@ -85,10 +75,10 @@ export default function TaskBoard({
   const statusKeysToLoad = useMemo(() => {
     if (includeClosedTasks) return ['PENDING', 'COMPLETED', 'CANCELLED'];
     const keys = ['PENDING'];
-    if (showDoneTasks) keys.push('COMPLETED');
-    if (showCancelledTasks) keys.push('CANCELLED');
+    if (filters.showDoneTasks) keys.push('COMPLETED');
+    if (filters.showCancelledTasks) keys.push('CANCELLED');
     return keys;
-  }, [includeClosedTasks, showDoneTasks, showCancelledTasks]);
+  }, [includeClosedTasks, filters.showDoneTasks, filters.showCancelledTasks]);
 
   const effectiveCriteria = useMemo(
     () => ({
@@ -139,49 +129,50 @@ export default function TaskBoard({
   );
 
   const startTaskAction = (task: Task, type: 'complete' | 'discard') => {
-    setEditingGroupId(null);
-    setGroupEditForm(null);
-    setCreatingGroupId(null);
-    setCreateForm(null);
-    setEditingTaskId(null);
-    setEditForm(null);
-    setActionState({ task, type });
-    setActionComment(task.comment ?? '');
+    groupStateModel.setEditingGroupId(null);
+    groupStateModel.setGroupEditForm(null);
+    groupStateModel.setCreatingGroupId(null);
+    groupStateModel.setCreateForm(null);
+    editStateModel.setEditingTaskId(null);
+    editStateModel.setEditForm(null);
+    actionStateModel.setActionState({ task, type });
+    actionStateModel.setActionComment(task.comment ?? '');
   };
 
   const applyTaskAction = async () => {
-    if (!actionState) return;
-    const statusKey = actionState.type === 'complete' ? 'COMPLETED' : 'CANCELLED';
+    if (!actionStateModel.actionState) return;
+    const statusKey = actionStateModel.actionState.type === 'complete' ? 'COMPLETED' : 'CANCELLED';
     const statusCode = taskStatusByKey[statusKey];
     if (!statusCode) return;
-    const nextComment = actionComment.trim();
-    if (actionState.type === 'discard' && !nextComment) return;
+    const nextComment = actionStateModel.actionComment.trim();
+    if (actionStateModel.actionState.type === 'discard' && !nextComment) return;
 
-    setActionSaving(true);
+    actionStateModel.setActionSaving(true);
     try {
       const payload: TaskUpdate = {
         status_id: statusCode.id,
         comment: nextComment || '',
       };
-      await api.updateTask(actionState.task.id, payload);
-      setActionState(null);
-      setActionComment('');
+      await api.updateTask(actionStateModel.actionState.task.id, payload);
+      actionStateModel.setActionState(null);
+      actionStateModel.setActionComment('');
       reload();
     } finally {
-      setActionSaving(false);
+      actionStateModel.setActionSaving(false);
     }
   };
 
   const startEditTask = (task: Task) => {
-    setEditingGroupId(null);
-    setGroupEditForm(null);
-    setCreatingGroupId(null);
-    setCreateForm(null);
-    setActionState(null);
-    setActionComment('');
-    setEditingTaskId(task.id);
-    setEditForm({
+    groupStateModel.setEditingGroupId(null);
+    groupStateModel.setGroupEditForm(null);
+    groupStateModel.setCreatingGroupId(null);
+    groupStateModel.setCreateForm(null);
+    actionStateModel.setActionState(null);
+    actionStateModel.setActionComment('');
+    editStateModel.setEditingTaskId(task.id);
+    editStateModel.setEditForm({
       description: task.description ?? '',
+      kind_key: task.kind_key ?? 'TASK',
       priority_id: task.priority_id ?? null,
       assigned_to_id: task.assigned_to_id ?? null,
       until: task.until ?? '',
@@ -190,55 +181,56 @@ export default function TaskBoard({
   };
 
   const cancelEditTask = () => {
-    setEditingTaskId(null);
-    setEditForm(null);
+    editStateModel.setEditingTaskId(null);
+    editStateModel.setEditForm(null);
   };
 
   const startCreateTask = (taskGroupId: number) => {
-    setEditingGroupId(null);
-    setGroupEditForm(null);
-    setActionState(null);
-    setActionComment('');
-    setEditingTaskId(null);
-    setEditForm(null);
-    setCreatingGroupId(taskGroupId);
-    setCreateForm({
+    groupStateModel.setEditingGroupId(null);
+    groupStateModel.setGroupEditForm(null);
+    actionStateModel.setActionState(null);
+    actionStateModel.setActionComment('');
+    editStateModel.setEditingTaskId(null);
+    editStateModel.setEditForm(null);
+    groupStateModel.setCreatingGroupId(taskGroupId);
+    groupStateModel.setCreateForm({
       description: '',
+      kind_key: 'TASK',
       priority_id: null,
       assigned_to_id: null,
-      until: todayIso(),
+      until: nowLocalDateTimeIso(),
       comment: '',
     });
   };
 
   const cancelCreateTask = () => {
-    setCreatingGroupId(null);
-    setCreateForm(null);
+    groupStateModel.setCreatingGroupId(null);
+    groupStateModel.setCreateForm(null);
   };
 
   const startEditGroup = (group: TaskGroup) => {
-    setActionState(null);
-    setActionComment('');
-    setEditingTaskId(null);
-    setEditForm(null);
-    setCreatingGroupId(null);
-    setCreateForm(null);
-    setEditingGroupId(group.id);
-    setGroupEditForm({
+    actionStateModel.setActionState(null);
+    actionStateModel.setActionComment('');
+    editStateModel.setEditingTaskId(null);
+    editStateModel.setEditForm(null);
+    groupStateModel.setCreatingGroupId(null);
+    groupStateModel.setCreateForm(null);
+    groupStateModel.setEditingGroupId(group.id);
+    groupStateModel.setGroupEditForm({
       name: group.name ?? '',
     });
   };
 
   const cancelEditGroup = () => {
-    setEditingGroupId(null);
-    setGroupEditForm(null);
+    groupStateModel.setEditingGroupId(null);
+    groupStateModel.setGroupEditForm(null);
   };
 
   const saveEditGroup = async (groupId: number) => {
-    if (!groupEditForm) return;
-    const nextName = groupEditForm.name.trim();
+    if (!groupStateModel.groupEditForm) return;
+    const nextName = groupStateModel.groupEditForm.name.trim();
     if (!nextName) return;
-    setGroupEditSaving(true);
+    groupStateModel.setGroupEditSaving(true);
     try {
       await api.updateTaskGroup(groupId, {
         name: nextName,
@@ -246,30 +238,31 @@ export default function TaskBoard({
       cancelEditGroup();
       reload();
     } finally {
-      setGroupEditSaving(false);
+      groupStateModel.setGroupEditSaving(false);
     }
   };
 
   const saveCreateTask = async (taskGroupId: number) => {
-    if (!createForm) return;
-    const nextDescription = createForm.description.trim();
+    if (!groupStateModel.createForm) return;
+    const nextDescription = groupStateModel.createForm.description.trim();
     if (!nextDescription) return;
 
-    setCreateSaving(true);
+    groupStateModel.setCreateSaving(true);
     try {
       const payload: TaskCreate = {
         task_group_id: taskGroupId,
         description: nextDescription,
-        priority_id: createForm.priority_id,
-        assigned_to_id: createForm.assigned_to_id,
-        until: createForm.until,
-        comment: createForm.comment,
+        kind_key: groupStateModel.createForm.kind_key,
+        priority_id: groupStateModel.createForm.priority_id,
+        assigned_to_id: groupStateModel.createForm.assigned_to_id,
+        until: groupStateModel.createForm.until,
+        comment: groupStateModel.createForm.comment,
       };
       await api.createTask(payload);
       cancelCreateTask();
       reload();
     } finally {
-      setCreateSaving(false);
+      groupStateModel.setCreateSaving(false);
     }
   };
 
@@ -334,7 +327,8 @@ export default function TaskBoard({
       const createPayload = (groupId: number, description: string): TaskCreate => ({
         task_group_id: groupId,
         description,
-        until: todayIso(),
+        kind_key: 'TASK',
+        until: nowLocalDateTimeIso(),
         comment: '',
       });
       let createdTask: Task;
@@ -357,14 +351,15 @@ export default function TaskBoard({
         setPreferredTopGroupId(replacementGroup.id);
         createdTask = await api.createTask(createPayload(replacementGroup.id, buildDefaultTaskDescription(replacementGroup)));
       }
-      setActionState(null);
-      setActionComment('');
-      setCreatingGroupId(null);
-      setCreateForm(null);
+      actionStateModel.setActionState(null);
+      actionStateModel.setActionComment('');
+      groupStateModel.setCreatingGroupId(null);
+      groupStateModel.setCreateForm(null);
       setAutoCreatedTaskId(source === 'auto' ? createdTask.id : null);
-      setEditingTaskId(createdTask.id);
-      setEditForm({
+      editStateModel.setEditingTaskId(createdTask.id);
+      editStateModel.setEditForm({
         description: createdTask.description ?? '',
+        kind_key: createdTask.kind_key ?? 'TASK',
         priority_id: createdTask.priority_id ?? null,
         assigned_to_id: createdTask.assigned_to_id ?? null,
         until: createdTask.until ?? '',
@@ -378,18 +373,18 @@ export default function TaskBoard({
   };
 
   const handleCancelEditTask = async () => {
-    if (editingTaskId == null) {
+    if (editStateModel.editingTaskId == null) {
       cancelEditTask();
       return;
     }
-    if (autoCreatedTaskId !== editingTaskId) {
+    if (autoCreatedTaskId !== editStateModel.editingTaskId) {
       cancelEditTask();
       return;
     }
     try {
       const cancelled = taskStatusByKey.CANCELLED;
       if (cancelled) {
-        await api.updateTask(editingTaskId, { status_id: cancelled.id, comment: '' });
+        await api.updateTask(editStateModel.editingTaskId, { status_id: cancelled.id, comment: '' });
       }
       setAutoCreatedTaskId(null);
       cancelEditTask();
@@ -412,15 +407,16 @@ export default function TaskBoard({
   }, [autoCreateToken]);
 
   const saveEditTask = async (taskId: number) => {
-    if (!editForm) return;
-    setEditSaving(true);
+    if (!editStateModel.editForm) return;
+    editStateModel.setEditSaving(true);
     try {
       const payload: TaskUpdate = {
-        description: editForm.description,
-        priority_id: editForm.priority_id,
-        assigned_to_id: editForm.assigned_to_id,
-        until: editForm.until,
-        comment: editForm.comment,
+        description: editStateModel.editForm.description,
+        kind_key: editStateModel.editForm.kind_key,
+        priority_id: editStateModel.editForm.priority_id,
+        assigned_to_id: editStateModel.editForm.assigned_to_id,
+        until: editStateModel.editForm.until,
+        comment: editStateModel.editForm.comment,
       };
       await api.updateTask(taskId, payload);
       if (autoCreatedTaskId === taskId) {
@@ -430,7 +426,7 @@ export default function TaskBoard({
       cancelEditTask();
       reload();
     } finally {
-      setEditSaving(false);
+      editStateModel.setEditSaving(false);
     }
   };
 
@@ -446,22 +442,22 @@ export default function TaskBoard({
 
     groupsSorted.forEach((group) => {
       const episode = group.episode_id ? episodesById[group.episode_id] : undefined;
-      if (organFilterId !== 'ALL' && episode?.organ_id !== organFilterId) return;
+      if (filters.organFilterId !== 'ALL' && episode?.organ_id !== filters.organFilterId) return;
       const groupState = computeGroupState(tasksByGroup[group.id] ?? []);
 
       const filteredTasks = sortTasks(tasksByGroup[group.id] ?? []).filter((task) => {
-        if (!showDoneTasks && isDoneTask(task)) return false;
-        if (!showCancelledTasks && isCancelledTask(task)) return false;
-        if (assignedToFilterId !== 'ALL' && task.assigned_to_id !== assignedToFilterId) return false;
-        if (dueBefore) {
+        if (!filters.showDoneTasks && isDoneTask(task)) return false;
+        if (!filters.showCancelledTasks && isCancelledTask(task)) return false;
+        if (filters.assignedToFilterId !== 'ALL' && task.assigned_to_id !== filters.assignedToFilterId) return false;
+        if (filters.dueBefore) {
           if (!task.until) return false;
-          if (new Date(task.until).getTime() > new Date(dueBefore).getTime()) return false;
+          if (new Date(task.until).getTime() > new Date(filters.dueBefore).getTime()) return false;
         }
         return true;
       });
 
       if (filteredTasks.length === 0) return;
-      if (showGroupHeadings) nextRows.push({ type: 'group', group, state: groupState });
+      if (filters.showGroupHeadings) nextRows.push({ type: 'group', group, state: groupState });
       filteredTasks.forEach((task) => nextRows.push({ type: 'task', group, task }));
     });
 
@@ -470,12 +466,12 @@ export default function TaskBoard({
     taskGroups,
     tasksByGroup,
     episodesById,
-    organFilterId,
-    assignedToFilterId,
-    dueBefore,
-    showDoneTasks,
-    showCancelledTasks,
-    showGroupHeadings,
+    filters.organFilterId,
+    filters.assignedToFilterId,
+    filters.dueBefore,
+    filters.showDoneTasks,
+    filters.showCancelledTasks,
+    filters.showGroupHeadings,
     preferredTopGroupId,
   ]);
 
@@ -501,18 +497,18 @@ export default function TaskBoard({
 
       {!hideFilters && (
         <TaskBoardFilters
-          organFilterId={organFilterId}
-          setOrganFilterId={setOrganFilterId}
-          assignedToFilterId={assignedToFilterId}
-          setAssignedToFilterId={setAssignedToFilterId}
-          dueBefore={dueBefore}
-          setDueBefore={setDueBefore}
-          showDoneTasks={showDoneTasks}
-          setShowDoneTasks={setShowDoneTasks}
-          showCancelledTasks={showCancelledTasks}
-          setShowCancelledTasks={setShowCancelledTasks}
-          showGroupHeadings={showGroupHeadings}
-          setShowGroupHeadings={setShowGroupHeadings}
+          organFilterId={filters.organFilterId}
+          setOrganFilterId={filters.setOrganFilterId}
+          assignedToFilterId={filters.assignedToFilterId}
+          setAssignedToFilterId={filters.setAssignedToFilterId}
+          dueBefore={filters.dueBefore}
+          setDueBefore={filters.setDueBefore}
+          showDoneTasks={filters.showDoneTasks}
+          setShowDoneTasks={filters.setShowDoneTasks}
+          showCancelledTasks={filters.showCancelledTasks}
+          setShowCancelledTasks={filters.setShowCancelledTasks}
+          showGroupHeadings={filters.showGroupHeadings}
+          setShowGroupHeadings={filters.setShowGroupHeadings}
           organOptions={organOptions}
           assignedToOptions={assignedToOptions}
         />
@@ -527,10 +523,10 @@ export default function TaskBoard({
           episodesById={episodesById}
           priorityCodes={priorityCodes}
           allUserOptions={allUserOptions}
-          editingTaskId={editingTaskId}
-          editForm={editForm}
-          setEditForm={setEditForm}
-          editSaving={editSaving}
+          editingTaskId={editStateModel.editingTaskId}
+          editForm={editStateModel.editForm}
+          setEditForm={editStateModel.setEditForm}
+          editSaving={editStateModel.editSaving}
           onSaveEdit={saveEditTask}
           onCancelEdit={() => {
             void handleCancelEditTask();
@@ -538,26 +534,26 @@ export default function TaskBoard({
           onStartComplete={(task) => startTaskAction(task, 'complete')}
           onStartDiscard={(task) => startTaskAction(task, 'discard')}
           onStartEdit={startEditTask}
-          actionState={actionState}
-          actionComment={actionComment}
-          setActionComment={setActionComment}
-          actionSaving={actionSaving}
+          actionState={actionStateModel.actionState}
+          actionComment={actionStateModel.actionComment}
+          setActionComment={actionStateModel.setActionComment}
+          actionSaving={actionStateModel.actionSaving}
           onConfirmAction={applyTaskAction}
           onCancelAction={() => {
-            setActionState(null);
-            setActionComment('');
+            actionStateModel.setActionState(null);
+            actionStateModel.setActionComment('');
           }}
-          editingGroupId={editingGroupId}
-          groupEditForm={groupEditForm}
-          setGroupEditForm={setGroupEditForm}
-          groupEditSaving={groupEditSaving}
+          editingGroupId={groupStateModel.editingGroupId}
+          groupEditForm={groupStateModel.groupEditForm}
+          setGroupEditForm={groupStateModel.setGroupEditForm}
+          groupEditSaving={groupStateModel.groupEditSaving}
           onStartEditGroup={startEditGroup}
           onSaveEditGroup={saveEditGroup}
           onCancelEditGroup={cancelEditGroup}
-          creatingGroupId={creatingGroupId}
-          createForm={createForm}
-          setCreateForm={setCreateForm}
-          createSaving={createSaving}
+          creatingGroupId={groupStateModel.creatingGroupId}
+          createForm={groupStateModel.createForm}
+          setCreateForm={groupStateModel.setCreateForm}
+          createSaving={groupStateModel.createSaving}
           onStartCreateTask={startCreateTask}
           onSaveCreateTask={saveCreateTask}
           onCancelCreateTask={cancelCreateTask}

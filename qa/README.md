@@ -9,8 +9,9 @@ This folder defines the workflow:
 
 ## Folder Layout
 
-- `spec/server/` - server-only specification documents (`.md`)
-- `spec/client-server/` - client-server-wide specification documents (`.md`)
+- `spec/testing/server/` - server-only specification documents (`.md`)
+- `spec/testing/client-server/` - client-server-wide specification documents (`.md`)
+- `spec/requirements/` - business requirement specifications (`.md`)
 - `qa/spec_tools/` - parser, generator, runner, suggestion executor
 - `qa/tests/generated/` - generated executable test code
 - `qa/reports/` - run reports with suggestion list
@@ -58,5 +59,5 @@ python -m qa.spec_tools.run_suggestions --report qa/reports/latest-partner-repor
 ## Notes
 
 - This workflow is intentionally text-first: specs are source of truth, tests are generated.
-- When you ask the assistant to create a new specification file, it should be added under `spec/server/` or `spec/client-server/` following this format.
+- When you ask the assistant to create a new test specification file, it should be added under `spec/testing/server/` or `spec/testing/client-server/` following this format.
 - Partner flow (`run_partner_specs`) runs Playwright UI actions plus direct DB verification for scenario-style tests.

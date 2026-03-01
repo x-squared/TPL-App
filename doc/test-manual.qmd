@@ -13,7 +13,8 @@ The project uses two complementary testing workflows:
 
 Main folders:
 
-- Specification files: `spec/server/`, `spec/client-server/`
+- Specification files for testing: `spec/testing/server/`, `spec/testing/client-server/`
+- Requirement specifications: `spec/requirements/`
 - Test tooling: `qa/spec_tools/`
 - Executable frontend browser tests: `frontend/test/`
 - Generated/temporary outputs:
@@ -50,8 +51,8 @@ Reason:
 
 Create a new Markdown file under:
 
-- `spec/server/` for server-only behavior
-- `spec/client-server/` for cross-layer behavior
+- `spec/testing/server/` for server-only behavior
+- `spec/testing/client-server/` for cross-layer behavior
 
 Specification format details live in `doc/specification-manual.qmd`.
 

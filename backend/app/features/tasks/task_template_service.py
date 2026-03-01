@@ -3,7 +3,7 @@ from __future__ import annotations
 from fastapi import HTTPException
 from sqlalchemy.orm import Session, joinedload
 
-from ...enums import PriorityKey
+from ...enums import PriorityKey, TaskKindKey
 from ...models import Code, TaskGroupTemplate, TaskTemplate
 from ...schemas import TaskTemplateCreate, TaskTemplateUpdate
 
@@ -37,6 +37,16 @@ def _task_template_query(db: Session):
     )
 
 
+def _normalize_kind_or_422(kind_key: str | None, *, field_name: str) -> str:
+    if kind_key is None:
+        return TaskKindKey.TASK.value
+    normalized = kind_key.strip().upper()
+    valid = {entry.value for entry in TaskKindKey}
+    if normalized not in valid:
+        raise HTTPException(status_code=422, detail=f"{field_name} must be one of {sorted(valid)}")
+    return normalized
+
+
 def list_task_templates(
     *,
     task_group_template_id: int | None,
@@ -66,9 +76,10 @@ def create_task_template(*, payload: TaskTemplateCreate, changed_by_id: int, db:
     template = TaskTemplate(
         task_group_template_id=payload.task_group_template_id,
         description=payload.description,
+        kind_key=_normalize_kind_or_422(payload.kind_key, field_name="kind_key"),
         priority_id=priority.id,
         priority_key=priority.key,
-        due_days_default=payload.due_days_default,
+        offset_minutes_default=payload.offset_minutes_default,
         is_active=payload.is_active,
         sort_pos=payload.sort_pos,
         changed_by_id=changed_by_id,
@@ -91,6 +102,8 @@ def update_task_template(
     data = payload.model_dump(exclude_unset=True)
     if "task_group_template_id" in data:
         _get_task_group_template_or_422(db=db, task_group_template_id=data["task_group_template_id"])
+    if "kind_key" in data:
+        data["kind_key"] = _normalize_kind_or_422(data["kind_key"], field_name="kind_key")
     if "priority_id" in data and data["priority_id"] is not None:
         priority = _get_code_or_422(db=db, code_id=data["priority_id"], code_type="PRIORITY", field_name="priority_id")
         data["priority_key"] = priority.key

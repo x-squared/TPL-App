@@ -151,6 +151,10 @@
   min-width: 14rem;
 }
 
+.task-board-kind-select {
+  min-width: 5.8rem !important;
+}
+
 .task-board-group-row td {
   background: #f4f6fb;
   font-weight: 600;

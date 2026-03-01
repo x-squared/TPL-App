@@ -125,11 +125,6 @@ class Coordination(Base):
         uselist=False,
         cascade="all, delete-orphan",
     )
-    procurement_organs = relationship(
-        "CoordinationProcurementOrgan",
-        back_populates="coordination",
-        cascade="all, delete-orphan",
-    )
     coordination_episodes = relationship(
         "CoordinationEpisode",
         back_populates="coordination",

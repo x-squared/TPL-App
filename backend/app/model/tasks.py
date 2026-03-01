@@ -1,9 +1,9 @@
-from sqlalchemy import Boolean, Column, Date, DateTime, Enum as SqlEnum, ForeignKey, Integer, String, UniqueConstraint
+from sqlalchemy import Boolean, Column, DateTime, Enum as SqlEnum, ForeignKey, Integer, String, UniqueConstraint
 from sqlalchemy.orm import relationship
 from sqlalchemy.sql import func
 
 from ..database import Base
-from ..enums import PriorityKey, TaskScopeKey, TaskStatusKey
+from ..enums import PriorityKey, TaskKindKey, TaskScopeKey, TaskStatusKey
 
 
 class TaskGroupTemplate(Base):
@@ -174,12 +174,26 @@ class TaskTemplate(Base):
         comment="Default priority enum key mirror of `priority_id`.",
         info={"label": "Default Priority Key"},
     )
-    due_days_default = Column(
-        "DUE_DAYS_DEFAULT",
+    kind_key = Column(
+        "KIND",
+        SqlEnum(
+            TaskKindKey,
+            native_enum=False,
+            validate_strings=True,
+            values_callable=lambda enum_cls: [entry.value for entry in enum_cls],
+            length=16,
+        ),
+        nullable=False,
+        default=TaskKindKey.TASK.value,
+        comment="Template item kind (`TASK` or `EVENT`).",
+        info={"label": "Task Kind"},
+    )
+    offset_minutes_default = Column(
+        "OFFSET_MINUTES_DEFAULT",
         Integer,
         nullable=True,
-        comment="Default due offset in days from anchor date.",
-        info={"label": "Due Days Default"},
+        comment="Default due offset in minutes from anchor date/time.",
+        info={"label": "Offset Minutes Default"},
     )
     is_active = Column(
         "IS_ACTIVE",
@@ -379,11 +393,25 @@ class Task(Base):
         info={"label": "Assigned To"},
     )
     until = Column(
-        "UNTIL",
-        Date,
+        "UNTIL_AT",
+        DateTime(timezone=True),
         nullable=False,
-        comment="Due date of the task.",
+        comment="Due date/time of the task.",
         info={"label": "Until"},
+    )
+    kind_key = Column(
+        "KIND",
+        SqlEnum(
+            TaskKindKey,
+            native_enum=False,
+            validate_strings=True,
+            values_callable=lambda enum_cls: [entry.value for entry in enum_cls],
+            length=16,
+        ),
+        nullable=False,
+        default=TaskKindKey.TASK.value,
+        comment="Task kind (`TASK` or `EVENT`).",
+        info={"label": "Task Kind"},
     )
     status_id = Column(
         "STATUS",
@@ -407,10 +435,10 @@ class Task(Base):
         info={"label": "Task Status Key"},
     )
     closed_at = Column(
-        "CLOSED_AT",
-        Date,
+        "CLOSED_AT_TS",
+        DateTime(timezone=True),
         nullable=True,
-        comment="Closure date when task becomes completed or discarded.",
+        comment="Closure timestamp when task becomes completed or discarded.",
         info={"label": "Closed At"},
     )
     closed_by_id = Column(

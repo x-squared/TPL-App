@@ -5,12 +5,12 @@ from sqlalchemy.orm import Session, joinedload
 
 from ...models import (
     Code,
+    CoordinationProcurementData,
+    CoordinationProcurementDataPerson,
+    CoordinationProcurementDataTeam,
     CoordinationProcurementFieldGroupTemplate,
     CoordinationProcurementFieldScopeTemplate,
     CoordinationProcurementFieldTemplate,
-    CoordinationProcurementValue,
-    CoordinationProcurementValuePerson,
-    CoordinationProcurementValueTeam,
     DatatypeDefinition,
 )
 from ...schemas import (
@@ -223,23 +223,23 @@ def update_field_template(
         setattr(item, key, value)
     new_value_mode = item.value_mode.value if hasattr(item.value_mode, "value") else item.value_mode
     if new_value_mode != old_value_mode:
-        value_rows = db.query(CoordinationProcurementValue).filter(
-            CoordinationProcurementValue.field_template_id == field_template_id
+        data_rows = db.query(CoordinationProcurementData).filter(
+            CoordinationProcurementData.field_template_id == field_template_id
         ).all()
-        for value_row in value_rows:
-            value_row.changed_by_id = changed_by_id
+        for data_row in data_rows:
+            data_row.changed_by_id = changed_by_id
             if new_value_mode == "PERSON_SINGLE":
                 kept_person_id = None
-                if value_row.persons:
-                    sorted_people = sorted(value_row.persons, key=lambda row: row.pos)
+                if data_row.persons:
+                    sorted_people = sorted(data_row.persons, key=lambda row: row.pos)
                     kept_person_id = sorted_people[0].person_id
-                value_row.persons.clear()
-                value_row.teams.clear()
-                value_row.episode_ref = None
-                value_row.value = ""
+                data_row.persons.clear()
+                data_row.teams.clear()
+                data_row.episode_id = None
+                data_row.value = ""
                 if kept_person_id is not None:
-                    value_row.persons.append(
-                        CoordinationProcurementValuePerson(
+                    data_row.persons.append(
+                        CoordinationProcurementDataPerson(
                             person_id=kept_person_id,
                             pos=0,
                             changed_by_id=changed_by_id,
@@ -247,37 +247,37 @@ def update_field_template(
                     )
             elif new_value_mode == "TEAM_SINGLE":
                 kept_team_id = None
-                if value_row.teams:
-                    sorted_teams = sorted(value_row.teams, key=lambda row: row.pos)
+                if data_row.teams:
+                    sorted_teams = sorted(data_row.teams, key=lambda row: row.pos)
                     kept_team_id = sorted_teams[0].team_id
-                value_row.teams.clear()
-                value_row.persons.clear()
-                value_row.episode_ref = None
-                value_row.value = ""
+                data_row.teams.clear()
+                data_row.persons.clear()
+                data_row.episode_id = None
+                data_row.value = ""
                 if kept_team_id is not None:
-                    value_row.teams.append(
-                        CoordinationProcurementValueTeam(
+                    data_row.teams.append(
+                        CoordinationProcurementDataTeam(
                             team_id=kept_team_id,
                             pos=0,
                             changed_by_id=changed_by_id,
                         )
                     )
             elif new_value_mode == "PERSON_LIST":
-                value_row.teams.clear()
-                value_row.episode_ref = None
-                value_row.value = ""
+                data_row.teams.clear()
+                data_row.episode_id = None
+                data_row.value = ""
             elif new_value_mode == "TEAM_LIST":
-                value_row.persons.clear()
-                value_row.episode_ref = None
-                value_row.value = ""
+                data_row.persons.clear()
+                data_row.episode_id = None
+                data_row.value = ""
             elif new_value_mode == "EPISODE":
-                value_row.persons.clear()
-                value_row.teams.clear()
-                value_row.value = ""
+                data_row.persons.clear()
+                data_row.teams.clear()
+                data_row.value = ""
             else:
-                value_row.persons.clear()
-                value_row.teams.clear()
-                value_row.episode_ref = None
+                data_row.persons.clear()
+                data_row.teams.clear()
+                data_row.episode_id = None
     item.changed_by_id = changed_by_id
     db.commit()
     return _field_template_query(db).filter(CoordinationProcurementFieldTemplate.id == item.id).first()

@@ -41,6 +41,11 @@ class TaskStatusKey(str, Enum):
     CANCELLED = "CANCELLED"
 
 
+class TaskKindKey(str, Enum):
+    TASK = "TASK"
+    EVENT = "EVENT"
+
+
 class PriorityKey(str, Enum):
     LOW = "LOW"
     NORMAL = "NORMAL"

@@ -1,12 +1,12 @@
 from __future__ import annotations
 
-from datetime import date
+from datetime import datetime
 
 from fastapi import HTTPException
 from sqlalchemy import or_
 from sqlalchemy.orm import Session, joinedload
 
-from ...enums import PriorityKey, TaskStatusKey
+from ...enums import PriorityKey, TaskKindKey, TaskStatusKey
 from ...models import Code, Task, TaskGroup, User
 from ...schemas import TaskCreate, TaskUpdate
 
@@ -61,6 +61,16 @@ def _is_task_group_closed(*, db: Session, task_group_id: int) -> bool:
     return total_count > 0 and open_count == 0
 
 
+def _normalize_kind_or_422(kind_key: str | None, *, field_name: str) -> str:
+    if kind_key is None:
+        return TaskKindKey.TASK.value
+    normalized = kind_key.strip().upper()
+    valid = {entry.value for entry in TaskKindKey}
+    if normalized not in valid:
+        raise HTTPException(status_code=422, detail=f"{field_name} must be one of {sorted(valid)}")
+    return normalized
+
+
 def _task_query(db: Session):
     return db.query(Task).options(
         joinedload(Task.priority),
@@ -109,10 +119,11 @@ def create_task(*, payload: TaskCreate, changed_by_id: int, db: Session) -> Task
         _get_user_or_422(db=db, user_id=payload.assigned_to_id, field_name="assigned_to_id")
     if payload.closed_by_id is not None:
         _get_user_or_422(db=db, user_id=payload.closed_by_id, field_name="closed_by_id")
+    kind_key = _normalize_kind_or_422(payload.kind_key, field_name="kind_key")
     closed_at = payload.closed_at
     closed_by_id = payload.closed_by_id
     if status.key in {TaskStatusKey.COMPLETED.value, TaskStatusKey.CANCELLED.value} and closed_at is None:
-        closed_at = date.today()
+        closed_at = datetime.now()
     if status.key in {TaskStatusKey.COMPLETED.value, TaskStatusKey.CANCELLED.value} and closed_by_id is None:
         closed_by_id = changed_by_id
     if not _is_closed_status_key(status.key):
@@ -123,6 +134,7 @@ def create_task(*, payload: TaskCreate, changed_by_id: int, db: Session) -> Task
     task = Task(
         task_group_id=payload.task_group_id,
         description=payload.description,
+        kind_key=kind_key,
         priority_id=priority.id,
         priority_key=priority.key,
         assigned_to_id=payload.assigned_to_id,
@@ -156,6 +168,8 @@ def update_task(*, task_id: int, payload: TaskUpdate, changed_by_id: int, db: Se
         _get_user_or_422(db=db, user_id=data["closed_by_id"], field_name="closed_by_id")
     if "until" in data and data["until"] is None:
         raise HTTPException(status_code=422, detail="until cannot be null")
+    if "kind_key" in data:
+        data["kind_key"] = _normalize_kind_or_422(data["kind_key"], field_name="kind_key")
     status_key = task.status_key or (task.status.key if task.status else None)
     if "status_id" in data and data["status_id"] is not None:
         status = _get_code_or_422(
@@ -172,7 +186,7 @@ def update_task(*, task_id: int, payload: TaskUpdate, changed_by_id: int, db: Se
     for key, value in data.items():
         setattr(task, key, value)
     if _is_closed_status_key(status_key) and task.closed_at is None:
-        task.closed_at = date.today()
+        task.closed_at = datetime.now()
     if _is_closed_status_key(status_key) and task.closed_by_id is None:
         task.closed_by_id = changed_by_id
     if not _is_closed_status_key(status_key):

@@ -26,3 +26,6 @@ frontend/playwright-report/
 # Generated QA artifacts
 qa/reports/
 qa/tests/generated/
+
+# Local temp workspace
+temp/

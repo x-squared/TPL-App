@@ -67,6 +67,16 @@ source .venv/bin/activate
 python -m app.db_schema --mode migrate --env DEV
 ```
 
+**B2) Verify schema compatibility (read-only):**
+
+```{bash}
+cd /Users/stephan/Workspace/TPL-App/backend
+source .venv/bin/activate
+python -m app.db_schema --mode verify --check-level strict --env DEV
+```
+
+Use `--check-level basic` when you only want table/column presence checks.
+
 **C) Update schema + clean data + seed (recommended default):**
 
 ```{bash}
@@ -81,6 +91,14 @@ python -m app.db_admin --mode refresh --env DEV
 cd /Users/stephan/Workspace/TPL-App/backend
 source .venv/bin/activate
 python -m app.db_data --mode clean --env DEV
+```
+
+**E) Backfill procurement runtime (legacy -> unified, idempotent):**
+
+```{bash}
+cd /Users/stephan/Workspace/TPL-App/backend
+source .venv/bin/activate
+python -m app.db_data --mode migrate-procurement-runtime --env DEV
 ```
 
 ### 3) Start backend

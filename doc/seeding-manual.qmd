@@ -54,6 +54,8 @@ Examples in current registry:
 - `core.coordination_procurement_field_templates` (includes grouped layout metadata via `group_key` and complex value mode via `value_mode`)
 - `core.coordination_procurement_field_scopes`
 
+Procurement runtime values are not part of core seeds. Only procurement metadata (groups/templates/scopes) is seeded. Runtime procurement rows are created by application write flows and explicit DB migration scripts. Person/team references for runtime procurement are stored in relational link tables (`COORDINATION_PROCUREMENT_DATA_PERSON`, `COORDINATION_PROCUREMENT_DATA_TEAM`), not JSON arrays.
+
 Medical value core seeds now define a template universe with:
 
 - group applicability flags (`is_static`, organ flags, donor flag)

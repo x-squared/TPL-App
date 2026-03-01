@@ -44,24 +44,27 @@ python -m app.db_data --mode clean --env DEV
 ## `app.db_schema` (DDL only)
 
 ```{bash}
-python -m app.db_schema --mode <recreate|migrate|verify> --env <DEV|TEST|PROD> [--db-url <URL>]
+python -m app.db_schema --mode <recreate|migrate|verify> --env <DEV|TEST|PROD> [--check-level <basic|strict>] [--db-url <URL>]
 ```
 
 - `recreate`: drops all tables and creates schema from current model metadata.
 - `migrate`: creates missing schema objects from model metadata.
-- `verify`: reports schema drift (missing tables/columns), no writes.
+- `verify`: reports schema drift (tables/columns/types/nullability/indexes/unique constraints/foreign keys), no writes.
+- `--check-level basic`: checks table/column presence only.
+- `--check-level strict` (default): includes type/nullability/index/index-unique/unique/FK checks.
 
 Use `verify` in CI or before release checks.
 
 ## `app.db_data` (DML only)
 
 ```{bash}
-python -m app.db_data --mode <clean|seed|refresh> --env <DEV|TEST|PROD> [--seed-profile <PROFILE>] [--db-url <URL>]
+python -m app.db_data --mode <clean|seed|refresh|migrate-procurement-runtime> --env <DEV|TEST|PROD> [--seed-profile <PROFILE>] [--db-url <URL>]
 ```
 
 - `clean`: wipes row data, keeps schema.
 - `seed`: loads seed jobs resolved by env/profile.
 - `refresh`: `clean + seed`.
+- `migrate-procurement-runtime`: idempotent backfill from legacy procurement runtime tables (`COORDINATION_PROCUREMENT_VALUE*`) into unified runtime tables (`COORDINATION_PROCUREMENT_DATA*`).
 
 ### Seed profile resolution
 
@@ -78,10 +81,16 @@ Example:
 python -m app.db_data --mode seed --env TEST --seed-profile CORE_TEST
 ```
 
+Explicit procurement runtime backfill:
+
+```{bash}
+python -m app.db_data --mode migrate-procurement-runtime --env DEV
+```
+
 ## `app.db_admin` (wrapper)
 
 ```{bash}
-python -m app.db_admin --mode <recreate|migrate|refresh|clean> --env <DEV|TEST|PROD> [--seed-profile <PROFILE>] [--db-url <URL>]
+python -m app.db_admin --mode <recreate|migrate|refresh|clean|migrate-procurement-runtime> --env <DEV|TEST|PROD> [--seed-profile <PROFILE>] [--db-url <URL>]
 ```
 
 Mode behavior:
@@ -90,6 +99,7 @@ Mode behavior:
 - `migrate` = `db_schema migrate`
 - `refresh` = `db_schema migrate` + `db_data refresh` (default)
 - `clean` = `db_data clean`
+- `migrate-procurement-runtime` = `db_data migrate-procurement-runtime`
 
 For `refresh`, if `migrate` cannot reconcile schema drift, the wrapper automatically falls back to `db_schema recreate` before data refresh.
 
@@ -110,7 +120,7 @@ python -m app.db_schema --mode migrate --env DEV
 Production-like schema check in CI:
 
 ```{bash}
-python -m app.db_schema --mode verify --env PROD
+python -m app.db_schema --mode verify --check-level strict --env PROD
 ```
 
 ## Notes
@@ -118,6 +128,11 @@ python -m app.db_schema --mode verify --env PROD
 - If schema is older than current models, `db_data seed` may fail; run schema step first.
 - `--db-url` allows targeting a non-default database.
 - For SQLite, "clean" keeps the file and clears all table rows.
+- Procurement runtime storage uses:
+  - `COORDINATION_PROCUREMENT_DATA` (main runtime row)
+  - `COORDINATION_PROCUREMENT_DATA_PERSON` (person refs)
+  - `COORDINATION_PROCUREMENT_DATA_TEAM` (team refs)
+- Startup does not mutate schema/data; it only verifies schema compatibility and fails fast on drift.
 
 ## Strong Enum Migration Path (carried out)
 
@@ -144,6 +159,6 @@ To reduce drift for stable technical vocabularies while keeping DB compatibility
   - `TASK_TEMPLATE.PRIORITY_KEY`
   - `TASK.PRIORITY_KEY`
   - `TASK.STATUS_KEY`
-- Added startup migration/backfill in `backend/app/main.py` to keep key/id mirrors aligned in both directions.
+- Migration/backfill remains an explicit script responsibility (`app.db_schema` / `app.db_admin`), not a startup action.
 - Updated service write paths and seed loaders so new/updated rows write enum keys deterministically.
 - Kept `*_id -> CODE.ID` fields and API contracts for backward compatibility while transitioning consumers to key-based semantics.

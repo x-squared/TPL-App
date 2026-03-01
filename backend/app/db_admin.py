@@ -10,9 +10,9 @@ def main() -> int:
     parser = argparse.ArgumentParser(description="Convenience wrapper for schema + data workflows.")
     parser.add_argument(
         "--mode",
-        choices=("recreate", "migrate", "refresh", "clean"),
+        choices=("recreate", "migrate", "refresh", "clean", "migrate-procurement-runtime"),
         default="refresh",
-        help="recreate=drop/create+seed, migrate=schema only, refresh=migrate+clean+seed, clean=data only",
+        help="recreate=drop/create+seed, migrate=schema only, refresh=migrate+clean+seed, clean=data only, migrate-procurement-runtime=legacy->unified procurement backfill",
     )
     parser.add_argument("--env", default=os.getenv("TPL_ENV", "DEV"), help="Application env (DEV/TEST/PROD)")
     parser.add_argument("--seed-profile", default=os.getenv("TPL_SEED_PROFILE"), help="Optional seed profile override")
@@ -38,6 +38,9 @@ def main() -> int:
 
     if args.mode == "clean":
         return run("app.db_data", ["--mode", "clean", "--env", args.env, *db_url_args])
+
+    if args.mode == "migrate-procurement-runtime":
+        return run("app.db_data", ["--mode", "migrate-procurement-runtime", "--env", args.env, *db_url_args])
 
     # Default: refresh = migrate + clean + seed.
     # If migrate cannot reconcile schema drift (e.g. missing columns on SQLite),

@@ -1,11 +1,11 @@
 from __future__ import annotations
 
-from datetime import date, timedelta
+from datetime import datetime, timedelta
 
 from fastapi import HTTPException
 from sqlalchemy.orm import Session, joinedload
 
-from ...enums import TaskStatusKey, TaskScopeKey
+from ...enums import TaskKindKey, TaskStatusKey, TaskScopeKey
 from ...models import Code, Episode, Patient, Task, TaskGroup, TaskGroupTemplate
 from ...schemas import TaskGroupTemplateInstantiateRequest
 from .group_service import episode_organ_ids
@@ -120,14 +120,15 @@ def instantiate_task_group_template(
         key=lambda item: (item.sort_pos, item.id),
     )
     for item in active_task_templates:
-        # Tasks must always have a due date. If template has no offset, use anchor_date.
-        until = payload.anchor_date
-        if item.due_days_default is not None:
-            until = payload.anchor_date + timedelta(days=item.due_days_default)
+        # Tasks/events must always have a target datetime. If template has no offset, use anchor_at.
+        until = payload.anchor_at
+        if item.offset_minutes_default is not None:
+            until = payload.anchor_at + timedelta(minutes=item.offset_minutes_default)
         db.add(
             Task(
                 task_group_id=task_group.id,
                 description=item.description,
+                kind_key=item.kind_key or TaskKindKey.TASK.value,
                 priority_id=item.priority_id,
                 priority_key=item.priority_key or (item.priority.key if item.priority else None),
                 assigned_to_id=None,
@@ -153,5 +154,5 @@ def instantiate_task_group_template(
     )
 
 
-def resolve_anchor_date(payload: TaskGroupTemplateInstantiateRequest) -> date:
-    return payload.anchor_date
+def resolve_anchor_date(payload: TaskGroupTemplateInstantiateRequest) -> datetime:
+    return payload.anchor_at

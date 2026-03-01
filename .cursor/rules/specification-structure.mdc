@@ -1,0 +1,51 @@
+---
+description: Author and update requirement specifications using the agreed Markdown hierarchy and labels
+alwaysApply: true
+---
+
+# Specification Structure Rule
+
+When creating or updating requirement specifications, follow the project specification system exactly.
+
+## Primary location and format
+
+- Business/domain requirement specifications live in `spec/requirements/`.
+- Requirement documents in this area must use Markdown `.md`.
+- Keep requirement docs prominent in `spec/requirements/` root.
+- The overarching document is `spec/requirements/TPLK-Specification.md`.
+
+## Mandatory hierarchy
+
+Each specification document must use this hierarchy (as headings):
+
+1. Topic
+2. Use Case
+3. Story
+4. Item
+
+Do not skip levels when adding detailed requirements.
+
+## Mandatory label on every level
+
+Every Topic, Use Case, Story, and Item must have exactly one status label.
+Use plain Markdown status tokens in headings (for example `## Topic: ... [Spec]` and `##### Item: ... [Ready]`).
+Do not use a dash before the status marker (write `Title [Ready]`, not `Title - [Ready]`).
+
+Allowed labels only:
+
+- `Spec` (ongoing specification)
+- `Ready` (ready for implementation)
+- `Impl` (being implemented)
+- `QA` (QA test creation outstanding)
+- `Done` (fully complete)
+
+## German language quality
+
+- If specification text is written in German, use proper umlauts (`ä`, `ö`, `ü`, `Ä`, `Ö`, `Ü`) and `ß` where linguistically correct.
+- Avoid fallback spellings like `ae`, `oe`, `ue` in final German specification wording unless a technical key/name requires ASCII.
+
+## Manual synchronization
+
+- If the specification system/structure changes, update `doc/specification-manual.qmd` in the same change set.
+- Keep wording concise and consistent with existing manuals.
+

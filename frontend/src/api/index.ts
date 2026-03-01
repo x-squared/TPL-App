@@ -33,7 +33,21 @@ export type {
   Patient, PatientListItem, PatientCreate, PatientUpdate,
 } from './patients';
 export { tasksApi } from './tasks';
-export type { Task, TaskCreate, TaskGroup, TaskGroupCreate, TaskGroupListParams, TaskGroupUpdate, TaskListParams, TaskUpdate } from './tasks';
+export type {
+  Task,
+  TaskCreate,
+  TaskGroup,
+  TaskGroupCreate,
+  TaskGroupListParams,
+  TaskGroupTemplate,
+  TaskGroupUpdate,
+  TaskListParams,
+  TaskTemplate,
+  TaskTemplateCreate,
+  TaskTemplateListParams,
+  TaskTemplateUpdate,
+  TaskUpdate,
+} from './tasks';
 export { colloqiumsApi } from './colloqiums';
 export type {
   Colloqium,

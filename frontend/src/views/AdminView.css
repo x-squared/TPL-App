@@ -199,6 +199,17 @@
   user-select: none;
 }
 
+.admin-task-template-create {
+  grid-template-columns: repeat(auto-fit, minmax(11rem, 1fr));
+  margin-bottom: 0.8rem;
+}
+
+.admin-inline-actions {
+  display: inline-flex;
+  gap: 0.3rem;
+  align-items: center;
+}
+
 @media (max-width: 980px) {
   .admin-people-grid {
     grid-template-columns: 1fr;

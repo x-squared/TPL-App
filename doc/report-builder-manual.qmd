@@ -11,6 +11,7 @@ Current source entities:
 - `PATIENT`
 - `EPISODE`
 - `COORDINATION`
+- `COORDINATION_PROCUREMENT`
 
 For each source, you can:
 
@@ -60,6 +61,12 @@ Example implemented path:
 
 Some of these fields are aggregated into one row-per-source-record output (for example, unique joined text values).
 
+`COORDINATION_PROCUREMENT` is a row-level source for flexible procurement runtime data. It includes:
+
+- runtime context (`coordination_id`, `organ_id`, `slot_key`, `field_template_id`)
+- resolved metadata joins (`FIELD_TEMPLATE`, `GROUP_TEMPLATE`, `ORGAN`)
+- relational references (`PERSON_REFS`, `TEAM_REFS`, `EPISODE_REF`)
+
 ## 4) Filter and type behavior
 
 Field types drive allowed operators:
@@ -107,6 +114,8 @@ The backend validates operator/value compatibility and returns `422` for invalid
   - `backend/app/features/reports/sources/patient.py`
   - `backend/app/features/reports/sources/episode.py`
   - `backend/app/features/reports/sources/coordination.py`
+  - `backend/app/features/reports/sources/coordination_procurement.py`
+  - `backend/app/features/reports/sources/__init__.py`
 - Schemas (request/response + metadata contracts):
   - `backend/app/schema/report.py`
   - exported through `backend/app/schema/__init__.py`
@@ -126,7 +135,7 @@ The backend validates operator/value compatibility and returns `422` for invalid
 
 ## 7) How to extend with a new join
 
-1. Add a `JoinDef` to the relevant source in `backend/app/routers/reports.py`
+1. Add a `JoinDef` to the relevant source in `backend/app/features/reports/sources/<source>.py`
 2. Add `FieldDef` entries for the join fields (getter functions included)
 3. Ensure query uses needed `joinedload(...)` paths
 4. Restart backend
@@ -144,4 +153,4 @@ No frontend code change is needed for typical new joins because UI is metadata-d
   - check value format (`YYYY-MM-DD` for `date`)
 - Missing expected related values:
   - verify source record has related data in DB
-  - verify join getter logic in `reports.py`
+  - verify join getter logic in `backend/app/features/reports/sources/<source>.py`

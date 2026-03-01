@@ -13,10 +13,57 @@ For test execution, reports, and suggestion handling, see `doc/test-manual.qmd`.
 
 ## Where Specification Files Live
 
-- Server-only specs: `spec/server/*.md`
-- Client-server-wide specs: `spec/client-server/*.md`
+- Server-only test specs: `spec/testing/server/*.md`
+- Client-server-wide test specs: `spec/testing/client-server/*.md`
+- Business/domain requirement specifications: `spec/requirements/*.md`
 
-These are plain Markdown documents with structured `spec-case` blocks.
+Test specs are plain Markdown documents with structured `spec-case` blocks.
+
+Business requirement specs in `spec/requirements/*.md` are maintained as plain Markdown.
+
+## Requirement Specification Standard
+
+All requirement specification documents under `spec/requirements/` must follow the same hierarchy:
+
+1. Topic
+2. Use Case
+3. Story
+4. Item
+
+Each level must include exactly one status label.
+
+Allowed labels:
+
+- `Spec`: ongoing specification
+- `Ready`: ready for implementation
+- `Impl`: currently being implemented
+- `QA`: implementation done, QA test creation outstanding
+- `Done`: fully completed
+
+Overarching document:
+
+- `spec/requirements/TPLK-Specification.md`
+
+### Label format (low-overhead Markdown)
+
+Business requirement specifications in `spec/requirements/` use plain Markdown status tokens:
+
+Apply labels directly in headings (without a dash before the status):
+
+```md
+## Topic: <Name> [Spec]
+### Use Case: <Name> [Ready]
+#### Story: <Name> [Impl]
+```
+
+Item level should use the same heading-inline style:
+
+```md
+##### Item: <Beschreibung> [QA]
+```
+
+Rule: every Topic, Use Case, Story, and Item must carry exactly one status label.
+Do not place ` - ` before the status marker.
 
 ## How Specs Map To Test Pipelines
 

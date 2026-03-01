@@ -18,10 +18,14 @@ export default function TaskBoardActionForm({
   onCancel,
 }: TaskBoardActionFormProps) {
   const requiresComment = actionState.type === 'discard';
+  const isEvent = actionState.task.kind_key === 'EVENT';
+  const actionLabel = actionState.type === 'complete'
+    ? (isEvent ? 'Register event occurrence' : 'Complete task')
+    : (isEvent ? 'Discard event' : 'Discard task');
   return (
     <div className="task-board-action-form">
       <p className="task-board-action-title">
-        {actionState.type === 'complete' ? 'Complete task' : 'Discard task'}: {actionState.task.description}
+        {actionLabel}: {actionState.task.description}
       </p>
       <textarea
         className="task-board-action-comment"

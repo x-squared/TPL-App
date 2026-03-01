@@ -101,65 +101,6 @@ class CoordinationProcurement(Base):
     changed_by_user = relationship("User")
 
 
-class CoordinationProcurementOrgan(Base):
-    """Runtime procurement organ row per coordination and organ."""
-
-    __tablename__ = "COORDINATION_PROCUREMENT_ORGAN"
-    __table_args__ = (
-        UniqueConstraint("COORDINATION_ID", "ORGAN_ID", name="uq_coordination_procurement_organ"),
-    )
-
-    id = Column("ID", Integer, primary_key=True, index=True)
-    coordination_id = Column("COORDINATION_ID", Integer, ForeignKey("COORDINATION.ID"), nullable=False, index=True)
-    organ_id = Column("ORGAN_ID", Integer, ForeignKey("CODE.ID"), nullable=False, index=True)
-    procurement_surgeon = Column("PROCUREMENT_SURGEON", String(64), default="")
-    changed_by_id = Column("CHANGED_BY", Integer, ForeignKey("USER.ID"), nullable=True)
-    created_at = Column("CREATED_AT", DateTime(timezone=True), server_default=func.now())
-    updated_at = Column("UPDATED_AT", DateTime(timezone=True), onupdate=func.now())
-
-    coordination = relationship("Coordination", back_populates="procurement_organs")
-    organ = relationship("Code", foreign_keys=[organ_id])
-    changed_by_user = relationship("User")
-    slots = relationship("CoordinationProcurementSlot", back_populates="procurement_organ", cascade="all, delete-orphan")
-
-
-class CoordinationProcurementSlot(Base):
-    """Optional slot dimension (MAIN/LEFT/RIGHT) for organ procurement values."""
-
-    __tablename__ = "COORDINATION_PROCUREMENT_SLOT"
-    __table_args__ = (
-        UniqueConstraint("COORDINATION_PROCUREMENT_ORGAN_ID", "SLOT_KEY", name="uq_coordination_procurement_slot"),
-    )
-
-    id = Column("ID", Integer, primary_key=True, index=True)
-    coordination_procurement_organ_id = Column(
-        "COORDINATION_PROCUREMENT_ORGAN_ID",
-        Integer,
-        ForeignKey("COORDINATION_PROCUREMENT_ORGAN.ID"),
-        nullable=False,
-        index=True,
-    )
-    slot_key = Column(
-        "SLOT_KEY",
-        SqlEnum(
-            ProcurementSlotKey,
-            native_enum=False,
-            validate_strings=True,
-            values_callable=lambda enum_cls: [entry.value for entry in enum_cls],
-            length=16,
-        ),
-        nullable=False,
-        default=ProcurementSlotKey.MAIN.value,
-    )
-    changed_by_id = Column("CHANGED_BY", Integer, ForeignKey("USER.ID"), nullable=True)
-    created_at = Column("CREATED_AT", DateTime(timezone=True), server_default=func.now())
-    updated_at = Column("UPDATED_AT", DateTime(timezone=True), onupdate=func.now())
-
-    procurement_organ = relationship("CoordinationProcurementOrgan", back_populates="slots")
-    changed_by_user = relationship("User")
-    values = relationship("CoordinationProcurementValue", back_populates="slot", cascade="all, delete-orphan")
-
-
 class CoordinationProcurementFieldTemplate(Base):
     """Template definition of flexible procurement fields."""
 
@@ -237,41 +178,105 @@ class CoordinationProcurementFieldScopeTemplate(Base):
     changed_by_user = relationship("User")
 
 
-class CoordinationProcurementValue(Base):
-    """Runtime procurement value bound to a slot and field template."""
+class CoordinationProcurementData(Base):
+    """Unified runtime procurement data row per coordination, organ, slot and field."""
 
-    __tablename__ = "COORDINATION_PROCUREMENT_VALUE"
+    __tablename__ = "COORDINATION_PROCUREMENT_DATA"
     __table_args__ = (
-        UniqueConstraint("SLOT_ID", "FIELD_TEMPLATE_ID", name="uq_coordination_procurement_value"),
+        UniqueConstraint(
+            "COORDINATION_ID",
+            "ORGAN_ID",
+            "SLOT_KEY",
+            "FIELD_TEMPLATE_ID",
+            name="uq_coordination_procurement_data",
+        ),
     )
 
     id = Column("ID", Integer, primary_key=True, index=True)
-    slot_id = Column("SLOT_ID", Integer, ForeignKey("COORDINATION_PROCUREMENT_SLOT.ID"), nullable=False, index=True)
-    field_template_id = Column("FIELD_TEMPLATE_ID", Integer, ForeignKey("COORDINATION_PROCUREMENT_FIELD_TEMPLATE.ID"), nullable=False, index=True)
-    value = Column("VALUE", String, default="")
+    coordination_id = Column("COORDINATION_ID", Integer, ForeignKey("COORDINATION.ID"), nullable=False, index=True)
+    organ_id = Column("ORGAN_ID", Integer, ForeignKey("CODE.ID"), nullable=False, index=True)
+    slot_key = Column(
+        "SLOT_KEY",
+        SqlEnum(
+            ProcurementSlotKey,
+            native_enum=False,
+            validate_strings=True,
+            values_callable=lambda enum_cls: [entry.value for entry in enum_cls],
+            length=16,
+        ),
+        nullable=False,
+        default=ProcurementSlotKey.MAIN.value,
+    )
+    field_template_id = Column(
+        "FIELD_TEMPLATE_ID",
+        Integer,
+        ForeignKey("COORDINATION_PROCUREMENT_FIELD_TEMPLATE.ID"),
+        nullable=False,
+        index=True,
+    )
+    value = Column("VALUE", String, nullable=False, default="")
+    episode_id = Column("EPISODE_ID", Integer, ForeignKey("EPISODE.ID"), nullable=True, index=True)
     changed_by_id = Column("CHANGED_BY", Integer, ForeignKey("USER.ID"), nullable=True)
     created_at = Column("CREATED_AT", DateTime(timezone=True), server_default=func.now())
     updated_at = Column("UPDATED_AT", DateTime(timezone=True), onupdate=func.now())
 
-    slot = relationship("CoordinationProcurementSlot", back_populates="values")
+    coordination = relationship("Coordination")
+    organ = relationship("Code", foreign_keys=[organ_id])
     field_template = relationship("CoordinationProcurementFieldTemplate")
+    episode = relationship("Episode", foreign_keys=[episode_id])
     changed_by_user = relationship("User")
     persons = relationship(
-        "CoordinationProcurementValuePerson",
-        back_populates="value_row",
+        "CoordinationProcurementDataPerson",
+        back_populates="data_row",
         cascade="all, delete-orphan",
     )
     teams = relationship(
-        "CoordinationProcurementValueTeam",
-        back_populates="value_row",
+        "CoordinationProcurementDataTeam",
+        back_populates="data_row",
         cascade="all, delete-orphan",
     )
-    episode_ref = relationship(
-        "CoordinationProcurementValueEpisode",
-        back_populates="value_row",
-        cascade="all, delete-orphan",
-        uselist=False,
+
+
+class CoordinationProcurementDataPerson(Base):
+    """Person references attached to a unified procurement data row."""
+
+    __tablename__ = "COORDINATION_PROCUREMENT_DATA_PERSON"
+    __table_args__ = (
+        UniqueConstraint("DATA_ID", "PERSON_ID", name="uq_coordination_procurement_data_person"),
     )
+
+    id = Column("ID", Integer, primary_key=True, index=True)
+    data_id = Column("DATA_ID", Integer, ForeignKey("COORDINATION_PROCUREMENT_DATA.ID"), nullable=False, index=True)
+    person_id = Column("PERSON_ID", Integer, ForeignKey("PERSON.ID"), nullable=False, index=True)
+    pos = Column("POS", Integer, nullable=False, default=0)
+    changed_by_id = Column("CHANGED_BY", Integer, ForeignKey("USER.ID"), nullable=True)
+    created_at = Column("CREATED_AT", DateTime(timezone=True), server_default=func.now())
+    updated_at = Column("UPDATED_AT", DateTime(timezone=True), onupdate=func.now())
+
+    data_row = relationship("CoordinationProcurementData", back_populates="persons")
+    person = relationship("Person")
+    changed_by_user = relationship("User")
+
+
+class CoordinationProcurementDataTeam(Base):
+    """Team references attached to a unified procurement data row."""
+
+    __tablename__ = "COORDINATION_PROCUREMENT_DATA_TEAM"
+    __table_args__ = (
+        UniqueConstraint("DATA_ID", "TEAM_ID", name="uq_coordination_procurement_data_team"),
+    )
+
+    id = Column("ID", Integer, primary_key=True, index=True)
+    data_id = Column("DATA_ID", Integer, ForeignKey("COORDINATION_PROCUREMENT_DATA.ID"), nullable=False, index=True)
+    team_id = Column("TEAM_ID", Integer, ForeignKey("PERSON_TEAM.ID"), nullable=False, index=True)
+    pos = Column("POS", Integer, nullable=False, default=0)
+    changed_by_id = Column("CHANGED_BY", Integer, ForeignKey("USER.ID"), nullable=True)
+    created_at = Column("CREATED_AT", DateTime(timezone=True), server_default=func.now())
+    updated_at = Column("UPDATED_AT", DateTime(timezone=True), onupdate=func.now())
+
+    data_row = relationship("CoordinationProcurementData", back_populates="teams")
+    team = relationship("PersonTeam")
+    changed_by_user = relationship("User")
 
 
 class CoordinationProcurementFieldGroupTemplate(Base):
@@ -291,65 +296,3 @@ class CoordinationProcurementFieldGroupTemplate(Base):
 
     changed_by_user = relationship("User")
     field_templates = relationship("CoordinationProcurementFieldTemplate", back_populates="group_template")
-
-
-class CoordinationProcurementValuePerson(Base):
-    """Person references attached to a procurement value row."""
-
-    __tablename__ = "COORDINATION_PROCUREMENT_VALUE_PERSON"
-    __table_args__ = (
-        UniqueConstraint("VALUE_ID", "PERSON_ID", name="uq_coordination_procurement_value_person"),
-    )
-
-    id = Column("ID", Integer, primary_key=True, index=True)
-    value_id = Column("VALUE_ID", Integer, ForeignKey("COORDINATION_PROCUREMENT_VALUE.ID"), nullable=False, index=True)
-    person_id = Column("PERSON_ID", Integer, ForeignKey("PERSON.ID"), nullable=False, index=True)
-    pos = Column("POS", Integer, nullable=False, default=0)
-    changed_by_id = Column("CHANGED_BY", Integer, ForeignKey("USER.ID"), nullable=True)
-    created_at = Column("CREATED_AT", DateTime(timezone=True), server_default=func.now())
-    updated_at = Column("UPDATED_AT", DateTime(timezone=True), onupdate=func.now())
-
-    value_row = relationship("CoordinationProcurementValue", back_populates="persons")
-    person = relationship("Person")
-    changed_by_user = relationship("User")
-
-
-class CoordinationProcurementValueTeam(Base):
-    """Team references attached to a procurement value row."""
-
-    __tablename__ = "COORDINATION_PROCUREMENT_VALUE_TEAM"
-    __table_args__ = (
-        UniqueConstraint("VALUE_ID", "TEAM_ID", name="uq_coordination_procurement_value_team"),
-    )
-
-    id = Column("ID", Integer, primary_key=True, index=True)
-    value_id = Column("VALUE_ID", Integer, ForeignKey("COORDINATION_PROCUREMENT_VALUE.ID"), nullable=False, index=True)
-    team_id = Column("TEAM_ID", Integer, ForeignKey("PERSON_TEAM.ID"), nullable=False, index=True)
-    pos = Column("POS", Integer, nullable=False, default=0)
-    changed_by_id = Column("CHANGED_BY", Integer, ForeignKey("USER.ID"), nullable=True)
-    created_at = Column("CREATED_AT", DateTime(timezone=True), server_default=func.now())
-    updated_at = Column("UPDATED_AT", DateTime(timezone=True), onupdate=func.now())
-
-    value_row = relationship("CoordinationProcurementValue", back_populates="teams")
-    team = relationship("PersonTeam")
-    changed_by_user = relationship("User")
-
-
-class CoordinationProcurementValueEpisode(Base):
-    """Episode reference attached to a procurement value row."""
-
-    __tablename__ = "COORDINATION_PROCUREMENT_VALUE_EPISODE"
-    __table_args__ = (
-        UniqueConstraint("VALUE_ID", name="uq_coordination_procurement_value_episode"),
-    )
-
-    id = Column("ID", Integer, primary_key=True, index=True)
-    value_id = Column("VALUE_ID", Integer, ForeignKey("COORDINATION_PROCUREMENT_VALUE.ID"), nullable=False, index=True)
-    episode_id = Column("EPISODE_ID", Integer, ForeignKey("EPISODE.ID"), nullable=False, index=True)
-    changed_by_id = Column("CHANGED_BY", Integer, ForeignKey("USER.ID"), nullable=True)
-    created_at = Column("CREATED_AT", DateTime(timezone=True), server_default=func.now())
-    updated_at = Column("UPDATED_AT", DateTime(timezone=True), onupdate=func.now())
-
-    value_row = relationship("CoordinationProcurementValue", back_populates="episode_ref")
-    episode = relationship("Episode")
-    changed_by_user = relationship("User")

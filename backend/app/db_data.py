@@ -49,13 +49,250 @@ def _seed(*, app_env: str | None, seed_profile: str | None) -> dict[str, object]
         db.close()
 
 
+def _migrate_procurement_runtime() -> dict[str, int]:
+    from .database import engine
+
+    migrated_values = 0
+    migrated_person_links = 0
+    migrated_team_links = 0
+
+    with engine.begin() as conn:
+        runtime_table_exists = conn.execute(
+            text("SELECT name FROM sqlite_master WHERE type='table' AND name='COORDINATION_PROCUREMENT_DATA'")
+        ).scalar_one_or_none()
+        runtime_person_table_exists = conn.execute(
+            text("SELECT name FROM sqlite_master WHERE type='table' AND name='COORDINATION_PROCUREMENT_DATA_PERSON'")
+        ).scalar_one_or_none()
+        runtime_team_table_exists = conn.execute(
+            text("SELECT name FROM sqlite_master WHERE type='table' AND name='COORDINATION_PROCUREMENT_DATA_TEAM'")
+        ).scalar_one_or_none()
+        old_value_table_exists = conn.execute(
+            text("SELECT name FROM sqlite_master WHERE type='table' AND name='COORDINATION_PROCUREMENT_VALUE'")
+        ).scalar_one_or_none()
+        if (
+            not runtime_table_exists
+            or not runtime_person_table_exists
+            or not runtime_team_table_exists
+            or not old_value_table_exists
+        ):
+            return {
+                "migrated_values": migrated_values,
+                "migrated_person_links": migrated_person_links,
+                "migrated_team_links": migrated_team_links,
+            }
+
+        old_value_person_table_exists = conn.execute(
+            text("SELECT name FROM sqlite_master WHERE type='table' AND name='COORDINATION_PROCUREMENT_VALUE_PERSON'")
+        ).scalar_one_or_none()
+        old_value_team_table_exists = conn.execute(
+            text("SELECT name FROM sqlite_master WHERE type='table' AND name='COORDINATION_PROCUREMENT_VALUE_TEAM'")
+        ).scalar_one_or_none()
+        old_value_episode_table_exists = conn.execute(
+            text("SELECT name FROM sqlite_master WHERE type='table' AND name='COORDINATION_PROCUREMENT_VALUE_EPISODE'")
+        ).scalar_one_or_none()
+
+        value_rows = conn.execute(
+            text(
+                'SELECT v."ID" AS value_id, '
+                'v."FIELD_TEMPLATE_ID" AS field_template_id, '
+                'v."VALUE" AS value_text, '
+                'v."CHANGED_BY" AS changed_by_id, '
+                'v."CREATED_AT" AS created_at, '
+                'v."UPDATED_AT" AS updated_at, '
+                's."SLOT_KEY" AS slot_key, '
+                'o."COORDINATION_ID" AS coordination_id, '
+                'o."ORGAN_ID" AS organ_id '
+                'FROM "COORDINATION_PROCUREMENT_VALUE" v '
+                'JOIN "COORDINATION_PROCUREMENT_SLOT" s ON s."ID" = v."SLOT_ID" '
+                'JOIN "COORDINATION_PROCUREMENT_ORGAN" o ON o."ID" = s."COORDINATION_PROCUREMENT_ORGAN_ID"'
+            )
+        ).mappings().all()
+        if not value_rows:
+            return {
+                "migrated_values": migrated_values,
+                "migrated_person_links": migrated_person_links,
+                "migrated_team_links": migrated_team_links,
+            }
+
+        person_rows = []
+        if old_value_person_table_exists:
+            person_rows = conn.execute(
+                text(
+                    'SELECT "VALUE_ID" AS value_id, "PERSON_ID" AS person_id '
+                    'FROM "COORDINATION_PROCUREMENT_VALUE_PERSON" '
+                    'ORDER BY "VALUE_ID", "POS", "ID"'
+                )
+            ).mappings().all()
+        team_rows = []
+        if old_value_team_table_exists:
+            team_rows = conn.execute(
+                text(
+                    'SELECT "VALUE_ID" AS value_id, "TEAM_ID" AS team_id '
+                    'FROM "COORDINATION_PROCUREMENT_VALUE_TEAM" '
+                    'ORDER BY "VALUE_ID", "POS", "ID"'
+                )
+            ).mappings().all()
+        episode_rows = []
+        if old_value_episode_table_exists:
+            episode_rows = conn.execute(
+                text(
+                    'SELECT "VALUE_ID" AS value_id, "EPISODE_ID" AS episode_id '
+                    'FROM "COORDINATION_PROCUREMENT_VALUE_EPISODE"'
+                )
+            ).mappings().all()
+
+        person_ids_by_value: dict[int, list[int]] = {}
+        for row in person_rows:
+            person_ids_by_value.setdefault(int(row["value_id"]), []).append(int(row["person_id"]))
+        team_ids_by_value: dict[int, list[int]] = {}
+        for row in team_rows:
+            team_ids_by_value.setdefault(int(row["value_id"]), []).append(int(row["team_id"]))
+        episode_id_by_value: dict[int, int] = {}
+        for row in episode_rows:
+            episode_id_by_value[int(row["value_id"])] = int(row["episode_id"])
+
+        for row in value_rows:
+            value_id = int(row["value_id"])
+            payload = {
+                "coordination_id": row["coordination_id"],
+                "organ_id": row["organ_id"],
+                "slot_key": row["slot_key"] or "MAIN",
+                "field_template_id": row["field_template_id"],
+                "value_text": row["value_text"] or "",
+                "episode_id": episode_id_by_value.get(value_id),
+                "changed_by_id": row["changed_by_id"],
+                "created_at": row["created_at"],
+                "updated_at": row["updated_at"],
+            }
+            before_count = conn.execute(
+                text(
+                    'SELECT COUNT(*) FROM "COORDINATION_PROCUREMENT_DATA" '
+                    'WHERE "COORDINATION_ID" = :coordination_id '
+                    'AND "ORGAN_ID" = :organ_id '
+                    'AND "SLOT_KEY" = :slot_key '
+                    'AND "FIELD_TEMPLATE_ID" = :field_template_id'
+                ),
+                payload,
+            ).scalar_one()
+            conn.execute(
+                text(
+                    'INSERT OR IGNORE INTO "COORDINATION_PROCUREMENT_DATA" ('
+                    '"COORDINATION_ID","ORGAN_ID","SLOT_KEY","FIELD_TEMPLATE_ID","VALUE",'
+                    '"EPISODE_ID","CHANGED_BY","CREATED_AT","UPDATED_AT","ROW_VERSION"'
+                    ') VALUES ('
+                    ':coordination_id,:organ_id,:slot_key,:field_template_id,:value_text,'
+                    ':episode_id,:changed_by_id,:created_at,:updated_at,1'
+                    ')'
+                ),
+                payload,
+            )
+            after_count = conn.execute(
+                text(
+                    'SELECT COUNT(*) FROM "COORDINATION_PROCUREMENT_DATA" '
+                    'WHERE "COORDINATION_ID" = :coordination_id '
+                    'AND "ORGAN_ID" = :organ_id '
+                    'AND "SLOT_KEY" = :slot_key '
+                    'AND "FIELD_TEMPLATE_ID" = :field_template_id'
+                ),
+                payload,
+            ).scalar_one()
+            if int(after_count) > int(before_count):
+                migrated_values += 1
+            data_id = conn.execute(
+                text(
+                    'SELECT "ID" FROM "COORDINATION_PROCUREMENT_DATA" '
+                    'WHERE "COORDINATION_ID" = :coordination_id '
+                    'AND "ORGAN_ID" = :organ_id '
+                    'AND "SLOT_KEY" = :slot_key '
+                    'AND "FIELD_TEMPLATE_ID" = :field_template_id'
+                ),
+                payload,
+            ).scalar_one_or_none()
+            if data_id is None:
+                continue
+            for pos, person_id in enumerate(person_ids_by_value.get(value_id, [])):
+                before_count = conn.execute(
+                    text(
+                        'SELECT COUNT(*) FROM "COORDINATION_PROCUREMENT_DATA_PERSON" '
+                        'WHERE "DATA_ID" = :data_id AND "PERSON_ID" = :person_id'
+                    ),
+                    {"data_id": data_id, "person_id": person_id},
+                ).scalar_one()
+                conn.execute(
+                    text(
+                        'INSERT OR IGNORE INTO "COORDINATION_PROCUREMENT_DATA_PERSON" ('
+                        '"DATA_ID","PERSON_ID","POS","CHANGED_BY","CREATED_AT","UPDATED_AT","ROW_VERSION"'
+                        ') VALUES ('
+                        ':data_id,:person_id,:pos,:changed_by_id,:created_at,:updated_at,1'
+                        ')'
+                    ),
+                    {
+                        "data_id": data_id,
+                        "person_id": person_id,
+                        "pos": pos,
+                        "changed_by_id": row["changed_by_id"],
+                        "created_at": row["created_at"],
+                        "updated_at": row["updated_at"],
+                    },
+                )
+                after_count = conn.execute(
+                    text(
+                        'SELECT COUNT(*) FROM "COORDINATION_PROCUREMENT_DATA_PERSON" '
+                        'WHERE "DATA_ID" = :data_id AND "PERSON_ID" = :person_id'
+                    ),
+                    {"data_id": data_id, "person_id": person_id},
+                ).scalar_one()
+                if int(after_count) > int(before_count):
+                    migrated_person_links += 1
+            for pos, team_id in enumerate(team_ids_by_value.get(value_id, [])):
+                before_count = conn.execute(
+                    text(
+                        'SELECT COUNT(*) FROM "COORDINATION_PROCUREMENT_DATA_TEAM" '
+                        'WHERE "DATA_ID" = :data_id AND "TEAM_ID" = :team_id'
+                    ),
+                    {"data_id": data_id, "team_id": team_id},
+                ).scalar_one()
+                conn.execute(
+                    text(
+                        'INSERT OR IGNORE INTO "COORDINATION_PROCUREMENT_DATA_TEAM" ('
+                        '"DATA_ID","TEAM_ID","POS","CHANGED_BY","CREATED_AT","UPDATED_AT","ROW_VERSION"'
+                        ') VALUES ('
+                        ':data_id,:team_id,:pos,:changed_by_id,:created_at,:updated_at,1'
+                        ')'
+                    ),
+                    {
+                        "data_id": data_id,
+                        "team_id": team_id,
+                        "pos": pos,
+                        "changed_by_id": row["changed_by_id"],
+                        "created_at": row["created_at"],
+                        "updated_at": row["updated_at"],
+                    },
+                )
+                after_count = conn.execute(
+                    text(
+                        'SELECT COUNT(*) FROM "COORDINATION_PROCUREMENT_DATA_TEAM" '
+                        'WHERE "DATA_ID" = :data_id AND "TEAM_ID" = :team_id'
+                    ),
+                    {"data_id": data_id, "team_id": team_id},
+                ).scalar_one()
+                if int(after_count) > int(before_count):
+                    migrated_team_links += 1
+
+    return {
+        "migrated_values": migrated_values,
+        "migrated_person_links": migrated_person_links,
+        "migrated_team_links": migrated_team_links,
+    }
+
+
 def main() -> int:
     parser = argparse.ArgumentParser(description="Data management (DML only).")
     parser.add_argument(
         "--mode",
-        choices=("clean", "seed", "refresh"),
+        choices=("clean", "seed", "refresh", "migrate-procurement-runtime"),
         default="refresh",
-        help="clean=wipe data, seed=seed only, refresh=clean+seed",
+        help="clean=wipe data, seed=seed only, refresh=clean+seed, migrate-procurement-runtime=backfill legacy procurement runtime",
     )
     parser.add_argument("--env", default=os.getenv("TPL_ENV", "DEV"), help="Application env (DEV/TEST/PROD)")
     parser.add_argument("--seed-profile", default=os.getenv("TPL_SEED_PROFILE"), help="Optional seed profile override")
@@ -75,6 +312,15 @@ def main() -> int:
             + f"env={result['environment']} "
             + f"categories={','.join(result['categories'])} "
             + f"jobs={','.join(result['executed_jobs'])}"
+        )
+
+    if args.mode == "migrate-procurement-runtime":
+        result = _migrate_procurement_runtime()
+        print(
+            "Procurement runtime migration complete: "
+            + f"values={result['migrated_values']} "
+            + f"person_links={result['migrated_person_links']} "
+            + f"team_links={result['migrated_team_links']}"
         )
 
     return 0

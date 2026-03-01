@@ -15,10 +15,47 @@ export interface TaskGroup {
   updated_at: string | null;
 }
 
+export interface TaskGroupTemplate {
+  id: number;
+  key: string;
+  name: string;
+  description: string;
+  scope_id: number;
+  scope: Code | null;
+  organ_id: number | null;
+  organ: Code | null;
+  tpl_phase_id: number | null;
+  tpl_phase: Code | null;
+  is_active: boolean;
+  sort_pos: number;
+  changed_by_id: number | null;
+  changed_by_user: AppUser | null;
+  created_at: string;
+  updated_at: string | null;
+}
+
+export interface TaskTemplate {
+  id: number;
+  task_group_template_id: number;
+  task_group_template: TaskGroupTemplate | null;
+  description: string;
+  kind_key: 'TASK' | 'EVENT';
+  priority_id: number | null;
+  priority: Code | null;
+  offset_minutes_default: number | null;
+  is_active: boolean;
+  sort_pos: number;
+  changed_by_id: number | null;
+  changed_by_user: AppUser | null;
+  created_at: string;
+  updated_at: string | null;
+}
+
 export interface Task {
   id: number;
   task_group_id: number;
   description: string;
+  kind_key: 'TASK' | 'EVENT';
   priority_id: number | null;
   priority: Code | null;
   assigned_to_id: number | null;
@@ -40,6 +77,7 @@ export interface Task {
 export interface TaskUpdate {
   task_group_id?: number;
   description?: string;
+  kind_key?: 'TASK' | 'EVENT';
   priority_id?: number | null;
   assigned_to_id?: number | null;
   until?: string;
@@ -50,6 +88,7 @@ export interface TaskUpdate {
 export interface TaskCreate {
   task_group_id: number;
   description?: string;
+  kind_key?: 'TASK' | 'EVENT';
   priority_id?: number | null;
   assigned_to_id?: number | null;
   until: string;
@@ -86,7 +125,43 @@ export interface TaskListParams {
   status_key?: string[];
 }
 
+export interface TaskTemplateListParams {
+  task_group_template_id?: number;
+  is_active?: boolean;
+}
+
+export interface TaskTemplateCreate {
+  task_group_template_id: number;
+  description: string;
+  kind_key?: 'TASK' | 'EVENT';
+  priority_id?: number | null;
+  offset_minutes_default?: number | null;
+  is_active?: boolean;
+  sort_pos?: number;
+}
+
+export interface TaskTemplateUpdate {
+  task_group_template_id?: number;
+  description?: string;
+  kind_key?: 'TASK' | 'EVENT';
+  priority_id?: number | null;
+  offset_minutes_default?: number | null;
+  is_active?: boolean;
+  sort_pos?: number;
+}
+
 export const tasksApi = {
+  listTaskGroupTemplates: () => request<TaskGroupTemplate[]>('/task-group-templates/'),
+  listTaskTemplates: (params?: TaskTemplateListParams) => {
+    const query = new URLSearchParams();
+    if (params?.task_group_template_id !== undefined) query.set('task_group_template_id', String(params.task_group_template_id));
+    if (params?.is_active !== undefined) query.set('is_active', params.is_active ? 'true' : 'false');
+    return request<TaskTemplate[]>(`/task-templates/${query.toString() ? `?${query.toString()}` : ''}`);
+  },
+  createTaskTemplate: (data: TaskTemplateCreate) =>
+    request<TaskTemplate>('/task-templates/', { method: 'POST', body: JSON.stringify(data) }),
+  updateTaskTemplate: (taskTemplateId: number, data: TaskTemplateUpdate) =>
+    request<TaskTemplate>(`/task-templates/${taskTemplateId}`, { method: 'PATCH', body: JSON.stringify(data) }),
   listTaskGroups: (params?: TaskGroupListParams) => {
     const query = new URLSearchParams();
     if (params?.patient_id !== undefined) query.set('patient_id', String(params.patient_id));

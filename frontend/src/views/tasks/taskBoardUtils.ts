@@ -1,4 +1,5 @@
 import type { Task } from '../../api';
+import { formatDateTimeDdMmYyyy } from '../layout/dateFormat';
 import { formatTaskEpisodeReference, formatTaskPatientReference } from '../layout/episodeDisplay';
 import type {
   TaskBoardRow,
@@ -89,10 +90,7 @@ export function isUrgentTask(task: Task): boolean {
 }
 
 export function formatDate(iso: string | null): string {
-  if (!iso) return '–';
-  const date = new Date(iso);
-  if (Number.isNaN(date.getTime())) return '–';
-  return date.toLocaleDateString('de-CH');
+  return formatDateTimeDdMmYyyy(iso);
 }
 
 function dueDateValue(iso: string | null): number {
@@ -166,4 +164,12 @@ export function boardStateSymbol(rows: TaskBoardRow[]): string {
       .map((row) => row.task),
   );
   return groupStateIndicator(state);
+}
+
+export function taskKindIcon(task: Task): string {
+  return task.kind_key === 'EVENT' ? '🗓' : '☑';
+}
+
+export function taskKindLabel(task: Task): string {
+  return task.kind_key === 'EVENT' ? 'Event' : 'Task';
 }

@@ -3,18 +3,21 @@ import { useEffect, useState } from 'react';
 import { useAdminAccessRules } from './admin/hooks/useAdminAccessRules';
 import { useAdminPeopleTeams } from './admin/hooks/useAdminPeopleTeams';
 import { useAdminProcurementConfig } from './admin/hooks/useAdminProcurementConfig';
+import { useAdminTaskTemplates } from './admin/hooks/useAdminTaskTemplates';
 import AdminOverviewTab from './admin/tabs/AdminOverviewTab';
 import AdminAccessRulesTab from './admin/tabs/AdminAccessRulesTab';
 import AdminPeopleTeamsTab from './admin/tabs/AdminPeopleTeamsTab';
 import AdminProcurementConfigTab from './admin/tabs/AdminProcurementConfigTab';
+import AdminTaskTemplatesTab from './admin/tabs/AdminTaskTemplatesTab';
 import './AdminView.css';
 
-type AdminTabKey = 'overview' | 'access-rules' | 'people-teams' | 'procurement-config';
+type AdminTabKey = 'overview' | 'access-rules' | 'people-teams' | 'task-templates' | 'procurement-config';
 
 export default function AdminView() {
   const [activeTab, setActiveTab] = useState<AdminTabKey>('overview');
   const accessRules = useAdminAccessRules();
   const peopleTeams = useAdminPeopleTeams();
+  const taskTemplates = useAdminTaskTemplates();
   const procurementConfig = useAdminProcurementConfig();
 
   useEffect(() => {
@@ -50,6 +53,13 @@ export default function AdminView() {
           type="button"
         >
           People & Teams
+        </button>
+        <button
+          className={`detail-tab ${activeTab === 'task-templates' ? 'active' : ''}`}
+          onClick={() => setActiveTab('task-templates')}
+          type="button"
+        >
+          Task Templates
         </button>
         <button
           className={`detail-tab ${activeTab === 'procurement-config' ? 'active' : ''}`}
@@ -92,6 +102,18 @@ export default function AdminView() {
           onDeleteTeam={peopleTeams.deleteTeam}
           onEnsureTeamMembersLoaded={peopleTeams.ensureTeamMembersLoaded}
           onSetTeamMembers={peopleTeams.setTeamMembers}
+        />
+      )}
+      {activeTab === 'task-templates' && (
+        <AdminTaskTemplatesTab
+          templates={taskTemplates.templates}
+          groupTemplates={taskTemplates.groupTemplates}
+          priorityCodes={taskTemplates.priorityCodes}
+          loading={taskTemplates.loading}
+          saving={taskTemplates.saving}
+          error={taskTemplates.error}
+          onCreateTemplate={taskTemplates.createTemplate}
+          onUpdateTemplate={taskTemplates.updateTemplate}
         />
       )}
       {activeTab === 'procurement-config' && (

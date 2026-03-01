@@ -1,6 +1,6 @@
 from __future__ import annotations
 
-from datetime import date, datetime
+from datetime import datetime
 
 from pydantic import BaseModel, ConfigDict, model_validator
 
@@ -49,8 +49,9 @@ class TaskGroupTemplateResponse(TaskGroupTemplateBase):
 class TaskTemplateBase(BaseModel):
     task_group_template_id: int
     description: str
+    kind_key: str = "TASK"
     priority_id: int | None = None
-    due_days_default: int | None = None
+    offset_minutes_default: int | None = None
     is_active: bool = True
     sort_pos: int = 0
 
@@ -62,8 +63,9 @@ class TaskTemplateCreate(TaskTemplateBase):
 class TaskTemplateUpdate(BaseModel):
     task_group_template_id: int | None = None
     description: str | None = None
+    kind_key: str | None = None
     priority_id: int | None = None
-    due_days_default: int | None = None
+    offset_minutes_default: int | None = None
     is_active: bool | None = None
     sort_pos: int | None = None
 
@@ -84,7 +86,7 @@ class TaskGroupTemplateInstantiateRequest(BaseModel):
     patient_id: int
     episode_id: int | None = None
     tpl_phase_id: int | None = None
-    anchor_date: date
+    anchor_at: datetime
 
 
 class TaskGroupBase(BaseModel):
@@ -127,11 +129,12 @@ class TaskGroupResponse(TaskGroupBase):
 class TaskBase(BaseModel):
     task_group_id: int
     description: str = ""
+    kind_key: str = "TASK"
     priority_id: int | None = None
     assigned_to_id: int | None = None
-    until: date
+    until: datetime
     status_id: int | None = None
-    closed_at: date | None = None
+    closed_at: datetime | None = None
     closed_by_id: int | None = None
     comment: str = ""
 
@@ -143,11 +146,12 @@ class TaskCreate(TaskBase):
 class TaskUpdate(BaseModel):
     task_group_id: int | None = None
     description: str | None = None
+    kind_key: str | None = None
     priority_id: int | None = None
     assigned_to_id: int | None = None
-    until: date | None = None
+    until: datetime | None = None
     status_id: int | None = None
-    closed_at: date | None = None
+    closed_at: datetime | None = None
     closed_by_id: int | None = None
     comment: str | None = None
 

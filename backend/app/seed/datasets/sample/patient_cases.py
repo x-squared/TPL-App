@@ -1,4 +1,4 @@
-from datetime import date
+from datetime import date, datetime
 
 # Patient-centric sample seed bundle.
 # Keep related demo data together so a single case can be edited coherently.
@@ -105,9 +105,10 @@ TASKS = [
     {
         "task_group_seed_key": "TEST_BASE",
         "description": "Pruefe Basisdokumente",
+        "kind_key": "TASK",
         "priority_key": "LOW",
         "assigned_to_ext_id": "TKOORD",
-        "until": date(2026, 3, 15),
+        "until": datetime(2026, 3, 15, 9, 0, 0),
         "status_key": "PENDING",
         "closed_at": None,
         "closed_by_ext_id": None,
@@ -117,9 +118,10 @@ TASKS = [
     {
         "task_group_seed_key": "TEST_BASE",
         "description": "Termin fuer Evaluation koordinieren",
+        "kind_key": "TASK",
         "priority_key": "NORMAL",
         "assigned_to_ext_id": "TKOORD",
-        "until": date(2026, 3, 20),
+        "until": datetime(2026, 3, 20, 10, 0, 0),
         "status_key": "PENDING",
         "closed_at": None,
         "closed_by_ext_id": None,
@@ -129,9 +131,10 @@ TASKS = [
     {
         "task_group_seed_key": "TEST_BASE",
         "description": "Dringende Rueckfrage beim Zentrum",
+        "kind_key": "TASK",
         "priority_key": "HIGH",
         "assigned_to_ext_id": "TKOORD",
-        "until": date(2026, 3, 10),
+        "until": datetime(2026, 3, 10, 8, 30, 0),
         "status_key": "PENDING",
         "closed_at": None,
         "closed_by_ext_id": None,

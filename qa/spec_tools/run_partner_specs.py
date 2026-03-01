@@ -42,7 +42,7 @@ def _build_suggestions(playwright_exit: int, db_ok: bool, created_pid: str | Non
             (
                 "MAINTAIN_PARTNER_FLOW",
                 "Partner flow passed",
-                "Keep this test in CI and add more UI+DB scenarios in spec/client-server.",
+                "Keep this test in CI and add more UI+DB scenarios in spec/testing/client-server.",
             )
         ]
 
