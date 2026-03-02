@@ -114,6 +114,14 @@ source .venv/bin/activate
 python -m app.db_data --mode migrate-procurement-runtime --env DEV
 ```
 
+**F) Capture current DB translations into `translations.json`:**
+
+```{bash}
+cd /Users/stephan/Workspace/TPL-App/backend
+source .venv/bin/activate
+python -m app.db_data --mode export-translations-json --env DEV
+```
+
 ### 3) Start backend
 
 ```{bash}

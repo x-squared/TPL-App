@@ -120,6 +120,23 @@ python -m app.db_admin --mode refresh --env DEV
 3. Add/update locale text (`de`) in `translations.json` or via Admin translations
 4. Validate in UI with both locales
 
+### D) Capture current DB translations back into `translations.json`
+
+Use this when you want to sync the frontend baseline file to the currently persisted runtime/admin translation state:
+
+```{bash}
+cd backend
+source .venv/bin/activate
+python -m app.db_data --mode export-translations-json --env DEV
+```
+
+Behavior:
+
+- reads current translation bundles from DB
+- preserves existing `label` metadata from `frontend/src/i18n/translations.json`
+- updates/writes `text` values per locale from DB bundles
+- writes result back to `frontend/src/i18n/translations.json`
+
 ## 8) Implementation references
 
 - Frontend i18n provider and key extraction: `frontend/src/i18n/i18n.tsx`

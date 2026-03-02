@@ -61,13 +61,14 @@ Use `verify` in CI or before release checks.
 ## `app.db_data` (DML only)
 
 ```{bash}
-python -m app.db_data --mode <clean|seed|refresh|migrate-procurement-runtime> --env <DEV|TEST|PROD> [--seed-profile <PROFILE>] [--db-url <URL>]
+python -m app.db_data --mode <clean|seed|refresh|migrate-procurement-runtime|export-translations-json> --env <DEV|TEST|PROD> [--seed-profile <PROFILE>] [--db-url <URL>]
 ```
 
 - `clean`: wipes row data, keeps schema.
 - `seed`: loads seed jobs resolved by env/profile.
 - `refresh`: `clean + seed`.
 - `migrate-procurement-runtime`: idempotent backfill from legacy procurement runtime tables (`COORDINATION_PROCUREMENT_VALUE*`) into unified runtime tables (`COORDINATION_PROCUREMENT_DATA*`).
+- `export-translations-json`: writes current DB translation bundles back to `frontend/src/i18n/translations.json` (preserves existing labels, updates text values).
 
 ### Seed profile resolution
 
@@ -88,6 +89,12 @@ Explicit procurement runtime backfill:
 
 ```{bash}
 python -m app.db_data --mode migrate-procurement-runtime --env DEV
+```
+
+Export current translations from DB to frontend baseline file:
+
+```{bash}
+python -m app.db_data --mode export-translations-json --env DEV
 ```
 
 ## `app.db_admin` (wrapper)

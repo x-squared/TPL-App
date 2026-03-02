@@ -54,3 +54,5 @@ Labels werden direkt als Status-Token am Ende der Überschrift gepflegt:
 # Dokumente [Spec]
 
 - `STCS-Spezifikation.md`
+- `Interface-Spezifikation.md`
+- `LTPL-Spezifikation.md`

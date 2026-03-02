@@ -52,7 +52,7 @@ def _write_translation_snapshot_file(*, bundles: list[dict[str, object]]) -> Pat
     return target
 
 
-def _export_translation_snapshot_to_core_seed() -> tuple[Path, int]:
+def _read_translation_bundles_from_db() -> list[dict[str, object]]:
     from .database import engine
 
     bundles: list[dict[str, object]] = []
@@ -94,8 +94,134 @@ def _export_translation_snapshot_to_core_seed() -> tuple[Path, int]:
                     continue
                 by_locale.setdefault(locale, {})[key] = value
             bundles = [{"locale": locale, "entries": entries} for locale, entries in sorted(by_locale.items())]
+    return bundles
+
+
+def _export_translation_snapshot_to_core_seed() -> tuple[Path, int]:
+    bundles = _read_translation_bundles_from_db()
     target = _write_translation_snapshot_file(bundles=bundles)
     return target, len(bundles)
+
+
+def _load_frontend_translation_config(
+    target: Path,
+) -> tuple[dict[str, dict[str, str]], dict[str, dict[str, str]]]:
+    texts_by_locale: dict[str, dict[str, str]] = {}
+    labels_by_key: dict[str, dict[str, str]] = {}
+    if not target.exists():
+        return texts_by_locale, labels_by_key
+    try:
+        payload = json.loads(target.read_text(encoding="utf-8"))
+    except json.JSONDecodeError:
+        return texts_by_locale, labels_by_key
+    if not isinstance(payload, dict):
+        return texts_by_locale, labels_by_key
+
+    def walk(node: object, path: list[str]) -> None:
+        if not isinstance(node, dict):
+            return
+        text_node = node.get("text")
+        label_node = node.get("label")
+        if isinstance(text_node, dict):
+            key = ".".join(path)
+            if key:
+                for locale, value in text_node.items():
+                    if not isinstance(locale, str) or not isinstance(value, str):
+                        continue
+                    locale_key = locale.strip().lower()
+                    text_value = value.strip()
+                    if not locale_key or not text_value:
+                        continue
+                    texts_by_locale.setdefault(locale_key, {})[key] = text_value
+        if isinstance(label_node, dict):
+            key = ".".join(path)
+            if key:
+                for locale, value in label_node.items():
+                    if not isinstance(locale, str) or not isinstance(value, str):
+                        continue
+                    locale_key = locale.strip().lower()
+                    label_value = value.strip()
+                    if not locale_key or not label_value:
+                        continue
+                    labels_by_key.setdefault(key, {})[locale_key] = label_value
+        for child_key, child_value in node.items():
+            if child_key in {"text", "label"}:
+                continue
+            if isinstance(child_key, str):
+                walk(child_value, [*path, child_key])
+
+    walk(payload, [])
+    return texts_by_locale, labels_by_key
+
+
+def _build_frontend_translation_tree(
+    *,
+    keys: set[str],
+    texts_by_locale: dict[str, dict[str, str]],
+    labels_by_key: dict[str, dict[str, str]],
+) -> dict[str, object]:
+    root: dict[str, object] = {}
+    for key in sorted(keys):
+        parts = [part for part in key.split(".") if part]
+        if not parts:
+            continue
+        cursor: dict[str, object] = root
+        for part in parts[:-1]:
+            existing = cursor.get(part)
+            if not isinstance(existing, dict):
+                existing = {}
+                cursor[part] = existing
+            cursor = existing
+        leaf_key = parts[-1]
+        leaf: dict[str, object] = {}
+        labels = labels_by_key.get(key, {})
+        if labels:
+            leaf["label"] = {locale: labels[locale] for locale in sorted(labels)}
+        text_for_key = {
+            locale: by_key[key]
+            for locale, by_key in texts_by_locale.items()
+            if key in by_key and by_key[key].strip()
+        }
+        if text_for_key:
+            leaf["text"] = {locale: text_for_key[locale] for locale in sorted(text_for_key)}
+        if leaf:
+            cursor[leaf_key] = leaf
+    return root
+
+
+def _export_translation_json_from_db() -> tuple[Path, int]:
+    root = Path(__file__).resolve().parents[2]
+    target = root / "frontend" / "src" / "i18n" / "translations.json"
+    existing_texts_by_locale, labels_by_key = _load_frontend_translation_config(target)
+    merged_texts_by_locale: dict[str, dict[str, str]] = {
+        locale: dict(entries)
+        for locale, entries in existing_texts_by_locale.items()
+    }
+    bundles = _read_translation_bundles_from_db()
+    for item in bundles:
+        locale = str(item.get("locale", "")).strip().lower()
+        entries = item.get("entries")
+        if not locale or not isinstance(entries, dict):
+            continue
+        target_entries = merged_texts_by_locale.setdefault(locale, {})
+        for key, value in entries.items():
+            if not isinstance(key, str) or not isinstance(value, str):
+                continue
+            normalized_key = key.strip()
+            normalized_value = value.strip()
+            if not normalized_key or not normalized_value:
+                continue
+            target_entries[normalized_key] = normalized_value
+    all_keys = set(labels_by_key.keys())
+    for by_key in merged_texts_by_locale.values():
+        all_keys.update(by_key.keys())
+    tree = _build_frontend_translation_tree(
+        keys=all_keys,
+        texts_by_locale=merged_texts_by_locale,
+        labels_by_key=labels_by_key,
+    )
+    target.write_text(json.dumps(tree, ensure_ascii=False, indent=2) + "\n", encoding="utf-8")
+    return target, len(all_keys)
 
 
 def _seed(*, app_env: str | None, seed_profile: str | None) -> dict[str, object]:
@@ -350,9 +476,9 @@ def main() -> int:
     parser = argparse.ArgumentParser(description="Data management (DML only).")
     parser.add_argument(
         "--mode",
-        choices=("clean", "seed", "refresh", "migrate-procurement-runtime"),
+        choices=("clean", "seed", "refresh", "migrate-procurement-runtime", "export-translations-json"),
         default="refresh",
-        help="clean=wipe data, seed=seed only, refresh=clean+seed, migrate-procurement-runtime=backfill legacy procurement runtime",
+        help="clean=wipe data, seed=seed only, refresh=clean+seed, migrate-procurement-runtime=backfill legacy procurement runtime, export-translations-json=write DB translations to frontend/src/i18n/translations.json",
     )
     parser.add_argument("--env", default=os.getenv("TPL_ENV", "DEV"), help="Application env (DEV/TEST/PROD)")
     parser.add_argument("--seed-profile", default=os.getenv("TPL_SEED_PROFILE"), help="Optional seed profile override")
@@ -384,6 +510,10 @@ def main() -> int:
             + f"person_links={result['migrated_person_links']} "
             + f"team_links={result['migrated_team_links']}"
         )
+
+    if args.mode == "export-translations-json":
+        output_path, key_count = _export_translation_json_from_db()
+        print(f"Frontend translations exported: {output_path} (keys: {key_count})")
 
     return 0
 
