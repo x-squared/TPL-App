@@ -14,6 +14,7 @@ interface Props {
   onBack: () => void;
   onOpenPatientEpisode: (patientId: number, episodeId: number) => void;
   initialTab?: CoordinationDetailTab;
+  onTabChange?: (tab: CoordinationDetailTab) => void;
 }
 
 export default function CoordinationDetailView({
@@ -21,6 +22,7 @@ export default function CoordinationDetailView({
   onBack,
   onOpenPatientEpisode,
   initialTab = 'coordination',
+  onTabChange,
 }: Props) {
   const model = useCoordinationDetailViewModel(coordinationId, initialTab);
   const donorName = model.donor?.full_name?.trim() || '';
@@ -35,6 +37,7 @@ export default function CoordinationDetailView({
   const coordinationFavorite = useFavoriteToggle(model.coordination ? {
     favorite_type_key: 'COORDINATION',
     coordination_id: model.coordination.id,
+    context_json: JSON.stringify({ coordination_tab: model.tab }),
     name: coordinationTitle,
   } : null);
   const openDetachedProtocol = () => {
@@ -68,7 +71,10 @@ export default function CoordinationDetailView({
       </div>
       <CoordinationDetailTabs
         tab={model.tab}
-        setTab={model.setTab}
+        setTab={(tab) => {
+          model.setTab(tab);
+          onTabChange?.(tab);
+        }}
         coordination={model.coordination}
         donor={model.donor}
         origin={model.origin}

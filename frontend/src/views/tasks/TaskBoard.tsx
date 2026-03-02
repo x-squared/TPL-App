@@ -1,4 +1,4 @@
-import { useEffect, useMemo, useRef, useState } from 'react';
+import { forwardRef, useCallback, useEffect, useImperativeHandle, useMemo, useRef, useState } from 'react';
 import { api, type Task, type TaskCreate, type TaskGroup, type TaskUpdate } from '../../api';
 import { ApiError } from '../../api/error';
 import ErrorBanner from '../layout/ErrorBanner';
@@ -6,11 +6,15 @@ import '../layout/PanelLayout.css';
 import './TaskBoard.css';
 import TaskBoardFilters from './TaskBoardFilters';
 import TaskBoardTable from './TaskBoardTable';
-import { computeGroupState, isCancelledTask, isDoneTask, sortTasks } from './taskBoardUtils';
+import { computeGroupState, isCancelledTask, isDoneTask, isUrgentTask, sortTasks } from './taskBoardUtils';
 import { buildDefaultTaskDescription, findContextManagedGroup } from './taskBoardContext';
 import type {
+  TaskBoardContext,
+  TaskBoardHandle,
   TaskBoardProps,
   TaskBoardRow,
+  TaskBoardContextType,
+  TaskBoardTaskChangeReason,
 } from './taskBoardTypes';
 import useTaskBoardData from './useTaskBoardData';
 import {
@@ -19,6 +23,7 @@ import {
   useTaskBoardFilters,
   useTaskBoardGroupState,
 } from './hooks/useTaskBoardUiState';
+import { TASK_CHANGED_EVENT } from './taskEvents';
 
 function nowLocalDateTimeIso(): string {
   const now = new Date();
@@ -30,19 +35,63 @@ function nowLocalDateTimeIso(): string {
   return `${y}-${m}-${d}T${hh}:${mm}:00`;
 }
 
-export default function TaskBoard({
-  criteria,
+function nowLocalDateIso(): string {
+  return nowLocalDateTimeIso().slice(0, 10);
+}
+
+function toFormUntilValue(kindKey: 'TASK' | 'EVENT', value: string | null | undefined): string {
+  const raw = (value ?? '').trim();
+  if (!raw) return kindKey === 'TASK' ? nowLocalDateIso() : nowLocalDateTimeIso().slice(0, 16);
+  if (kindKey === 'TASK') return raw.slice(0, 10);
+  if (raw.includes('T')) return raw.slice(0, 16);
+  return `${raw.slice(0, 10)}T00:00`;
+}
+
+function normalizeUntilForApi(kindKey: 'TASK' | 'EVENT', value: string): string {
+  const raw = value.trim();
+  if (!raw) return raw;
+  const day = raw.slice(0, 10);
+  if (kindKey === 'TASK') return `${day}T00:00:00`;
+  if (!raw.includes('T')) return `${day}T00:00:00`;
+  const timePart = raw.slice(11);
+  if (timePart.length === 5) return `${day}T${timePart}:00`;
+  return `${day}T${timePart}`;
+}
+
+function buildContextTarget(
+  group: TaskGroup,
+  colloqiumAgendaId: number | null,
+  colloqiumAgendasById: Record<number, { colloqium_id: number }>,
+) {
+  if (group.coordination_id != null) return { type: 'COORDINATION' as const, coordinationId: group.coordination_id };
+  const resolvedAgendaId = group.colloqium_agenda_id ?? colloqiumAgendaId;
+  if (resolvedAgendaId != null) {
+    const agenda = colloqiumAgendasById[resolvedAgendaId];
+    if (agenda?.colloqium_id != null) return { type: 'COLLOQUIUM' as const, colloqiumId: agenda.colloqium_id };
+  }
+  if (group.episode_id != null) return { type: 'EPISODE' as const, patientId: group.patient_id, episodeId: group.episode_id };
+  return { type: 'PATIENT' as const, patientId: group.patient_id };
+}
+
+const TaskBoard = forwardRef<TaskBoardHandle, TaskBoardProps>(function TaskBoard({
+  criteria = {},
+  context,
   title = 'Tasks',
   onAddClick = () => undefined,
   maxTableHeight = 420,
   headerMeta,
   hideFilters = false,
+  hideAddButton = false,
   showGroupHeadingsDefault = true,
   includeClosedTasks = false,
   autoCreateToken,
   onAutoCreateSaved,
   onAutoCreateDiscarded,
-}: TaskBoardProps) {
+  onTaskChanged,
+  onOpenTaskContext,
+  taskSort = null,
+  onTaskSortChange,
+}: TaskBoardProps, ref) {
   const apiErrorHasDetail = (error: unknown, expected: string): boolean => {
     if (!(error instanceof ApiError)) return false;
     const detail = (error.detail as { detail?: unknown })?.detail;
@@ -52,8 +101,11 @@ export default function TaskBoard({
     }
     return JSON.stringify(error.detail).includes(expected);
   };
+  const incomingContext = context ?? criteria;
+  const [activeContext, setActiveContext] = useState<TaskBoardContext>(incomingContext);
+  const taskChangeListenersRef = useRef(new Set<NonNullable<TaskBoardProps['onTaskChanged']>>());
   const [effectiveColloqiumAgendaId, setEffectiveColloqiumAgendaId] = useState<number | null>(
-    criteria.colloqiumAgendaId ?? null,
+    incomingContext.colloqiumAgendaId ?? null,
   );
   const filters = useTaskBoardFilters(includeClosedTasks, showGroupHeadingsDefault);
   const actionStateModel = useTaskBoardActionState();
@@ -62,15 +114,38 @@ export default function TaskBoard({
   const [panelAddSaving, setPanelAddSaving] = useState(false);
   const [preferredTopGroupId, setPreferredTopGroupId] = useState<number | null>(null);
   const [autoCreatedTaskId, setAutoCreatedTaskId] = useState<number | null>(null);
+  const [selectedTaskId, setSelectedTaskId] = useState<number | null>(null);
   const prevAutoCreateTokenRef = useRef<number | undefined>(autoCreateToken);
 
   useEffect(() => {
-    setEffectiveColloqiumAgendaId(criteria.colloqiumAgendaId ?? null);
-  }, [criteria.colloqiumAgendaId, criteria.episodeId, criteria.colloqiumId, criteria.patientId]);
+    setActiveContext({
+      patientId: incomingContext.patientId,
+      episodeId: incomingContext.episodeId,
+      colloqiumAgendaId: incomingContext.colloqiumAgendaId,
+      colloqiumId: incomingContext.colloqiumId,
+      tplPhaseId: incomingContext.tplPhaseId,
+      assignedToId: incomingContext.assignedToId,
+      contextType: incomingContext.contextType,
+      extraParams: incomingContext.extraParams,
+    });
+  }, [
+    incomingContext.patientId,
+    incomingContext.episodeId,
+    incomingContext.colloqiumAgendaId,
+    incomingContext.colloqiumId,
+    incomingContext.tplPhaseId,
+    incomingContext.assignedToId,
+    incomingContext.contextType,
+    incomingContext.extraParams,
+  ]);
+
+  useEffect(() => {
+    setEffectiveColloqiumAgendaId(activeContext.colloqiumAgendaId ?? null);
+  }, [activeContext.colloqiumAgendaId, activeContext.episodeId, activeContext.colloqiumId, activeContext.patientId]);
 
   useEffect(() => {
     setPreferredTopGroupId(null);
-  }, [criteria.patientId, criteria.episodeId, effectiveColloqiumAgendaId, criteria.tplPhaseId]);
+  }, [activeContext.patientId, activeContext.episodeId, effectiveColloqiumAgendaId, activeContext.tplPhaseId]);
 
   const statusKeysToLoad = useMemo(() => {
     if (includeClosedTasks) return ['PENDING', 'COMPLETED', 'CANCELLED'];
@@ -82,10 +157,10 @@ export default function TaskBoard({
 
   const effectiveCriteria = useMemo(
     () => ({
-      ...criteria,
+      ...activeContext,
       colloqiumAgendaId: effectiveColloqiumAgendaId,
     }),
-    [criteria, effectiveColloqiumAgendaId],
+    [activeContext, effectiveColloqiumAgendaId],
   );
 
   const {
@@ -99,8 +174,42 @@ export default function TaskBoard({
     priorityCodes,
     taskStatusByKey,
     allUsers,
+    colloqiumAgendasById,
+    currentUserId,
     reload,
   } = useTaskBoardData(effectiveCriteria, statusKeysToLoad);
+
+  const emitTaskChanged = useCallback((task: Task, reason: TaskBoardTaskChangeReason) => {
+    const group = taskGroups.find((item) => item.id === task.task_group_id);
+    const patient = group ? patientsById[group.patient_id] : undefined;
+    const episode = group?.episode_id ? episodesById[group.episode_id] : undefined;
+    const event = {
+      reason,
+      task,
+      group,
+      patient,
+      episode,
+      context: activeContext,
+    };
+    onTaskChanged?.(event);
+    taskChangeListenersRef.current.forEach((listener) => listener(event));
+    window.dispatchEvent(new CustomEvent(TASK_CHANGED_EVENT, { detail: event }));
+  }, [activeContext, episodesById, onTaskChanged, patientsById, taskGroups]);
+
+  useImperativeHandle(ref, () => ({
+    setContext: (nextContext) => {
+      setActiveContext(nextContext);
+      setEffectiveColloqiumAgendaId(nextContext.colloqiumAgendaId ?? null);
+    },
+    getContext: () => activeContext,
+    registerTaskChangeListener: (listener) => {
+      taskChangeListenersRef.current.add(listener);
+      return () => {
+        taskChangeListenersRef.current.delete(listener);
+      };
+    },
+    reload,
+  }), [activeContext, reload]);
 
   const assignedToOptions = useMemo(() => {
     const options = new Map<number, string>();
@@ -153,7 +262,8 @@ export default function TaskBoard({
         status_id: statusCode.id,
         comment: nextComment || '',
       };
-      await api.updateTask(actionStateModel.actionState.task.id, payload);
+      const updatedTask = await api.updateTask(actionStateModel.actionState.task.id, payload);
+      emitTaskChanged(updatedTask, actionStateModel.actionState.type === 'complete' ? 'completed' : 'discarded');
       actionStateModel.setActionState(null);
       actionStateModel.setActionComment('');
       reload();
@@ -175,7 +285,7 @@ export default function TaskBoard({
       kind_key: task.kind_key ?? 'TASK',
       priority_id: task.priority_id ?? null,
       assigned_to_id: task.assigned_to_id ?? null,
-      until: task.until ?? '',
+      until: toFormUntilValue(task.kind_key ?? 'TASK', task.until),
       comment: task.comment ?? '',
     });
   };
@@ -197,8 +307,8 @@ export default function TaskBoard({
       description: '',
       kind_key: 'TASK',
       priority_id: null,
-      assigned_to_id: null,
-      until: nowLocalDateTimeIso(),
+      assigned_to_id: currentUserId,
+      until: nowLocalDateIso(),
       comment: '',
     });
   };
@@ -255,10 +365,11 @@ export default function TaskBoard({
         kind_key: groupStateModel.createForm.kind_key,
         priority_id: groupStateModel.createForm.priority_id,
         assigned_to_id: groupStateModel.createForm.assigned_to_id,
-        until: groupStateModel.createForm.until,
+        until: normalizeUntilForApi(groupStateModel.createForm.kind_key, groupStateModel.createForm.until),
         comment: groupStateModel.createForm.comment,
       };
-      await api.createTask(payload);
+      const createdTask = await api.createTask(payload);
+      emitTaskChanged(createdTask, 'created');
       cancelCreateTask();
       reload();
     } finally {
@@ -268,7 +379,7 @@ export default function TaskBoard({
 
   const createTaskFromPanelContext = async (source: 'manual' | 'auto' = 'manual') => {
     if (panelAddSaving) return;
-    const contextPatientId = criteria.patientId;
+    const contextPatientId = activeContext.patientId;
     if (!contextPatientId) {
       return;
     }
@@ -276,10 +387,10 @@ export default function TaskBoard({
     setPanelAddSaving(true);
     try {
       const resolveCurrentColloqiumAgendaId = async (): Promise<number | null> => {
-        if (criteria.colloqiumId == null || criteria.episodeId == null) return effectiveColloqiumAgendaId;
-        const agendas = await api.listColloqiumAgendas({ episodeId: criteria.episodeId });
+        if (activeContext.colloqiumId == null || activeContext.episodeId == null) return effectiveColloqiumAgendaId;
+        const agendas = await api.listColloqiumAgendas({ episodeId: activeContext.episodeId });
         const matching = agendas
-          .filter((agenda) => agenda.colloqium_id === criteria.colloqiumId)
+          .filter((agenda) => agenda.colloqium_id === activeContext.colloqiumId)
           .sort((a, b) => a.id - b.id)[0];
         const resolved = matching?.id ?? null;
         setEffectiveColloqiumAgendaId(resolved);
@@ -288,16 +399,16 @@ export default function TaskBoard({
       const tryCreateContextGroup = async (colloqiumAgendaId: number | null): Promise<TaskGroup> => api.createTaskGroup({
         patient_id: contextPatientId,
         task_group_template_id: null,
-        episode_id: criteria.episodeId ?? null,
+        episode_id: activeContext.episodeId ?? null,
         colloqium_agenda_id: colloqiumAgendaId,
-        tpl_phase_id: criteria.episodeId != null ? (criteria.tplPhaseId ?? null) : null,
+        tpl_phase_id: activeContext.episodeId != null ? (activeContext.tplPhaseId ?? null) : null,
       });
       let taskGroup = findContextManagedGroup({
         groups: taskGroups,
-        patientId: criteria.patientId,
-        episodeId: criteria.episodeId,
+        patientId: activeContext.patientId,
+        episodeId: activeContext.episodeId,
         colloqiumAgendaId: effectiveColloqiumAgendaId,
-        tplPhaseId: criteria.tplPhaseId,
+        tplPhaseId: activeContext.tplPhaseId,
         taskGroupsTasks: tasksByGroup,
       });
       if (taskGroup && taskGroup.colloqium_agenda_id == null && effectiveColloqiumAgendaId != null) {
@@ -324,11 +435,17 @@ export default function TaskBoard({
         }
       }
       setPreferredTopGroupId(taskGroup.id);
+      if (source === 'manual') {
+        startCreateTask(taskGroup.id);
+        onAddClick();
+        return;
+      }
       const createPayload = (groupId: number, description: string): TaskCreate => ({
         task_group_id: groupId,
         description,
         kind_key: 'TASK',
-        until: nowLocalDateTimeIso(),
+        assigned_to_id: currentUserId,
+        until: normalizeUntilForApi('TASK', nowLocalDateIso()),
         comment: '',
       });
       let createdTask: Task;
@@ -362,9 +479,10 @@ export default function TaskBoard({
         kind_key: createdTask.kind_key ?? 'TASK',
         priority_id: createdTask.priority_id ?? null,
         assigned_to_id: createdTask.assigned_to_id ?? null,
-        until: createdTask.until ?? '',
+        until: toFormUntilValue(createdTask.kind_key ?? 'TASK', createdTask.until),
         comment: createdTask.comment ?? '',
       });
+      emitTaskChanged(createdTask, 'created');
       reload();
       onAddClick();
     } finally {
@@ -384,7 +502,8 @@ export default function TaskBoard({
     try {
       const cancelled = taskStatusByKey.CANCELLED;
       if (cancelled) {
-        await api.updateTask(editStateModel.editingTaskId, { status_id: cancelled.id, comment: '' });
+        const autoDiscardedTask = await api.updateTask(editStateModel.editingTaskId, { status_id: cancelled.id, comment: '' });
+        emitTaskChanged(autoDiscardedTask, 'auto_discarded');
       }
       setAutoCreatedTaskId(null);
       cancelEditTask();
@@ -415,10 +534,11 @@ export default function TaskBoard({
         kind_key: editStateModel.editForm.kind_key,
         priority_id: editStateModel.editForm.priority_id,
         assigned_to_id: editStateModel.editForm.assigned_to_id,
-        until: editStateModel.editForm.until,
+        until: normalizeUntilForApi(editStateModel.editForm.kind_key, editStateModel.editForm.until),
         comment: editStateModel.editForm.comment,
       };
-      await api.updateTask(taskId, payload);
+      const updatedTask = await api.updateTask(taskId, payload);
+      emitTaskChanged(updatedTask, 'updated');
       if (autoCreatedTaskId === taskId) {
         setAutoCreatedTaskId(null);
         onAutoCreateSaved?.();
@@ -431,6 +551,18 @@ export default function TaskBoard({
   };
 
   const rows = useMemo<TaskBoardRow[]>(() => {
+    const matchesContextType = (group: TaskGroup, expected: TaskBoardContextType): boolean => {
+      if (expected === 'ALL') return true;
+      if (expected === 'COORDINATION') return group.coordination_id != null;
+      if (expected === 'COLLOQUIUM') return group.colloqium_agenda_id != null;
+      if (expected === 'EPISODE') return group.episode_id != null;
+      if (expected === 'PATIENT') return (
+        group.coordination_id == null
+        && group.colloqium_agenda_id == null
+        && group.episode_id == null
+      );
+      return true;
+    };
     const groupsSorted = [...taskGroups].sort((a, b) => {
       if (preferredTopGroupId != null) {
         if (a.id === preferredTopGroupId) return -1;
@@ -440,7 +572,9 @@ export default function TaskBoard({
     });
     const nextRows: TaskBoardRow[] = [];
 
+    const filteredTaskRows: Array<{ type: 'task'; group: TaskGroup; task: Task }> = [];
     groupsSorted.forEach((group) => {
+      if (!matchesContextType(group, activeContext.contextType ?? 'ALL')) return;
       const episode = group.episode_id ? episodesById[group.episode_id] : undefined;
       if (filters.organFilterId !== 'ALL' && episode?.organ_id !== filters.organFilterId) return;
       const groupState = computeGroupState(tasksByGroup[group.id] ?? []);
@@ -458,8 +592,64 @@ export default function TaskBoard({
 
       if (filteredTasks.length === 0) return;
       if (filters.showGroupHeadings) nextRows.push({ type: 'group', group, state: groupState });
-      filteredTasks.forEach((task) => nextRows.push({ type: 'task', group, task }));
+      filteredTasks.forEach((task) => filteredTaskRows.push({ type: 'task', group, task }));
     });
+
+    if (!filters.showGroupHeadings && taskSort) {
+      const rankByStatus = (task: Task): number => {
+        if (isUrgentTask(task)) return 0;
+        const key = (task.status?.key ?? '').toUpperCase();
+        if (key === 'PENDING') return 1;
+        if (key === 'IN_PROGRESS') return 2;
+        if (key === 'COMPLETED') return 3;
+        if (key === 'CANCELLED') return 4;
+        return 5;
+      };
+      const priorityRankByKey = new Map(
+        [...priorityCodes]
+          .sort((a, b) => b.pos - a.pos)
+          .map((code, index) => [code.key.toUpperCase(), index]),
+      );
+      const rankByPriority = (task: Task): number => {
+        const key = (task.priority?.key ?? '').toUpperCase();
+        if (key) {
+          const mappedRank = priorityRankByKey.get(key);
+          if (mappedRank != null) return mappedRank;
+        }
+        if (key === 'HIGH') return 0;
+        if (key === 'NORMAL') return 1;
+        if (key === 'LOW') return 2;
+        return 3;
+      };
+      const dueDateValue = (iso: string | null): number => {
+        if (!iso) return Number.POSITIVE_INFINITY;
+        const value = new Date(iso).getTime();
+        return Number.isFinite(value) ? value : Number.POSITIVE_INFINITY;
+      };
+      const directionFactor = taskSort.direction === 'asc' ? 1 : -1;
+      filteredTaskRows.sort((a, b) => {
+        if (taskSort.key === 'status') {
+          const statusCmp = directionFactor * (rankByStatus(a.task) - rankByStatus(b.task));
+          if (statusCmp !== 0) return statusCmp;
+          const dueCmp = directionFactor * (dueDateValue(a.task.until) - dueDateValue(b.task.until));
+          if (dueCmp !== 0) return dueCmp;
+          return directionFactor * (a.task.id - b.task.id);
+        }
+        if (taskSort.key === 'priority') {
+          const priorityCmp = directionFactor * (rankByPriority(a.task) - rankByPriority(b.task));
+          if (priorityCmp !== 0) return priorityCmp;
+          return a.task.id - b.task.id;
+        }
+        const dueCmp = directionFactor * (dueDateValue(a.task.until) - dueDateValue(b.task.until));
+        if (dueCmp !== 0) return dueCmp;
+        const priorityCmp = rankByPriority(a.task) - rankByPriority(b.task);
+        if (priorityCmp !== 0) return priorityCmp;
+        const statusCmp = rankByStatus(a.task) - rankByStatus(b.task);
+        if (statusCmp !== 0) return statusCmp;
+        return a.task.id - b.task.id;
+      });
+    }
+    filteredTaskRows.forEach((row) => nextRows.push(row));
 
     return nextRows;
   }, [
@@ -473,7 +663,22 @@ export default function TaskBoard({
     filters.showCancelledTasks,
     filters.showGroupHeadings,
     preferredTopGroupId,
+    activeContext.contextType,
+    taskSort,
+    priorityCodes,
   ]);
+
+  const selectedTaskRow = useMemo(() => {
+    if (selectedTaskId == null) return null;
+    const row = rows.find((item) => item.type === 'task' && item.task.id === selectedTaskId);
+    return row?.type === 'task' ? row : null;
+  }, [rows, selectedTaskId]);
+
+  useEffect(() => {
+    if (selectedTaskId == null) return;
+    const exists = rows.some((item) => item.type === 'task' && item.task.id === selectedTaskId);
+    if (!exists) setSelectedTaskId(null);
+  }, [rows, selectedTaskId]);
 
   return (
     <section className="ui-panel-section task-board-section">
@@ -482,17 +687,67 @@ export default function TaskBoard({
           <h2>{title}</h2>
           {headerMeta && <div className="task-board-header-meta">{headerMeta}</div>}
         </div>
-        <button
-          className="ci-add-btn"
-          onClick={() => {
-            void createTaskFromPanelContext('manual');
-          }}
-          disabled={panelAddSaving || !criteria.patientId}
-          title={criteria.patientId ? 'Add task from current context' : 'Select a patient to add a task'}
-          aria-label="Add task from current context"
-        >
-          {panelAddSaving ? '…' : '+ Add'}
-        </button>
+        {selectedTaskRow ? (
+          <div className="task-board-heading-actions">
+            {onOpenTaskContext ? (
+              <button
+                className="edit-btn"
+                onClick={() => {
+                  const target = buildContextTarget(
+                    selectedTaskRow.group,
+                    effectiveColloqiumAgendaId,
+                    colloqiumAgendasById as Record<number, { colloqium_id: number }>,
+                  );
+                  onOpenTaskContext(target);
+                }}
+                title="Open context"
+                aria-label="Open context"
+              >
+                &#x279C;
+              </button>
+            ) : null}
+            <button
+              className="edit-btn"
+              onClick={() => startTaskAction(selectedTaskRow.task, 'complete')}
+              disabled={isDoneTask(selectedTaskRow.task) || isCancelledTask(selectedTaskRow.task)}
+              title={selectedTaskRow.task.kind_key === 'EVENT' ? 'Register event occurrence' : 'Complete task'}
+              aria-label={selectedTaskRow.task.kind_key === 'EVENT' ? 'Register event occurrence' : 'Complete task'}
+            >
+              ✓
+            </button>
+            <button
+              className="cancel-btn"
+              onClick={() => startTaskAction(selectedTaskRow.task, 'discard')}
+              disabled={isDoneTask(selectedTaskRow.task) || isCancelledTask(selectedTaskRow.task)}
+              title="Discard task"
+              aria-label="Discard task"
+            >
+              −
+            </button>
+            <button
+              className="edit-btn"
+              onClick={() => startEditTask(selectedTaskRow.task)}
+              disabled={editStateModel.editingTaskId !== null}
+              title="Edit task"
+              aria-label="Edit task"
+            >
+              ✎
+            </button>
+          </div>
+        ) : null}
+        {!hideAddButton ? (
+          <button
+            className="ci-add-btn"
+            onClick={() => {
+              void createTaskFromPanelContext('manual');
+            }}
+            disabled={panelAddSaving || !activeContext.patientId}
+            title={activeContext.patientId ? 'Add task from current context' : 'Select a patient to add a task'}
+            aria-label="Add task from current context"
+          >
+            {panelAddSaving ? '…' : '+ Add'}
+          </button>
+        ) : null}
       </div>
 
       {!hideFilters && (
@@ -523,6 +778,7 @@ export default function TaskBoard({
           episodesById={episodesById}
           priorityCodes={priorityCodes}
           allUserOptions={allUserOptions}
+          colloqiumAgendasById={colloqiumAgendasById}
           editingTaskId={editStateModel.editingTaskId}
           editForm={editStateModel.editForm}
           setEditForm={editStateModel.setEditForm}
@@ -557,9 +813,16 @@ export default function TaskBoard({
           onStartCreateTask={startCreateTask}
           onSaveCreateTask={saveCreateTask}
           onCancelCreateTask={cancelCreateTask}
+          onOpenTaskContext={onOpenTaskContext}
+          selectedTaskId={selectedTaskId}
+          onSelectTask={setSelectedTaskId}
+          taskSort={taskSort}
+          onTaskSortChange={onTaskSortChange}
           maxTableHeight={maxTableHeight}
         />
       )}
     </section>
   );
-}
+});
+
+export default TaskBoard;

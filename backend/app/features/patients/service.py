@@ -48,15 +48,26 @@ def _static_medical_values(patient: Patient) -> list[dict[str, str]]:
         # Patients overview should show only static values marked as main.
         if not bool(mv.medical_value_template and mv.medical_value_template.is_main):
             continue
+        datatype_key = (mv.datatype.key if mv.datatype else "") or (
+            mv.medical_value_template.datatype.key
+            if mv.medical_value_template and mv.medical_value_template.datatype
+            else ""
+        )
+        if datatype_key != "BLOOD_TYPE":
+            continue
         rows.append(mv)
     rows.sort(key=lambda mv: ((mv.pos or 0), mv.id))
-    return [
-        {
-            "name": (mv.name or (mv.medical_value_template.name_default if mv.medical_value_template else "") or "Value"),
-            "value": mv.value or "–",
-        }
-        for mv in rows
-    ]
+    for mv in rows:
+        value = (mv.value or "").strip()
+        if not value:
+            continue
+        return [
+            {
+                "name": (mv.name or (mv.medical_value_template.name_default if mv.medical_value_template else "") or "Blood type"),
+                "value": value,
+            }
+        ]
+    return []
 
 
 def _patient_detail_query(db: Session):

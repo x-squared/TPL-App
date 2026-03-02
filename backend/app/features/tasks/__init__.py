@@ -24,11 +24,13 @@ from .template_instantiation_service import (
     instantiate_task_group_template,
     validate_template_links,
 )
+from .coordination_protocol_instantiation_service import ensure_coordination_protocol_task_groups
 
 __all__ = [
     "validate_task_group_links",
     "resolve_task_group_name",
     "validate_template_links",
+    "ensure_coordination_protocol_task_groups",
     "instantiate_task_group_template",
     "get_default_code_or_422",
     "list_task_templates",

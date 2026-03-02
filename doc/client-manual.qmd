@@ -4,6 +4,7 @@ This manual explains how to configure and start the TPL frontend client.
 
 For backend startup and environment setup, see `doc/server-manual.qmd`.
 For specification-based client-server tests, see `doc/specification-manual.qmd`.
+For i18n architecture and translation operations, see `doc/i18n-manual.qmd`.
 
 ## 1) What "client" means in this project
 

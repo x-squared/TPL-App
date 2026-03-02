@@ -1,5 +1,6 @@
-from sqlalchemy import Column, Integer, String, UniqueConstraint
+from sqlalchemy import Column, DateTime, ForeignKey, Integer, String, UniqueConstraint
 from sqlalchemy.orm import relationship
+from sqlalchemy.sql import func
 
 from ..database import Base
 
@@ -122,3 +123,19 @@ class Catalogue(Base):
         comment="Default display name for the catalogue entry.",
         info={"label": "Name"},
     )
+
+
+class TranslationBundle(Base):
+    """Admin-managed translation JSON bundle per locale."""
+
+    __tablename__ = "TRANSLATION_BUNDLE"
+    __table_args__ = (UniqueConstraint("LOCALE"),)
+
+    id = Column("ID", Integer, primary_key=True, index=True)
+    locale = Column("LOCALE", String(16), nullable=False, index=True)
+    payload_json = Column("PAYLOAD_JSON", String, nullable=False, default="{}")
+    changed_by_id = Column("CHANGED_BY", Integer, ForeignKey("USER.ID"), nullable=True)
+    created_at = Column("CREATED_AT", DateTime(timezone=True), server_default=func.now())
+    updated_at = Column("UPDATED_AT", DateTime(timezone=True), onupdate=func.now())
+
+    changed_by_user = relationship("User", foreign_keys=[changed_by_id])

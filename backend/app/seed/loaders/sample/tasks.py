@@ -1,15 +1,55 @@
 from sqlalchemy.orm import Session
 
-from ....models import Code, Patient, Task, TaskGroup, TaskGroupTemplate, User
+from ....models import Code, Coordination, CoordinationEpisode, Episode, Patient, Task, TaskGroup, TaskGroupTemplate, User
 
 
 def sync_tasks(db: Session) -> None:
     """Replace all TASK_GROUP and TASK rows with seed data on every startup."""
-    from ...datasets.sample.patient_cases import TASK_GROUPS, TASKS
+    from ...datasets.sample.patient_cases import COORDINATIONS, TASK_GROUPS, TASKS
 
     db.query(Task).delete()
     db.query(TaskGroup).delete()
+    db.query(CoordinationEpisode).delete()
+    db.query(Coordination).delete()
     db.flush()
+
+    for entry in COORDINATIONS:
+        raw = dict(entry)
+        patient_pid = raw.pop("patient_pid")
+        episode_organ_key = raw.pop("episode_organ_key")
+        status_key = raw.pop("status_key")
+        raw.pop("seed_key", None)
+
+        patient = db.query(Patient).filter(Patient.pid == patient_pid).first()
+        if not patient:
+            continue
+        status = db.query(Code).filter(Code.type == "COORDINATION_STATUS", Code.key == status_key).first()
+        organ = db.query(Code).filter(Code.type == "ORGAN", Code.key == episode_organ_key).first()
+        if not status or not organ:
+            continue
+        episode = (
+            db.query(Episode)
+            .filter(Episode.patient_id == patient.id, Episode.organ_id == organ.id)
+            .first()
+        )
+        if not episode:
+            continue
+
+        coordination = Coordination(
+            status_id=status.id,
+            status_key=status.key,
+            **raw,
+        )
+        db.add(coordination)
+        db.flush()
+        db.add(
+            CoordinationEpisode(
+                coordination_id=coordination.id,
+                episode_id=episode.id,
+                organ_id=organ.id,
+                changed_by_id=raw.get("changed_by_id"),
+            )
+        )
 
     created_groups: dict[str, TaskGroup] = {}
     for entry in TASK_GROUPS:

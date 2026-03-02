@@ -21,14 +21,6 @@ def _ensure_organ_exists(organ_id: int, db: Session) -> None:
         raise HTTPException(status_code=422, detail="organ_id must reference CODE type ORGAN")
 
 
-def _ensure_task_exists(task_id: int | None, db: Session) -> None:
-    if task_id is None:
-        return
-    task = db.query(Task).filter(Task.id == task_id).first()
-    if not task:
-        raise HTTPException(status_code=422, detail="task_id must reference TASK")
-
-
 def _query_with_joins(db: Session):
     return db.query(CoordinationProtocolEventLog).options(
         joinedload(CoordinationProtocolEventLog.organ),
@@ -60,12 +52,18 @@ def create_coordination_protocol_event(
 ) -> CoordinationProtocolEventLog:
     _ensure_coordination_exists(coordination_id, db)
     _ensure_organ_exists(payload.organ_id, db)
-    _ensure_task_exists(payload.task_id, db)
+    task = None
+    if payload.task_id is not None:
+        task = db.query(Task).filter(Task.id == payload.task_id).first()
+        if not task:
+            raise HTTPException(status_code=422, detail="task_id must reference TASK")
     item = CoordinationProtocolEventLog(
         coordination_id=coordination_id,
         organ_id=payload.organ_id,
         event=payload.event,
         task_id=payload.task_id,
+        task_text=(payload.task_text.strip() if payload.task_text else None) or (task.description if task else None),
+        task_comment=(payload.task_comment.strip() if payload.task_comment else None),
         changed_by_id=changed_by_id,
     )
     db.add(item)

@@ -1,4 +1,4 @@
-from sqlalchemy import Column, ForeignKey, Integer, String, Table, UniqueConstraint
+from sqlalchemy import Column, ForeignKey, Integer, String, Table, Text, UniqueConstraint
 from sqlalchemy.orm import relationship
 
 from ..database import Base
@@ -57,6 +57,13 @@ class User(Base):
         nullable=True,
         comment="Assigned role code (`CODE.ROLE`) of the user.",
         info={"label": "User Role"},
+    )
+    preferences_json = Column(
+        "PREFERENCES_JSON",
+        Text,
+        nullable=True,
+        comment="User-specific UI preferences as JSON.",
+        info={"label": "Preferences JSON"},
     )
 
     role = relationship("Code", foreign_keys=[role_id])

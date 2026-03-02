@@ -5,7 +5,7 @@ from sqlalchemy import or_
 from sqlalchemy.orm import Session, aliased, joinedload
 
 from ...enums import TaskScopeKey
-from ...models import Code, ColloqiumAgenda, Episode, Patient, TaskGroup, TaskGroupTemplate
+from ...models import Code, ColloqiumAgenda, Coordination, Episode, Patient, TaskGroup, TaskGroupTemplate
 from ...schemas import TaskGroupCreate, TaskGroupUpdate
 
 
@@ -31,6 +31,8 @@ def validate_task_group_links(
     task_group_template_id: int | None,
     episode_id: int | None,
     colloqium_agenda_id: int | None,
+    coordination_id: int | None,
+    organ_id: int | None,
     tpl_phase_id: int | None,
     db: Session,
 ) -> None:
@@ -63,6 +65,14 @@ def validate_task_group_links(
                 status_code=422,
                 detail="episode_id must match COLLOQIUM_AGENDA.episode_id",
             )
+    if coordination_id is not None:
+        coordination = db.query(Coordination).filter(Coordination.id == coordination_id).first()
+        if not coordination:
+            raise HTTPException(status_code=422, detail="coordination_id references unknown COORDINATION")
+    if organ_id is not None:
+        organ = db.query(Code).filter(Code.id == organ_id, Code.type == "ORGAN").first()
+        if not organ:
+            raise HTTPException(status_code=422, detail="organ_id must reference CODE with type ORGAN")
     if tpl_phase_id is not None:
         if episode_id is None:
             raise HTTPException(
@@ -142,11 +152,14 @@ def list_task_groups(
     patient_id: int | None,
     episode_id: int | None,
     colloqium_agenda_id: int | None,
+    coordination_id: int | None,
+    organ_id: int | None,
     db: Session,
 ) -> list[TaskGroup]:
     episode_direct = aliased(Episode)
     episode_via_agenda = aliased(Episode)
     query = db.query(TaskGroup).options(
+        joinedload(TaskGroup.organ),
         joinedload(TaskGroup.tpl_phase),
         joinedload(TaskGroup.changed_by_user),
     )
@@ -173,6 +186,10 @@ def list_task_groups(
         )
     if colloqium_agenda_id is not None:
         query = query.filter(TaskGroup.colloqium_agenda_id == colloqium_agenda_id)
+    if coordination_id is not None:
+        query = query.filter(TaskGroup.coordination_id == coordination_id)
+    if organ_id is not None:
+        query = query.filter(TaskGroup.organ_id == organ_id)
     return query.distinct().all()
 
 
@@ -195,6 +212,8 @@ def create_task_group(*, payload: TaskGroupCreate, changed_by_id: int, db: Sessi
         task_group_template_id=payload_data.get("task_group_template_id"),
         episode_id=payload_data.get("episode_id"),
         colloqium_agenda_id=payload_data.get("colloqium_agenda_id"),
+        coordination_id=payload_data.get("coordination_id"),
+        organ_id=payload_data.get("organ_id"),
         tpl_phase_id=payload_data.get("tpl_phase_id"),
         db=db,
     )
@@ -205,6 +224,7 @@ def create_task_group(*, payload: TaskGroupCreate, changed_by_id: int, db: Sessi
     return (
         db.query(TaskGroup)
         .options(
+            joinedload(TaskGroup.organ),
             joinedload(TaskGroup.tpl_phase),
             joinedload(TaskGroup.changed_by_user),
         )
@@ -230,6 +250,8 @@ def update_task_group(
     task_group_template_id = update_data.get("task_group_template_id", tg.task_group_template_id)
     episode_id = update_data.get("episode_id", tg.episode_id)
     colloqium_agenda_id = update_data.get("colloqium_agenda_id", tg.colloqium_agenda_id)
+    coordination_id = update_data.get("coordination_id", tg.coordination_id)
+    organ_id = update_data.get("organ_id", tg.organ_id)
     tpl_phase_id = update_data.get("tpl_phase_id", tg.tpl_phase_id)
     if colloqium_agenda_id is not None and episode_id is None:
         agenda = db.query(ColloqiumAgenda).filter(ColloqiumAgenda.id == colloqium_agenda_id).first()
@@ -241,6 +263,8 @@ def update_task_group(
         task_group_template_id=task_group_template_id,
         episode_id=episode_id,
         colloqium_agenda_id=colloqium_agenda_id,
+        coordination_id=coordination_id,
+        organ_id=organ_id,
         tpl_phase_id=tpl_phase_id,
         db=db,
     )
@@ -253,6 +277,7 @@ def update_task_group(
     return (
         db.query(TaskGroup)
         .options(
+            joinedload(TaskGroup.organ),
             joinedload(TaskGroup.tpl_phase),
             joinedload(TaskGroup.changed_by_user),
         )

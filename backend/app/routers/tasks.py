@@ -19,9 +19,15 @@ router = APIRouter(prefix="/tasks", tags=["tasks"])
 def list_tasks(
     task_group_id: int | None = None,
     status_key: list[str] | None = Query(default=None),
+    assigned_to_id: int | None = None,
     db: Session = Depends(get_db),
 ):
-    return list_tasks_service(task_group_id=task_group_id, status_key=status_key, db=db)
+    return list_tasks_service(
+        task_group_id=task_group_id,
+        status_key=status_key,
+        assigned_to_id=assigned_to_id,
+        db=db,
+    )
 
 
 @router.post("/", response_model=TaskResponse, status_code=201)

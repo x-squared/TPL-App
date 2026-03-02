@@ -20,12 +20,16 @@ def list_task_groups(
     patient_id: int | None = None,
     episode_id: int | None = None,
     colloqium_agenda_id: int | None = None,
+    coordination_id: int | None = None,
+    organ_id: int | None = None,
     db: Session = Depends(get_db),
 ):
     return list_task_groups_service(
         patient_id=patient_id,
         episode_id=episode_id,
         colloqium_agenda_id=colloqium_agenda_id,
+        coordination_id=coordination_id,
+        organ_id=organ_id,
         db=db,
     )
 

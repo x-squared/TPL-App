@@ -15,6 +15,7 @@ class FavoriteBase(BaseModel):
     episode_id: int | None = None
     colloqium_id: int | None = None
     coordination_id: int | None = None
+    context_json: str | None = None
 
 
 class FavoriteCreate(BaseModel):
@@ -24,6 +25,7 @@ class FavoriteCreate(BaseModel):
     episode_id: int | None = None
     colloqium_id: int | None = None
     coordination_id: int | None = None
+    context_json: str | None = None
 
     @model_validator(mode="after")
     def validate_target(self):

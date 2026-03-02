@@ -1,3 +1,4 @@
+import json
 from typing import Any
 
 from sqlalchemy.orm import Session
@@ -40,6 +41,7 @@ def _resolve_person_for_user(*, db: Session, raw: dict[str, Any], existing: User
 
 def _save_user_entry(db: Session, entry: dict[str, Any]) -> None:
     raw = dict(entry)
+    preferences = raw.pop("preferences", None)
     role_keys = raw.pop("role_keys", None)
     role_key = raw.pop("role_key", "")
     if role_keys is None:
@@ -64,8 +66,13 @@ def _save_user_entry(db: Session, entry: dict[str, Any]) -> None:
         existing.person_id = person.id
         existing.role_id = primary_role.id if primary_role else None
         existing.roles = roles
+        if preferences is not None:
+            existing.preferences_json = json.dumps(preferences, ensure_ascii=False, sort_keys=True)
         return
-    db.add(User(role_id=primary_role.id if primary_role else None, roles=roles, person_id=person.id, **raw))
+    user_data = dict(raw)
+    if preferences is not None:
+        user_data["preferences_json"] = json.dumps(preferences, ensure_ascii=False, sort_keys=True)
+    db.add(User(role_id=primary_role.id if primary_role else None, roles=roles, person_id=person.id, **user_data))
 
 
 def sync_users_core(db: Session) -> None:

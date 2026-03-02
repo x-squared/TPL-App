@@ -122,6 +122,8 @@ export interface CoordinationProtocolEventLog {
   event: string;
   time: string;
   task_id: number | null;
+  task_text: string | null;
+  task_comment: string | null;
   changed_by_id: number | null;
   changed_by_user: AppUser | null;
   created_at: string;
@@ -132,6 +134,8 @@ export interface CoordinationProtocolEventLogCreate {
   organ_id: number;
   event: string;
   task_id?: number | null;
+  task_text?: string | null;
+  task_comment?: string | null;
 }
 
 export interface CoordinationEpisodeLinkedEpisode {

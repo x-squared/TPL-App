@@ -1,4 +1,4 @@
-export { getToken, setToken, clearToken, authApi, codesApi, medicalValueTemplatesApi, medicalValueGroupsApi, usersApi, adminAccessApi, personsApi, adminPeopleApi, adminProcurementConfigApi, supportTicketApi } from './core';
+export { getToken, setToken, clearToken, authApi, codesApi, medicalValueTemplatesApi, medicalValueGroupsApi, usersApi, translationsApi, adminAccessApi, personsApi, adminPeopleApi, adminProcurementConfigApi, supportTicketApi } from './core';
 export type {
   AppUser,
   AccessControlMatrix,
@@ -10,6 +10,9 @@ export type {
   Code,
   HealthInfo,
   SupportTicketConfig,
+  TranslationOverridesResponse,
+  UserPreferences,
+  AppStartPage,
   DatatypeDefinition,
   ProcurementSlotKey,
   ProcurementValueMode,
@@ -40,6 +43,8 @@ export type {
   TaskGroupCreate,
   TaskGroupListParams,
   TaskGroupTemplate,
+  TaskGroupTemplateCreate,
+  TaskGroupTemplateUpdate,
   TaskGroupUpdate,
   TaskListParams,
   TaskTemplate,
@@ -107,7 +112,7 @@ export type {
   E2ETestRunResponse,
 } from './e2eTests';
 
-import { authApi, codesApi, medicalValueTemplatesApi, medicalValueGroupsApi, usersApi, adminAccessApi, personsApi, adminPeopleApi, adminProcurementConfigApi, supportTicketApi } from './core';
+import { authApi, codesApi, medicalValueTemplatesApi, medicalValueGroupsApi, usersApi, translationsApi, adminAccessApi, personsApi, adminPeopleApi, adminProcurementConfigApi, supportTicketApi } from './core';
 import { patientsApi } from './patients';
 import { tasksApi } from './tasks';
 import { colloqiumsApi } from './colloqiums';
@@ -123,6 +128,7 @@ export const api = {
   ...medicalValueTemplatesApi,
   ...medicalValueGroupsApi,
   ...usersApi,
+  ...translationsApi,
   ...adminAccessApi,
   ...personsApi,
   ...adminPeopleApi,

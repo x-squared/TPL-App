@@ -168,6 +168,10 @@ export function useCoordinationDetailViewModel(
   }, [loadAll]);
 
   useEffect(() => {
+    setTab(initialTab);
+  }, [coordinationId, initialTab]);
+
+  useEffect(() => {
     if (!runningStart) return;
     const id = window.setInterval(() => {
       setElapsedSec(Math.floor((Date.now() - runningStart.getTime()) / 1000));

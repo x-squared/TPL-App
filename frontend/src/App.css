@@ -408,6 +408,55 @@
   background: #2a2a44;
 }
 
+.user-menu-locale {
+  display: flex;
+  flex-direction: column;
+  gap: 0.35rem;
+  padding: 0.5rem 0.75rem;
+  font-size: 0.8rem;
+  color: #bbb;
+}
+
+.user-menu-locale select {
+  border: 1px solid #3b3b55;
+  border-radius: 6px;
+  background: #17172b;
+  color: #ddd;
+  padding: 0.3rem 0.45rem;
+}
+
+.user-menu-translation-editor {
+  padding: 0.45rem 0.75rem 0.65rem;
+  border-top: 1px solid #333;
+  border-bottom: 1px solid #333;
+  margin-bottom: 0.25rem;
+}
+
+.user-menu-translation-editor strong {
+  display: block;
+  font-size: 0.78rem;
+  margin-bottom: 0.2rem;
+}
+
+.user-menu-translation-editor p {
+  margin: 0 0 0.4rem;
+  font-size: 0.72rem;
+  color: #999;
+}
+
+.user-menu-translation-editor textarea {
+  width: 100%;
+  min-height: 8rem;
+  resize: vertical;
+  border: 1px solid #3b3b55;
+  border-radius: 6px;
+  background: #17172b;
+  color: #ddd;
+  padding: 0.4rem;
+  font-family: ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, 'Liberation Mono', 'Courier New', monospace;
+  font-size: 0.72rem;
+}
+
 /* ── Main content ── */
 
 .main-content {

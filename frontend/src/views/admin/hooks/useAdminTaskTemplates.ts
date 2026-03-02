@@ -1,6 +1,15 @@
 import { useEffect, useState } from 'react';
 
-import { api, type Code, type TaskGroupTemplate, type TaskTemplate, type TaskTemplateCreate, type TaskTemplateUpdate } from '../../../api';
+import {
+  api,
+  type Code,
+  type TaskGroupTemplate,
+  type TaskGroupTemplateCreate,
+  type TaskGroupTemplateUpdate,
+  type TaskTemplate,
+  type TaskTemplateCreate,
+  type TaskTemplateUpdate,
+} from '../../../api';
 import { toUserErrorMessage } from '../../../api/error';
 
 interface TaskTemplateOffsetParts {
@@ -30,6 +39,8 @@ export function combineOffsetMinutes(parts: TaskTemplateOffsetParts): number {
 export function useAdminTaskTemplates() {
   const [templates, setTemplates] = useState<TaskTemplate[]>([]);
   const [groupTemplates, setGroupTemplates] = useState<TaskGroupTemplate[]>([]);
+  const [taskScopeCodes, setTaskScopeCodes] = useState<Code[]>([]);
+  const [organCodes, setOrganCodes] = useState<Code[]>([]);
   const [priorityCodes, setPriorityCodes] = useState<Code[]>([]);
   const [loading, setLoading] = useState(true);
   const [saving, setSaving] = useState(false);
@@ -39,14 +50,25 @@ export function useAdminTaskTemplates() {
     setLoading(true);
     setError('');
     try {
-      const [templateRows, groupTemplateRows, priorityRows] = await Promise.all([
+      const [templateRows, groupTemplateRows, priorityRows, scopeRows, organRows] = await Promise.all([
         api.listTaskTemplates(),
         api.listTaskGroupTemplates(),
         api.listCodes('PRIORITY'),
+        api.listCodes('TASK_SCOPE'),
+        api.listCodes('ORGAN'),
       ]);
-      setTemplates(templateRows);
-      setGroupTemplates(groupTemplateRows);
+      const coordinationProtocolScope = scopeRows.find((entry) => entry.key === 'COORDINATION_PROTOCOL');
+      const protocolGroupTemplates = coordinationProtocolScope
+        ? groupTemplateRows.filter((entry) => entry.scope_id === coordinationProtocolScope.id)
+        : [];
+      const protocolGroupTemplateIds = new Set(protocolGroupTemplates.map((entry) => entry.id));
+      const protocolTaskTemplates = templateRows.filter((entry) => protocolGroupTemplateIds.has(entry.task_group_template_id));
+
+      setTemplates(protocolTaskTemplates);
+      setGroupTemplates(protocolGroupTemplates);
       setPriorityCodes(priorityRows);
+      setTaskScopeCodes(scopeRows);
+      setOrganCodes(organRows);
     } catch (err) {
       setError(toUserErrorMessage(err, 'Could not load task templates.'));
     } finally {
@@ -84,13 +106,43 @@ export function useAdminTaskTemplates() {
     }
   };
 
+  const createGroupTemplate = async (payload: TaskGroupTemplateCreate) => {
+    setSaving(true);
+    setError('');
+    try {
+      await api.createTaskGroupTemplate(payload);
+      await load();
+    } catch (err) {
+      setError(toUserErrorMessage(err, 'Could not create task group template.'));
+    } finally {
+      setSaving(false);
+    }
+  };
+
+  const updateGroupTemplate = async (taskGroupTemplateId: number, payload: TaskGroupTemplateUpdate) => {
+    setSaving(true);
+    setError('');
+    try {
+      await api.updateTaskGroupTemplate(taskGroupTemplateId, payload);
+      await load();
+    } catch (err) {
+      setError(toUserErrorMessage(err, 'Could not update task group template.'));
+    } finally {
+      setSaving(false);
+    }
+  };
+
   return {
     templates,
     groupTemplates,
+    taskScopeCodes,
+    organCodes,
     priorityCodes,
     loading,
     saving,
     error,
+    createGroupTemplate,
+    updateGroupTemplate,
     createTemplate,
     updateTemplate,
     refresh: load,

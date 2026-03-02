@@ -9,7 +9,10 @@ const formatParticipants = (people: Person[]) =>
     .filter((name) => name.length > 0)
     .join(', ');
 
-export function useColloquiumGeneralDetails(colloqiumId: number) {
+export function useColloquiumGeneralDetails(
+  colloqiumId: number,
+  initialTab: ColloquiumDetailTab = 'colloquium',
+) {
   const [colloqium, setColloqium] = useState<Colloqium | null>(null);
   const [loading, setLoading] = useState(true);
   const [tab, setTab] = useState<ColloquiumDetailTab>('colloquium');
@@ -40,6 +43,10 @@ export function useColloquiumGeneralDetails(colloqiumId: number) {
     };
     void load();
   }, [colloqiumId]);
+
+  useEffect(() => {
+    setTab(initialTab);
+  }, [colloqiumId, initialTab]);
 
   const isGeneralDirty = Boolean(
     colloqium

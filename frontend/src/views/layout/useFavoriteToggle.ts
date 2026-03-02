@@ -22,6 +22,7 @@ export function useFavoriteToggle(target: FavoriteTarget | null) {
   const targetEpisodeId = target?.episode_id ?? null;
   const targetColloqiumId = target?.colloqium_id ?? null;
   const targetCoordinationId = target?.coordination_id ?? null;
+  const targetContextJson = target?.context_json ?? null;
   const targetName = target?.name ?? '';
 
   const stableTarget = useMemo<FavoriteTarget | null>(() => {
@@ -32,9 +33,10 @@ export function useFavoriteToggle(target: FavoriteTarget | null) {
       episode_id: targetEpisodeId,
       colloqium_id: targetColloqiumId,
       coordination_id: targetCoordinationId,
+      context_json: targetContextJson,
       name: targetName,
     };
-  }, [targetColloqiumId, targetCoordinationId, targetEpisodeId, targetName, targetPatientId, targetType]);
+  }, [targetColloqiumId, targetContextJson, targetCoordinationId, targetEpisodeId, targetName, targetPatientId, targetType]);
 
   const refresh = useCallback(async () => {
     if (!stableTarget) {

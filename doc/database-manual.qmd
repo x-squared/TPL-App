@@ -2,6 +2,9 @@
 
 Purpose: manage schema and data lifecycle explicitly during development and operations.
 
+For backend HTTP endpoint contracts, use `doc/server-manual.qmd` and live OpenAPI (`/docs`).
+For seed profile/category semantics, use `doc/seeding-manual.qmd`.
+
 The backend now separates:
 
 - schema management (DDL): `python -m app.db_schema`

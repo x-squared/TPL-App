@@ -7,21 +7,68 @@ export interface TaskBoardCriteria {
   colloqiumAgendaId?: number | null;
   colloqiumId?: number | null;
   tplPhaseId?: number | null;
+  assignedToId?: number | null;
+  contextType?: TaskBoardContextType;
   extraParams?: Record<string, string | number | boolean | null | undefined>;
 }
 
+export type TaskBoardContext = TaskBoardCriteria;
+export type TaskBoardContextType = 'ALL' | 'PATIENT' | 'EPISODE' | 'COLLOQUIUM' | 'COORDINATION';
+export type TaskBoardSortKey = 'status' | 'priority' | 'due_date';
+export type TaskBoardSortDirection = 'asc' | 'desc';
+export interface TaskBoardSort {
+  key: TaskBoardSortKey;
+  direction: TaskBoardSortDirection;
+}
+export type TaskBoardContextTarget =
+  | { type: 'PATIENT'; patientId: number }
+  | { type: 'EPISODE'; patientId: number; episodeId: number }
+  | { type: 'COLLOQUIUM'; colloqiumId: number }
+  | { type: 'COORDINATION'; coordinationId: number };
+
+export type TaskBoardTaskChangeReason =
+  | 'created'
+  | 'updated'
+  | 'completed'
+  | 'discarded'
+  | 'auto_discarded';
+
+export interface TaskBoardTaskChangeEvent {
+  reason: TaskBoardTaskChangeReason;
+  task: Task;
+  group: TaskGroup | undefined;
+  patient: Patient | undefined;
+  episode: Episode | undefined;
+  context: TaskBoardContext;
+}
+
+export type TaskBoardTaskChangeListener = (event: TaskBoardTaskChangeEvent) => void;
+
+export interface TaskBoardHandle {
+  setContext: (context: TaskBoardContext) => void;
+  getContext: () => TaskBoardContext;
+  registerTaskChangeListener: (listener: TaskBoardTaskChangeListener) => () => void;
+  reload: () => void;
+}
+
 export interface TaskBoardProps {
-  criteria: TaskBoardCriteria;
+  criteria?: TaskBoardCriteria;
+  context?: TaskBoardContext;
   title?: string;
   onAddClick?: () => void;
   maxTableHeight?: number | string;
   headerMeta?: ReactNode;
   hideFilters?: boolean;
+  hideAddButton?: boolean;
   showGroupHeadingsDefault?: boolean;
   includeClosedTasks?: boolean;
   autoCreateToken?: number;
   onAutoCreateSaved?: () => void;
   onAutoCreateDiscarded?: () => void;
+  onTaskChanged?: TaskBoardTaskChangeListener;
+  onOpenTaskContext?: (target: TaskBoardContextTarget) => void;
+  taskSort?: TaskBoardSort | null;
+  onTaskSortChange?: (sort: TaskBoardSort | null) => void;
 }
 
 export interface TaskReferenceContext {

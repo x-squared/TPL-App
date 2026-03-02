@@ -4,6 +4,7 @@ from fastapi import HTTPException
 from sqlalchemy.orm import Session, joinedload
 
 from ...enums import CoordinationStatusKey
+from ...features.tasks import ensure_coordination_protocol_task_groups
 from ...models import Code, Coordination
 from ...schemas import CoordinationCreate, CoordinationUpdate
 
@@ -74,6 +75,7 @@ def create_coordination(*, payload: CoordinationCreate, changed_by_id: int, db: 
     db.add(item)
     db.commit()
     db.refresh(item)
+    ensure_coordination_protocol_task_groups(coordination_id=item.id, changed_by_id=changed_by_id, db=db)
     return get_coordination_or_404(item.id, db)
 
 

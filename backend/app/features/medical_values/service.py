@@ -3,6 +3,7 @@ from __future__ import annotations
 from collections.abc import Iterable
 
 from fastapi import HTTPException
+from sqlalchemy import func
 from sqlalchemy.orm import Session, joinedload, selectinload
 
 from ...models import (
@@ -209,6 +210,48 @@ def _get_default_group_id(db: Session) -> int | None:
     return group.id if group else None
 
 
+def _group_key_for_id(db: Session, group_id: int | None) -> str | None:
+    if group_id is None:
+        return None
+    group = db.query(MedicalValueGroupTemplate).filter(MedicalValueGroupTemplate.id == group_id).first()
+    return group.key if group else None
+
+
+def _assert_medical_value_unique_for_non_user_captured(
+    *,
+    patient_id: int,
+    group_key: str | None,
+    context_key: str,
+    medical_value_template_id: int | None,
+    name: str,
+    db: Session,
+    exclude_id: int | None = None,
+) -> None:
+    if group_key == "USER_CAPTURED":
+        return
+    query = db.query(MedicalValue).filter(
+        MedicalValue.patient_id == patient_id,
+        MedicalValue.context_key == context_key,
+    )
+    if medical_value_template_id is not None:
+        query = query.filter(MedicalValue.medical_value_template_id == medical_value_template_id)
+    else:
+        normalized_name = name.strip().lower()
+        if not normalized_name:
+            return
+        query = query.filter(
+            MedicalValue.medical_value_template_id.is_(None),
+            func.lower(MedicalValue.name) == normalized_name,
+        )
+    if exclude_id is not None:
+        query = query.filter(MedicalValue.id != exclude_id)
+    if query.first():
+        raise HTTPException(
+            status_code=422,
+            detail="Duplicate medical value is not allowed for non user-captured groups.",
+        )
+
+
 def list_medical_values_for_patient(*, patient_id: int, db: Session) -> list[MedicalValue]:
     _get_patient_or_404(patient_id, db)
     return (
@@ -263,6 +306,14 @@ def create_medical_value_for_patient(
             changed_by_id=changed_by_id,
         )
         data["medical_value_group_instance_id"] = group_instance.id
+    _assert_medical_value_unique_for_non_user_captured(
+        patient_id=patient_id,
+        group_key=_group_key_for_id(db, data.get("medical_value_group_id")),
+        context_key=context_key,
+        medical_value_template_id=data.get("medical_value_template_id"),
+        name=data.get("name", ""),
+        db=db,
+    )
     mv = MedicalValue(
         patient_id=patient_id,
         **data,
@@ -320,6 +371,27 @@ def update_medical_value_for_patient(
                 changed_by_id=changed_by_id,
             )
             mv.medical_value_group_instance_id = group_instance.id
+    should_validate_uniqueness = any(
+        key in update_data
+        for key in (
+            "medical_value_template_id",
+            "name",
+            "organ_id",
+            "is_donor_context",
+            "context_key",
+            "medical_value_group_id",
+        )
+    )
+    if should_validate_uniqueness:
+        _assert_medical_value_unique_for_non_user_captured(
+            patient_id=patient_id,
+            group_key=_group_key_for_id(db, mv.medical_value_group_id),
+            context_key=mv.context_key or build_context_key(organ_id=mv.organ_id, is_donor_context=bool(mv.is_donor_context)),
+            medical_value_template_id=mv.medical_value_template_id,
+            name=mv.name or "",
+            db=db,
+            exclude_id=mv.id,
+        )
     mv.changed_by_id = changed_by_id
     db.commit()
     db.refresh(mv)

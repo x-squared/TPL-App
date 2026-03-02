@@ -1,5 +1,5 @@
 import type { Task } from '../../api';
-import { formatDateTimeDdMmYyyy } from '../layout/dateFormat';
+import { formatDateDdMmYyyy, formatDateTimeDdMmYyyy } from '../layout/dateFormat';
 import { formatTaskEpisodeReference, formatTaskPatientReference } from '../layout/episodeDisplay';
 import type {
   TaskBoardRow,
@@ -91,6 +91,11 @@ export function isUrgentTask(task: Task): boolean {
 
 export function formatDate(iso: string | null): string {
   return formatDateTimeDdMmYyyy(iso);
+}
+
+export function formatDue(task: Task): string {
+  if (task.kind_key === 'EVENT') return formatDateTimeDdMmYyyy(task.until);
+  return formatDateDdMmYyyy(task.until);
 }
 
 function dueDateValue(iso: string | null): number {

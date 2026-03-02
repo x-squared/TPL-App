@@ -4,6 +4,17 @@ Practical command cookbook for running TPL-App end-to-end from terminal cells (i
 
 Use this from repository root unless a section says otherwise.
 
+## Where To Find API/Options Reference
+
+This manual is intentionally a practical cookbook. Full API/option references live in focused manuals:
+
+- Backend HTTP API and endpoint overview: `doc/server-manual.qmd` (+ live OpenAPI at `http://localhost:8000/docs`)
+- Database tool CLI options (`db_schema`, `db_data`, `db_admin`): `doc/database-manual.qmd`
+- Seed categories/profiles/seed CLI options: `doc/seeding-manual.qmd`
+- i18n architecture and translation operations: `doc/i18n-manual.qmd`
+
+Use this DIY file for runnable sequences and common operational flows.
+
 ## Quick Start (Most Used)
 
 > Note: Quarto does not open new terminals automatically. Start backend and frontend in separate terminals manually (for example Terminal A: backend, Terminal B: frontend), because both commands are long-running.
@@ -92,6 +103,8 @@ cd /Users/stephan/Workspace/TPL-App/backend
 source .venv/bin/activate
 python -m app.db_data --mode clean --env DEV
 ```
+
+Note: clean/refresh now exports current DB translation bundles into `backend/app/seed/datasets/core/translations_runtime_snapshot.py` before wiping tables.
 
 **E) Backfill procurement runtime (legacy -> unified, idempotent):**
 
@@ -310,7 +323,7 @@ python -m py_compile backend/app/main.py
 
 Only run this if you understand the impact:
 
-```{bash}
+```
 cd /Users/stephan/Workspace/TPL-App
 git clean -fd
 ```

@@ -4,6 +4,7 @@ from fastapi import HTTPException
 from sqlalchemy.exc import IntegrityError
 from sqlalchemy.orm import Session, joinedload
 
+from ...features.tasks import ensure_coordination_protocol_task_groups
 from ...models import Catalogue, Code, Coordination, CoordinationEpisode, Episode
 from ...schemas import CoordinationEpisodeCreate, CoordinationEpisodeUpdate
 
@@ -100,6 +101,7 @@ def create_coordination_episode(
     except IntegrityError:
         db.rollback()
         raise HTTPException(status_code=409, detail="Coordination episode already exists")
+    ensure_coordination_protocol_task_groups(coordination_id=coordination_id, changed_by_id=changed_by_id, db=db)
     return _query_with_joins(db).filter(CoordinationEpisode.id == item.id).first()
 
 
@@ -142,6 +144,7 @@ def update_coordination_episode(
     except IntegrityError:
         db.rollback()
         raise HTTPException(status_code=409, detail="Coordination episode already exists")
+    ensure_coordination_protocol_task_groups(coordination_id=coordination_id, changed_by_id=changed_by_id, db=db)
     return _query_with_joins(db).filter(CoordinationEpisode.id == coordination_episode_id).first()
 
 

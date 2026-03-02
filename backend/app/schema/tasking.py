@@ -95,6 +95,8 @@ class TaskGroupBase(BaseModel):
     name: str = ""
     episode_id: int | None = None
     colloqium_agenda_id: int | None = None
+    coordination_id: int | None = None
+    organ_id: int | None = None
     tpl_phase_id: int | None = None
 
 
@@ -112,6 +114,8 @@ class TaskGroupUpdate(BaseModel):
     name: str | None = None
     episode_id: int | None = None
     colloqium_agenda_id: int | None = None
+    coordination_id: int | None = None
+    organ_id: int | None = None
     tpl_phase_id: int | None = None
 
 
@@ -119,6 +123,7 @@ class TaskGroupResponse(TaskGroupBase):
     model_config = ConfigDict(from_attributes=True)
 
     id: int
+    organ: CodeResponse | None = None
     tpl_phase: CodeResponse | None = None
     changed_by_id: int | None = None
     changed_by_user: UserResponse | None = None

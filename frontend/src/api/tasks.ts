@@ -7,6 +7,9 @@ export interface TaskGroup {
   name: string;
   episode_id: number | null;
   colloqium_agenda_id: number | null;
+  coordination_id: number | null;
+  organ_id: number | null;
+  organ: Code | null;
   tpl_phase_id: number | null;
   tpl_phase: Code | null;
   changed_by_id: number | null;
@@ -100,6 +103,8 @@ export interface TaskGroupListParams {
   patient_id?: number;
   episode_id?: number;
   colloqium_agenda_id?: number;
+  coordination_id?: number;
+  organ_id?: number;
 }
 
 export interface TaskGroupCreate {
@@ -108,6 +113,8 @@ export interface TaskGroupCreate {
   name?: string;
   episode_id?: number | null;
   colloqium_agenda_id?: number | null;
+  coordination_id?: number | null;
+  organ_id?: number | null;
   tpl_phase_id?: number | null;
 }
 
@@ -117,11 +124,36 @@ export interface TaskGroupUpdate {
   name?: string;
   episode_id?: number | null;
   colloqium_agenda_id?: number | null;
+  coordination_id?: number | null;
+  organ_id?: number | null;
   tpl_phase_id?: number | null;
+}
+
+export interface TaskGroupTemplateCreate {
+  key: string;
+  name: string;
+  description?: string;
+  scope_id: number;
+  organ_id?: number | null;
+  tpl_phase_id?: number | null;
+  is_active?: boolean;
+  sort_pos?: number;
+}
+
+export interface TaskGroupTemplateUpdate {
+  key?: string;
+  name?: string;
+  description?: string;
+  scope_id?: number;
+  organ_id?: number | null;
+  tpl_phase_id?: number | null;
+  is_active?: boolean;
+  sort_pos?: number;
 }
 
 export interface TaskListParams {
   task_group_id?: number;
+  assigned_to_id?: number;
   status_key?: string[];
 }
 
@@ -152,6 +184,10 @@ export interface TaskTemplateUpdate {
 
 export const tasksApi = {
   listTaskGroupTemplates: () => request<TaskGroupTemplate[]>('/task-group-templates/'),
+  createTaskGroupTemplate: (data: TaskGroupTemplateCreate) =>
+    request<TaskGroupTemplate>('/task-group-templates/', { method: 'POST', body: JSON.stringify(data) }),
+  updateTaskGroupTemplate: (taskGroupTemplateId: number, data: TaskGroupTemplateUpdate) =>
+    request<TaskGroupTemplate>(`/task-group-templates/${taskGroupTemplateId}`, { method: 'PATCH', body: JSON.stringify(data) }),
   listTaskTemplates: (params?: TaskTemplateListParams) => {
     const query = new URLSearchParams();
     if (params?.task_group_template_id !== undefined) query.set('task_group_template_id', String(params.task_group_template_id));
@@ -167,6 +203,8 @@ export const tasksApi = {
     if (params?.patient_id !== undefined) query.set('patient_id', String(params.patient_id));
     if (params?.episode_id !== undefined) query.set('episode_id', String(params.episode_id));
     if (params?.colloqium_agenda_id !== undefined) query.set('colloqium_agenda_id', String(params.colloqium_agenda_id));
+    if (params?.coordination_id !== undefined) query.set('coordination_id', String(params.coordination_id));
+    if (params?.organ_id !== undefined) query.set('organ_id', String(params.organ_id));
     return request<TaskGroup[]>(`/task-groups/${query.toString() ? `?${query.toString()}` : ''}`);
   },
   createTaskGroup: (data: TaskGroupCreate) =>
@@ -176,6 +214,7 @@ export const tasksApi = {
   listTasks: (params?: TaskListParams) => {
     const query = new URLSearchParams();
     if (params?.task_group_id !== undefined) query.set('task_group_id', String(params.task_group_id));
+    if (params?.assigned_to_id !== undefined) query.set('assigned_to_id', String(params.assigned_to_id));
     (params?.status_key ?? []).forEach((value) => query.append('status_key', value));
     return request<Task[]>(`/tasks/${query.toString() ? `?${query.toString()}` : ''}`);
   },

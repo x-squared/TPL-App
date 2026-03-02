@@ -37,6 +37,17 @@ PATIENTS = [
         "blood_type_key": "AB+",
         "changed_by_id": 2,
     },
+    {
+        "pid": "5034",
+        "first_name": "Georg",
+        "name": "Gamma",
+        "date_of_birth": date(1975, 6, 22),
+        "ahv_nr": "756.7777.8888.99",
+        "lang": "Deutsch",
+        "translate": False,
+        "blood_type_key": "B+",
+        "changed_by_id": 2,
+    },
 ]
 
 CONTACT_INFOS = [
@@ -85,6 +96,42 @@ EPISODES = [
         "organ_keys": ["KIDNEY", "PANCREAS"],
         "start": date(2025, 7, 10),
         "status_key": "ABKLAERUNG",
+        "changed_by_id": 2,
+    },
+    {
+        "patient_pid": "5034",
+        "organ_keys": ["LIVER", "KIDNEY"],
+        "start": date(2026, 2, 3),
+        "status_key": "ABKLAERUNG",
+        "changed_by_id": 2,
+    },
+]
+
+COORDINATIONS = [
+    {
+        "seed_key": "HANS_OPEN_COORDINATION",
+        "patient_pid": "4711",
+        "episode_organ_key": "LIVER",
+        "status_key": "OPEN",
+        "start": date(2026, 2, 15),
+        "end": None,
+        "donor_nr": "D-HANS-001",
+        "swtpl_nr": "SW471101",
+        "national_coordinator": "Sample Coordinator",
+        "comment": "Open sample coordination for Hans Test.",
+        "changed_by_id": 2,
+    },
+    {
+        "seed_key": "ANNA_OPEN_COORDINATION",
+        "patient_pid": "4812",
+        "episode_organ_key": "KIDNEY",
+        "status_key": "OPEN",
+        "start": date(2026, 2, 16),
+        "end": None,
+        "donor_nr": "D-ANNA-001",
+        "swtpl_nr": "SW481201",
+        "national_coordinator": "Sample Coordinator",
+        "comment": "Open sample coordination for Anna.",
         "changed_by_id": 2,
     },
 ]

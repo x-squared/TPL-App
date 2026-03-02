@@ -1,13 +1,16 @@
-import type { Code, Episode, Patient, Task, TaskGroup } from '../../api';
+import type { Code, ColloqiumAgenda, Episode, Patient, Task, TaskGroup } from '../../api';
 import { boardStateSymbol } from './taskBoardUtils';
 import TaskBoardRows from './TaskBoardRows';
 import type {
   TaskActionState,
   TaskBoardRow,
+  TaskBoardSort,
+  TaskBoardSortKey,
   TaskCreateFormState,
   TaskGroupEditFormState,
   TaskEditFormState,
 } from './taskBoardTypes';
+import type { TaskBoardContextTarget } from './taskBoardTypes';
 
 export interface TaskBoardTableProps {
   rows: TaskBoardRow[];
@@ -15,6 +18,7 @@ export interface TaskBoardTableProps {
   episodesById: Record<number, Episode>;
   priorityCodes: Code[];
   allUserOptions: Array<{ id: number; name: string }>;
+  colloqiumAgendasById: Record<number, ColloqiumAgenda>;
   editingTaskId: number | null;
   editForm: TaskEditFormState | null;
   setEditForm: (updater: (prev: TaskEditFormState | null) => TaskEditFormState | null) => void;
@@ -44,6 +48,11 @@ export interface TaskBoardTableProps {
   onStartCreateTask: (taskGroupId: number) => void;
   onSaveCreateTask: (taskGroupId: number) => void;
   onCancelCreateTask: () => void;
+  onOpenTaskContext?: (target: TaskBoardContextTarget) => void;
+  selectedTaskId: number | null;
+  onSelectTask: (taskId: number) => void;
+  taskSort?: TaskBoardSort | null;
+  onTaskSortChange?: (sort: TaskBoardSort | null) => void;
   maxTableHeight: number | string;
 }
 
@@ -53,6 +62,7 @@ export default function TaskBoardTable({
   episodesById,
   priorityCodes,
   allUserOptions,
+  colloqiumAgendasById,
   editingTaskId,
   editForm,
   setEditForm,
@@ -82,27 +92,63 @@ export default function TaskBoardTable({
   onStartCreateTask,
   onSaveCreateTask,
   onCancelCreateTask,
+  onOpenTaskContext,
+  selectedTaskId,
+  onSelectTask,
+  taskSort = null,
+  onTaskSortChange,
   maxTableHeight,
 }: TaskBoardTableProps) {
   const headerStateSymbol = boardStateSymbol(rows);
+  const onSortHeaderClick = (key: TaskBoardSortKey) => {
+    if (!onTaskSortChange) return;
+    if (!taskSort || taskSort.key !== key) {
+      onTaskSortChange({ key, direction: 'asc' });
+      return;
+    }
+    if (taskSort.direction === 'asc') {
+      onTaskSortChange({ key, direction: 'desc' });
+      return;
+    }
+    onTaskSortChange(null);
+  };
+  const sortSymbol = (key: TaskBoardSortKey): string => {
+    if (!taskSort || taskSort.key !== key) return '';
+    return taskSort.direction === 'asc' ? '▲' : '▼';
+  };
 
   return (
     <div className="ui-table-wrap task-board-table-scroll" style={{ maxHeight: maxTableHeight }}>
       <table className="data-table task-board-table">
         <thead>
           <tr>
+            <th className="open-col"></th>
             <th
               aria-label="State"
-              title="State"
+              title={onTaskSortChange ? 'Sort by status (asc/desc/off)' : 'State'}
+              className={onTaskSortChange ? 'task-sortable-header' : undefined}
+              onClick={onTaskSortChange ? () => onSortHeaderClick('status') : undefined}
             >
-              {headerStateSymbol}
+              {headerStateSymbol}{sortSymbol('status')}
             </th>
-            <th>Priority</th>
+            <th
+              className={onTaskSortChange ? 'task-sortable-header' : undefined}
+              onClick={onTaskSortChange ? () => onSortHeaderClick('priority') : undefined}
+              title={onTaskSortChange ? 'Sort by priority (asc/desc/off)' : undefined}
+            >
+              Priority {sortSymbol('priority')}
+            </th>
             <th>Reference</th>
             <th>Kind</th>
             <th className="task-col-description">Description</th>
             <th>Assigned To</th>
-            <th>Due At</th>
+            <th
+              className={onTaskSortChange ? 'task-sortable-header' : undefined}
+              onClick={onTaskSortChange ? () => onSortHeaderClick('due_date') : undefined}
+              title={onTaskSortChange ? 'Sort by due date (asc/desc/off)' : undefined}
+            >
+              Due At {sortSymbol('due_date')}
+            </th>
             <th className="task-col-comment">Comment</th>
             <th>Closed At</th>
             <th>Closed By</th>
@@ -112,7 +158,7 @@ export default function TaskBoardTable({
         <tbody>
           {rows.length === 0 && (
             <tr>
-              <td colSpan={11}>No tasks match the current filters.</td>
+              <td colSpan={12}>No tasks match the current filters.</td>
             </tr>
           )}
           <TaskBoardRows
@@ -121,6 +167,7 @@ export default function TaskBoardTable({
             episodesById={episodesById}
             priorityCodes={priorityCodes}
             allUserOptions={allUserOptions}
+            colloqiumAgendasById={colloqiumAgendasById}
             editingTaskId={editingTaskId}
             editForm={editForm}
             setEditForm={setEditForm}
@@ -150,6 +197,9 @@ export default function TaskBoardTable({
             onStartCreateTask={onStartCreateTask}
             onSaveCreateTask={onSaveCreateTask}
             onCancelCreateTask={onCancelCreateTask}
+            onOpenTaskContext={onOpenTaskContext}
+            selectedTaskId={selectedTaskId}
+            onSelectTask={onSelectTask}
           />
         </tbody>
       </table>

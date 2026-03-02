@@ -1,4 +1,4 @@
-from sqlalchemy import Column, DateTime, Enum as SqlEnum, ForeignKey, Integer, String
+from sqlalchemy import Column, DateTime, Enum as SqlEnum, ForeignKey, Integer, String, Text
 from sqlalchemy.orm import relationship
 from sqlalchemy.sql import func
 
@@ -80,6 +80,13 @@ class Favorite(Base):
         index=True,
         comment="Referenced coordination id, if favorite type is COORDINATION.",
         info={"label": "Coordination"},
+    )
+    context_json = Column(
+        "CONTEXT_JSON",
+        Text,
+        nullable=True,
+        comment="Optional UI context payload (e.g. selected tab) restored when opening the favorite.",
+        info={"label": "Context JSON"},
     )
     sort_pos = Column(
         "SORT_POS",

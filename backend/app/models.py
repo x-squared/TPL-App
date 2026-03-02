@@ -49,6 +49,7 @@ from .model import (
     TaskGroup,
     TaskGroupTemplate,
     TaskTemplate,
+    TranslationBundle,
     User,
 )
 from .model.utils import apply_entity_metadata_defaults, apply_optimistic_locking_defaults
@@ -60,6 +61,7 @@ apply_optimistic_locking_defaults()
 __all__ = [
     "Code",
     "Catalogue",
+    "TranslationBundle",
     "AccessPermission",
     "ColloqiumType",
     "Colloqium",

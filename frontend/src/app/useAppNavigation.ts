@@ -2,8 +2,10 @@ import { useEffect, useRef, useState } from 'react';
 
 import type { Favorite } from '../api';
 import type { PatientDetailTab } from '../views/patient-detail/PatientDetailTabs';
+import type { ColloquiumDetailTab } from '../views/colloquiums/detail/colloquiumDetailViewModelTypes';
+import type { CoordinationDetailTab } from '../views/coordinations/detail/useCoordinationDetailViewModel';
 
-export type Page = 'my-work' | 'patients' | 'donations' | 'colloquiums' | 'coordinations' | 'reports' | 'admin' | 'e2e-tests';
+export type Page = 'my-work' | 'patients' | 'donations' | 'colloquiums' | 'coordinations' | 'reports' | 'admin' | 'e2e-tests' | 'preferences';
 
 interface UseAppNavigationArgs {
   canViewPatients: boolean;
@@ -13,13 +15,16 @@ interface UseAppNavigationArgs {
   canViewReports: boolean;
   canViewAdmin: boolean;
   devToolsEnabled: boolean;
+  startPagePreference?: Page;
 }
 
 interface NavigationState {
   page: Page;
   selectedPatientId: number | null;
   selectedColloqiumId: number | null;
+  selectedColloqiumTab: ColloquiumDetailTab | undefined;
   selectedCoordinationId: number | null;
+  selectedCoordinationTab: CoordinationDetailTab | undefined;
   patientInitialTab: PatientDetailTab | undefined;
   patientInitialEpisodeId: number | null;
 }
@@ -29,10 +34,24 @@ function isSameState(a: NavigationState, b: NavigationState): boolean {
     a.page === b.page
     && a.selectedPatientId === b.selectedPatientId
     && a.selectedColloqiumId === b.selectedColloqiumId
+    && a.selectedColloqiumTab === b.selectedColloqiumTab
     && a.selectedCoordinationId === b.selectedCoordinationId
+    && a.selectedCoordinationTab === b.selectedCoordinationTab
     && a.patientInitialTab === b.patientInitialTab
     && a.patientInitialEpisodeId === b.patientInitialEpisodeId
   );
+}
+
+function parseFavoriteContext(favorite: Favorite): Record<string, unknown> {
+  const raw = favorite.context_json;
+  if (!raw) return {};
+  try {
+    const parsed = JSON.parse(raw);
+    if (typeof parsed === 'object' && parsed !== null) return parsed as Record<string, unknown>;
+    return {};
+  } catch {
+    return {};
+  }
 }
 
 export function useAppNavigation({
@@ -43,11 +62,14 @@ export function useAppNavigation({
   canViewReports,
   canViewAdmin,
   devToolsEnabled,
+  startPagePreference,
 }: UseAppNavigationArgs) {
   const [page, setPage] = useState<Page>('patients');
   const [selectedPatientId, setSelectedPatientId] = useState<number | null>(null);
   const [selectedColloqiumId, setSelectedColloqiumId] = useState<number | null>(null);
+  const [selectedColloqiumTab, setSelectedColloqiumTab] = useState<ColloquiumDetailTab | undefined>(undefined);
   const [selectedCoordinationId, setSelectedCoordinationId] = useState<number | null>(null);
+  const [selectedCoordinationTab, setSelectedCoordinationTab] = useState<CoordinationDetailTab | undefined>(undefined);
   const [patientInitialTab, setPatientInitialTab] = useState<PatientDetailTab | undefined>(undefined);
   const [patientInitialEpisodeId, setPatientInitialEpisodeId] = useState<number | null>(null);
   const [canGoBack, setCanGoBack] = useState(false);
@@ -59,12 +81,15 @@ export function useAppNavigation({
   const markedLocationRef = useRef<NavigationState | null>(null);
   const lastRecordedStateRef = useRef<NavigationState | null>(null);
   const isApplyingHistoryRef = useRef(false);
+  const startPageAppliedRef = useRef<Page | null>(null);
 
   const buildCurrentState = (): NavigationState => ({
     page,
     selectedPatientId,
     selectedColloqiumId,
+    selectedColloqiumTab,
     selectedCoordinationId,
+    selectedCoordinationTab,
     patientInitialTab,
     patientInitialEpisodeId,
   });
@@ -73,7 +98,9 @@ export function useAppNavigation({
     setPage(state.page);
     setSelectedPatientId(state.selectedPatientId);
     setSelectedColloqiumId(state.selectedColloqiumId);
+    setSelectedColloqiumTab(state.selectedColloqiumTab);
     setSelectedCoordinationId(state.selectedCoordinationId);
+    setSelectedCoordinationTab(state.selectedCoordinationTab);
     setPatientInitialTab(state.patientInitialTab);
     setPatientInitialEpisodeId(state.patientInitialEpisodeId);
   };
@@ -84,6 +111,13 @@ export function useAppNavigation({
   };
 
   useEffect(() => {
+    if (!startPagePreference) return;
+    if (startPageAppliedRef.current === startPagePreference) return;
+    setPage(startPagePreference);
+    startPageAppliedRef.current = startPagePreference;
+  }, [startPagePreference]);
+
+  useEffect(() => {
     if (!devToolsEnabled && page === 'e2e-tests') {
       setPage('patients');
     }
@@ -91,6 +125,7 @@ export function useAppNavigation({
 
   useEffect(() => {
     const pagePermissions: Partial<Record<Page, boolean>> = {
+      preferences: true,
       patients: canViewPatients,
       donations: canViewDonations,
       colloquiums: canViewColloquiums,
@@ -140,7 +175,9 @@ export function useAppNavigation({
     page,
     selectedPatientId,
     selectedColloqiumId,
+    selectedColloqiumTab,
     selectedCoordinationId,
+    selectedCoordinationTab,
     patientInitialTab,
     patientInitialEpisodeId,
   ]);
@@ -148,17 +185,29 @@ export function useAppNavigation({
   const resetSelection = () => {
     setSelectedPatientId(null);
     setSelectedColloqiumId(null);
+    setSelectedColloqiumTab(undefined);
     setSelectedCoordinationId(null);
+    setSelectedCoordinationTab(undefined);
     setPatientInitialTab(undefined);
     setPatientInitialEpisodeId(null);
   };
 
   const openFavorite = (favorite: Favorite) => {
+    const context = parseFavoriteContext(favorite);
+    const patientTab = context.patient_tab;
+    const colloquiumTab = context.colloquium_tab;
+    const coordinationTab = context.coordination_tab;
     if (favorite.favorite_type_key === 'PATIENT' && favorite.patient_id) {
       setPage('patients');
       setSelectedColloqiumId(null);
+      setSelectedColloqiumTab(undefined);
       setSelectedCoordinationId(null);
-      setPatientInitialTab(undefined);
+      setSelectedCoordinationTab(undefined);
+      setPatientInitialTab(
+        patientTab === 'patient' || patientTab === 'episodes' || patientTab === 'medical' || patientTab === 'tasks'
+          ? patientTab
+          : undefined,
+      );
       setPatientInitialEpisodeId(null);
       setSelectedPatientId(favorite.patient_id);
       return;
@@ -166,7 +215,9 @@ export function useAppNavigation({
     if (favorite.favorite_type_key === 'EPISODE' && favorite.episode_id && favorite.patient_id) {
       setPage('patients');
       setSelectedColloqiumId(null);
+      setSelectedColloqiumTab(undefined);
       setSelectedCoordinationId(null);
+      setSelectedCoordinationTab(undefined);
       setSelectedPatientId(favorite.patient_id);
       setPatientInitialTab('episodes');
       setPatientInitialEpisodeId(favorite.episode_id);
@@ -176,18 +227,26 @@ export function useAppNavigation({
       setPage('colloquiums');
       setSelectedPatientId(null);
       setSelectedCoordinationId(null);
+      setSelectedCoordinationTab(undefined);
       setPatientInitialTab(undefined);
       setPatientInitialEpisodeId(null);
       setSelectedColloqiumId(favorite.colloqium_id);
+      setSelectedColloqiumTab(colloquiumTab === 'colloquium' || colloquiumTab === 'protocol' ? colloquiumTab : undefined);
       return;
     }
     if (favorite.favorite_type_key === 'COORDINATION' && favorite.coordination_id) {
       setPage('coordinations');
       setSelectedPatientId(null);
       setSelectedColloqiumId(null);
+      setSelectedColloqiumTab(undefined);
       setPatientInitialTab(undefined);
       setPatientInitialEpisodeId(null);
       setSelectedCoordinationId(favorite.coordination_id);
+      setSelectedCoordinationTab(
+        coordinationTab === 'coordination' || coordinationTab === 'protocol' || coordinationTab === 'time-log'
+          ? coordinationTab
+          : undefined,
+      );
     }
   };
 
@@ -230,8 +289,12 @@ export function useAppNavigation({
     setSelectedPatientId,
     selectedColloqiumId,
     setSelectedColloqiumId,
+    selectedColloqiumTab,
+    setSelectedColloqiumTab,
     selectedCoordinationId,
     setSelectedCoordinationId,
+    selectedCoordinationTab,
+    setSelectedCoordinationTab,
     patientInitialTab,
     setPatientInitialTab,
     patientInitialEpisodeId,

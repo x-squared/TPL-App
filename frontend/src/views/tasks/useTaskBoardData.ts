@@ -1,5 +1,5 @@
 import { useCallback, useEffect, useState } from 'react';
-import { api, type Code, type Episode, type Patient, type Task, type TaskGroup } from '../../api';
+import { api, type Code, type ColloqiumAgenda, type Episode, type Patient, type Task, type TaskGroup } from '../../api';
 import { toUserErrorMessage } from '../../api/error';
 import type { TaskBoardCriteria } from './taskBoardTypes';
 
@@ -14,6 +14,8 @@ interface TaskBoardDataState {
   priorityCodes: Code[];
   taskStatusByKey: Record<string, Code>;
   allUsers: Record<number, string>;
+  colloqiumAgendasById: Record<number, ColloqiumAgenda>;
+  currentUserId: number | null;
 }
 
 const initialState: TaskBoardDataState = {
@@ -27,6 +29,8 @@ const initialState: TaskBoardDataState = {
   priorityCodes: [],
   taskStatusByKey: {},
   allUsers: {},
+  colloqiumAgendasById: {},
+  currentUserId: null,
 };
 
 export default function useTaskBoardData(criteria: TaskBoardCriteria, statusKeysToLoad: string[]) {
@@ -48,7 +52,8 @@ export default function useTaskBoardData(criteria: TaskBoardCriteria, statusKeys
           episode_id: criteria.episodeId ?? undefined,
         };
         const groups = await api.listTaskGroups(groupParams);
-        const [users, organs, priorities, taskStatuses] = await Promise.all([
+        const [me, users, organs, priorities, taskStatuses] = await Promise.all([
+          api.getMe(),
           api.listUsers(),
           api.listCodes('ORGAN'),
           api.listCodes('PRIORITY'),
@@ -75,10 +80,13 @@ export default function useTaskBoardData(criteria: TaskBoardCriteria, statusKeys
             groupId: group.id,
             tasks: await api.listTasks({
               task_group_id: group.id,
+              assigned_to_id: criteria.assignedToId ?? undefined,
               status_key: statusKeysToLoad,
             }),
           })),
         );
+        const needsAgendas = groupsWithContext.some((group) => group.colloqium_agenda_id != null);
+        const agendas = needsAgendas ? await api.listColloqiumAgendas() : [];
 
         if (cancelled) return;
 
@@ -108,6 +116,10 @@ export default function useTaskBoardData(criteria: TaskBoardCriteria, statusKeys
         taskStatuses.forEach((status) => {
           nextTaskStatusByKey[status.key] = status;
         });
+        const nextColloqiumAgendasById: Record<number, ColloqiumAgenda> = {};
+        agendas.forEach((agenda) => {
+          nextColloqiumAgendasById[agenda.id] = agenda;
+        });
 
         setState({
           loading: false,
@@ -120,6 +132,8 @@ export default function useTaskBoardData(criteria: TaskBoardCriteria, statusKeys
           priorityCodes: priorities,
           taskStatusByKey: nextTaskStatusByKey,
           allUsers: nextUsers,
+          colloqiumAgendasById: nextColloqiumAgendasById,
+          currentUserId: me.id,
         });
       } catch (err) {
         if (cancelled) return;
@@ -135,7 +149,7 @@ export default function useTaskBoardData(criteria: TaskBoardCriteria, statusKeys
     return () => {
       cancelled = true;
     };
-  }, [criteria.patientId, criteria.episodeId, criteria.colloqiumAgendaId, criteria.tplPhaseId, statusKeysToLoad, reloadToken]);
+  }, [criteria.patientId, criteria.episodeId, criteria.colloqiumAgendaId, criteria.tplPhaseId, criteria.assignedToId, statusKeysToLoad, reloadToken]);
 
   return {
     ...state,

@@ -54,6 +54,14 @@ TASK_SCOPE = [
     {"type": "TASK_SCOPE", "key": TaskScopeKey.ALL.value, "pos": 1, "ext_sys": "", "ext_key": "", "name_default": "Alle"},
     {"type": "TASK_SCOPE", "key": TaskScopeKey.PATIENT.value, "pos": 2, "ext_sys": "", "ext_key": "", "name_default": "Patient"},
     {"type": "TASK_SCOPE", "key": TaskScopeKey.EPISODE.value, "pos": 3, "ext_sys": "", "ext_key": "", "name_default": "Episode"},
+    {
+        "type": "TASK_SCOPE",
+        "key": TaskScopeKey.COORDINATION_PROTOCOL.value,
+        "pos": 4,
+        "ext_sys": "",
+        "ext_key": "",
+        "name_default": "Koordinationsprotokoll",
+    },
 ]
 
 RECORDS = RECORDS + TASK_SCOPE

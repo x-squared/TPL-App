@@ -62,7 +62,7 @@ export default function CoordinationProtocolTab({ coordinationId, groups, onOpen
             coordinationId={coordinationId}
             organId={activeGroup.organ.id}
           />
-          <CoordinationProtocolTasksPanel entries={activeGroup.entries} />
+          <CoordinationProtocolTasksPanel coordinationId={coordinationId} organId={activeGroup.organ.id} />
         </div>
       </div>
     </section>

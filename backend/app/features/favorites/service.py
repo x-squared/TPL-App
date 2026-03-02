@@ -86,6 +86,11 @@ def list_favorites(*, user_id: int, db: Session) -> list[Favorite]:
 def create_favorite(*, user_id: int, payload: FavoriteCreate, db: Session) -> Favorite:
     existing = _find_existing(user_id, payload, db)
     if existing:
+        next_context = (payload.context_json or "").strip() or None
+        if existing.context_json != next_context:
+            existing.context_json = next_context
+            db.commit()
+            db.refresh(existing)
         return existing
     max_sort_pos = db.query(Favorite.sort_pos).filter(Favorite.user_id == user_id).order_by(Favorite.sort_pos.desc()).first()
     next_sort_pos = (max_sort_pos[0] if max_sort_pos else 0) + 1
@@ -97,6 +102,7 @@ def create_favorite(*, user_id: int, payload: FavoriteCreate, db: Session) -> Fa
         episode_id=payload.episode_id,
         colloqium_id=payload.colloqium_id,
         coordination_id=payload.coordination_id,
+        context_json=(payload.context_json or "").strip() or None,
         sort_pos=next_sort_pos,
     )
     db.add(favorite)

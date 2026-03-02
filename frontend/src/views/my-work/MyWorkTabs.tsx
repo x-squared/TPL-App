@@ -3,9 +3,16 @@ import type { MyWorkTabKey } from './useMyWorkTabsViewModel';
 interface MyWorkTabsProps {
   activeTab: MyWorkTabKey;
   setActiveTab: (tab: MyWorkTabKey) => void;
+  unreadInformationCount: number;
+  openTaskCount: number;
 }
 
-export default function MyWorkTabs({ activeTab, setActiveTab }: MyWorkTabsProps) {
+export default function MyWorkTabs({
+  activeTab,
+  setActiveTab,
+  unreadInformationCount,
+  openTaskCount,
+}: MyWorkTabsProps) {
   return (
     <>
       <button
@@ -16,11 +23,18 @@ export default function MyWorkTabs({ activeTab, setActiveTab }: MyWorkTabsProps)
         Favorites
       </button>
       <button
+        className={`detail-tab ${activeTab === 'tasks' ? 'active' : ''}`}
+        onClick={() => setActiveTab('tasks')}
+        type="button"
+      >
+        Tasks ({openTaskCount})
+      </button>
+      <button
         className={`detail-tab ${activeTab === 'information' ? 'active' : ''}`}
         onClick={() => setActiveTab('information')}
         type="button"
       >
-        Information
+        Information ({unreadInformationCount})
       </button>
     </>
   );

@@ -33,6 +33,7 @@ class TaskScopeKey(str, Enum):
     ALL = "ALL"
     PATIENT = "PATIENT"
     EPISODE = "EPISODE"
+    COORDINATION_PROTOCOL = "COORDINATION_PROTOCOL"
 
 
 class TaskStatusKey(str, Enum):

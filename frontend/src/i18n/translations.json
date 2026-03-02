@@ -1,0 +1,400 @@
+{
+  "app": {
+    "views": {
+      "myWork": {
+        "label": { "en": "View name: My Work", "de": "Ansichtsname: Meine Arbeit" },
+        "text": { "de": "Meine Arbeit" }
+      },
+      "patients": {
+        "label": { "en": "View name: Recipients", "de": "Ansichtsname: Empfaenger" },
+        "text": { "de": "Empfaenger" }
+      },
+      "donations": {
+        "label": { "en": "View name: Donors", "de": "Ansichtsname: Spender" },
+        "text": { "de": "Spender" }
+      },
+      "colloquiums": {
+        "label": { "en": "View name: Colloquiums", "de": "Ansichtsname: Kolloquien" },
+        "text": { "de": "Kolloquien" }
+      },
+      "coordinations": {
+        "label": { "en": "View name: Coordinations", "de": "Ansichtsname: Koordinationen" },
+        "text": { "de": "Koordinationen" }
+      },
+      "reports": {
+        "label": { "en": "View name: Reports", "de": "Ansichtsname: Berichte" },
+        "text": { "de": "Berichte" }
+      },
+      "admin": {
+        "label": { "en": "View name: Admin", "de": "Ansichtsname: Admin" },
+        "text": { "de": "Admin" }
+      },
+      "preferences": {
+        "label": { "en": "View name: User Preferences", "de": "Ansichtsname: Benutzereinstellungen" },
+        "text": { "de": "Benutzereinstellungen" }
+      },
+      "e2eTests": {
+        "label": { "en": "View name: E2E Tests", "de": "Ansichtsname: E2E-Tests" },
+        "text": { "de": "E2E-Tests" }
+      }
+    },
+    "login": {
+      "subtitle": {
+        "label": {
+          "en": "Login subtitle",
+          "de": "Login Untertitel"
+        },
+        "text": {
+          "de": "Bitte anmelden, um fortzufahren"
+        }
+      },
+      "placeholder": {
+        "extId": {
+          "label": {
+            "en": "Login external user id placeholder",
+            "de": "Login Platzhalter Benutzer-ID"
+          },
+          "text": {
+            "de": "Benutzer-ID eingeben (z. B. TKOORD)"
+          }
+        }
+      },
+      "submit": {
+        "label": {
+          "en": "Login submit button",
+          "de": "Login Absenden"
+        },
+        "text": {
+          "de": "Anmelden"
+        }
+      },
+      "loading": {
+        "label": {
+          "en": "Login loading text",
+          "de": "Login Ladehinweis"
+        },
+        "text": {
+          "de": "Laden..."
+        }
+      }
+    },
+    "preferences": {
+      "title": {
+        "label": { "en": "Preferences page title", "de": "Titel Einstellungsseite" },
+        "text": { "de": "Benutzereinstellungen" }
+      },
+      "sections": {
+        "general": {
+          "label": { "en": "Preferences section heading: General", "de": "Einstellungen Abschnitt: Allgemein" },
+          "text": { "de": "Allgemein" }
+        },
+        "actions": {
+          "label": { "en": "Preferences section heading: Actions", "de": "Einstellungen Abschnitt: Aktionen" },
+          "text": { "de": "Aktionen" }
+        }
+      },
+      "fields": {
+        "language": {
+          "label": { "en": "Preferences field label: Language", "de": "Einstellungen Feld: Sprache" },
+          "text": { "de": "Sprache" }
+        },
+        "startView": {
+          "label": { "en": "Preferences field label: Start View", "de": "Einstellungen Feld: Startansicht" },
+          "text": { "de": "Startansicht" }
+        },
+        "languageEn": {
+          "label": { "en": "Preferences language option: English", "de": "Sprache Option: Englisch" },
+          "text": { "de": "Englisch" }
+        },
+        "languageDe": {
+          "label": { "en": "Preferences language option: German", "de": "Sprache Option: Deutsch" },
+          "text": { "de": "Deutsch" }
+        }
+      },
+      "actions": {
+        "save": {
+          "label": { "en": "Preferences action button: Save Preferences", "de": "Einstellungen Aktion: Speichern" },
+          "text": { "de": "Einstellungen speichern" }
+        },
+        "saving": {
+          "label": { "en": "Preferences action button: Saving", "de": "Einstellungen Aktion: Speichern laeuft" },
+          "text": { "de": "Speichern..." }
+        }
+      }
+    },
+    "admin": {
+      "title": {
+        "label": { "en": "Admin page title", "de": "Titel Adminseite" },
+        "text": { "de": "Admin" }
+      },
+      "tabs": {
+        "overview": {
+          "label": { "en": "Admin tab name: Overview", "de": "Admin Tab: Uebersicht" },
+          "text": { "de": "Uebersicht" }
+        },
+        "accessRules": {
+          "label": { "en": "Admin tab name: Access Rules", "de": "Admin Tab: Zugriffsregeln" },
+          "text": { "de": "Zugriffsregeln" }
+        },
+        "peopleTeams": {
+          "label": { "en": "Admin tab name: People and Teams", "de": "Admin Tab: Personen und Teams" },
+          "text": { "de": "Personen und Teams" }
+        },
+        "taskTemplates": {
+          "label": { "en": "Admin tab name: Task Templates", "de": "Admin Tab: Aufgabenvorlagen" },
+          "text": { "de": "Aufgabenvorlagen" }
+        },
+        "protocolConfig": {
+          "label": { "en": "Admin tab name: Protocol Config", "de": "Admin Tab: Protokollkonfiguration" },
+          "text": { "de": "Protokollkonfiguration" }
+        },
+        "translations": {
+          "label": { "en": "Admin tab name: Translations", "de": "Admin Tab: Uebersetzungen" },
+          "text": { "de": "Uebersetzungen" }
+        }
+      }
+    }
+  },
+  "coordination": {
+    "tabs": {
+      "coordination": {
+        "label": { "en": "Coordination detail tab: Coordination", "de": "Koordination Detail Tab: Koordination" },
+        "text": { "de": "Koordination" }
+      },
+      "protocol": {
+        "label": { "en": "Coordination detail tab: Protocol", "de": "Koordination Detail Tab: Protokoll" },
+        "text": { "de": "Protokoll" }
+      },
+      "timeLog": {
+        "label": { "en": "Coordination detail tab: Time Log", "de": "Koordination Detail Tab: Zeitprotokoll" },
+        "text": { "de": "Zeitprotokoll" }
+      }
+    }
+  },
+  "sidebar": {
+    "nav": {
+      "myWork": {
+        "label": {
+          "en": "Sidebar navigation item: My Work",
+          "de": "Seitenleiste Navigation: Meine Arbeit"
+        },
+        "text": {
+          "de": "Meine Arbeit"
+        }
+      },
+      "recipients": {
+        "label": {
+          "en": "Sidebar navigation item: Recipients",
+          "de": "Seitenleiste Navigation: Empfaenger"
+        },
+        "text": {
+          "de": "Empfaenger"
+        }
+      },
+      "donors": {
+        "label": {
+          "en": "Sidebar navigation item: Donors",
+          "de": "Seitenleiste Navigation: Spender"
+        },
+        "text": {
+          "de": "Spender"
+        }
+      },
+      "colloquiums": {
+        "label": {
+          "en": "Sidebar navigation item: Colloquiums",
+          "de": "Seitenleiste Navigation: Kolloquien"
+        },
+        "text": {
+          "de": "Kolloquien"
+        }
+      },
+      "coordinations": {
+        "label": {
+          "en": "Sidebar navigation item: Coordinations",
+          "de": "Seitenleiste Navigation: Koordinationen"
+        },
+        "text": {
+          "de": "Koordinationen"
+        }
+      },
+      "reports": {
+        "label": {
+          "en": "Sidebar navigation item: Reports",
+          "de": "Seitenleiste Navigation: Berichte"
+        },
+        "text": {
+          "de": "Berichte"
+        }
+      },
+      "admin": {
+        "label": {
+          "en": "Sidebar navigation item: Admin",
+          "de": "Seitenleiste Navigation: Admin"
+        },
+        "text": {
+          "de": "Admin"
+        }
+      }
+    },
+    "user": {
+      "logout": {
+        "label": {
+          "en": "Sidebar user menu action: logout",
+          "de": "Benutzermenue Aktion: Abmelden"
+        },
+        "text": {
+          "de": "Abmelden"
+        }
+      },
+      "preferences": {
+        "label": {
+          "en": "Sidebar user menu action: preferences",
+          "de": "Benutzermenue Aktion: Einstellungen"
+        },
+        "text": {
+          "de": "Einstellungen"
+        }
+      }
+    }
+  },
+  "navigation": {
+    "dev": {
+      "e2eTests": {
+        "label": {
+          "en": "Navigation item: E2E tests",
+          "de": "Navigationseintrag: E2E-Tests"
+        },
+        "text": {
+          "de": "E2E-Tests"
+        }
+      }
+    }
+  },
+  "server": {
+    "entities": {
+      "patient": {
+        "label": { "en": "Server-side entity name: Patient", "de": "Server Entitaet: Patient" },
+        "text": { "de": "Patient" }
+      },
+      "episode": {
+        "label": { "en": "Server-side entity name: Episode", "de": "Server Entitaet: Episode" },
+        "text": { "de": "Episode" }
+      },
+      "coordination": {
+        "label": { "en": "Server-side entity name: Coordination", "de": "Server Entitaet: Koordination" },
+        "text": { "de": "Koordination" }
+      },
+      "colloquium": {
+        "label": { "en": "Server-side entity name: Colloquium", "de": "Server Entitaet: Kolloquium" },
+        "text": { "de": "Kolloquium" }
+      },
+      "taskGroupTemplate": {
+        "label": { "en": "Server-side entity name: Task Group Template", "de": "Server Entitaet: Aufgaben-Gruppenvorlage" },
+        "text": { "de": "Aufgaben-Gruppenvorlage" }
+      },
+      "taskTemplate": {
+        "label": { "en": "Server-side entity name: Task Template", "de": "Server Entitaet: Aufgabenvorlage" },
+        "text": { "de": "Aufgabenvorlage" }
+      },
+      "taskGroup": {
+        "label": { "en": "Server-side entity name: Task Group", "de": "Server Entitaet: Aufgabengruppe" },
+        "text": { "de": "Aufgabengruppe" }
+      },
+      "task": {
+        "label": { "en": "Server-side entity name: Task", "de": "Server Entitaet: Aufgabe" },
+        "text": { "de": "Aufgabe" }
+      },
+      "code": {
+        "label": { "en": "Server-side entity name: Code", "de": "Server Entitaet: Code" },
+        "text": { "de": "Code" }
+      },
+      "catalogue": {
+        "label": { "en": "Server-side entity name: Catalogue", "de": "Server Entitaet: Katalog" },
+        "text": { "de": "Katalog" }
+      },
+      "user": {
+        "label": { "en": "Server-side entity name: User", "de": "Server Entitaet: Benutzer" },
+        "text": { "de": "Benutzer" }
+      },
+      "person": {
+        "label": { "en": "Server-side entity name: Person", "de": "Server Entitaet: Person" },
+        "text": { "de": "Person" }
+      }
+    },
+    "codeTypeNames": {
+      "coordinationStatus": {
+        "label": { "en": "Server code type name: COORDINATION_STATUS", "de": "Server Codetyp: KOORDINATIONSSTATUS" },
+        "text": { "de": "Koordinationsstatus" }
+      },
+      "taskStatus": {
+        "label": { "en": "Server code type name: TASK_STATUS", "de": "Server Codetyp: AUFGABENSTATUS" },
+        "text": { "de": "Aufgabenstatus" }
+      },
+      "taskScope": {
+        "label": { "en": "Server code type name: TASK_SCOPE", "de": "Server Codetyp: AUFGABENKONTEXT" },
+        "text": { "de": "Aufgabenkontext" }
+      },
+      "priority": {
+        "label": { "en": "Server code type name: PRIORITY", "de": "Server Codetyp: PRIORITAET" },
+        "text": { "de": "Prioritaet" }
+      },
+      "organ": {
+        "label": { "en": "Server code type name: ORGAN", "de": "Server Codetyp: ORGAN" },
+        "text": { "de": "Organ" }
+      },
+      "role": {
+        "label": { "en": "Server code type name: ROLE", "de": "Server Codetyp: ROLLE" },
+        "text": { "de": "Rolle" }
+      }
+    },
+    "codeValueNames": {
+      "taskStatus": {
+        "pending": {
+          "label": { "en": "Server code value TASK_STATUS.PENDING", "de": "Server Codewert TASK_STATUS.PENDING" },
+          "text": { "de": "Ausstehend" }
+        },
+        "completed": {
+          "label": { "en": "Server code value TASK_STATUS.COMPLETED", "de": "Server Codewert TASK_STATUS.COMPLETED" },
+          "text": { "de": "Abgeschlossen" }
+        },
+        "cancelled": {
+          "label": { "en": "Server code value TASK_STATUS.CANCELLED", "de": "Server Codewert TASK_STATUS.CANCELLED" },
+          "text": { "de": "Abgebrochen" }
+        }
+      },
+      "taskScope": {
+        "all": {
+          "label": { "en": "Server code value TASK_SCOPE.ALL", "de": "Server Codewert TASK_SCOPE.ALL" },
+          "text": { "de": "Alle" }
+        },
+        "patient": {
+          "label": { "en": "Server code value TASK_SCOPE.PATIENT", "de": "Server Codewert TASK_SCOPE.PATIENT" },
+          "text": { "de": "Patient" }
+        },
+        "episode": {
+          "label": { "en": "Server code value TASK_SCOPE.EPISODE", "de": "Server Codewert TASK_SCOPE.EPISODE" },
+          "text": { "de": "Episode" }
+        },
+        "coordinationProtocol": {
+          "label": { "en": "Server code value TASK_SCOPE.COORDINATION_PROTOCOL", "de": "Server Codewert TASK_SCOPE.COORDINATION_PROTOCOL" },
+          "text": { "de": "Koordinationsprotokoll" }
+        }
+      },
+      "priority": {
+        "low": {
+          "label": { "en": "Server code value PRIORITY.LOW", "de": "Server Codewert PRIORITY.LOW" },
+          "text": { "de": "Niedrig" }
+        },
+        "normal": {
+          "label": { "en": "Server code value PRIORITY.NORMAL", "de": "Server Codewert PRIORITY.NORMAL" },
+          "text": { "de": "Normal" }
+        },
+        "high": {
+          "label": { "en": "Server code value PRIORITY.HIGH", "de": "Server Codewert PRIORITY.HIGH" },
+          "text": { "de": "Hoch" }
+        }
+      }
+    }
+  }
+}

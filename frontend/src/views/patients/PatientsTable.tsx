@@ -35,10 +35,7 @@ export default function PatientsTable({
   const medicalSummary = (p: PatientListItem) => {
     const entries = p.static_medical_values ?? [];
     if (!entries.length) return '–';
-    const bloodType = entries.find((entry) => entry.name.toLowerCase().includes('blood'));
-    const primary = bloodType ?? entries[0];
-    if (entries.length > 1) return `${primary.value}/...(other values)`;
-    return primary.value;
+    return entries[0].value || '–';
   };
 
   return (

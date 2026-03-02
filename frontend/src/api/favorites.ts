@@ -11,6 +11,7 @@ export interface Favorite {
   episode_id: number | null;
   colloqium_id: number | null;
   coordination_id: number | null;
+  context_json: string | null;
   sort_pos: number;
   created_at: string;
   updated_at: string | null;
@@ -23,6 +24,7 @@ export interface FavoriteCreate {
   episode_id?: number | null;
   colloqium_id?: number | null;
   coordination_id?: number | null;
+  context_json?: string | null;
 }
 
 export const favoritesApi = {

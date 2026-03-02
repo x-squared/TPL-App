@@ -94,7 +94,11 @@ export default function CoordinationProtocolEventLogPanel({
           <ul className="coord-protocol-compact-list coord-event-log-list-items">
             {entries.map((entry) => (
               <li key={entry.id} className="coord-event-log-item">
-                <span className="coord-event-log-text">{entry.event}</span>
+                <span className="coord-event-log-text">
+                  <strong>{entry.event}</strong>
+                  {entry.task_text ? `: ${entry.task_text}` : ''}
+                  {entry.task_comment ? ` (${entry.task_comment})` : ''}
+                </span>
                 <span className="coord-event-log-time">{formatTimeOfDay(entry.time)}</span>
               </li>
             ))}

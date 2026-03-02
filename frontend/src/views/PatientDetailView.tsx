@@ -13,6 +13,7 @@ interface Props {
   initialTab?: PatientDetailTab;
   initialEpisodeId?: number | null;
   onOpenColloqium: (colloqiumId: number) => void;
+  onTabChange?: (tab: PatientDetailTab) => void;
 }
 
 export default function PatientDetailView({
@@ -21,11 +22,13 @@ export default function PatientDetailView({
   initialTab,
   initialEpisodeId,
   onOpenColloqium,
+  onTabChange,
 }: Props) {
   const model = usePatientDetailViewModel(patientId, initialTab, initialEpisodeId ?? null, onOpenColloqium);
   const patientFavorite = useFavoriteToggle(model.patient ? {
     favorite_type_key: 'PATIENT',
     patient_id: model.patient.id,
+    context_json: JSON.stringify({ patient_tab: model.tabsProps?.tab ?? 'patient' }),
     name: formatPatientFavoriteName({
       fullName: `${model.patient.first_name} ${model.patient.name}`.trim(),
       birthDate: model.patient.date_of_birth,
@@ -41,6 +44,14 @@ export default function PatientDetailView({
     return <p className="status">Patient not found.</p>;
   }
 
+  const tabsProps = {
+    ...model.tabsProps,
+    setTab: (tab: PatientDetailTab) => {
+      model.tabsProps?.setTab(tab);
+      onTabChange?.(tab);
+    },
+  };
+
   return (
     <div className="patient-detail">
       <div className="ui-detail-heading">
@@ -55,7 +66,7 @@ export default function PatientDetailView({
           />
         </div>
       </div>
-      <PatientDetailTabs {...model.tabsProps} />
+      <PatientDetailTabs {...tabsProps} />
     </div>
   );
 }

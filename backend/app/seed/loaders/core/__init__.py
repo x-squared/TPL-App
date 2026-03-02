@@ -10,6 +10,7 @@ from .procurement_fields import (
     sync_coordination_procurement_field_scopes,
     sync_coordination_procurement_field_templates,
 )
+from .translations import sync_translation_bundles_core
 from .users import sync_users, sync_users_core, sync_users_sample
 
 __all__ = [
@@ -27,4 +28,5 @@ __all__ = [
     "sync_medical_value_templates",
     "sync_coordination_procurement_field_templates",
     "sync_coordination_procurement_field_scopes",
+    "sync_translation_bundles_core",
 ]

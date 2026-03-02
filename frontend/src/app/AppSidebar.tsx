@@ -1,6 +1,7 @@
 import type { AppUser } from '../api';
+import { useI18n } from '../i18n/i18n';
 
-type Page = 'my-work' | 'patients' | 'donations' | 'colloquiums' | 'coordinations' | 'reports' | 'admin' | 'e2e-tests';
+type Page = 'my-work' | 'patients' | 'donations' | 'colloquiums' | 'coordinations' | 'reports' | 'admin' | 'e2e-tests' | 'preferences';
 
 interface AppSidebarProps {
   user: AppUser;
@@ -18,6 +19,7 @@ interface AppSidebarProps {
   canViewAdmin: boolean;
   devToolsEnabled: boolean;
   unreadInformationCount: number;
+  openTaskCount: number;
   onResetSelection: () => void;
   canGoBack: boolean;
   canGoForward: boolean;
@@ -26,6 +28,7 @@ interface AppSidebarProps {
   onGoForward: () => void;
   onToggleMarkedLocation: () => void;
   onQuickCreateCoordination: () => void;
+  onOpenPreferences: () => void;
   onLogout: () => void;
 }
 
@@ -45,6 +48,7 @@ export default function AppSidebar({
   canViewAdmin,
   devToolsEnabled,
   unreadInformationCount,
+  openTaskCount,
   onResetSelection,
   canGoBack,
   canGoForward,
@@ -53,8 +57,11 @@ export default function AppSidebar({
   onGoForward,
   onToggleMarkedLocation,
   onQuickCreateCoordination,
+  onOpenPreferences,
   onLogout,
 }: AppSidebarProps) {
+  const { t } = useI18n();
+
   return (
     <aside className={`sidebar ${sidebarOpen ? 'open' : 'collapsed'}`}>
       <div className="sidebar-top">
@@ -84,10 +91,10 @@ export default function AppSidebar({
             setPage('my-work');
             onResetSelection();
           }}
-          title={`My Work (${unreadInformationCount})`}
+          title={`${t('sidebar.nav.myWork', 'My Work')} (${openTaskCount} | ${unreadInformationCount})`}
         >
           <span className="nav-icon">{'\u2606'}</span>
-          {sidebarOpen && <span className="nav-label">{`My Work (${unreadInformationCount})`}</span>}
+          {sidebarOpen && <span className="nav-label">{`${t('sidebar.nav.myWork', 'My Work')} (${openTaskCount} | ${unreadInformationCount})`}</span>}
         </button>
         {canViewPatients && (
           <button
@@ -96,10 +103,10 @@ export default function AppSidebar({
               setPage('patients');
               onResetSelection();
             }}
-            title="Recipients"
+            title={t('sidebar.nav.recipients', 'Recipients')}
           >
             <span className="nav-icon">{'\u2695'}</span>
-            {sidebarOpen && <span className="nav-label">Recipients</span>}
+            {sidebarOpen && <span className="nav-label">{t('sidebar.nav.recipients', 'Recipients')}</span>}
           </button>
         )}
         {canViewDonations && (
@@ -109,10 +116,10 @@ export default function AppSidebar({
               setPage('donations');
               onResetSelection();
             }}
-            title="Donors"
+            title={t('sidebar.nav.donors', 'Donors')}
           >
             <span className="nav-icon">{'\u25C8'}</span>
-            {sidebarOpen && <span className="nav-label">Donors</span>}
+            {sidebarOpen && <span className="nav-label">{t('sidebar.nav.donors', 'Donors')}</span>}
           </button>
         )}
         {canViewColloquiums && (
@@ -122,10 +129,10 @@ export default function AppSidebar({
               setPage('colloquiums');
               onResetSelection();
             }}
-            title="Colloquiums"
+            title={t('sidebar.nav.colloquiums', 'Colloquiums')}
           >
             <span className="nav-icon">{'\u2263'}</span>
-            {sidebarOpen && <span className="nav-label">Colloquiums</span>}
+            {sidebarOpen && <span className="nav-label">{t('sidebar.nav.colloquiums', 'Colloquiums')}</span>}
           </button>
         )}
         {canViewCoordinations && (
@@ -135,10 +142,10 @@ export default function AppSidebar({
               setPage('coordinations');
               onResetSelection();
             }}
-            title="Coordinations"
+            title={t('sidebar.nav.coordinations', 'Coordinations')}
           >
             <span className="nav-icon">{'\u23F1'}</span>
-            {sidebarOpen && <span className="nav-label">Coordinations</span>}
+            {sidebarOpen && <span className="nav-label">{t('sidebar.nav.coordinations', 'Coordinations')}</span>}
           </button>
         )}
         {canViewReports && (
@@ -148,10 +155,10 @@ export default function AppSidebar({
               setPage('reports');
               onResetSelection();
             }}
-            title="Reports"
+            title={t('sidebar.nav.reports', 'Reports')}
           >
             <span className="nav-icon">{'\u25A4'}</span>
-            {sidebarOpen && <span className="nav-label">Reports</span>}
+            {sidebarOpen && <span className="nav-label">{t('sidebar.nav.reports', 'Reports')}</span>}
           </button>
         )}
         {canViewAdmin && (
@@ -167,10 +174,10 @@ export default function AppSidebar({
                 setPage('admin');
                 onResetSelection();
               }}
-              title="Admin"
+              title={t('sidebar.nav.admin', 'Admin')}
             >
               <span className="nav-icon">{'\u2699'}</span>
-              {sidebarOpen && <span className="nav-label">Admin</span>}
+              {sidebarOpen && <span className="nav-label">{t('sidebar.nav.admin', 'Admin')}</span>}
             </button>
           </>
         )}
@@ -242,8 +249,14 @@ export default function AppSidebar({
               <strong>{user.name}</strong>
               <span>{user.ext_id}</span>
             </div>
+            <button
+              className="user-menu-action"
+              onClick={onOpenPreferences}
+            >
+              {t('sidebar.user.preferences', 'Preferences')}
+            </button>
             <button className="user-menu-action" onClick={onLogout}>
-              Log out
+              {t('sidebar.user.logout', 'Log out')}
             </button>
           </div>
         )}

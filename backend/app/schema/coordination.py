@@ -143,12 +143,16 @@ class CoordinationProtocolEventLogBase(BaseModel):
     event: str
     time: datetime
     task_id: int | None = None
+    task_text: str | None = None
+    task_comment: str | None = None
 
 
 class CoordinationProtocolEventLogCreate(BaseModel):
     organ_id: int
     event: str
     task_id: int | None = None
+    task_text: str | None = None
+    task_comment: str | None = None
 
     @field_validator("event")
     @classmethod

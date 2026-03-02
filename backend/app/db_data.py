@@ -1,9 +1,11 @@
 from __future__ import annotations
 
 import argparse
+import json
 import os
+from pathlib import Path
 
-from sqlalchemy import MetaData, text
+from sqlalchemy import MetaData, inspect, text
 
 
 def _configure_env(*, app_env: str | None, database_url: str | None, seed_profile: str | None) -> None:
@@ -36,6 +38,64 @@ def _clean_data() -> int:
                 conn.execute(text("DELETE FROM sqlite_sequence"))
             conn.execute(text("PRAGMA foreign_keys = ON"))
     return table_count
+
+
+def _write_translation_snapshot_file(*, bundles: list[dict[str, object]]) -> Path:
+    target = Path(__file__).resolve().parent / "seed" / "datasets" / "core" / "translations_runtime_snapshot.py"
+    lines = [
+        '"""Runtime translation snapshot written from DB during clean/refresh."""',
+        "",
+        f"RUNTIME_TRANSLATION_BUNDLES = {json.dumps(bundles, ensure_ascii=False, sort_keys=True, indent=4)}",
+        "",
+    ]
+    target.write_text("\n".join(lines), encoding="utf-8")
+    return target
+
+
+def _export_translation_snapshot_to_core_seed() -> tuple[Path, int]:
+    from .database import engine
+
+    bundles: list[dict[str, object]] = []
+    with engine.begin() as conn:
+        inspector = inspect(conn)
+        if inspector.has_table("TRANSLATION_BUNDLE"):
+            rows = conn.execute(
+                text('SELECT "LOCALE" AS locale, "PAYLOAD_JSON" AS payload_json FROM "TRANSLATION_BUNDLE" ORDER BY "LOCALE"')
+            ).mappings().all()
+            for row in rows:
+                locale = (row.get("locale") or "").strip().lower()
+                raw_payload = row.get("payload_json")
+                if not locale:
+                    continue
+                entries: dict[str, str] = {}
+                if isinstance(raw_payload, str) and raw_payload.strip():
+                    try:
+                        parsed = json.loads(raw_payload)
+                        if isinstance(parsed, dict):
+                            for key, value in parsed.items():
+                                if isinstance(key, str) and isinstance(value, str) and key.strip() and value.strip():
+                                    entries[key.strip()] = value
+                    except json.JSONDecodeError:
+                        entries = {}
+                bundles.append({"locale": locale, "entries": entries})
+        elif inspector.has_table("TRANSLATION_OVERRIDE"):
+            rows = conn.execute(
+                text(
+                    'SELECT "LOCALE" AS locale, "KEY" AS key, "TEXT" AS text FROM "TRANSLATION_OVERRIDE" '
+                    'ORDER BY "LOCALE", "KEY", "ID"'
+                )
+            ).mappings().all()
+            by_locale: dict[str, dict[str, str]] = {}
+            for row in rows:
+                locale = (row.get("locale") or "").strip().lower()
+                key = (row.get("key") or "").strip()
+                value = (row.get("text") or "").strip()
+                if not locale or not key or not value:
+                    continue
+                by_locale.setdefault(locale, {})[key] = value
+            bundles = [{"locale": locale, "entries": entries} for locale, entries in sorted(by_locale.items())]
+    target = _write_translation_snapshot_file(bundles=bundles)
+    return target, len(bundles)
 
 
 def _seed(*, app_env: str | None, seed_profile: str | None) -> dict[str, object]:
@@ -302,6 +362,8 @@ def main() -> int:
     _configure_env(app_env=args.env, database_url=args.db_url, seed_profile=args.seed_profile)
 
     if args.mode in {"clean", "refresh"}:
+        snapshot_path, bundle_count = _export_translation_snapshot_to_core_seed()
+        print(f"Translation snapshot exported: {snapshot_path} (locales: {bundle_count})")
         cleaned_tables = _clean_data()
         print(f"Data clean complete. Tables wiped: {cleaned_tables}")
 

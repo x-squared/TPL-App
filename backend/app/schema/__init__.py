@@ -173,5 +173,7 @@ from .tasking import (
     TaskTemplateUpdate,
     TaskUpdate,
 )
+from .user_preferences import UserPreferencesResponse, UserPreferencesUpdate
+from .translation import TranslationOverridesResponse, TranslationOverridesUpdate
 
 __all__ = [name for name in globals() if not name.startswith("_")]

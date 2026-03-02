@@ -1,9 +1,10 @@
 import { useColloquiumAgendaManager } from './hooks/useColloquiumAgendaManager';
 import { useColloquiumGeneralDetails } from './hooks/useColloquiumGeneralDetails';
 import { useColloquiumProtocolDraftSync } from './hooks/useColloquiumProtocolDraftSync';
+import type { ColloquiumDetailTab } from './colloquiumDetailViewModelTypes';
 
-export function useColloquiumDetailViewModel(colloqiumId: number) {
-  const general = useColloquiumGeneralDetails(colloqiumId);
+export function useColloquiumDetailViewModel(colloqiumId: number, initialTab?: ColloquiumDetailTab) {
+  const general = useColloquiumGeneralDetails(colloqiumId, initialTab);
   const agendas = useColloquiumAgendaManager(colloqiumId, general.colloqium?.colloqium_type?.organ_id);
 
   useColloquiumProtocolDraftSync({

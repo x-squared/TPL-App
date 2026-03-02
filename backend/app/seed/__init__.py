@@ -15,6 +15,7 @@ from .loaders.core import (
     sync_medical_value_groups,
     sync_medical_value_templates,
     sync_people_core,
+    sync_translation_bundles_core,
     sync_users_core,
     sync_users_sample,
 )
@@ -101,6 +102,12 @@ def get_seed_jobs() -> tuple[SeedJob, ...]:
             category="core",
             description="Load procurement field scopes",
             loader=sync_coordination_procurement_field_scopes,
+        ),
+        SeedJob(
+            key="core.translation_bundles",
+            category="core",
+            description="Load translation bundles (defaults + runtime snapshot)",
+            loader=sync_translation_bundles_core,
         ),
         SeedJob(
             key="sample.users",

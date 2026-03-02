@@ -22,13 +22,53 @@ interface EditFormState {
 
 interface CreateFormState extends EditFormState {}
 
+interface GroupTemplateCreateFormState {
+  key: string;
+  name: string;
+  description: string;
+  organ_id: number | null;
+  is_active: boolean;
+  sort_pos: number;
+}
+
+interface GroupTemplateEditFormState {
+  key: string;
+  name: string;
+  description: string;
+  organ_id: number | null;
+  is_active: boolean;
+  sort_pos: number;
+}
+
 interface AdminTaskTemplatesTabProps {
   templates: TaskTemplate[];
   groupTemplates: TaskGroupTemplate[];
+  taskScopeCodes: Code[];
+  organCodes: Code[];
   priorityCodes: Code[];
   loading: boolean;
   saving: boolean;
   error: string;
+  onCreateGroupTemplate: (payload: {
+    key: string;
+    name: string;
+    description: string;
+    scope_id: number;
+    organ_id: number | null;
+    is_active: boolean;
+    sort_pos: number;
+  }) => Promise<void>;
+  onUpdateGroupTemplate: (
+    taskGroupTemplateId: number,
+    payload: {
+      key: string;
+      name: string;
+      description: string;
+      organ_id: number | null;
+      is_active: boolean;
+      sort_pos: number;
+    },
+  ) => Promise<void>;
   onCreateTemplate: (payload: {
     task_group_template_id: number;
     description: string;
@@ -67,16 +107,30 @@ function buildInitialCreateForm(groupTemplates: TaskGroupTemplate[]): CreateForm
 export default function AdminTaskTemplatesTab({
   templates,
   groupTemplates,
+  taskScopeCodes,
+  organCodes,
   priorityCodes,
   loading,
   saving,
   error,
+  onCreateGroupTemplate,
+  onUpdateGroupTemplate,
   onCreateTemplate,
   onUpdateTemplate,
 }: AdminTaskTemplatesTabProps) {
   const [editingTemplateId, setEditingTemplateId] = useState<number | null>(null);
   const [editForm, setEditForm] = useState<EditFormState | null>(null);
   const [createForm, setCreateForm] = useState<CreateFormState>(buildInitialCreateForm(groupTemplates));
+  const [editingGroupTemplateId, setEditingGroupTemplateId] = useState<number | null>(null);
+  const [editGroupTemplateForm, setEditGroupTemplateForm] = useState<GroupTemplateEditFormState | null>(null);
+  const [createGroupTemplateForm, setCreateGroupTemplateForm] = useState<GroupTemplateCreateFormState>({
+    key: '',
+    name: '',
+    description: '',
+    organ_id: null,
+    is_active: true,
+    sort_pos: 0,
+  });
 
   useEffect(() => {
     if (groupTemplates.length === 0) return;
@@ -91,6 +145,11 @@ export default function AdminTaskTemplatesTab({
     () => [...templates].sort((a, b) => (a.sort_pos - b.sort_pos) || (a.id - b.id)),
     [templates],
   );
+  const sortedGroupTemplates = useMemo(
+    () => [...groupTemplates].sort((a, b) => (a.sort_pos - b.sort_pos) || (a.id - b.id)),
+    [groupTemplates],
+  );
+  const coordinationProtocolScopeId = taskScopeCodes.find((entry) => entry.key === 'COORDINATION_PROTOCOL')?.id ?? null;
 
   const startEdit = (template: TaskTemplate) => {
     setEditingTemplateId(template.id);
@@ -131,18 +190,252 @@ export default function AdminTaskTemplatesTab({
       is_active: createForm.is_active,
       sort_pos: createForm.sort_pos,
     });
-    setCreateForm(buildInitialCreateForm(groupTemplates));
+    setCreateForm((prev) => ({ ...buildInitialCreateForm(groupTemplates), task_group_template_id: prev.task_group_template_id }));
+  };
+
+  const startEditGroupTemplate = (template: TaskGroupTemplate) => {
+    setEditingGroupTemplateId(template.id);
+    setEditGroupTemplateForm({
+      key: template.key,
+      name: template.name,
+      description: template.description,
+      organ_id: template.organ_id,
+      is_active: template.is_active,
+      sort_pos: template.sort_pos,
+    });
+  };
+
+  const saveCreateGroupTemplate = async () => {
+    if (!coordinationProtocolScopeId) return;
+    if (!createGroupTemplateForm.key.trim() || !createGroupTemplateForm.name.trim()) return;
+    await onCreateGroupTemplate({
+      key: createGroupTemplateForm.key.trim(),
+      name: createGroupTemplateForm.name.trim(),
+      description: createGroupTemplateForm.description.trim(),
+      scope_id: coordinationProtocolScopeId,
+      organ_id: createGroupTemplateForm.organ_id,
+      is_active: createGroupTemplateForm.is_active,
+      sort_pos: createGroupTemplateForm.sort_pos,
+    });
+    setCreateGroupTemplateForm({
+      key: '',
+      name: '',
+      description: '',
+      organ_id: null,
+      is_active: true,
+      sort_pos: 0,
+    });
+  };
+
+  const saveEditGroupTemplate = async (taskGroupTemplateId: number) => {
+    if (!editGroupTemplateForm) return;
+    await onUpdateGroupTemplate(taskGroupTemplateId, {
+      key: editGroupTemplateForm.key.trim(),
+      name: editGroupTemplateForm.name.trim(),
+      description: editGroupTemplateForm.description.trim(),
+      organ_id: editGroupTemplateForm.organ_id,
+      is_active: editGroupTemplateForm.is_active,
+      sort_pos: editGroupTemplateForm.sort_pos,
+    });
+    setEditingGroupTemplateId(null);
+    setEditGroupTemplateForm(null);
   };
 
   return (
     <section className="detail-section ui-panel-section">
       <div className="detail-section-heading">
-        <h2>Task Templates</h2>
+        <h2>Coordination Protocol Task Templates</h2>
       </div>
       {loading && <p className="status">Loading task templates...</p>}
       {error && <ErrorBanner message={error} />}
       {!loading && (
         <>
+          <div className="admin-task-template-create admin-people-form">
+            <label>
+              <span>Group Key</span>
+              <input
+                className="detail-input"
+                value={createGroupTemplateForm.key}
+                onChange={(e) => setCreateGroupTemplateForm((prev) => ({ ...prev, key: e.target.value }))}
+                placeholder="COORD_PROTOCOL_COMMON"
+              />
+            </label>
+            <label>
+              <span>Group Name</span>
+              <input
+                className="detail-input"
+                value={createGroupTemplateForm.name}
+                onChange={(e) => setCreateGroupTemplateForm((prev) => ({ ...prev, name: e.target.value }))}
+                placeholder="Protocol - Common"
+              />
+            </label>
+            <label>
+              <span>Description</span>
+              <input
+                className="detail-input"
+                value={createGroupTemplateForm.description}
+                onChange={(e) => setCreateGroupTemplateForm((prev) => ({ ...prev, description: e.target.value }))}
+              />
+            </label>
+            <label>
+              <span>Organ</span>
+              <select
+                className="detail-input"
+                value={createGroupTemplateForm.organ_id ?? ''}
+                onChange={(e) => setCreateGroupTemplateForm((prev) => ({ ...prev, organ_id: e.target.value ? Number(e.target.value) : null }))}
+              >
+                <option value="">All organs</option>
+                {organCodes.map((organ) => (
+                  <option key={organ.id} value={organ.id}>
+                    {organ.name_default}
+                  </option>
+                ))}
+              </select>
+            </label>
+            <label>
+              <span>Active</span>
+              <input
+                type="checkbox"
+                checked={createGroupTemplateForm.is_active}
+                onChange={(e) => setCreateGroupTemplateForm((prev) => ({ ...prev, is_active: e.target.checked }))}
+              />
+            </label>
+            <label>
+              <span>Pos</span>
+              <input
+                className="detail-input"
+                type="number"
+                value={createGroupTemplateForm.sort_pos}
+                onChange={(e) => setCreateGroupTemplateForm((prev) => ({ ...prev, sort_pos: Number(e.target.value || 0) }))}
+              />
+            </label>
+            <div className="admin-proc-action-cell">
+              <button
+                className="save-btn"
+                disabled={saving || !createGroupTemplateForm.key.trim() || !createGroupTemplateForm.name.trim() || !coordinationProtocolScopeId}
+                onClick={() => { void saveCreateGroupTemplate(); }}
+              >
+                + Add Group Template
+              </button>
+            </div>
+          </div>
+
+          <div className="ui-table-wrap">
+            <table className="data-table">
+              <thead>
+                <tr>
+                  <th>Key</th>
+                  <th>Name</th>
+                  <th>Description</th>
+                  <th>Organ</th>
+                  <th>Active</th>
+                  <th>Pos</th>
+                  <th>Actions</th>
+                </tr>
+              </thead>
+              <tbody>
+                {sortedGroupTemplates.map((groupTemplate) => {
+                  const isEditing = editingGroupTemplateId === groupTemplate.id && editGroupTemplateForm !== null;
+                  return (
+                    <tr key={groupTemplate.id}>
+                      <td>
+                        {isEditing ? (
+                          <input
+                            className="detail-input"
+                            value={editGroupTemplateForm.key}
+                            onChange={(e) => setEditGroupTemplateForm((prev) => (prev ? { ...prev, key: e.target.value } : prev))}
+                          />
+                        ) : groupTemplate.key}
+                      </td>
+                      <td>
+                        {isEditing ? (
+                          <input
+                            className="detail-input"
+                            value={editGroupTemplateForm.name}
+                            onChange={(e) => setEditGroupTemplateForm((prev) => (prev ? { ...prev, name: e.target.value } : prev))}
+                          />
+                        ) : groupTemplate.name}
+                      </td>
+                      <td>
+                        {isEditing ? (
+                          <input
+                            className="detail-input"
+                            value={editGroupTemplateForm.description}
+                            onChange={(e) => setEditGroupTemplateForm((prev) => (prev ? { ...prev, description: e.target.value } : prev))}
+                          />
+                        ) : groupTemplate.description}
+                      </td>
+                      <td>
+                        {isEditing ? (
+                          <select
+                            className="detail-input"
+                            value={editGroupTemplateForm.organ_id ?? ''}
+                            onChange={(e) => setEditGroupTemplateForm((prev) => (prev ? { ...prev, organ_id: e.target.value ? Number(e.target.value) : null } : prev))}
+                          >
+                            <option value="">All organs</option>
+                            {organCodes.map((organ) => (
+                              <option key={organ.id} value={organ.id}>
+                                {organ.name_default}
+                              </option>
+                            ))}
+                          </select>
+                        ) : (groupTemplate.organ?.name_default ?? 'All organs')}
+                      </td>
+                      <td>
+                        {isEditing ? (
+                          <input
+                            type="checkbox"
+                            checked={editGroupTemplateForm.is_active}
+                            onChange={(e) => setEditGroupTemplateForm((prev) => (prev ? { ...prev, is_active: e.target.checked } : prev))}
+                          />
+                        ) : (groupTemplate.is_active ? 'Yes' : 'No')}
+                      </td>
+                      <td>
+                        {isEditing ? (
+                          <input
+                            className="detail-input"
+                            type="number"
+                            value={editGroupTemplateForm.sort_pos}
+                            onChange={(e) => setEditGroupTemplateForm((prev) => (prev ? { ...prev, sort_pos: Number(e.target.value || 0) } : prev))}
+                          />
+                        ) : groupTemplate.sort_pos}
+                      </td>
+                      <td className="admin-people-actions-cell">
+                        {isEditing ? (
+                          <div className="admin-inline-actions">
+                            <button
+                              className="save-btn"
+                              disabled={saving || !editGroupTemplateForm.key.trim() || !editGroupTemplateForm.name.trim()}
+                              onClick={() => { void saveEditGroupTemplate(groupTemplate.id); }}
+                            >
+                              ✓
+                            </button>
+                            <button
+                              className="cancel-btn"
+                              disabled={saving}
+                              onClick={() => { setEditingGroupTemplateId(null); setEditGroupTemplateForm(null); }}
+                            >
+                              ✕
+                            </button>
+                          </div>
+                        ) : (
+                          <button className="edit-btn" disabled={saving} onClick={() => startEditGroupTemplate(groupTemplate)}>
+                            ✎
+                          </button>
+                        )}
+                      </td>
+                    </tr>
+                  );
+                })}
+                {sortedGroupTemplates.length === 0 && (
+                  <tr>
+                    <td colSpan={7}>No coordination protocol group templates available.</td>
+                  </tr>
+                )}
+              </tbody>
+            </table>
+          </div>
+
           <div className="admin-task-template-create admin-people-form">
             <label>
               <span>Group Template</span>

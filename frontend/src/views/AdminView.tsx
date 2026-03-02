@@ -9,11 +9,14 @@ import AdminAccessRulesTab from './admin/tabs/AdminAccessRulesTab';
 import AdminPeopleTeamsTab from './admin/tabs/AdminPeopleTeamsTab';
 import AdminProcurementConfigTab from './admin/tabs/AdminProcurementConfigTab';
 import AdminTaskTemplatesTab from './admin/tabs/AdminTaskTemplatesTab';
+import AdminTranslationsTab from './admin/tabs/AdminTranslationsTab';
+import { useI18n } from '../i18n/i18n';
 import './AdminView.css';
 
-type AdminTabKey = 'overview' | 'access-rules' | 'people-teams' | 'task-templates' | 'procurement-config';
+type AdminTabKey = 'overview' | 'access-rules' | 'people-teams' | 'task-templates' | 'procurement-config' | 'translations';
 
 export default function AdminView() {
+  const { t } = useI18n();
   const [activeTab, setActiveTab] = useState<AdminTabKey>('overview');
   const accessRules = useAdminAccessRules();
   const peopleTeams = useAdminPeopleTeams();
@@ -29,7 +32,7 @@ export default function AdminView() {
   return (
     <>
       <header className="patients-header">
-        <h1>Admin</h1>
+        <h1>{t('app.admin.title', 'Admin')}</h1>
       </header>
 
       <nav className="detail-tabs">
@@ -38,35 +41,42 @@ export default function AdminView() {
           onClick={() => setActiveTab('overview')}
           type="button"
         >
-          Overview
+          {t('app.admin.tabs.overview', 'Overview')}
         </button>
         <button
           className={`detail-tab ${activeTab === 'access-rules' ? 'active' : ''}`}
           onClick={() => setActiveTab('access-rules')}
           type="button"
         >
-          Access Rules
+          {t('app.admin.tabs.accessRules', 'Access Rules')}
         </button>
         <button
           className={`detail-tab ${activeTab === 'people-teams' ? 'active' : ''}`}
           onClick={() => setActiveTab('people-teams')}
           type="button"
         >
-          People & Teams
+          {t('app.admin.tabs.peopleTeams', 'People & Teams')}
         </button>
         <button
           className={`detail-tab ${activeTab === 'task-templates' ? 'active' : ''}`}
           onClick={() => setActiveTab('task-templates')}
           type="button"
         >
-          Task Templates
+          {t('app.admin.tabs.taskTemplates', 'Task Templates')}
         </button>
         <button
           className={`detail-tab ${activeTab === 'procurement-config' ? 'active' : ''}`}
           onClick={() => setActiveTab('procurement-config')}
           type="button"
         >
-          Protocol Config
+          {t('app.admin.tabs.protocolConfig', 'Protocol Config')}
+        </button>
+        <button
+          className={`detail-tab ${activeTab === 'translations' ? 'active' : ''}`}
+          onClick={() => setActiveTab('translations')}
+          type="button"
+        >
+          {t('app.admin.tabs.translations', 'Translations')}
         </button>
       </nav>
 
@@ -108,10 +118,14 @@ export default function AdminView() {
         <AdminTaskTemplatesTab
           templates={taskTemplates.templates}
           groupTemplates={taskTemplates.groupTemplates}
+          taskScopeCodes={taskTemplates.taskScopeCodes}
+          organCodes={taskTemplates.organCodes}
           priorityCodes={taskTemplates.priorityCodes}
           loading={taskTemplates.loading}
           saving={taskTemplates.saving}
           error={taskTemplates.error}
+          onCreateGroupTemplate={taskTemplates.createGroupTemplate}
+          onUpdateGroupTemplate={taskTemplates.updateGroupTemplate}
           onCreateTemplate={taskTemplates.createTemplate}
           onUpdateTemplate={taskTemplates.updateTemplate}
         />
@@ -134,6 +148,9 @@ export default function AdminView() {
           onCreateScope={procurementConfig.createScope}
           onDeleteScope={procurementConfig.deleteScope}
         />
+      )}
+      {activeTab === 'translations' && (
+        <AdminTranslationsTab />
       )}
     </>
   );

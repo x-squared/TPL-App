@@ -1,0 +1,23 @@
+---
+description: Build text in English first, then add translation layer
+alwaysApply: true
+---
+
+# English-First Translation Rule
+
+- Define and maintain all product text in English first (keys + English defaults).
+- Add German as a separate translation layer, never by replacing English source text.
+- Keep i18n non-intrusive: use a shared translation helper/provider instead of scattering locale conditionals.
+- Use stable translation keys that make target usage identifiable for editors (for example `sidebar.user.logout`).
+- Built-in translation configuration must live in `frontend/src/i18n/translations.json` (not hardcoded maps in TS/TSX).
+- Keep translation JSON structured by path groups (for example `sidebar.nav.*`) and store per-item:
+  - `label` (language-specific admin-readable descriptor of UI/data target)
+  - `text` (language-specific translated value)
+- When adding new UI text:
+  1) add English key/default first,
+  2) then add/adjust the corresponding entry in `frontend/src/i18n/translations.json`.
+- Expose language selection in user-facing settings/dialogs when relevant.
+- Translation overlay editing is admin-owned configuration; do not place translation JSON editors in normal user preferences.
+- User preferences may store locale choice, but translation dictionaries/overrides must be managed in admin-only surfaces.
+- Every change to visible product text must include a translation-file impact review:
+  - update existing entry, add new entry, or explicitly document why no translation JSON update is needed.

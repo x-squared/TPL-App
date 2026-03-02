@@ -28,7 +28,7 @@ from .medical import (
 )
 from .patient import Absence, ContactInfo, Diagnosis, Patient
 from .person import Person, PersonTeam
-from .reference import Catalogue, Code
+from .reference import Catalogue, Code, TranslationBundle
 from .rbac import AccessPermission
 from .tasks import Task, TaskGroup, TaskGroupTemplate, TaskTemplate
 from .user import User
@@ -36,6 +36,7 @@ from .user import User
 __all__ = [
     "Code",
     "Catalogue",
+    "TranslationBundle",
     "AccessPermission",
     "User",
     "Patient",

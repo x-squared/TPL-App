@@ -15,6 +15,13 @@ export interface AppUser {
   permissions: string[];
 }
 
+export type AppStartPage = 'my-work' | 'patients' | 'donations' | 'colloquiums' | 'coordinations' | 'reports' | 'admin' | 'e2e-tests';
+
+export interface UserPreferences {
+  locale: 'en' | 'de';
+  start_page: AppStartPage;
+}
+
 export interface HealthInfo {
   status: string;
   env?: string;
@@ -23,6 +30,11 @@ export interface HealthInfo {
 
 export interface SupportTicketConfig {
   support_email: string;
+}
+
+export interface TranslationOverridesResponse {
+  locale: string;
+  entries: Record<string, string>;
 }
 
 export interface Code {
@@ -297,6 +309,25 @@ export const medicalValueGroupsApi = {
 export const usersApi = {
   listUsers: (roleKey?: string) =>
     request<AppUser[]>(`/users/${roleKey ? `?role_key=${encodeURIComponent(roleKey)}` : ''}`),
+  getMyUserPreferences: () =>
+    request<UserPreferences>('/user-preferences/me'),
+  updateMyUserPreferences: (data: Partial<UserPreferences>) =>
+    request<UserPreferences>('/user-preferences/me', {
+      method: 'PATCH',
+      body: JSON.stringify(data),
+    }),
+};
+
+export const translationsApi = {
+  getTranslationOverrides: (locale: string) =>
+    request<TranslationOverridesResponse>(`/translations/overrides?locale=${encodeURIComponent(locale)}`),
+  getAdminTranslationOverrides: (locale: string) =>
+    request<TranslationOverridesResponse>(`/admin/translations/?locale=${encodeURIComponent(locale)}`),
+  replaceAdminTranslationOverrides: (locale: string, entries: Record<string, string>) =>
+    request<TranslationOverridesResponse>(`/admin/translations/?locale=${encodeURIComponent(locale)}`, {
+      method: 'PUT',
+      body: JSON.stringify({ entries }),
+    }),
 };
 
 export const supportTicketApi = {

@@ -1,8 +1,9 @@
-import type { Code, Episode, Patient, Task, TaskGroup } from '../../api';
+import type { Code, ColloqiumAgenda, Episode, Patient, Task, TaskGroup } from '../../api';
 import TaskBoardActionForm from './TaskBoardActionForm';
 import {
   buildTaskReferences,
   formatDate,
+  formatDue,
   groupStateIndicator,
   isCancelledTask,
   isDoneTask,
@@ -17,6 +18,7 @@ import type {
   TaskGroupEditFormState,
   TaskReferenceSegment,
   TaskEditFormState,
+  TaskBoardContextTarget,
 } from './taskBoardTypes';
 
 interface TaskBoardRowsProps {
@@ -25,6 +27,7 @@ interface TaskBoardRowsProps {
   episodesById: Record<number, Episode>;
   priorityCodes: Code[];
   allUserOptions: Array<{ id: number; name: string }>;
+  colloqiumAgendasById: Record<number, ColloqiumAgenda>;
   editingTaskId: number | null;
   editForm: TaskEditFormState | null;
   setEditForm: (updater: (prev: TaskEditFormState | null) => TaskEditFormState | null) => void;
@@ -54,6 +57,31 @@ interface TaskBoardRowsProps {
   onStartCreateTask: (taskGroupId: number) => void;
   onSaveCreateTask: (taskGroupId: number) => void;
   onCancelCreateTask: () => void;
+  onOpenTaskContext?: (target: TaskBoardContextTarget) => void;
+  selectedTaskId: number | null;
+  onSelectTask: (taskId: number) => void;
+}
+
+function buildContextTarget(
+  group: TaskGroup,
+  colloqiumAgendasById: Record<number, ColloqiumAgenda>,
+): TaskBoardContextTarget {
+  if (group.coordination_id != null) return { type: 'COORDINATION', coordinationId: group.coordination_id };
+  if (group.colloqium_agenda_id != null) {
+    const agenda = colloqiumAgendasById[group.colloqium_agenda_id];
+    if (agenda?.colloqium_id != null) return { type: 'COLLOQUIUM', colloqiumId: agenda.colloqium_id };
+  }
+  if (group.episode_id != null) return { type: 'EPISODE', patientId: group.patient_id, episodeId: group.episode_id };
+  return { type: 'PATIENT', patientId: group.patient_id };
+}
+
+function toKindSpecificUntil(kindKey: 'TASK' | 'EVENT', value: string): string {
+  const raw = value.trim();
+  if (!raw) return raw;
+  const day = raw.slice(0, 10);
+  if (kindKey === 'TASK') return day;
+  if (raw.includes('T')) return raw.slice(0, 16);
+  return `${day}T00:00`;
 }
 
 function ReferenceCell({ references }: { references: TaskReferenceSegment[] }) {
@@ -79,6 +107,7 @@ export default function TaskBoardRows({
   episodesById,
   priorityCodes,
   allUserOptions,
+  colloqiumAgendasById,
   editingTaskId,
   editForm,
   setEditForm,
@@ -108,6 +137,9 @@ export default function TaskBoardRows({
   onStartCreateTask,
   onSaveCreateTask,
   onCancelCreateTask,
+  onOpenTaskContext,
+  selectedTaskId,
+  onSelectTask,
 }: TaskBoardRowsProps) {
   return (
     <>
@@ -118,6 +150,7 @@ export default function TaskBoardRows({
           const isCreating = !isClosedGroup && creatingGroupId === row.group.id && createForm !== null;
           return [
             <tr key={`group-${row.group.id}-${idx}`} className="task-board-group-row">
+              <td className="open-col"></td>
               <td className="task-board-state" title="Task group state" aria-label="Task group state">
                 {groupStateIndicator(row.state)}
               </td>
@@ -153,7 +186,7 @@ export default function TaskBoardRows({
             </tr>,
             isEditingGroup ? (
               <tr key={`group-edit-${row.group.id}`} className="task-board-inline-group-edit-row">
-                <td colSpan={11}>
+                <td colSpan={12}>
                   <div className="task-board-action-form">
                     <p className="task-board-action-title">
                       Edit group #{row.group.id}
@@ -201,13 +234,22 @@ export default function TaskBoardRows({
             ) : null,
             isCreating ? (
               <tr key={`group-add-${row.group.id}`} className="task-board-inline-create-row">
+                <td className="open-col"></td>
                 <td className="task-board-state">●</td>
                 <td>
                   <select
                     className="ui-filter-input task-board-cell-input"
                     value={createForm.kind_key}
                     onChange={(e) =>
-                      setCreateForm((prev) => (prev ? { ...prev, kind_key: e.target.value as 'TASK' | 'EVENT' } : prev))
+                      setCreateForm((prev) => {
+                        if (!prev) return prev;
+                        const nextKind = e.target.value as 'TASK' | 'EVENT';
+                        return {
+                          ...prev,
+                          kind_key: nextKind,
+                          until: toKindSpecificUntil(nextKind, prev.until),
+                        };
+                      })
                     }
                   >
                     <option value="TASK">Task</option>
@@ -254,7 +296,7 @@ export default function TaskBoardRows({
                 <td>
                   <input
                     className="ui-filter-input task-board-cell-input"
-                    type="datetime-local"
+                    type={createForm.kind_key === 'TASK' ? 'date' : 'datetime-local'}
                     value={createForm.until}
                     onChange={(e) => setCreateForm((prev) => (prev ? { ...prev, until: e.target.value } : prev))}
                   />
@@ -307,11 +349,25 @@ export default function TaskBoardRows({
           : cancelled
             ? 'task-board-task-row is-cancelled'
             : 'task-board-task-row';
+        const selectedClass = selectedTaskId === task.id ? ' is-selected' : '';
         const isEditing = editingTaskId === task.id && editForm !== null;
         const canFinalize = !done && !cancelled;
+        const contextTarget = buildContextTarget(row.group, colloqiumAgendasById);
 
         return [
-          <tr key={`task-${task.id}`} className={rowClass}>
+          <tr key={`task-${task.id}`} className={`${rowClass}${selectedClass}`} onClick={() => onSelectTask(task.id)}>
+            <td className="open-col">
+              {onOpenTaskContext ? (
+                <button
+                  className="open-btn"
+                  onClick={() => onOpenTaskContext(contextTarget)}
+                  title="Open context"
+                  aria-label="Open context"
+                >
+                  &#x279C;
+                </button>
+              ) : null}
+            </td>
             <td className="task-board-state">{statusIndicator(task)}</td>
             <td>
               {isEditing ? (
@@ -336,7 +392,15 @@ export default function TaskBoardRows({
                   className="ui-filter-input task-board-cell-input task-board-kind-select"
                   value={editForm.kind_key}
                   onChange={(e) =>
-                    setEditForm((prev) => (prev ? { ...prev, kind_key: e.target.value as 'TASK' | 'EVENT' } : prev))
+                    setEditForm((prev) => {
+                      if (!prev) return prev;
+                      const nextKind = e.target.value as 'TASK' | 'EVENT';
+                      return {
+                        ...prev,
+                        kind_key: nextKind,
+                        until: toKindSpecificUntil(nextKind, prev.until),
+                      };
+                    })
                   }
                 >
                   <option value="TASK">Task</option>
@@ -373,11 +437,11 @@ export default function TaskBoardRows({
               {isEditing ? (
                 <input
                   className="ui-filter-input task-board-cell-input"
-                  type="datetime-local"
+                  type={editForm.kind_key === 'TASK' ? 'date' : 'datetime-local'}
                   value={editForm.until}
                   onChange={(e) => setEditForm((prev) => (prev ? { ...prev, until: e.target.value } : prev))}
                 />
-              ) : formatDate(task.until)}
+              ) : formatDue(task)}
             </td>
             <td className="task-col-comment">
               {isEditing ? (
@@ -447,7 +511,7 @@ export default function TaskBoardRows({
           </tr>,
           actionState?.task.id === task.id ? (
             <tr key={`task-action-${task.id}`} className="task-board-inline-action-row">
-              <td colSpan={11}>
+              <td colSpan={12}>
                 <TaskBoardActionForm
                   actionState={actionState}
                   actionComment={actionComment}

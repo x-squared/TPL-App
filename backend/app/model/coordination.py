@@ -145,6 +145,11 @@ class Coordination(Base):
         back_populates="coordination",
         cascade="all, delete-orphan",
     )
+    task_groups = relationship(
+        "TaskGroup",
+        back_populates="coordination",
+        cascade="all, delete-orphan",
+    )
 
 
 class CoordinationProtocolEventLog(Base):
@@ -158,6 +163,8 @@ class CoordinationProtocolEventLog(Base):
     event = Column("EVENT", String(128), nullable=False, default="")
     time = Column("TIME", DateTime(timezone=True), server_default=func.now(), nullable=False, index=True)
     task_id = Column("TASK_ID", Integer, ForeignKey("TASK.ID"), nullable=True, index=True)
+    task_text = Column("TASK_TEXT", String(512), nullable=True)
+    task_comment = Column("TASK_COMMENT", String(512), nullable=True)
     changed_by_id = Column("CHANGED_BY", Integer, ForeignKey("USER.ID"), nullable=True)
     created_at = Column("CREATED_AT", DateTime(timezone=True), server_default=func.now())
     updated_at = Column("UPDATED_AT", DateTime(timezone=True), onupdate=func.now())

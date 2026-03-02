@@ -7,7 +7,7 @@ from sqlalchemy import or_
 from sqlalchemy.orm import Session, joinedload
 
 from ...enums import PriorityKey, TaskKindKey, TaskStatusKey
-from ...models import Code, Task, TaskGroup, User
+from ...models import Code, CoordinationProtocolEventLog, Task, TaskGroup, User
 from ...schemas import TaskCreate, TaskUpdate
 
 
@@ -81,10 +81,54 @@ def _task_query(db: Session):
     )
 
 
-def list_tasks(*, task_group_id: int | None, status_key: list[str] | None, db: Session) -> list[Task]:
+def _build_protocol_task_event_name(*, task: Task, status_key: str | None) -> str:
+    if status_key == TaskStatusKey.CANCELLED.value:
+        return "Task dropped"
+    if (task.kind_key or TaskKindKey.TASK.value) == TaskKindKey.EVENT.value:
+        return "Event registered"
+    return "Task completed"
+
+
+def _maybe_create_coordination_protocol_event_log(
+    *,
+    task: Task,
+    status_key_before: str | None,
+    status_key_after: str | None,
+    changed_by_id: int,
+    db: Session,
+) -> None:
+    if not _is_closed_status_key(status_key_after):
+        return
+    if _is_closed_status_key(status_key_before):
+        return
+    task_group = db.query(TaskGroup).filter(TaskGroup.id == task.task_group_id).first()
+    if not task_group or task_group.coordination_id is None or task_group.organ_id is None:
+        return
+    db.add(
+        CoordinationProtocolEventLog(
+            coordination_id=task_group.coordination_id,
+            organ_id=task_group.organ_id,
+            event=_build_protocol_task_event_name(task=task, status_key=status_key_after),
+            task_id=task.id,
+            task_text=(task.description or "").strip() or None,
+            task_comment=(task.comment or "").strip() or None,
+            changed_by_id=changed_by_id,
+        )
+    )
+
+
+def list_tasks(
+    *,
+    task_group_id: int | None,
+    status_key: list[str] | None,
+    assigned_to_id: int | None,
+    db: Session,
+) -> list[Task]:
     query = _task_query(db)
     if task_group_id is not None:
         query = query.filter(Task.task_group_id == task_group_id)
+    if assigned_to_id is not None:
+        query = query.filter(Task.assigned_to_id == assigned_to_id)
     if status_key:
         normalized = [value.upper() for value in status_key]
         query = query.filter(Task.status_key.in_(normalized))
@@ -147,6 +191,14 @@ def create_task(*, payload: TaskCreate, changed_by_id: int, db: Session) -> Task
         changed_by_id=changed_by_id,
     )
     db.add(task)
+    db.flush()
+    _maybe_create_coordination_protocol_event_log(
+        task=task,
+        status_key_before=None,
+        status_key_after=status.key,
+        changed_by_id=changed_by_id,
+        db=db,
+    )
     db.commit()
     db.refresh(task)
     return _task_query(db).filter(Task.id == task.id).first()
@@ -170,7 +222,8 @@ def update_task(*, task_id: int, payload: TaskUpdate, changed_by_id: int, db: Se
         raise HTTPException(status_code=422, detail="until cannot be null")
     if "kind_key" in data:
         data["kind_key"] = _normalize_kind_or_422(data["kind_key"], field_name="kind_key")
-    status_key = task.status_key or (task.status.key if task.status else None)
+    status_key_before = task.status_key or (task.status.key if task.status else None)
+    status_key = status_key_before
     if "status_id" in data and data["status_id"] is not None:
         status = _get_code_or_422(
             db=db,
@@ -193,6 +246,13 @@ def update_task(*, task_id: int, payload: TaskUpdate, changed_by_id: int, db: Se
         task.closed_at = None
         task.closed_by_id = None
     task.changed_by_id = changed_by_id
+    _maybe_create_coordination_protocol_event_log(
+        task=task,
+        status_key_before=status_key_before,
+        status_key_after=status_key,
+        changed_by_id=changed_by_id,
+        db=db,
+    )
     db.commit()
     return _task_query(db).filter(Task.id == task_id).first()
 

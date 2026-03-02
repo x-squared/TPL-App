@@ -55,5 +55,9 @@ For any new complex view (like patients or colloquiums), follow this structure b
   - Keep confirmation wording and Yes/No controls consistent across tables.
 - **Behavior preservation**: Refactors must not change UX logic unless explicitly requested.
 - **Validation**: After refactors, run frontend build/typecheck and fix all issues before finishing.
+- **Preferences + navigation consistency**:
+  - User preferences views must follow the same section/panel design system as other complex views (no ad-hoc layouts).
+  - Start-view selection must render human labels from a centralized navigation config layer, not raw route keys.
+  - Start-view labels must be written exactly as shown in navigation for the active language setting (for example `Recipients` in EN, translated equivalent in DE), not raw route keys (for example not `patients`).
 
 Use this pattern for all upcoming complex views unless the user asks for a different architecture.

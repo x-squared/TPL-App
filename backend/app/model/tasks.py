@@ -56,7 +56,7 @@ class TaskGroupTemplate(Base):
             native_enum=False,
             validate_strings=True,
             values_callable=lambda enum_cls: [entry.value for entry in enum_cls],
-            length=16,
+            length=32,
         ),
         nullable=True,
         comment="Template scope enum key mirror of `scope_id`.",
@@ -294,6 +294,24 @@ class TaskGroup(Base):
         comment="Optional colloqium agenda origin for this task group.",
         info={"label": "Colloqium Agenda"},
     )
+    coordination_id = Column(
+        "COORDINATION_ID",
+        Integer,
+        ForeignKey("COORDINATION.ID"),
+        nullable=True,
+        index=True,
+        comment="Optional coordination context for protocol task groups.",
+        info={"label": "Coordination"},
+    )
+    organ_id = Column(
+        "ORGAN_ID",
+        Integer,
+        ForeignKey("CODE.ID"),
+        nullable=True,
+        index=True,
+        comment="Optional organ context (`CODE.ORGAN`) for coordination protocol task groups.",
+        info={"label": "Organ"},
+    )
     tpl_phase_id = Column(
         "TPL_PHASE_ID",
         Integer,
@@ -329,6 +347,8 @@ class TaskGroup(Base):
     task_group_template = relationship("TaskGroupTemplate", back_populates="task_groups")
     episode = relationship("Episode", back_populates="task_groups")
     colloqium_agenda = relationship("ColloqiumAgenda")
+    coordination = relationship("Coordination", back_populates="task_groups")
+    organ = relationship("Code", foreign_keys=[organ_id])
     tpl_phase = relationship("Code", foreign_keys=[tpl_phase_id])
     changed_by_user = relationship("User", foreign_keys=[changed_by_id])
     tasks = relationship("Task", back_populates="task_group", cascade="all, delete-orphan")

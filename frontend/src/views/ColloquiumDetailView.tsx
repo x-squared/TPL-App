@@ -1,4 +1,5 @@
 import ColloquiumDetailTabs from './colloquiums/detail/ColloquiumDetailTabs';
+import type { ColloquiumDetailTab } from './colloquiums/detail/colloquiumDetailViewModelTypes';
 import FavoriteButton from './layout/FavoriteButton';
 import { useFavoriteToggle } from './layout/useFavoriteToggle';
 import { useColloquiumDetailViewModel } from './colloquiums/detail/useColloquiumDetailViewModel';
@@ -11,6 +12,8 @@ interface Props {
   colloqiumId: number;
   onBack: () => void;
   onOpenEpisode: (patientId: number, episodeId: number) => void;
+  initialTab?: ColloquiumDetailTab;
+  onTabChange?: (tab: ColloquiumDetailTab) => void;
   standalone?: boolean;
 }
 
@@ -18,12 +21,15 @@ export default function ColloquiumDetailView({
   colloqiumId,
   onBack,
   onOpenEpisode,
+  initialTab,
+  onTabChange,
   standalone = false,
 }: Props) {
-  const model = useColloquiumDetailViewModel(colloqiumId);
+  const model = useColloquiumDetailViewModel(colloqiumId, initialTab);
   const colloquiumFavorite = useFavoriteToggle(model.colloqium ? {
     favorite_type_key: 'COLLOQUIUM',
     colloqium_id: model.colloqium.id,
+    context_json: JSON.stringify({ colloquium_tab: model.tab }),
     name: `${model.colloqium.colloqium_type?.name ?? 'Colloquium'} (${model.colloqium.date})`,
   } : null);
 
@@ -37,7 +43,10 @@ export default function ColloquiumDetailView({
       loading={model.loading}
       colloqium={model.colloqium}
       tab={model.tab}
-      setTab={model.setTab}
+      setTab={(tab) => {
+        model.setTab(tab);
+        onTabChange?.(tab);
+      }}
       onBack={onBack}
       standalone={standalone}
       onOpenDetachedProtocol={openDetachedProtocol}
