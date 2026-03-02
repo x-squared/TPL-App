@@ -6,7 +6,7 @@ from ....models import Code, ContactInfo, Episode, EpisodeOrgan, MedicalValue, M
 
 def sync_patients(db: Session) -> None:
     """Replace all PATIENT and CONTACT_INFO rows with seed data on every startup."""
-    from ...datasets.sample.patient_cases import CONTACT_INFOS, EPISODES, PATIENTS
+    from ...datasets.sample.patient_cases import CONTACT_INFOS, EPISODES, PATIENTS, SAMPLE_CHANGED_BY_ID
 
     db.query(EpisodeOrgan).delete()
     db.query(Episode).delete()
@@ -78,7 +78,7 @@ def sync_patients(db: Session) -> None:
             db,
             patient.id,
             include_donor_context=False,
-            changed_by_id=2,
+            changed_by_id=SAMPLE_CHANGED_BY_ID,
         )
         blood_type_key = patient_blood_types_by_pid.get(pid) or ""
         if static_blood_type_template and blood_type_key:
@@ -93,5 +93,5 @@ def sync_patients(db: Session) -> None:
             )
             if row:
                 row.value = blood_type_key
-                row.changed_by_id = 2
+                row.changed_by_id = SAMPLE_CHANGED_BY_ID
     db.commit()

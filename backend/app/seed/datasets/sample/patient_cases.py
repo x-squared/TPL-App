@@ -2,6 +2,7 @@ from datetime import date, datetime
 
 # Patient-centric sample seed bundle.
 # Keep related demo data together so a single case can be edited coherently.
+SAMPLE_CHANGED_BY_ID = 2
 
 PATIENTS = [
     {
@@ -13,7 +14,7 @@ PATIENTS = [
         "lang": "Deutsch",
         "translate": False,
         "blood_type_key": "A+",
-        "changed_by_id": 2,
+        "changed_by_id": SAMPLE_CHANGED_BY_ID,
     },
     {
         "pid": "4812",
@@ -24,7 +25,7 @@ PATIENTS = [
         "lang": "Deutsch",
         "translate": False,
         "blood_type_key": "O+",
-        "changed_by_id": 2,
+        "changed_by_id": SAMPLE_CHANGED_BY_ID,
     },
     {
         "pid": "4923",
@@ -35,7 +36,7 @@ PATIENTS = [
         "lang": "Deutsch",
         "translate": False,
         "blood_type_key": "AB+",
-        "changed_by_id": 2,
+        "changed_by_id": SAMPLE_CHANGED_BY_ID,
     },
     {
         "pid": "5034",
@@ -46,7 +47,7 @@ PATIENTS = [
         "lang": "Deutsch",
         "translate": False,
         "blood_type_key": "B+",
-        "changed_by_id": 2,
+        "changed_by_id": SAMPLE_CHANGED_BY_ID,
     },
 ]
 
@@ -59,7 +60,7 @@ CONTACT_INFOS = [
         "comment": "",
         "main": True,
         "pos": 1,
-        "changed_by_id": 2,
+        "changed_by_id": SAMPLE_CHANGED_BY_ID,
     },
     {
         "patient_pid": "4711",
@@ -69,7 +70,7 @@ CONTACT_INFOS = [
         "comment": "",
         "main": True,
         "pos": 2,
-        "changed_by_id": 2,
+        "changed_by_id": SAMPLE_CHANGED_BY_ID,
     },
     {
         "patient_pid": "4711",
@@ -79,7 +80,7 @@ CONTACT_INFOS = [
         "comment": "Schwester, Nur Notfall",
         "main": False,
         "pos": 3,
-        "changed_by_id": 2,
+        "changed_by_id": SAMPLE_CHANGED_BY_ID,
     },
 ]
 
@@ -89,21 +90,21 @@ EPISODES = [
         "organ_keys": ["LIVER"],
         "start": date(2026, 1, 15),
         "status_key": "ABKLAERUNG",
-        "changed_by_id": 2,
+        "changed_by_id": SAMPLE_CHANGED_BY_ID,
     },
     {
         "patient_pid": "4812",
         "organ_keys": ["KIDNEY", "PANCREAS"],
         "start": date(2025, 7, 10),
         "status_key": "ABKLAERUNG",
-        "changed_by_id": 2,
+        "changed_by_id": SAMPLE_CHANGED_BY_ID,
     },
     {
         "patient_pid": "5034",
         "organ_keys": ["LIVER", "KIDNEY"],
         "start": date(2026, 2, 3),
         "status_key": "ABKLAERUNG",
-        "changed_by_id": 2,
+        "changed_by_id": SAMPLE_CHANGED_BY_ID,
     },
 ]
 
@@ -119,7 +120,7 @@ COORDINATIONS = [
         "swtpl_nr": "SW471101",
         "national_coordinator": "Sample Coordinator",
         "comment": "Open sample coordination for Hans Test.",
-        "changed_by_id": 2,
+        "changed_by_id": SAMPLE_CHANGED_BY_ID,
     },
     {
         "seed_key": "ANNA_OPEN_COORDINATION",
@@ -132,7 +133,7 @@ COORDINATIONS = [
         "swtpl_nr": "SW481201",
         "national_coordinator": "Sample Coordinator",
         "comment": "Open sample coordination for Anna.",
-        "changed_by_id": 2,
+        "changed_by_id": SAMPLE_CHANGED_BY_ID,
     },
 ]
 
@@ -144,7 +145,7 @@ TASK_GROUPS = [
         "name": "Test Base Group",
         "episode_id": None,
         "tpl_phase_key": None,
-        "changed_by_id": 2,
+        "changed_by_id": SAMPLE_CHANGED_BY_ID,
     },
 ]
 
@@ -160,7 +161,7 @@ TASKS = [
         "closed_at": None,
         "closed_by_ext_id": None,
         "comment": "",
-        "changed_by_id": 2,
+        "changed_by_id": SAMPLE_CHANGED_BY_ID,
     },
     {
         "task_group_seed_key": "TEST_BASE",
@@ -173,7 +174,7 @@ TASKS = [
         "closed_at": None,
         "closed_by_ext_id": None,
         "comment": "",
-        "changed_by_id": 2,
+        "changed_by_id": SAMPLE_CHANGED_BY_ID,
     },
     {
         "task_group_seed_key": "TEST_BASE",
@@ -186,6 +187,6 @@ TASKS = [
         "closed_at": None,
         "closed_by_ext_id": None,
         "comment": "",
-        "changed_by_id": 2,
+        "changed_by_id": SAMPLE_CHANGED_BY_ID,
     },
 ]

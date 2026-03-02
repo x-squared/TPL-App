@@ -47,9 +47,16 @@ export default function useTaskBoardData(criteria: TaskBoardCriteria, statusKeys
     const loadData = async () => {
       setState((prev) => ({ ...prev, loading: true, error: '' }));
       try {
+        const extraTaskGroupParams = criteria.extraParams ?? {};
         const groupParams = {
           patient_id: criteria.patientId,
           episode_id: criteria.episodeId ?? undefined,
+          ...(typeof extraTaskGroupParams.coordination_id === 'number'
+            ? { coordination_id: extraTaskGroupParams.coordination_id }
+            : {}),
+          ...(typeof extraTaskGroupParams.organ_id === 'number'
+            ? { organ_id: extraTaskGroupParams.organ_id }
+            : {}),
         };
         const groups = await api.listTaskGroups(groupParams);
         const [me, users, organs, priorities, taskStatuses] = await Promise.all([
@@ -149,7 +156,16 @@ export default function useTaskBoardData(criteria: TaskBoardCriteria, statusKeys
     return () => {
       cancelled = true;
     };
-  }, [criteria.patientId, criteria.episodeId, criteria.colloqiumAgendaId, criteria.tplPhaseId, criteria.assignedToId, statusKeysToLoad, reloadToken]);
+  }, [
+    criteria.patientId,
+    criteria.episodeId,
+    criteria.colloqiumAgendaId,
+    criteria.tplPhaseId,
+    criteria.assignedToId,
+    criteria.extraParams,
+    statusKeysToLoad,
+    reloadToken,
+  ]);
 
   return {
     ...state,

@@ -1,0 +1,45 @@
+---
+description: Enforce proactive clean architecture and drift prevention
+alwaysApply: true
+---
+
+# Clean Architecture Enforcement
+
+Apply this quality gate to every non-trivial change set.
+
+## 1) Drift Sweep (required)
+
+Before finishing, explicitly check for architectural drift in touched flows:
+
+- duplicated business logic across views/services
+- router logic that should live in feature services
+- ad-hoc UI implementations where a shared component already exists
+- expanding monolith files that should be decomposed
+
+## 2) Shared-First Rule
+
+- If a shared abstraction exists (component/hook/service), extend or reuse it first.
+- Do not introduce parallel implementations without a documented reason.
+- For task list flows, default to the shared TaskBoard pattern unless technically impossible.
+
+## 3) Thin-Boundary Rule
+
+- Routers should stay transport-thin (validation/dependency wiring/delegation).
+- Put orchestration, subprocess/query workflow, and domain decisions into feature services.
+- Keep model/schema contracts decoupled from transport concerns.
+
+## 4) Decomposition Trigger
+
+When a touched file is large and gaining responsibilities, extract focused modules now (not later):
+
+- move pure logic to utilities/services
+- move stateful behavior to focused hooks/services
+- keep rendering/orchestration boundaries clear
+
+## 5) Completion Gate
+
+In the final note, include:
+
+- what drift was reduced
+- what was intentionally not refactored (and why)
+- where follow-up decomposition is still recommended

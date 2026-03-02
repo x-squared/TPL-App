@@ -1,4 +1,5 @@
 """Seed data for task group templates and task templates."""
+SAMPLE_CHANGED_BY_ID = 2
 
 # ---- task group templates ----
 TASK_GROUP_TEMPLATES = [
@@ -11,7 +12,7 @@ TASK_GROUP_TEMPLATES = [
         "tpl_phase_key": None,
         "is_active": True,
         "sort_pos": 1,
-        "changed_by_id": 2,
+        "changed_by_id": SAMPLE_CHANGED_BY_ID,
     },
     {
         "key": "COORD_PROTOCOL_COMMON",
@@ -22,7 +23,7 @@ TASK_GROUP_TEMPLATES = [
         "tpl_phase_key": None,
         "is_active": True,
         "sort_pos": 10,
-        "changed_by_id": 2,
+        "changed_by_id": SAMPLE_CHANGED_BY_ID,
     },
     {
         "key": "COORD_PROTOCOL_HEART",
@@ -33,7 +34,7 @@ TASK_GROUP_TEMPLATES = [
         "tpl_phase_key": None,
         "is_active": True,
         "sort_pos": 20,
-        "changed_by_id": 2,
+        "changed_by_id": SAMPLE_CHANGED_BY_ID,
     },
 ]
 
@@ -47,7 +48,7 @@ TASK_TEMPLATES = [
         "offset_minutes_default": -2880,
         "is_active": True,
         "sort_pos": 1,
-        "changed_by_id": 2,
+        "changed_by_id": SAMPLE_CHANGED_BY_ID,
     },
     {
         "task_group_template_key": "TEST_BASE_TEMPLATE",
@@ -57,7 +58,7 @@ TASK_TEMPLATES = [
         "offset_minutes_default": 0,
         "is_active": True,
         "sort_pos": 2,
-        "changed_by_id": 2,
+        "changed_by_id": SAMPLE_CHANGED_BY_ID,
     },
     {
         "task_group_template_key": "TEST_BASE_TEMPLATE",
@@ -67,7 +68,7 @@ TASK_TEMPLATES = [
         "offset_minutes_default": 10080,
         "is_active": True,
         "sort_pos": 3,
-        "changed_by_id": 2,
+        "changed_by_id": SAMPLE_CHANGED_BY_ID,
     },
     {
         "task_group_template_key": "COORD_PROTOCOL_COMMON",
@@ -77,7 +78,7 @@ TASK_TEMPLATES = [
         "offset_minutes_default": 0,
         "is_active": True,
         "sort_pos": 1,
-        "changed_by_id": 2,
+        "changed_by_id": SAMPLE_CHANGED_BY_ID,
     },
     {
         "task_group_template_key": "COORD_PROTOCOL_COMMON",
@@ -87,7 +88,7 @@ TASK_TEMPLATES = [
         "offset_minutes_default": 0,
         "is_active": True,
         "sort_pos": 2,
-        "changed_by_id": 2,
+        "changed_by_id": SAMPLE_CHANGED_BY_ID,
     },
     {
         "task_group_template_key": "COORD_PROTOCOL_HEART",
@@ -97,7 +98,7 @@ TASK_TEMPLATES = [
         "offset_minutes_default": 0,
         "is_active": True,
         "sort_pos": 1,
-        "changed_by_id": 2,
+        "changed_by_id": SAMPLE_CHANGED_BY_ID,
     },
 ]
 

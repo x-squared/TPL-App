@@ -6,8 +6,9 @@ import '../layout/PanelLayout.css';
 import './TaskBoard.css';
 import TaskBoardFilters from './TaskBoardFilters';
 import TaskBoardTable from './TaskBoardTable';
-import { computeGroupState, isCancelledTask, isDoneTask, isUrgentTask, sortTasks } from './taskBoardUtils';
+import { computeGroupState, isCancelledTask, isDoneTask, sortTasks } from './taskBoardUtils';
 import { buildDefaultTaskDescription, findContextManagedGroup } from './taskBoardContext';
+import { sortFlatTaskRows, type FlatTaskRow } from './taskBoardSorting';
 import type {
   TaskBoardContext,
   TaskBoardHandle,
@@ -572,7 +573,7 @@ const TaskBoard = forwardRef<TaskBoardHandle, TaskBoardProps>(function TaskBoard
     });
     const nextRows: TaskBoardRow[] = [];
 
-    const filteredTaskRows: Array<{ type: 'task'; group: TaskGroup; task: Task }> = [];
+    const filteredTaskRows: FlatTaskRow[] = [];
     groupsSorted.forEach((group) => {
       if (!matchesContextType(group, activeContext.contextType ?? 'ALL')) return;
       const episode = group.episode_id ? episodesById[group.episode_id] : undefined;
@@ -596,58 +597,9 @@ const TaskBoard = forwardRef<TaskBoardHandle, TaskBoardProps>(function TaskBoard
     });
 
     if (!filters.showGroupHeadings && taskSort) {
-      const rankByStatus = (task: Task): number => {
-        if (isUrgentTask(task)) return 0;
-        const key = (task.status?.key ?? '').toUpperCase();
-        if (key === 'PENDING') return 1;
-        if (key === 'IN_PROGRESS') return 2;
-        if (key === 'COMPLETED') return 3;
-        if (key === 'CANCELLED') return 4;
-        return 5;
-      };
-      const priorityRankByKey = new Map(
-        [...priorityCodes]
-          .sort((a, b) => b.pos - a.pos)
-          .map((code, index) => [code.key.toUpperCase(), index]),
-      );
-      const rankByPriority = (task: Task): number => {
-        const key = (task.priority?.key ?? '').toUpperCase();
-        if (key) {
-          const mappedRank = priorityRankByKey.get(key);
-          if (mappedRank != null) return mappedRank;
-        }
-        if (key === 'HIGH') return 0;
-        if (key === 'NORMAL') return 1;
-        if (key === 'LOW') return 2;
-        return 3;
-      };
-      const dueDateValue = (iso: string | null): number => {
-        if (!iso) return Number.POSITIVE_INFINITY;
-        const value = new Date(iso).getTime();
-        return Number.isFinite(value) ? value : Number.POSITIVE_INFINITY;
-      };
-      const directionFactor = taskSort.direction === 'asc' ? 1 : -1;
-      filteredTaskRows.sort((a, b) => {
-        if (taskSort.key === 'status') {
-          const statusCmp = directionFactor * (rankByStatus(a.task) - rankByStatus(b.task));
-          if (statusCmp !== 0) return statusCmp;
-          const dueCmp = directionFactor * (dueDateValue(a.task.until) - dueDateValue(b.task.until));
-          if (dueCmp !== 0) return dueCmp;
-          return directionFactor * (a.task.id - b.task.id);
-        }
-        if (taskSort.key === 'priority') {
-          const priorityCmp = directionFactor * (rankByPriority(a.task) - rankByPriority(b.task));
-          if (priorityCmp !== 0) return priorityCmp;
-          return a.task.id - b.task.id;
-        }
-        const dueCmp = directionFactor * (dueDateValue(a.task.until) - dueDateValue(b.task.until));
-        if (dueCmp !== 0) return dueCmp;
-        const priorityCmp = rankByPriority(a.task) - rankByPriority(b.task);
-        if (priorityCmp !== 0) return priorityCmp;
-        const statusCmp = rankByStatus(a.task) - rankByStatus(b.task);
-        if (statusCmp !== 0) return statusCmp;
-        return a.task.id - b.task.id;
-      });
+      const sorted = sortFlatTaskRows(filteredTaskRows, taskSort, priorityCodes);
+      filteredTaskRows.length = 0;
+      filteredTaskRows.push(...sorted);
     }
     filteredTaskRows.forEach((row) => nextRows.push(row));
 

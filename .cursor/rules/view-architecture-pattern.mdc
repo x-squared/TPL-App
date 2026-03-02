@@ -53,6 +53,12 @@ For any new complex view (like patients or colloquiums), follow this structure b
   - Destructive row deletes must require explicit confirmation before execution.
   - Reuse shared row-action components (for example `InlineDeleteActions`) for edit/delete/confirm UI instead of duplicating per-table markup.
   - Keep confirmation wording and Yes/No controls consistent across tables.
+- **Task UI standardization**:
+  - Treat `frontend/src/views/tasks/TaskBoard.tsx` as the default task/task-group UI component for list/edit/action flows.
+  - Before creating a custom task list/panel, first try to integrate `TaskBoard` using `criteria`, mode flags (`hideFilters`, `hideAddButton`, `includeClosedTasks`, `showGroupHeadingsDefault`) and callbacks.
+  - If an existing view has ad-hoc task CRUD/sorting/filtering logic, prefer migrating it to `TaskBoard` (or shared TaskBoard hooks/utilities) instead of extending the bespoke implementation.
+  - Keep task sorting/filtering semantics centralized in shared TaskBoard modules; avoid re-implementing comparators/state models locally.
+  - If a view cannot use `TaskBoard`, document the concrete technical reason in the change notes.
 - **Behavior preservation**: Refactors must not change UX logic unless explicitly requested.
 - **Validation**: After refactors, run frontend build/typecheck and fix all issues before finishing.
 - **Preferences + navigation consistency**:
