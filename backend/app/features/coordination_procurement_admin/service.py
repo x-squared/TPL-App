@@ -5,18 +5,19 @@ from sqlalchemy.orm import Session, joinedload
 
 from ...models import (
     Code,
-    CoordinationProcurementData,
-    CoordinationProcurementDataPerson,
-    CoordinationProcurementDataTeam,
     CoordinationProcurementFieldGroupTemplate,
+    CoordinationProcurementProtocolTaskGroupSelection,
     CoordinationProcurementFieldScopeTemplate,
     CoordinationProcurementFieldTemplate,
     DatatypeDefinition,
+    TaskGroupTemplate,
 )
 from ...schemas import (
     CoordinationProcurementAdminConfigResponse,
     CoordinationProcurementFieldGroupTemplateCreate,
     CoordinationProcurementFieldGroupTemplateUpdate,
+    CoordinationProcurementProtocolTaskGroupSelectionCreate,
+    CoordinationProcurementProtocolTaskGroupSelectionUpdate,
     CoordinationProcurementFieldScopeTemplateCreate,
     CoordinationProcurementFieldTemplateCreate,
     CoordinationProcurementFieldTemplateUpdate,
@@ -37,20 +38,28 @@ def _scope_template_query(db: Session):
     )
 
 
-def _resolve_string_datatype_def_id(db: Session) -> int:
+def _protocol_task_group_selection_query(db: Session):
+    return db.query(CoordinationProcurementProtocolTaskGroupSelection).options(
+        joinedload(CoordinationProcurementProtocolTaskGroupSelection.task_group_template).joinedload(TaskGroupTemplate.scope),
+        joinedload(CoordinationProcurementProtocolTaskGroupSelection.task_group_template).joinedload(TaskGroupTemplate.organ),
+        joinedload(CoordinationProcurementProtocolTaskGroupSelection.organ),
+        joinedload(CoordinationProcurementProtocolTaskGroupSelection.changed_by_user),
+    )
+
+
+def _resolve_protocol_task_group_template_or_422(*, task_group_template_id: int, db: Session) -> TaskGroupTemplate:
     item = (
-        db.query(DatatypeDefinition)
-        .join(Code, DatatypeDefinition.code_id == Code.id)
-        .filter(Code.type == "DATATYPE", Code.key == "STRING")
+        db.query(TaskGroupTemplate)
+        .options(joinedload(TaskGroupTemplate.scope))
+        .filter(TaskGroupTemplate.id == task_group_template_id)
         .first()
     )
     if not item:
-        raise HTTPException(status_code=422, detail="STRING datatype definition not found")
-    return item.id
-
-
-def _mode_requires_user_datatype(value_mode: str | None) -> bool:
-    return value_mode == "SCALAR"
+        raise HTTPException(status_code=422, detail="task_group_template_id not found")
+    scope_key = item.scope_key.value if hasattr(item.scope_key, "value") else item.scope_key
+    if scope_key != "COORDINATION_PROTOCOL":
+        raise HTTPException(status_code=422, detail="task_group_template_id must reference TASK_SCOPE.COORDINATION_PROTOCOL")
+    return item
 
 
 def get_procurement_admin_config(*, db: Session) -> CoordinationProcurementAdminConfigResponse:
@@ -69,6 +78,11 @@ def get_procurement_admin_config(*, db: Session) -> CoordinationProcurementAdmin
         .order_by(CoordinationProcurementFieldScopeTemplate.id.asc())
         .all()
     )
+    protocol_task_group_selections = (
+        _protocol_task_group_selection_query(db)
+        .order_by(CoordinationProcurementProtocolTaskGroupSelection.pos.asc(), CoordinationProcurementProtocolTaskGroupSelection.id.asc())
+        .all()
+    )
     datatype_definitions = (
         db.query(DatatypeDefinition)
         .options(joinedload(DatatypeDefinition.code))
@@ -85,6 +99,7 @@ def get_procurement_admin_config(*, db: Session) -> CoordinationProcurementAdmin
         field_group_templates=field_group_templates,
         field_templates=field_templates,
         field_scope_templates=field_scope_templates,
+        protocol_task_group_selections=protocol_task_group_selections,
         datatype_definitions=datatype_definitions,
         organs=organs,
     )
@@ -96,16 +111,10 @@ def create_field_group_template(
     changed_by_id: int,
     db: Session,
 ) -> CoordinationProcurementFieldGroupTemplate:
-    existing = db.query(CoordinationProcurementFieldGroupTemplate).filter(CoordinationProcurementFieldGroupTemplate.key == payload.key).first()
-    if existing:
-        raise HTTPException(status_code=422, detail="group key already exists")
-    item = CoordinationProcurementFieldGroupTemplate(
-        **payload.model_dump(),
-        changed_by_id=changed_by_id,
+    raise HTTPException(
+        status_code=422,
+        detail="Procurement group templates are fixed and cannot be created",
     )
-    db.add(item)
-    db.commit()
-    return item
 
 
 def update_field_group_template(
@@ -119,22 +128,12 @@ def update_field_group_template(
     if not item:
         raise HTTPException(status_code=404, detail="Field group template not found")
     data = payload.model_dump(exclude_unset=True)
-    if "key" in data and data["key"] != item.key:
-        existing = db.query(CoordinationProcurementFieldGroupTemplate).filter(CoordinationProcurementFieldGroupTemplate.key == data["key"]).first()
-        if existing:
-            raise HTTPException(status_code=422, detail="group key already exists")
+    allowed = {"pos"}
+    forbidden = [key for key in data.keys() if key not in allowed]
+    if forbidden:
+        raise HTTPException(status_code=422, detail=f"Only arrangement updates are allowed for groups (invalid: {', '.join(sorted(forbidden))})")
     for key, value in data.items():
         setattr(item, key, value)
-    if data.get("is_active") is False:
-        db.query(CoordinationProcurementFieldTemplate).filter(
-            CoordinationProcurementFieldTemplate.group_template_id == group_template_id
-        ).update(
-            {
-                CoordinationProcurementFieldTemplate.is_active: False,
-                CoordinationProcurementFieldTemplate.changed_by_id: changed_by_id,
-            },
-            synchronize_session=False,
-        )
     item.changed_by_id = changed_by_id
     db.commit()
     return item
@@ -157,29 +156,10 @@ def create_field_template(
     changed_by_id: int,
     db: Session,
 ) -> CoordinationProcurementFieldTemplate:
-    existing = db.query(CoordinationProcurementFieldTemplate).filter(CoordinationProcurementFieldTemplate.key == payload.key).first()
-    if existing:
-        raise HTTPException(status_code=422, detail="field key already exists")
-    data = payload.model_dump()
-    value_mode = payload.value_mode.value if hasattr(payload.value_mode, "value") else payload.value_mode
-    if not _mode_requires_user_datatype(value_mode):
-        data["datatype_def_id"] = _resolve_string_datatype_def_id(db)
-    datatype_definition = db.query(DatatypeDefinition).filter(DatatypeDefinition.id == data["datatype_def_id"]).first()
-    if not datatype_definition:
-        raise HTTPException(status_code=422, detail="datatype_def_id not found")
-    if payload.group_template_id is not None:
-        group_template = db.query(CoordinationProcurementFieldGroupTemplate).filter(
-            CoordinationProcurementFieldGroupTemplate.id == payload.group_template_id
-        ).first()
-        if not group_template:
-            raise HTTPException(status_code=422, detail="group_template_id not found")
-    item = CoordinationProcurementFieldTemplate(
-        **data,
-        changed_by_id=changed_by_id,
+    raise HTTPException(
+        status_code=422,
+        detail="Procurement field templates are fixed and cannot be created",
     )
-    db.add(item)
-    db.commit()
-    return _field_template_query(db).filter(CoordinationProcurementFieldTemplate.id == item.id).first()
 
 
 def update_field_template(
@@ -193,91 +173,18 @@ def update_field_template(
     if not item:
         raise HTTPException(status_code=404, detail="Field template not found")
     data = payload.model_dump(exclude_unset=True)
-    current_value_mode = item.value_mode.value if hasattr(item.value_mode, "value") else item.value_mode
-    next_mode_raw = data.get("value_mode")
-    next_value_mode = next_mode_raw.value if hasattr(next_mode_raw, "value") else next_mode_raw
-    if next_value_mode is not None and not _mode_requires_user_datatype(next_value_mode):
-        data["datatype_def_id"] = _resolve_string_datatype_def_id(db)
-    elif (
-        "datatype_def_id" in data
-        and not _mode_requires_user_datatype(current_value_mode)
-        and (next_value_mode is None or not _mode_requires_user_datatype(next_value_mode))
-    ):
-        raise HTTPException(status_code=422, detail="datatype_def_id cannot be changed while value_mode is non-scalar")
-    if "key" in data and data["key"] != item.key:
-        existing = db.query(CoordinationProcurementFieldTemplate).filter(CoordinationProcurementFieldTemplate.key == data["key"]).first()
-        if existing:
-            raise HTTPException(status_code=422, detail="field key already exists")
-    if "datatype_def_id" in data and data["datatype_def_id"] is not None:
-        datatype_definition = db.query(DatatypeDefinition).filter(DatatypeDefinition.id == data["datatype_def_id"]).first()
-        if not datatype_definition:
-            raise HTTPException(status_code=422, detail="datatype_def_id not found")
+    allowed = {"group_template_id", "pos"}
+    forbidden = [key for key in data.keys() if key not in allowed]
+    if forbidden:
+        raise HTTPException(status_code=422, detail=f"Only arrangement updates are allowed for fields (invalid: {', '.join(sorted(forbidden))})")
     if "group_template_id" in data and data["group_template_id"] is not None:
         group_template = db.query(CoordinationProcurementFieldGroupTemplate).filter(
             CoordinationProcurementFieldGroupTemplate.id == data["group_template_id"]
         ).first()
         if not group_template:
             raise HTTPException(status_code=422, detail="group_template_id not found")
-    old_value_mode = item.value_mode.value if hasattr(item.value_mode, "value") else item.value_mode
     for key, value in data.items():
         setattr(item, key, value)
-    new_value_mode = item.value_mode.value if hasattr(item.value_mode, "value") else item.value_mode
-    if new_value_mode != old_value_mode:
-        data_rows = db.query(CoordinationProcurementData).filter(
-            CoordinationProcurementData.field_template_id == field_template_id
-        ).all()
-        for data_row in data_rows:
-            data_row.changed_by_id = changed_by_id
-            if new_value_mode == "PERSON_SINGLE":
-                kept_person_id = None
-                if data_row.persons:
-                    sorted_people = sorted(data_row.persons, key=lambda row: row.pos)
-                    kept_person_id = sorted_people[0].person_id
-                data_row.persons.clear()
-                data_row.teams.clear()
-                data_row.episode_id = None
-                data_row.value = ""
-                if kept_person_id is not None:
-                    data_row.persons.append(
-                        CoordinationProcurementDataPerson(
-                            person_id=kept_person_id,
-                            pos=0,
-                            changed_by_id=changed_by_id,
-                        )
-                    )
-            elif new_value_mode == "TEAM_SINGLE":
-                kept_team_id = None
-                if data_row.teams:
-                    sorted_teams = sorted(data_row.teams, key=lambda row: row.pos)
-                    kept_team_id = sorted_teams[0].team_id
-                data_row.teams.clear()
-                data_row.persons.clear()
-                data_row.episode_id = None
-                data_row.value = ""
-                if kept_team_id is not None:
-                    data_row.teams.append(
-                        CoordinationProcurementDataTeam(
-                            team_id=kept_team_id,
-                            pos=0,
-                            changed_by_id=changed_by_id,
-                        )
-                    )
-            elif new_value_mode == "PERSON_LIST":
-                data_row.teams.clear()
-                data_row.episode_id = None
-                data_row.value = ""
-            elif new_value_mode == "TEAM_LIST":
-                data_row.persons.clear()
-                data_row.episode_id = None
-                data_row.value = ""
-            elif new_value_mode == "EPISODE":
-                data_row.persons.clear()
-                data_row.teams.clear()
-                data_row.value = ""
-            else:
-                data_row.persons.clear()
-                data_row.teams.clear()
-                data_row.episode_id = None
     item.changed_by_id = changed_by_id
     db.commit()
     return _field_template_query(db).filter(CoordinationProcurementFieldTemplate.id == item.id).first()
@@ -330,5 +237,75 @@ def delete_field_scope_template(*, scope_template_id: int, db: Session) -> None:
     item = db.query(CoordinationProcurementFieldScopeTemplate).filter(CoordinationProcurementFieldScopeTemplate.id == scope_template_id).first()
     if not item:
         raise HTTPException(status_code=404, detail="Field scope template not found")
+    db.delete(item)
+    db.commit()
+
+
+def create_protocol_task_group_selection(
+    *,
+    payload: CoordinationProcurementProtocolTaskGroupSelectionCreate,
+    changed_by_id: int,
+    db: Session,
+) -> CoordinationProcurementProtocolTaskGroupSelection:
+    _resolve_protocol_task_group_template_or_422(task_group_template_id=payload.task_group_template_id, db=db)
+    if payload.organ_id is not None:
+        organ = db.query(Code).filter(Code.id == payload.organ_id, Code.type == "ORGAN").first()
+        if not organ:
+            raise HTTPException(status_code=422, detail="organ_id must reference CODE.ORGAN")
+    duplicate = db.query(CoordinationProcurementProtocolTaskGroupSelection).filter(
+        CoordinationProcurementProtocolTaskGroupSelection.task_group_template_id == payload.task_group_template_id,
+        CoordinationProcurementProtocolTaskGroupSelection.organ_id == payload.organ_id,
+    ).first()
+    if duplicate:
+        raise HTTPException(status_code=422, detail="Protocol task group selection already exists for this scope")
+    item = CoordinationProcurementProtocolTaskGroupSelection(
+        task_group_template_id=payload.task_group_template_id,
+        organ_id=payload.organ_id,
+        pos=payload.pos,
+        changed_by_id=changed_by_id,
+    )
+    db.add(item)
+    db.commit()
+    return _protocol_task_group_selection_query(db).filter(CoordinationProcurementProtocolTaskGroupSelection.id == item.id).first()
+
+
+def update_protocol_task_group_selection(
+    *,
+    selection_id: int,
+    payload: CoordinationProcurementProtocolTaskGroupSelectionUpdate,
+    changed_by_id: int,
+    db: Session,
+) -> CoordinationProcurementProtocolTaskGroupSelection:
+    item = db.query(CoordinationProcurementProtocolTaskGroupSelection).filter(
+        CoordinationProcurementProtocolTaskGroupSelection.id == selection_id
+    ).first()
+    if not item:
+        raise HTTPException(status_code=404, detail="Protocol task group selection not found")
+    data = payload.model_dump(exclude_unset=True)
+    if "organ_id" in data:
+        if data["organ_id"] is not None:
+            organ = db.query(Code).filter(Code.id == data["organ_id"], Code.type == "ORGAN").first()
+            if not organ:
+                raise HTTPException(status_code=422, detail="organ_id must reference CODE.ORGAN")
+        duplicate = db.query(CoordinationProcurementProtocolTaskGroupSelection).filter(
+            CoordinationProcurementProtocolTaskGroupSelection.id != item.id,
+            CoordinationProcurementProtocolTaskGroupSelection.task_group_template_id == item.task_group_template_id,
+            CoordinationProcurementProtocolTaskGroupSelection.organ_id == data["organ_id"],
+        ).first()
+        if duplicate:
+            raise HTTPException(status_code=422, detail="Protocol task group selection already exists for this scope")
+    for key, value in data.items():
+        setattr(item, key, value)
+    item.changed_by_id = changed_by_id
+    db.commit()
+    return _protocol_task_group_selection_query(db).filter(CoordinationProcurementProtocolTaskGroupSelection.id == item.id).first()
+
+
+def delete_protocol_task_group_selection(*, selection_id: int, db: Session) -> None:
+    item = db.query(CoordinationProcurementProtocolTaskGroupSelection).filter(
+        CoordinationProcurementProtocolTaskGroupSelection.id == selection_id
+    ).first()
+    if not item:
+        raise HTTPException(status_code=404, detail="Protocol task group selection not found")
     db.delete(item)
     db.commit()

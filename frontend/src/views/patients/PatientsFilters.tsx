@@ -1,4 +1,5 @@
 import type { Code } from '../../api';
+import { useI18n } from '../../i18n/i18n';
 
 interface Props {
   filterAny: string;
@@ -35,26 +36,27 @@ export default function PatientsFilters({
   filterOpenOnly,
   setFilterOpenOnly,
 }: Props) {
+  const { t } = useI18n();
   return (
     <div className="filter-bar">
       <input
         type="text"
-        placeholder="Wildcard search (* allowed, across patient + episodes)"
+        placeholder={t('patients.filters.wildcard', 'Wildcard search (* allowed, across patient + episodes)')}
         value={filterAny}
         onChange={(e) => setFilterAny(e.target.value)}
       />
-      <input type="text" placeholder="PID" value={filterPid} onChange={(e) => setFilterPid(e.target.value)} />
-      <input type="text" placeholder="Name" value={filterName} onChange={(e) => setFilterName(e.target.value)} />
-      <input type="text" placeholder="First name" value={filterFirstName} onChange={(e) => setFilterFirstName(e.target.value)} />
-      <input type="text" placeholder="Date of birth" value={filterDob} onChange={(e) => setFilterDob(e.target.value)} />
+      <input type="text" placeholder={t('patients.filters.pid', 'PID')} value={filterPid} onChange={(e) => setFilterPid(e.target.value)} />
+      <input type="text" placeholder={t('patients.filters.name', 'Name')} value={filterName} onChange={(e) => setFilterName(e.target.value)} />
+      <input type="text" placeholder={t('patients.filters.firstName', 'First name')} value={filterFirstName} onChange={(e) => setFilterFirstName(e.target.value)} />
+      <input type="text" placeholder={t('patients.filters.dateOfBirth', 'Date of birth')} value={filterDob} onChange={(e) => setFilterDob(e.target.value)} />
       <div className="filter-episode-filters">
         <select className="filter-select" value={filterOrgan} onChange={(e) => setFilterOrgan(e.target.value)}>
-          <option value="">Organ...</option>
+          <option value="">{t('patients.filters.organ', 'Organ...')}</option>
           {organCodes.map((c) => <option key={c.id} value={c.id}>{c.name_default}</option>)}
         </select>
         <select className="filter-select" value={filterOpenOnly ? 'open' : ''} onChange={(e) => setFilterOpenOnly(e.target.value === 'open')}>
-          <option value="">All episodes</option>
-          <option value="open">Open only</option>
+          <option value="">{t('patients.filters.allEpisodes', 'All episodes')}</option>
+          <option value="open">{t('patients.filters.openOnly', 'Open only')}</option>
         </select>
       </div>
     </div>

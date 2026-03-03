@@ -8,7 +8,7 @@ export interface StartViewOption {
 
 export interface NavigationAccess {
   canViewPatients: boolean;
-  canViewDonations: boolean;
+  canViewDonors: boolean;
   canViewColloquiums: boolean;
   canViewCoordinations: boolean;
   canViewReports: boolean;
@@ -19,7 +19,7 @@ export interface NavigationAccess {
 const START_VIEW_LABELS: Record<AppStartPage, { labelKey: string; englishDefault: string }> = {
   'my-work': { labelKey: 'sidebar.nav.myWork', englishDefault: 'My Work' },
   patients: { labelKey: 'sidebar.nav.recipients', englishDefault: 'Recipients' },
-  donations: { labelKey: 'sidebar.nav.donors', englishDefault: 'Donors' },
+  donors: { labelKey: 'sidebar.nav.donors', englishDefault: 'Donors' },
   colloquiums: { labelKey: 'sidebar.nav.colloquiums', englishDefault: 'Colloquiums' },
   coordinations: { labelKey: 'sidebar.nav.coordinations', englishDefault: 'Coordinations' },
   reports: { labelKey: 'sidebar.nav.reports', englishDefault: 'Reports' },
@@ -30,7 +30,7 @@ const START_VIEW_LABELS: Record<AppStartPage, { labelKey: string; englishDefault
 export function buildStartViewOptions(access: NavigationAccess): StartViewOption[] {
   const options: StartViewOption[] = [{ key: 'my-work', ...START_VIEW_LABELS['my-work'] }];
   if (access.canViewPatients) options.push({ key: 'patients', ...START_VIEW_LABELS.patients });
-  if (access.canViewDonations) options.push({ key: 'donations', ...START_VIEW_LABELS.donations });
+  if (access.canViewDonors) options.push({ key: 'donors', ...START_VIEW_LABELS.donors });
   if (access.canViewColloquiums) options.push({ key: 'colloquiums', ...START_VIEW_LABELS.colloquiums });
   if (access.canViewCoordinations) options.push({ key: 'coordinations', ...START_VIEW_LABELS.coordinations });
   if (access.canViewReports) options.push({ key: 'reports', ...START_VIEW_LABELS.reports });

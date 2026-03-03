@@ -11,6 +11,10 @@ SECRET_KEY = "tpl-app-dev-secret-key-change-in-production"
 ALGORITHM = "HS256"
 
 bearer_scheme = HTTPBearer()
+PERMISSION_ALIASES: dict[str, str] = {
+    "view.donations": "view.donors",
+    "edit.donations": "edit.donors",
+}
 
 
 def create_token(ext_id: str) -> str:
@@ -57,7 +61,12 @@ def get_user_permission_keys(db: Session, user: User) -> list[str]:
         .distinct()
         .all()
     )
-    return sorted(key for (key,) in keys)
+    permission_keys = {key for (key,) in keys}
+    # Backward compatibility: existing DB role mappings may still carry legacy donation keys.
+    for legacy_key, canonical_key in PERMISSION_ALIASES.items():
+        if legacy_key in permission_keys:
+            permission_keys.add(canonical_key)
+    return sorted(permission_keys)
 
 
 def require_permission(permission_key: str):

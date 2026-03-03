@@ -1,7 +1,8 @@
 import { forwardRef, useCallback, useEffect, useImperativeHandle, useMemo, useRef, useState } from 'react';
-import { api, type Task, type TaskCreate, type TaskGroup, type TaskUpdate } from '../../api';
+import { api, type Task, type TaskCreate, type TaskGroup, type TaskKindKey, type TaskUpdate } from '../../api';
 import { ApiError } from '../../api/error';
 import ErrorBanner from '../layout/ErrorBanner';
+import { useI18n } from '../../i18n/i18n';
 import '../layout/PanelLayout.css';
 import './TaskBoard.css';
 import TaskBoardFilters from './TaskBoardFilters';
@@ -40,19 +41,36 @@ function nowLocalDateIso(): string {
   return nowLocalDateTimeIso().slice(0, 10);
 }
 
-function toFormUntilValue(kindKey: 'TASK' | 'EVENT', value: string | null | undefined): string {
+function toFormDateTimeValue(value: string | null | undefined): string {
   const raw = (value ?? '').trim();
-  if (!raw) return kindKey === 'TASK' ? nowLocalDateIso() : nowLocalDateTimeIso().slice(0, 16);
-  if (kindKey === 'TASK') return raw.slice(0, 10);
+  if (!raw) return nowLocalDateTimeIso();
+  if (raw.includes('T') && raw.length === 16) return `${raw}:00`;
+  return raw;
+}
+
+function toFormUntilValue(kindKey: TaskKindKey, value: string | null | undefined): string {
+  const raw = (value ?? '').trim();
+  if (!raw) return kindKey === 'EVENT' ? nowLocalDateTimeIso().slice(0, 16) : nowLocalDateIso();
+  if (kindKey !== 'EVENT') return raw.slice(0, 10);
   if (raw.includes('T')) return raw.slice(0, 16);
   return `${raw.slice(0, 10)}T00:00`;
 }
 
-function normalizeUntilForApi(kindKey: 'TASK' | 'EVENT', value: string): string {
+function normalizeUntilForApi(kindKey: TaskKindKey, value: string): string {
   const raw = value.trim();
   if (!raw) return raw;
   const day = raw.slice(0, 10);
-  if (kindKey === 'TASK') return `${day}T00:00:00`;
+  if (kindKey !== 'EVENT') return `${day}T00:00:00`;
+  if (!raw.includes('T')) return `${day}T00:00:00`;
+  const timePart = raw.slice(11);
+  if (timePart.length === 5) return `${day}T${timePart}:00`;
+  return `${day}T${timePart}`;
+}
+
+function normalizeDateTimeForApi(value: string): string {
+  const raw = value.trim();
+  if (!raw) return raw;
+  const day = raw.slice(0, 10);
   if (!raw.includes('T')) return `${day}T00:00:00`;
   const timePart = raw.slice(11);
   if (timePart.length === 5) return `${day}T${timePart}:00`;
@@ -75,9 +93,10 @@ function buildContextTarget(
 }
 
 const TaskBoard = forwardRef<TaskBoardHandle, TaskBoardProps>(function TaskBoard({
+  declaredContextType,
   criteria = {},
   context,
-  title = 'Tasks',
+  title,
   onAddClick = () => undefined,
   maxTableHeight = 420,
   headerMeta,
@@ -92,7 +111,10 @@ const TaskBoard = forwardRef<TaskBoardHandle, TaskBoardProps>(function TaskBoard
   onOpenTaskContext,
   taskSort = null,
   onTaskSortChange,
+  columnVisibility,
 }: TaskBoardProps, ref) {
+  const { t } = useI18n();
+  const resolvedTitle = title ?? t('taskBoard.title', 'Tasks');
   const apiErrorHasDetail = (error: unknown, expected: string): boolean => {
     if (!(error instanceof ApiError)) return false;
     const detail = (error.detail as { detail?: unknown })?.detail;
@@ -103,7 +125,19 @@ const TaskBoard = forwardRef<TaskBoardHandle, TaskBoardProps>(function TaskBoard
     return JSON.stringify(error.detail).includes(expected);
   };
   const incomingContext = context ?? criteria;
-  const [activeContext, setActiveContext] = useState<TaskBoardContext>(incomingContext);
+  const resolveContextType = (incoming?: TaskBoardContextType): TaskBoardContextType => {
+    if (incoming && incoming !== declaredContextType) {
+      throw new Error(
+        `TaskBoard contextType mismatch: declared=${declaredContextType} incoming=${incoming}. ` +
+        'TaskBoard integrations must declare and use a single context type.',
+      );
+    }
+    return incoming ?? declaredContextType;
+  };
+  const [activeContext, setActiveContext] = useState<TaskBoardContext>({
+    ...incomingContext,
+    contextType: resolveContextType(incomingContext.contextType),
+  });
   const taskChangeListenersRef = useRef(new Set<NonNullable<TaskBoardProps['onTaskChanged']>>());
   const [effectiveColloqiumAgendaId, setEffectiveColloqiumAgendaId] = useState<number | null>(
     incomingContext.colloqiumAgendaId ?? null,
@@ -126,7 +160,7 @@ const TaskBoard = forwardRef<TaskBoardHandle, TaskBoardProps>(function TaskBoard
       colloqiumId: incomingContext.colloqiumId,
       tplPhaseId: incomingContext.tplPhaseId,
       assignedToId: incomingContext.assignedToId,
-      contextType: incomingContext.contextType,
+      contextType: resolveContextType(incomingContext.contextType),
       extraParams: incomingContext.extraParams,
     });
   }, [
@@ -138,6 +172,7 @@ const TaskBoard = forwardRef<TaskBoardHandle, TaskBoardProps>(function TaskBoard
     incomingContext.assignedToId,
     incomingContext.contextType,
     incomingContext.extraParams,
+    declaredContextType,
   ]);
 
   useEffect(() => {
@@ -199,8 +234,12 @@ const TaskBoard = forwardRef<TaskBoardHandle, TaskBoardProps>(function TaskBoard
 
   useImperativeHandle(ref, () => ({
     setContext: (nextContext) => {
-      setActiveContext(nextContext);
+      const contextType = resolveContextType(nextContext.contextType);
       setEffectiveColloqiumAgendaId(nextContext.colloqiumAgendaId ?? null);
+      setActiveContext({
+        ...nextContext,
+        contextType,
+      });
     },
     getContext: () => activeContext,
     registerTaskChangeListener: (listener) => {
@@ -245,8 +284,11 @@ const TaskBoard = forwardRef<TaskBoardHandle, TaskBoardProps>(function TaskBoard
     groupStateModel.setCreateForm(null);
     editStateModel.setEditingTaskId(null);
     editStateModel.setEditForm(null);
-    actionStateModel.setActionState({ task, type });
+    const taskCommentHint = (task.comment_hint ?? '').trim();
+    const hint = taskCommentHint || undefined;
+    actionStateModel.setActionState({ task, type, hint });
     actionStateModel.setActionComment(task.comment ?? '');
+    actionStateModel.setActionEventTime(toFormDateTimeValue(task.event_time));
   };
 
   const applyTaskAction = async () => {
@@ -255,7 +297,12 @@ const TaskBoard = forwardRef<TaskBoardHandle, TaskBoardProps>(function TaskBoard
     const statusCode = taskStatusByKey[statusKey];
     if (!statusCode) return;
     const nextComment = actionStateModel.actionComment.trim();
+    const nextEventTime = actionStateModel.actionEventTime.trim();
+    const hasHint = (actionStateModel.actionState.hint ?? '').trim() !== '';
+    const isEventCompletion = actionStateModel.actionState.task.kind_key === 'EVENT' && actionStateModel.actionState.type === 'complete';
     if (actionStateModel.actionState.type === 'discard' && !nextComment) return;
+    if (hasHint && !nextComment) return;
+    if (isEventCompletion && !nextEventTime) return;
 
     actionStateModel.setActionSaving(true);
     try {
@@ -263,10 +310,14 @@ const TaskBoard = forwardRef<TaskBoardHandle, TaskBoardProps>(function TaskBoard
         status_id: statusCode.id,
         comment: nextComment || '',
       };
+      if (isEventCompletion) {
+        payload.event_time = normalizeDateTimeForApi(nextEventTime);
+      }
       const updatedTask = await api.updateTask(actionStateModel.actionState.task.id, payload);
       emitTaskChanged(updatedTask, actionStateModel.actionState.type === 'complete' ? 'completed' : 'discarded');
       actionStateModel.setActionState(null);
       actionStateModel.setActionComment('');
+      actionStateModel.setActionEventTime('');
       reload();
     } finally {
       actionStateModel.setActionSaving(false);
@@ -280,6 +331,7 @@ const TaskBoard = forwardRef<TaskBoardHandle, TaskBoardProps>(function TaskBoard
     groupStateModel.setCreateForm(null);
     actionStateModel.setActionState(null);
     actionStateModel.setActionComment('');
+    actionStateModel.setActionEventTime('');
     editStateModel.setEditingTaskId(task.id);
     editStateModel.setEditForm({
       description: task.description ?? '',
@@ -301,6 +353,7 @@ const TaskBoard = forwardRef<TaskBoardHandle, TaskBoardProps>(function TaskBoard
     groupStateModel.setGroupEditForm(null);
     actionStateModel.setActionState(null);
     actionStateModel.setActionComment('');
+    actionStateModel.setActionEventTime('');
     editStateModel.setEditingTaskId(null);
     editStateModel.setEditForm(null);
     groupStateModel.setCreatingGroupId(taskGroupId);
@@ -322,6 +375,7 @@ const TaskBoard = forwardRef<TaskBoardHandle, TaskBoardProps>(function TaskBoard
   const startEditGroup = (group: TaskGroup) => {
     actionStateModel.setActionState(null);
     actionStateModel.setActionComment('');
+    actionStateModel.setActionEventTime('');
     editStateModel.setEditingTaskId(null);
     editStateModel.setEditForm(null);
     groupStateModel.setCreatingGroupId(null);
@@ -471,6 +525,7 @@ const TaskBoard = forwardRef<TaskBoardHandle, TaskBoardProps>(function TaskBoard
       }
       actionStateModel.setActionState(null);
       actionStateModel.setActionComment('');
+      actionStateModel.setActionEventTime('');
       groupStateModel.setCreatingGroupId(null);
       groupStateModel.setCreateForm(null);
       setAutoCreatedTaskId(source === 'auto' ? createdTask.id : null);
@@ -572,7 +627,6 @@ const TaskBoard = forwardRef<TaskBoardHandle, TaskBoardProps>(function TaskBoard
       return a.id - b.id;
     });
     const nextRows: TaskBoardRow[] = [];
-
     const filteredTaskRows: FlatTaskRow[] = [];
     groupsSorted.forEach((group) => {
       if (!matchesContextType(group, activeContext.contextType ?? 'ALL')) return;
@@ -592,7 +646,11 @@ const TaskBoard = forwardRef<TaskBoardHandle, TaskBoardProps>(function TaskBoard
       });
 
       if (filteredTasks.length === 0) return;
-      if (filters.showGroupHeadings) nextRows.push({ type: 'group', group, state: groupState });
+      if (filters.showGroupHeadings) {
+        nextRows.push({ type: 'group', group, state: groupState });
+        filteredTasks.forEach((task) => nextRows.push({ type: 'task', group, task }));
+        return;
+      }
       filteredTasks.forEach((task) => filteredTaskRows.push({ type: 'task', group, task }));
     });
 
@@ -601,7 +659,9 @@ const TaskBoard = forwardRef<TaskBoardHandle, TaskBoardProps>(function TaskBoard
       filteredTaskRows.length = 0;
       filteredTaskRows.push(...sorted);
     }
-    filteredTaskRows.forEach((row) => nextRows.push(row));
+    if (!filters.showGroupHeadings) {
+      filteredTaskRows.forEach((row) => nextRows.push(row));
+    }
 
     return nextRows;
   }, [
@@ -636,7 +696,7 @@ const TaskBoard = forwardRef<TaskBoardHandle, TaskBoardProps>(function TaskBoard
     <section className="ui-panel-section task-board-section">
       <div className="ui-panel-heading">
         <div className="task-board-heading-main">
-          <h2>{title}</h2>
+          <h2>{resolvedTitle}</h2>
           {headerMeta && <div className="task-board-header-meta">{headerMeta}</div>}
         </div>
         {selectedTaskRow ? (
@@ -652,8 +712,8 @@ const TaskBoard = forwardRef<TaskBoardHandle, TaskBoardProps>(function TaskBoard
                   );
                   onOpenTaskContext(target);
                 }}
-                title="Open context"
-                aria-label="Open context"
+                title={t('taskBoard.actions.openContext', 'Open context')}
+                aria-label={t('taskBoard.actions.openContext', 'Open context')}
               >
                 &#x279C;
               </button>
@@ -662,8 +722,12 @@ const TaskBoard = forwardRef<TaskBoardHandle, TaskBoardProps>(function TaskBoard
               className="edit-btn"
               onClick={() => startTaskAction(selectedTaskRow.task, 'complete')}
               disabled={isDoneTask(selectedTaskRow.task) || isCancelledTask(selectedTaskRow.task)}
-              title={selectedTaskRow.task.kind_key === 'EVENT' ? 'Register event occurrence' : 'Complete task'}
-              aria-label={selectedTaskRow.task.kind_key === 'EVENT' ? 'Register event occurrence' : 'Complete task'}
+              title={selectedTaskRow.task.kind_key === 'EVENT'
+                ? t('taskBoard.actions.registerEventOccurrence', 'Register event occurrence')
+                : t('taskBoard.actions.completeTask', 'Complete task')}
+              aria-label={selectedTaskRow.task.kind_key === 'EVENT'
+                ? t('taskBoard.actions.registerEventOccurrence', 'Register event occurrence')
+                : t('taskBoard.actions.completeTask', 'Complete task')}
             >
               ✓
             </button>
@@ -671,8 +735,8 @@ const TaskBoard = forwardRef<TaskBoardHandle, TaskBoardProps>(function TaskBoard
               className="cancel-btn"
               onClick={() => startTaskAction(selectedTaskRow.task, 'discard')}
               disabled={isDoneTask(selectedTaskRow.task) || isCancelledTask(selectedTaskRow.task)}
-              title="Discard task"
-              aria-label="Discard task"
+              title={t('taskBoard.actions.discardTask', 'Discard task')}
+              aria-label={t('taskBoard.actions.discardTask', 'Discard task')}
             >
               −
             </button>
@@ -680,8 +744,8 @@ const TaskBoard = forwardRef<TaskBoardHandle, TaskBoardProps>(function TaskBoard
               className="edit-btn"
               onClick={() => startEditTask(selectedTaskRow.task)}
               disabled={editStateModel.editingTaskId !== null}
-              title="Edit task"
-              aria-label="Edit task"
+              title={t('taskBoard.actions.editTask', 'Edit task')}
+              aria-label={t('taskBoard.actions.editTask', 'Edit task')}
             >
               ✎
             </button>
@@ -694,10 +758,12 @@ const TaskBoard = forwardRef<TaskBoardHandle, TaskBoardProps>(function TaskBoard
               void createTaskFromPanelContext('manual');
             }}
             disabled={panelAddSaving || !activeContext.patientId}
-            title={activeContext.patientId ? 'Add task from current context' : 'Select a patient to add a task'}
-            aria-label="Add task from current context"
+            title={activeContext.patientId
+              ? t('taskBoard.actions.addFromContext', 'Add task from current context')
+              : t('taskBoard.actions.selectPatientToAdd', 'Select a patient to add a task')}
+            aria-label={t('taskBoard.actions.addFromContext', 'Add task from current context')}
           >
-            {panelAddSaving ? '…' : '+ Add'}
+            {panelAddSaving ? '…' : t('taskBoard.actions.add', '+ Add')}
           </button>
         ) : null}
       </div>
@@ -721,7 +787,7 @@ const TaskBoard = forwardRef<TaskBoardHandle, TaskBoardProps>(function TaskBoard
         />
       )}
 
-      {loading && <p className="status">Loading tasks...</p>}
+      {loading && <p className="status">{t('taskBoard.loading', 'Loading tasks...')}</p>}
       {!loading && error && <ErrorBanner message={error} />}
       {!loading && !error && (
         <TaskBoardTable
@@ -745,11 +811,14 @@ const TaskBoard = forwardRef<TaskBoardHandle, TaskBoardProps>(function TaskBoard
           actionState={actionStateModel.actionState}
           actionComment={actionStateModel.actionComment}
           setActionComment={actionStateModel.setActionComment}
+          actionEventTime={actionStateModel.actionEventTime}
+          setActionEventTime={actionStateModel.setActionEventTime}
           actionSaving={actionStateModel.actionSaving}
           onConfirmAction={applyTaskAction}
           onCancelAction={() => {
             actionStateModel.setActionState(null);
             actionStateModel.setActionComment('');
+            actionStateModel.setActionEventTime('');
           }}
           editingGroupId={groupStateModel.editingGroupId}
           groupEditForm={groupStateModel.groupEditForm}
@@ -770,6 +839,7 @@ const TaskBoard = forwardRef<TaskBoardHandle, TaskBoardProps>(function TaskBoard
           onSelectTask={setSelectedTaskId}
           taskSort={taskSort}
           onTaskSortChange={onTaskSortChange}
+          columnVisibility={columnVisibility}
           maxTableHeight={maxTableHeight}
         />
       )}

@@ -26,7 +26,7 @@ router = APIRouter(
 def list_coordination_organ_effects(
     coordination_id: int,
     db: Session = Depends(get_db),
-    _: User = Depends(require_permission("view.donations")),
+    _: User = Depends(require_permission("view.donors")),
 ):
     return list_coordination_organ_effects_service(coordination_id=coordination_id, db=db)
 
@@ -36,7 +36,7 @@ def create_coordination_organ_effect(
     coordination_id: int,
     payload: CoordinationOrganEffectCreate,
     db: Session = Depends(get_db),
-    current_user: User = Depends(require_permission("edit.donations")),
+    current_user: User = Depends(require_permission("edit.donors")),
 ):
     return create_coordination_organ_effect_service(
         coordination_id=coordination_id,
@@ -52,7 +52,7 @@ def update_coordination_organ_effect(
     organ_effect_id: int,
     payload: CoordinationOrganEffectUpdate,
     db: Session = Depends(get_db),
-    current_user: User = Depends(require_permission("edit.donations")),
+    current_user: User = Depends(require_permission("edit.donors")),
 ):
     return update_coordination_organ_effect_service(
         coordination_id=coordination_id,
@@ -68,7 +68,7 @@ def delete_coordination_organ_effect(
     coordination_id: int,
     organ_effect_id: int,
     db: Session = Depends(get_db),
-    current_user: User = Depends(require_permission("edit.donations")),
+    current_user: User = Depends(require_permission("edit.donors")),
 ):
     _ = current_user
     delete_coordination_organ_effect_service(coordination_id=coordination_id, organ_effect_id=organ_effect_id, db=db)

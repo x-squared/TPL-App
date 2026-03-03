@@ -1,4 +1,5 @@
 import type { ColloqiumAgenda, ColloqiumType } from '../../../api';
+import { useI18n } from '../../../i18n/i18n';
 import ErrorBanner from '../../layout/ErrorBanner';
 
 interface Props {
@@ -36,26 +37,27 @@ export default function EpisodeColloquiumSection({
   onAssign,
   onCloseAssignDialog,
 }: Props) {
+  const { t } = useI18n();
   return (
     <>
       <section className="detail-section episode-colloqium-section">
         <div className="detail-section-heading">
-          <h2>Colloquium</h2>
-          <button className="ci-add-btn" onClick={onOpenAssignDialog}>+ Add</button>
+          <h2>{t('server.entities.colloquium', 'Colloquium')}</h2>
+          <button className="ci-add-btn" onClick={onOpenAssignDialog}>{t('information.actions.add', '+ Add')}</button>
         </div>
         {loadingEpisodeColloqiums ? (
-          <p className="detail-empty">Loading colloquiums...</p>
+          <p className="detail-empty">{t('episode.colloquium.loading', 'Loading colloquiums...')}</p>
         ) : episodeColloqiumAgendas.length === 0 ? (
-          <p className="detail-empty">Episode is not assigned to any colloquium.</p>
+          <p className="detail-empty">{t('episode.colloquium.empty', 'Episode is not assigned to any colloquium.')}</p>
         ) : (
           <table className="detail-contact-table">
             <thead>
               <tr>
                 <th className="open-col"></th>
-                <th>Type</th>
-                <th>Name</th>
-                <th>Date</th>
-                <th>Participants</th>
+                <th>{t('colloquiums.table.type', 'Type')}</th>
+                <th>{t('colloquiums.table.name', 'Name')}</th>
+                <th>{t('colloquiums.table.date', 'Date')}</th>
+                <th>{t('colloquiums.detail.participants', 'Participants')}</th>
               </tr>
             </thead>
             <tbody>
@@ -74,14 +76,14 @@ export default function EpisodeColloquiumSection({
                         onClick={() => {
                           if (colloqiumId) onOpenColloqium(colloqiumId);
                         }}
-                        title="Open colloquium"
+                        title={t('colloquiums.actions.open', 'Open colloquium')}
                         disabled={!colloqiumId}
                       >
                         &#x279C;
                       </button>
                     </td>
-                    <td>{agenda.colloqium?.colloqium_type?.organ?.name_default ?? '–'}</td>
-                    <td>{agenda.colloqium?.colloqium_type?.name ?? '–'}</td>
+                    <td>{agenda.colloqium?.colloqium_type?.organ?.name_default ?? t('common.emptySymbol', '–')}</td>
+                    <td>{agenda.colloqium?.colloqium_type?.name ?? t('common.emptySymbol', '–')}</td>
                     <td>{formatDate(agenda.colloqium?.date ?? null)}</td>
                     <td>{agenda.colloqium?.participants ?? ''}</td>
                   </tr>
@@ -93,27 +95,27 @@ export default function EpisodeColloquiumSection({
       </section>
 
       {assignDialogOpen && (
-        <div className="episode-colloqium-dialog-overlay" role="dialog" aria-modal="true" aria-label="Assign episode to colloquium">
+        <div className="episode-colloqium-dialog-overlay" role="dialog" aria-modal="true" aria-label={t('episode.colloquium.assignDialog.ariaLabel', 'Assign episode to colloquium')}>
           <div className="episode-colloqium-dialog">
-            <h3>Assign episode to colloquium</h3>
+            <h3>{t('episode.colloquium.assignDialog.title', 'Assign episode to colloquium')}</h3>
             <div className="episode-colloqium-dialog-fields">
               <label>
-                Colloquium type
+                {t('episode.colloquium.assignDialog.type', 'Colloquium type')}
                 <select
                   className="detail-input"
                   value={assignTypeId ?? ''}
                   onChange={(e) => setAssignTypeId(e.target.value ? Number(e.target.value) : null)}
                 >
-                  <option value="">Select type...</option>
+                  <option value="">{t('episode.colloquium.assignDialog.selectType', 'Select type...')}</option>
                   {selectableColloqiumTypes.map((type) => (
                     <option key={type.id} value={type.id}>
-                      {type.organ?.name_default ?? '–'} - {type.name}
+                      {type.organ?.name_default ?? t('common.emptySymbol', '–')} - {type.name}
                     </option>
                   ))}
                 </select>
               </label>
               <label>
-                Date
+                {t('colloquiums.table.date', 'Date')}
                 <input
                   className="detail-input"
                   type="date"
@@ -129,14 +131,14 @@ export default function EpisodeColloquiumSection({
                 onClick={onAssign}
                 disabled={assigningColloqium || !assignTypeId || !assignDate}
               >
-                {assigningColloqium ? 'Assigning...' : 'Assign'}
+                {assigningColloqium ? t('episode.colloquium.assignDialog.assigning', 'Assigning...') : t('episode.colloquium.assignDialog.assign', 'Assign')}
               </button>
               <button
                 className="cancel-btn"
                 onClick={onCloseAssignDialog}
                 disabled={assigningColloqium}
               >
-                Cancel
+                {t('actions.cancel', 'Cancel')}
               </button>
             </div>
           </div>

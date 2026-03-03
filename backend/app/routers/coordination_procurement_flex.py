@@ -27,7 +27,7 @@ router = APIRouter(prefix="/coordinations/{coordination_id}/procurement-flex", t
 def get_procurement_flex(
     coordination_id: int,
     db: Session = Depends(get_db),
-    _: User = Depends(require_permission("view.donations")),
+    _: User = Depends(require_permission("view.donors")),
 ):
     return get_procurement_flex_service(coordination_id=coordination_id, db=db)
 
@@ -38,7 +38,7 @@ def upsert_procurement_organ(
     organ_id: int,
     payload: CoordinationProcurementOrganCreate,
     db: Session = Depends(get_db),
-    current_user: User = Depends(require_permission("edit.donations")),
+    current_user: User = Depends(require_permission("edit.donors")),
 ):
     return upsert_procurement_organ_service(
         coordination_id=coordination_id,
@@ -55,7 +55,7 @@ def update_procurement_organ(
     organ_id: int,
     payload: CoordinationProcurementOrganUpdate,
     db: Session = Depends(get_db),
-    current_user: User = Depends(require_permission("edit.donations")),
+    current_user: User = Depends(require_permission("edit.donors")),
 ):
     return update_procurement_organ_service(
         coordination_id=coordination_id,
@@ -74,7 +74,7 @@ def upsert_procurement_value(
     field_template_id: int,
     payload: CoordinationProcurementValueCreate,
     db: Session = Depends(get_db),
-    current_user: User = Depends(require_permission("edit.donations")),
+    current_user: User = Depends(require_permission("edit.donors")),
 ):
     return upsert_procurement_value_service(
         coordination_id=coordination_id,

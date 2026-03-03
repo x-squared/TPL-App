@@ -35,7 +35,7 @@ export default function AdminView() {
         <h1>{t('app.admin.title', 'Admin')}</h1>
       </header>
 
-      <nav className="detail-tabs">
+      <nav className="detail-tabs admin-detail-tabs">
         <button
           className={`detail-tab ${activeTab === 'overview' ? 'active' : ''}`}
           onClick={() => setActiveTab('overview')}
@@ -147,6 +147,10 @@ export default function AdminView() {
           onReorderFields={procurementConfig.reorderFields}
           onCreateScope={procurementConfig.createScope}
           onDeleteScope={procurementConfig.deleteScope}
+          coordinationProtocolTaskGroupTemplates={procurementConfig.coordinationProtocolTaskGroupTemplates}
+          onCreateProtocolTaskGroupSelection={procurementConfig.createProtocolTaskGroupSelection}
+          onUpdateProtocolTaskGroupSelection={procurementConfig.updateProtocolTaskGroupSelection}
+          onDeleteProtocolTaskGroupSelection={procurementConfig.deleteProtocolTaskGroupSelection}
         />
       )}
       {activeTab === 'translations' && (

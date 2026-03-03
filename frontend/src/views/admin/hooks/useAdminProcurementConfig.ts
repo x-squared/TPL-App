@@ -4,6 +4,7 @@ import {
   api,
   type ProcurementAdminConfig,
   type ProcurementSlotKey,
+  type TaskGroupTemplate,
   type ProcurementValueMode,
 } from '../../../api';
 import { toUserErrorMessage } from '../../../api/error';
@@ -14,6 +15,7 @@ export function useAdminProcurementConfig() {
   const [saving, setSaving] = useState(false);
   const [error, setError] = useState('');
   const [status, setStatus] = useState('');
+  const [coordinationProtocolTaskGroupTemplates, setCoordinationProtocolTaskGroupTemplates] = useState<TaskGroupTemplate[]>([]);
 
   const load = async (options?: { withLoading?: boolean }) => {
     const withLoading = options?.withLoading ?? (config == null);
@@ -23,7 +25,12 @@ export function useAdminProcurementConfig() {
     setError('');
     try {
       const payload = await api.getProcurementAdminConfig();
+      const taskGroupTemplates = await api.listTaskGroupTemplates();
+      const protocolTaskGroupTemplates = taskGroupTemplates
+        .filter((entry) => entry.scope?.key === 'COORDINATION_PROTOCOL')
+        .sort((a, b) => (a.sort_pos - b.sort_pos) || (a.id - b.id));
       setConfig(payload);
+      setCoordinationProtocolTaskGroupTemplates(protocolTaskGroupTemplates);
     } catch (err) {
       setError(toUserErrorMessage(err, 'Could not load procurement data configuration.'));
     } finally {
@@ -38,22 +45,14 @@ export function useAdminProcurementConfig() {
   }, []);
 
   const createGroup = async (payload: { key: string; name_default: string; comment: string; is_active?: boolean; pos: number }) => {
-    setSaving(true);
-    setError('');
+    void payload;
     setStatus('');
-    try {
-      await api.createProcurementFieldGroupTemplate(payload);
-      await load();
-    } catch (err) {
-      setError(toUserErrorMessage(err, 'Could not create data group.'));
-    } finally {
-      setSaving(false);
-    }
+    setError('');
   };
 
   const updateGroup = async (
     groupId: number,
-    payload: { key?: string; name_default?: string; comment?: string; is_active?: boolean; pos?: number },
+    payload: { pos?: number },
   ) => {
     setSaving(true);
     setError('');
@@ -110,18 +109,9 @@ export function useAdminProcurementConfig() {
     group_template_id?: number | null;
     value_mode: ProcurementValueMode;
   }) => {
-    setSaving(true);
-    setError('');
+    void payload;
     setStatus('');
-    try {
-      await api.createProcurementFieldTemplate(payload);
-      setStatus('Field created.');
-      await load();
-    } catch (err) {
-      setError(toUserErrorMessage(err, 'Could not create field.'));
-    } finally {
-      setSaving(false);
-    }
+    setError('');
   };
 
   const reorderFields = async (
@@ -152,7 +142,7 @@ export function useAdminProcurementConfig() {
 
   const updateField = async (
     fieldId: number,
-    payload: { group_template_id?: number | null; comment?: string; is_active?: boolean; pos?: number },
+    payload: { group_template_id?: number | null; pos?: number },
   ) => {
     setSaving(true);
     setError('');
@@ -202,6 +192,55 @@ export function useAdminProcurementConfig() {
     }
   };
 
+  const createProtocolTaskGroupSelection = async (payload: {
+    task_group_template_id: number;
+    organ_id?: number | null;
+    pos: number;
+  }) => {
+    setSaving(true);
+    setError('');
+    setStatus('');
+    try {
+      await api.createProcurementProtocolTaskGroupSelection(payload);
+      await load();
+    } catch (err) {
+      setError(toUserErrorMessage(err, 'Could not add protocol task-group selection.'));
+    } finally {
+      setSaving(false);
+    }
+  };
+
+  const updateProtocolTaskGroupSelection = async (
+    selectionId: number,
+    payload: { organ_id?: number | null; pos?: number },
+  ) => {
+    setSaving(true);
+    setError('');
+    setStatus('');
+    try {
+      await api.updateProcurementProtocolTaskGroupSelection(selectionId, payload);
+      await load();
+    } catch (err) {
+      setError(toUserErrorMessage(err, 'Could not update protocol task-group selection.'));
+    } finally {
+      setSaving(false);
+    }
+  };
+
+  const deleteProtocolTaskGroupSelection = async (selectionId: number) => {
+    setSaving(true);
+    setError('');
+    setStatus('');
+    try {
+      await api.deleteProcurementProtocolTaskGroupSelection(selectionId);
+      await load();
+    } catch (err) {
+      setError(toUserErrorMessage(err, 'Could not remove protocol task-group selection.'));
+    } finally {
+      setSaving(false);
+    }
+  };
+
   const scopesByFieldId = useMemo(() => {
     const out: Record<number, ProcurementAdminConfig['field_scope_templates']> = {};
     for (const scope of config?.field_scope_templates ?? []) {
@@ -216,6 +255,7 @@ export function useAdminProcurementConfig() {
     saving,
     error,
     status,
+    coordinationProtocolTaskGroupTemplates,
     scopesByFieldId,
     createGroup,
     updateGroup,
@@ -226,6 +266,9 @@ export function useAdminProcurementConfig() {
     reorderFields,
     createScope,
     deleteScope,
+    createProtocolTaskGroupSelection,
+    updateProtocolTaskGroupSelection,
+    deleteProtocolTaskGroupSelection,
     refresh: load,
   };
 }

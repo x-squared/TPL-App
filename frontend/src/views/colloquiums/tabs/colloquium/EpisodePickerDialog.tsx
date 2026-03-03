@@ -1,5 +1,6 @@
 import { useEffect, useMemo, useState } from 'react';
 import type { PatientListItem } from '../../../../api';
+import { useI18n } from '../../../../i18n/i18n';
 
 interface EpisodeChoice {
   episodeId: number;
@@ -47,6 +48,7 @@ export default function EpisodePickerDialog({
   onClose,
   onConfirm,
 }: Props) {
+  const { t } = useI18n();
   const [search, setSearch] = useState('');
   const [selectedEpisodeIds, setSelectedEpisodeIds] = useState<number[]>([]);
 
@@ -68,38 +70,38 @@ export default function EpisodePickerDialog({
   if (!open) return null;
 
   return (
-    <div className="colloquium-dialog-overlay" role="dialog" aria-modal="true" aria-label="Select episode">
+    <div className="colloquium-dialog-overlay" role="dialog" aria-modal="true" aria-label={t('episodePicker.selectEpisode', 'Select episode')}>
       <div className="colloquium-dialog">
         <header className="colloquium-dialog-header">
-          <h3>Select episode ({organLabel})</h3>
-          <button className="patients-cancel-btn" onClick={onClose}>Close</button>
+          <h3>{t('episodePicker.selectEpisode', 'Select episode')} ({organLabel})</h3>
+          <button className="patients-cancel-btn" onClick={onClose}>{t('episodePicker.close', 'Close')}</button>
         </header>
 
         <div className="colloquium-dialog-search">
           <input
             className="detail-input"
-            placeholder="Search by name, PID, or date of birth"
+            placeholder={t('episodePicker.searchPlaceholder', 'Search by name, PID, or date of birth')}
             value={search}
             onChange={(e) => setSearch(e.target.value)}
           />
         </div>
 
         {loading ? (
-          <p className="status">Loading matching patients...</p>
+          <p className="status">{t('episodePicker.loading', 'Loading matching patients...')}</p>
         ) : filtered.length === 0 ? (
-          <p className="status">No patients with a current matching episode.</p>
+          <p className="status">{t('episodePicker.empty', 'No patients with a current matching episode.')}</p>
         ) : (
           <div className="patients-table-wrap ui-table-wrap">
             <table className="data-table">
               <thead>
                 <tr>
                   <th></th>
-                  <th>Name</th>
-                  <th>PID</th>
-                  <th>Date of Birth</th>
-                  <th>Episode</th>
-                  <th>Start</th>
-                  <th>End</th>
+                  <th>{t('patients.table.name', 'Name')}</th>
+                  <th>{t('patients.table.pid', 'PID')}</th>
+                  <th>{t('patients.table.dateOfBirth', 'Date of Birth')}</th>
+                  <th>{t('episodePicker.episode', 'Episode')}</th>
+                  <th>{t('patients.episodes.start', 'Start')}</th>
+                  <th>{t('patients.episodes.end', 'End')}</th>
                 </tr>
               </thead>
               <tbody>
@@ -141,9 +143,9 @@ export default function EpisodePickerDialog({
             onClick={() => onConfirm(selectedEpisodeIds)}
             disabled={selectedEpisodeIds.length === 0}
           >
-            Select episode{selectedEpisodeIds.length > 1 ? 's' : ''}
+            {t('episodePicker.selectEpisode', 'Select episode')}{selectedEpisodeIds.length > 1 ? 's' : ''}
           </button>
-          <button className="patients-cancel-btn" onClick={onClose}>Cancel</button>
+          <button className="patients-cancel-btn" onClick={onClose}>{t('actions.cancel', 'Cancel')}</button>
         </div>
       </div>
     </div>

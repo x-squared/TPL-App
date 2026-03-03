@@ -1,5 +1,6 @@
 import { useMemo } from 'react';
 import type { Patient } from '../../../api';
+import { useI18n } from '../../../i18n/i18n';
 import type { PatientDiagnosesModel } from '../../patient-detail/PatientDetailTabs';
 import InlineDeleteActions from '../../layout/InlineDeleteActions';
 
@@ -28,6 +29,7 @@ export default function DiagnosesSection({
   handleDeleteDiag,
   formatDate,
 }: DiagnosesSectionProps) {
+  const { t } = useI18n();
   const hasDiagnoses = Boolean(patient.diagnoses && patient.diagnoses.length > 0);
   const sortedDiagnoses = useMemo(() => {
     return [...(patient.diagnoses ?? [])].sort((a, b) => {
@@ -45,19 +47,19 @@ export default function DiagnosesSection({
   return (
     <section className="detail-section" style={{ marginTop: '1.5rem' }}>
       <div className="detail-section-heading">
-        <h2>Diagnoses</h2>
+        <h2>{t('patient.diagnoses.title', 'Diagnoses')}</h2>
         {!addingDiag && (
-          <button className="ci-add-btn" onClick={() => setAddingDiag(true)}>+ Add</button>
+          <button className="ci-add-btn" onClick={() => setAddingDiag(true)}>{t('information.actions.add', '+ Add')}</button>
         )}
       </div>
       {hasDiagnoses ? (
         <table className="detail-contact-table diagnosis-table">
           <thead>
             <tr>
-              <th>Main</th>
-              <th>Diagnosis</th>
-              <th>Comment</th>
-              <th>Date</th>
+              <th>{t('patients.contact.main', 'Main')}</th>
+              <th>{t('coordinations.donorData.diagnosis', 'Diagnosis')}</th>
+              <th>{t('taskBoard.columns.comment', 'Comment')}</th>
+              <th>{t('colloquiums.table.date', 'Date')}</th>
               <th></th>
             </tr>
           </thead>
@@ -106,9 +108,9 @@ export default function DiagnosesSection({
                   }
                 >
                   <td className="diag-main">
-                    {d.is_main && <span className="diag-main-badge">Main</span>}
+                    {d.is_main && <span className="diag-main-badge">{t('patients.contact.main', 'Main')}</span>}
                   </td>
-                  <td className="diag-code">{d.catalogue ? `${d.catalogue.key} – ${d.catalogue.name_default}` : '–'}</td>
+                  <td className="diag-code">{d.catalogue ? `${d.catalogue.key} – ${d.catalogue.name_default}` : t('common.emptySymbol', '–')}</td>
                   <td className="diag-comment">{d.comment || ''}</td>
                   <td className="diag-date">{formatDate(d.updated_at ?? d.created_at)}</td>
                   <td className="detail-ci-actions">
@@ -133,7 +135,7 @@ export default function DiagnosesSection({
           </tbody>
         </table>
       ) : (
-        <p className="detail-empty">No diagnoses.</p>
+        <p className="detail-empty">{t('patient.diagnoses.empty', 'No diagnoses.')}</p>
       )}
 
       {addingDiag && (
@@ -149,7 +151,7 @@ export default function DiagnosesSection({
           </select>
           <input
             className="detail-input"
-            placeholder="Comment"
+            placeholder={t('taskBoard.columns.comment', 'Comment')}
             value={diagForm.comment}
             onChange={(e) => setDiagForm((f) => ({ ...f, comment: e.target.value }))}
           />
@@ -160,16 +162,16 @@ export default function DiagnosesSection({
               onChange={(e) => setDiagForm((f) => ({ ...f, is_main: e.target.checked }))}
               disabled={!hasDiagnoses}
             />
-            Main
+            {t('patients.contact.main', 'Main')}
           </label>
           {!hasDiagnoses && (
-            <span className="diag-main-hint">First diagnosis is always main.</span>
+            <span className="diag-main-hint">{t('patient.diagnoses.firstIsMain', 'First diagnosis is always main.')}</span>
           )}
           <div className="ci-add-actions">
             <button className="save-btn" onClick={handleAddDiag} disabled={diagSaving || !diagForm.catalogue_id}>
-              {diagSaving ? 'Saving...' : 'Save'}
+              {diagSaving ? t('coordinations.form.saving', 'Saving...') : t('actions.save', 'Save')}
             </button>
-            <button className="cancel-btn" onClick={() => setAddingDiag(false)} disabled={diagSaving}>Cancel</button>
+            <button className="cancel-btn" onClick={() => setAddingDiag(false)} disabled={diagSaving}>{t('actions.cancel', 'Cancel')}</button>
           </div>
         </div>
       )}

@@ -148,6 +148,16 @@ export function useAdminTranslations() {
     return (labels.en ?? key).trim();
   };
 
+  const getEffectiveText = (key: string): string => {
+    const draftText = (draft[key] ?? '').trim();
+    if (draftText) return draftText;
+    const entryText = (entries[key] ?? '').trim();
+    if (entryText) return entryText;
+    const builtinText = (builtinEntries[key] ?? '').trim();
+    if (builtinText) return builtinText;
+    return getEnglishReference(key);
+  };
+
   return {
     locale,
     setLocale,
@@ -163,5 +173,6 @@ export function useAdminTranslations() {
     getItemLabel,
     getSourceKind,
     getEnglishReference,
+    getEffectiveText,
   };
 }

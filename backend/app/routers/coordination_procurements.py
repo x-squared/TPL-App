@@ -23,7 +23,7 @@ router = APIRouter(prefix="/coordinations/{coordination_id}/procurement", tags=[
 def get_coordination_procurement(
     coordination_id: int,
     db: Session = Depends(get_db),
-    _: User = Depends(require_permission("view.donations")),
+    _: User = Depends(require_permission("view.donors")),
 ):
     return get_coordination_procurement_service(coordination_id=coordination_id, db=db)
 
@@ -33,7 +33,7 @@ def upsert_coordination_procurement(
     coordination_id: int,
     payload: CoordinationProcurementCreate,
     db: Session = Depends(get_db),
-    current_user: User = Depends(require_permission("edit.donations")),
+    current_user: User = Depends(require_permission("edit.donors")),
 ):
     return upsert_coordination_procurement_service(
         coordination_id=coordination_id,
@@ -48,7 +48,7 @@ def update_coordination_procurement(
     coordination_id: int,
     payload: CoordinationProcurementUpdate,
     db: Session = Depends(get_db),
-    current_user: User = Depends(require_permission("edit.donations")),
+    current_user: User = Depends(require_permission("edit.donors")),
 ):
     return update_coordination_procurement_service(
         coordination_id=coordination_id,
@@ -62,6 +62,6 @@ def update_coordination_procurement(
 def delete_coordination_procurement(
     coordination_id: int,
     db: Session = Depends(get_db),
-    _: User = Depends(require_permission("edit.donations")),
+    _: User = Depends(require_permission("edit.donors")),
 ):
     delete_coordination_procurement_service(coordination_id=coordination_id, db=db)

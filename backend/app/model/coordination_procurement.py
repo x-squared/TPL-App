@@ -1,9 +1,20 @@
-from sqlalchemy import Boolean, Column, DateTime, Enum as SqlEnum, ForeignKey, Integer, String, UniqueConstraint
+from enum import Enum
+
+from sqlalchemy import Boolean, Column, Date, DateTime, Enum as SqlEnum, ForeignKey, Integer, String, UniqueConstraint
 from sqlalchemy.orm import relationship
 from sqlalchemy.sql import func
 
 from ..database import Base
 from ..enums import ProcurementSlotKey, ProcurementValueMode
+
+
+class ProcurementPersonListKey(str, Enum):
+    ON_SITE_COORDINATORS = "ON_SITE_COORDINATORS"
+    PROCUREMENT_TEAM_INT = "PROCUREMENT_TEAM_INT"
+
+
+class ProcurementTeamListKey(str, Enum):
+    IMPLANT_TEAM = "IMPLANT_TEAM"
 
 
 class CoordinationProcurement(Base):
@@ -279,6 +290,149 @@ class CoordinationProcurementDataTeam(Base):
     changed_by_user = relationship("User")
 
 
+class CoordinationProcurementTypedData(Base):
+    """Typed runtime procurement data row per coordination, organ and slot."""
+
+    __tablename__ = "COORDINATION_PROCUREMENT_TYPED_DATA"
+    __table_args__ = (
+        UniqueConstraint(
+            "COORDINATION_ID",
+            "ORGAN_ID",
+            "SLOT_KEY",
+            name="uq_coordination_procurement_typed_data",
+        ),
+    )
+
+    id = Column("ID", Integer, primary_key=True, index=True)
+    coordination_id = Column("COORDINATION_ID", Integer, ForeignKey("COORDINATION.ID"), nullable=False, index=True)
+    organ_id = Column("ORGAN_ID", Integer, ForeignKey("CODE.ID"), nullable=False, index=True)
+    slot_key = Column(
+        "SLOT_KEY",
+        SqlEnum(
+            ProcurementSlotKey,
+            native_enum=False,
+            validate_strings=True,
+            values_callable=lambda enum_cls: [entry.value for entry in enum_cls],
+            length=16,
+        ),
+        nullable=False,
+        default=ProcurementSlotKey.MAIN.value,
+    )
+
+    # Explicit typed procurement attributes (catalog-backed).
+    ambulance_arrival_time = Column("AMBULANCE_ARRIVAL_TIME", DateTime(timezone=True), nullable=True)
+    informed_time = Column("INFORMED_TIME", DateTime(timezone=True), nullable=True)
+    incision_time = Column("INCISION_TIME", DateTime(timezone=True), nullable=True)
+    cardiac_arrest_time = Column("CARDIAC_ARREST_TIME", DateTime(timezone=True), nullable=True)
+    cold_perfusion = Column("COLD_PERFUSION", Date, nullable=True)
+    cold_perfusion_abdominal = Column("COLD_PERFUSION_ABDOMINAL", Date, nullable=True)
+    ehb_box_nr = Column("EHB_BOX_NR", String, nullable=False, default="")
+    ehb_nr = Column("EHB_NR", String, nullable=False, default="")
+    reached_time = Column("REACHED_TIME", DateTime(timezone=True), nullable=True)
+    informed_implantteam_time = Column("INFORMED_IMPLANTTEAM_TIME", DateTime(timezone=True), nullable=True)
+    incision_donor_time = Column("INCISION_DONOR_TIME", DateTime(timezone=True), nullable=True)
+    nmp_used = Column("NMP_USED", Boolean, nullable=True, default=None)
+    cross_clamp_time = Column("CROSS_CLAMP_TIME", DateTime(timezone=True), nullable=True)
+    procurement_team_departure_time = Column("PROCUREMENT_TEAM_DEPARTURE_TIME", DateTime(timezone=True), nullable=True)
+    evlp_used = Column("EVLP_USED", Boolean, nullable=True, default=None)
+    departure_donor_time = Column("DEPARTURE_DONOR_TIME", DateTime(timezone=True), nullable=True)
+    hope_used = Column("HOPE_USED", Boolean, nullable=True, default=None)
+    arrival_time = Column("ARRIVAL_TIME", DateTime(timezone=True), nullable=True)
+    lifeport_used = Column("LIFEPORT_USED", Boolean, nullable=True, default=None)
+
+    # Explicit single-reference attributes.
+    arzt_responsible_person_id = Column("ARZT_RESPONSIBLE_PERSON_ID", Integer, ForeignKey("PERSON.ID"), nullable=True, index=True)
+    chirurg_responsible_person_id = Column("CHIRURG_RESPONSIBLE_PERSON_ID", Integer, ForeignKey("PERSON.ID"), nullable=True, index=True)
+    procurment_team_team_id = Column("PROCURMENT_TEAM_TEAM_ID", Integer, ForeignKey("PERSON_TEAM.ID"), nullable=True, index=True)
+    recipient_episode_id = Column("RECIPIENT_EPISODE_ID", Integer, ForeignKey("EPISODE.ID"), nullable=True, index=True)
+
+    changed_by_id = Column("CHANGED_BY", Integer, ForeignKey("USER.ID"), nullable=True)
+    created_at = Column("CREATED_AT", DateTime(timezone=True), server_default=func.now())
+    updated_at = Column("UPDATED_AT", DateTime(timezone=True), onupdate=func.now())
+
+    coordination = relationship("Coordination")
+    organ = relationship("Code", foreign_keys=[organ_id])
+    arzt_responsible_person = relationship("Person", foreign_keys=[arzt_responsible_person_id])
+    chirurg_responsible_person = relationship("Person", foreign_keys=[chirurg_responsible_person_id])
+    procurment_team_team = relationship("PersonTeam", foreign_keys=[procurment_team_team_id])
+    recipient_episode = relationship("Episode", foreign_keys=[recipient_episode_id])
+    changed_by_user = relationship("User")
+    person_lists = relationship(
+        "CoordinationProcurementTypedDataPersonList",
+        back_populates="data_row",
+        cascade="all, delete-orphan",
+    )
+    team_lists = relationship(
+        "CoordinationProcurementTypedDataTeamList",
+        back_populates="data_row",
+        cascade="all, delete-orphan",
+    )
+
+
+class CoordinationProcurementTypedDataPersonList(Base):
+    """Typed person-list references attached to a typed procurement data row."""
+
+    __tablename__ = "COORDINATION_PROCUREMENT_TYPED_DATA_PERSON_LIST"
+    __table_args__ = (
+        UniqueConstraint("DATA_ID", "LIST_KEY", "PERSON_ID", name="uq_coordination_procurement_typed_data_person"),
+    )
+
+    id = Column("ID", Integer, primary_key=True, index=True)
+    data_id = Column("DATA_ID", Integer, ForeignKey("COORDINATION_PROCUREMENT_TYPED_DATA.ID"), nullable=False, index=True)
+    list_key = Column(
+        "LIST_KEY",
+        SqlEnum(
+            ProcurementPersonListKey,
+            native_enum=False,
+            validate_strings=True,
+            values_callable=lambda enum_cls: [entry.value for entry in enum_cls],
+            length=32,
+        ),
+        nullable=False,
+    )
+    person_id = Column("PERSON_ID", Integer, ForeignKey("PERSON.ID"), nullable=False, index=True)
+    pos = Column("POS", Integer, nullable=False, default=0)
+    changed_by_id = Column("CHANGED_BY", Integer, ForeignKey("USER.ID"), nullable=True)
+    created_at = Column("CREATED_AT", DateTime(timezone=True), server_default=func.now())
+    updated_at = Column("UPDATED_AT", DateTime(timezone=True), onupdate=func.now())
+
+    data_row = relationship("CoordinationProcurementTypedData", back_populates="person_lists")
+    person = relationship("Person")
+    changed_by_user = relationship("User")
+
+
+class CoordinationProcurementTypedDataTeamList(Base):
+    """Typed team-list references attached to a typed procurement data row."""
+
+    __tablename__ = "COORDINATION_PROCUREMENT_TYPED_DATA_TEAM_LIST"
+    __table_args__ = (
+        UniqueConstraint("DATA_ID", "LIST_KEY", "TEAM_ID", name="uq_coordination_procurement_typed_data_team"),
+    )
+
+    id = Column("ID", Integer, primary_key=True, index=True)
+    data_id = Column("DATA_ID", Integer, ForeignKey("COORDINATION_PROCUREMENT_TYPED_DATA.ID"), nullable=False, index=True)
+    list_key = Column(
+        "LIST_KEY",
+        SqlEnum(
+            ProcurementTeamListKey,
+            native_enum=False,
+            validate_strings=True,
+            values_callable=lambda enum_cls: [entry.value for entry in enum_cls],
+            length=32,
+        ),
+        nullable=False,
+    )
+    team_id = Column("TEAM_ID", Integer, ForeignKey("PERSON_TEAM.ID"), nullable=False, index=True)
+    pos = Column("POS", Integer, nullable=False, default=0)
+    changed_by_id = Column("CHANGED_BY", Integer, ForeignKey("USER.ID"), nullable=True)
+    created_at = Column("CREATED_AT", DateTime(timezone=True), server_default=func.now())
+    updated_at = Column("UPDATED_AT", DateTime(timezone=True), onupdate=func.now())
+
+    data_row = relationship("CoordinationProcurementTypedData", back_populates="team_lists")
+    team = relationship("PersonTeam")
+    changed_by_user = relationship("User")
+
+
 class CoordinationProcurementFieldGroupTemplate(Base):
     """Template grouping for procurement field rendering and grouped capture."""
 
@@ -296,3 +450,34 @@ class CoordinationProcurementFieldGroupTemplate(Base):
 
     changed_by_user = relationship("User")
     field_templates = relationship("CoordinationProcurementFieldTemplate", back_populates="group_template")
+
+
+class CoordinationProcurementProtocolTaskGroupSelection(Base):
+    """Overlay config selecting protocol task-group templates and their display order."""
+
+    __tablename__ = "COORDINATION_PROCUREMENT_PROTOCOL_TASK_GROUP_SELECTION"
+    __table_args__ = (
+        UniqueConstraint(
+            "TASK_GROUP_TEMPLATE_ID",
+            "ORGAN_ID",
+            name="uq_coordination_procurement_protocol_task_group_selection",
+        ),
+    )
+
+    id = Column("ID", Integer, primary_key=True, index=True)
+    task_group_template_id = Column(
+        "TASK_GROUP_TEMPLATE_ID",
+        Integer,
+        ForeignKey("TASK_GROUP_TEMPLATE.ID"),
+        nullable=False,
+        index=True,
+    )
+    organ_id = Column("ORGAN_ID", Integer, ForeignKey("CODE.ID"), nullable=True, index=True)
+    pos = Column("POS", Integer, nullable=False, default=0)
+    changed_by_id = Column("CHANGED_BY", Integer, ForeignKey("USER.ID"), nullable=True)
+    created_at = Column("CREATED_AT", DateTime(timezone=True), server_default=func.now())
+    updated_at = Column("UPDATED_AT", DateTime(timezone=True), onupdate=func.now())
+
+    task_group_template = relationship("TaskGroupTemplate")
+    organ = relationship("Code", foreign_keys=[organ_id])
+    changed_by_user = relationship("User")

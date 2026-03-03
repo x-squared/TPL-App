@@ -1,4 +1,5 @@
 import type { PatientAbsencesModel } from '../../patient-detail/PatientDetailTabs';
+import { useI18n } from '../../../i18n/i18n';
 import InlineDeleteActions from '../../layout/InlineDeleteActions';
 
 type AbsencesSectionProps = PatientAbsencesModel & {
@@ -24,12 +25,13 @@ export default function AbsencesSection({
   handleAddAbsence,
   formatDate,
 }: AbsencesSectionProps) {
+  const { t } = useI18n();
   return (
     <section className="detail-section">
       <div className="detail-section-heading">
-        <h2>Absences</h2>
+        <h2>{t('patient.absences.title', 'Absences')}</h2>
         {!addingAbsence && (
-          <button className="ci-add-btn" onClick={() => setAddingAbsence(true)}>+ Add</button>
+          <button className="ci-add-btn" onClick={() => setAddingAbsence(true)}>{t('information.actions.add', '+ Add')}</button>
         )}
       </div>
       {sortedAbsences.length > 0 ? (
@@ -86,7 +88,7 @@ export default function AbsencesSection({
           </tbody>
         </table>
       ) : (
-        <p className="detail-empty">No absences.</p>
+        <p className="detail-empty">{t('patient.absences.empty', 'No absences.')}</p>
       )}
 
       {addingAbsence && (
@@ -105,15 +107,15 @@ export default function AbsencesSection({
           />
           <input
             className="detail-input"
-            placeholder="Comment"
+            placeholder={t('taskBoard.columns.comment', 'Comment')}
             value={abForm.comment}
             onChange={(e) => setAbForm((f) => ({ ...f, comment: e.target.value }))}
           />
           <div className="ci-add-actions">
             <button className="save-btn" onClick={handleAddAbsence} disabled={abSaving || !abForm.start || !abForm.end || abForm.end < abForm.start}>
-              {abSaving ? 'Saving...' : 'Save'}
+              {abSaving ? t('coordinations.form.saving', 'Saving...') : t('actions.save', 'Save')}
             </button>
-            <button className="cancel-btn" onClick={() => setAddingAbsence(false)} disabled={abSaving}>Cancel</button>
+            <button className="cancel-btn" onClick={() => setAddingAbsence(false)} disabled={abSaving}>{t('actions.cancel', 'Cancel')}</button>
           </div>
         </div>
       )}

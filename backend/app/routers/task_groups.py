@@ -1,4 +1,4 @@
-from fastapi import APIRouter, Depends
+from fastapi import APIRouter, Depends, Query
 from sqlalchemy.orm import Session
 
 from ..auth import get_current_user
@@ -6,11 +6,12 @@ from ..database import get_db
 from ..features.tasks import (
     create_task_group as create_task_group_service,
     delete_task_group as delete_task_group_service,
+    ensure_coordination_protocol_task_groups as ensure_coordination_protocol_task_groups_service,
     list_task_groups as list_task_groups_service,
     update_task_group as update_task_group_service,
 )
 from ..models import User
-from ..schemas import TaskGroupCreate, TaskGroupResponse, TaskGroupUpdate
+from ..schemas import CoordinationProtocolTaskGroupsEnsureResponse, TaskGroupCreate, TaskGroupResponse, TaskGroupUpdate
 
 router = APIRouter(prefix="/task-groups", tags=["task-groups"])
 
@@ -22,6 +23,7 @@ def list_task_groups(
     colloqium_agenda_id: int | None = None,
     coordination_id: int | None = None,
     organ_id: int | None = None,
+    task_group_template_id: list[int] | None = Query(default=None),
     db: Session = Depends(get_db),
 ):
     return list_task_groups_service(
@@ -30,6 +32,7 @@ def list_task_groups(
         colloqium_agenda_id=colloqium_agenda_id,
         coordination_id=coordination_id,
         organ_id=organ_id,
+        task_group_template_ids=task_group_template_id,
         db=db,
     )
 
@@ -45,6 +48,22 @@ def create_task_group(
         changed_by_id=current_user.id,
         db=db,
     )
+
+
+@router.post("/coordination/{coordination_id}/ensure-protocol", response_model=CoordinationProtocolTaskGroupsEnsureResponse)
+def ensure_coordination_protocol_task_groups(
+    coordination_id: int,
+    organ_id: int | None = None,
+    db: Session = Depends(get_db),
+    current_user: User = Depends(get_current_user),
+):
+    created_group_count = ensure_coordination_protocol_task_groups_service(
+        coordination_id=coordination_id,
+        changed_by_id=current_user.id,
+        db=db,
+        organ_id=organ_id,
+    )
+    return CoordinationProtocolTaskGroupsEnsureResponse(created_group_count=created_group_count)
 
 
 @router.patch("/{task_group_id}", response_model=TaskGroupResponse)

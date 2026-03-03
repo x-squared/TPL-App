@@ -9,10 +9,6 @@ export interface ProcurementGroupCreatePayload {
 }
 
 export interface ProcurementGroupUpdatePayload {
-  key?: string;
-  name_default?: string;
-  comment?: string;
-  is_active?: boolean;
   pos?: number;
 }
 
@@ -29,8 +25,6 @@ export interface ProcurementFieldCreatePayload {
 
 export interface ProcurementFieldUpdatePayload {
   group_template_id?: number | null;
-  comment?: string;
-  is_active?: boolean;
   pos?: number;
 }
 
@@ -38,4 +32,10 @@ export interface ProcurementScopeCreatePayload {
   field_template_id: number;
   organ_id?: number | null;
   slot_key: ProcurementSlotKey;
+}
+
+export interface ProcurementProtocolTaskGroupSelectionCreatePayload {
+  task_group_template_id: number;
+  organ_id?: number | null;
+  pos: number;
 }

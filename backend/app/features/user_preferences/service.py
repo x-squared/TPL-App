@@ -24,7 +24,9 @@ def _normalize_preferences(raw: object) -> dict[str, object]:
     if locale in {"en", "de"}:
         normalized["locale"] = locale
     start_page = raw.get("start_page")
-    if start_page in {"my-work", "patients", "donations", "colloquiums", "coordinations", "reports", "admin", "e2e-tests"}:
+    if start_page == "donations":
+        start_page = "donors"
+    if start_page in {"my-work", "patients", "donors", "colloquiums", "coordinations", "reports", "admin", "e2e-tests"}:
         normalized["start_page"] = start_page
     return normalized
 

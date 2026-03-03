@@ -472,13 +472,259 @@ def _migrate_procurement_runtime() -> dict[str, int]:
     }
 
 
+def _migrate_procurement_to_typed() -> dict[str, int]:
+    from .database import engine
+
+    migrated_rows = 0
+    migrated_scalar_updates = 0
+    migrated_person_links = 0
+    migrated_team_links = 0
+
+    with engine.begin() as conn:
+        required_tables = (
+            "COORDINATION_PROCUREMENT_DATA",
+            "COORDINATION_PROCUREMENT_FIELD_TEMPLATE",
+            "COORDINATION_PROCUREMENT_TYPED_DATA",
+            "COORDINATION_PROCUREMENT_TYPED_DATA_PERSON_LIST",
+            "COORDINATION_PROCUREMENT_TYPED_DATA_TEAM_LIST",
+        )
+        for table_name in required_tables:
+            exists = conn.execute(
+                text(f"SELECT name FROM sqlite_master WHERE type='table' AND name='{table_name}'")
+            ).scalar_one_or_none()
+            if not exists:
+                return {
+                    "migrated_rows": migrated_rows,
+                    "migrated_scalar_updates": migrated_scalar_updates,
+                    "migrated_person_links": migrated_person_links,
+                    "migrated_team_links": migrated_team_links,
+                }
+
+        value_rows = conn.execute(
+            text(
+                'SELECT d."ID" AS data_id, d."COORDINATION_ID" AS coordination_id, d."ORGAN_ID" AS organ_id, '
+                'd."SLOT_KEY" AS slot_key, d."VALUE" AS value_text, d."EPISODE_ID" AS episode_id, '
+                'd."CHANGED_BY" AS changed_by_id, d."CREATED_AT" AS created_at, d."UPDATED_AT" AS updated_at, '
+                'f."KEY" AS field_key '
+                'FROM "COORDINATION_PROCUREMENT_DATA" d '
+                'JOIN "COORDINATION_PROCUREMENT_FIELD_TEMPLATE" f ON f."ID" = d."FIELD_TEMPLATE_ID"'
+            )
+        ).mappings().all()
+        if not value_rows:
+            return {
+                "migrated_rows": migrated_rows,
+                "migrated_scalar_updates": migrated_scalar_updates,
+                "migrated_person_links": migrated_person_links,
+                "migrated_team_links": migrated_team_links,
+            }
+
+        scalar_sql_by_field_key = {
+            "AMBULANCE_ARRIVAL_TIME": 'UPDATE "COORDINATION_PROCUREMENT_TYPED_DATA" SET "AMBULANCE_ARRIVAL_TIME" = :value_text, "CHANGED_BY" = :changed_by_id WHERE "ID" = :typed_id',
+            "INFORMED_TIME": 'UPDATE "COORDINATION_PROCUREMENT_TYPED_DATA" SET "INFORMED_TIME" = :value_text, "CHANGED_BY" = :changed_by_id WHERE "ID" = :typed_id',
+            "INCISION_TIME": 'UPDATE "COORDINATION_PROCUREMENT_TYPED_DATA" SET "INCISION_TIME" = :value_text, "CHANGED_BY" = :changed_by_id WHERE "ID" = :typed_id',
+            "CARDIAC_ARREST_TIME": 'UPDATE "COORDINATION_PROCUREMENT_TYPED_DATA" SET "CARDIAC_ARREST_TIME" = :value_text, "CHANGED_BY" = :changed_by_id WHERE "ID" = :typed_id',
+            "COLD_PERFUSION": 'UPDATE "COORDINATION_PROCUREMENT_TYPED_DATA" SET "COLD_PERFUSION" = :value_text, "CHANGED_BY" = :changed_by_id WHERE "ID" = :typed_id',
+            "COLD_PERFUSION_ABDOMINAL": 'UPDATE "COORDINATION_PROCUREMENT_TYPED_DATA" SET "COLD_PERFUSION_ABDOMINAL" = :value_text, "CHANGED_BY" = :changed_by_id WHERE "ID" = :typed_id',
+            "EHB_BOX_NR": 'UPDATE "COORDINATION_PROCUREMENT_TYPED_DATA" SET "EHB_BOX_NR" = :value_text, "CHANGED_BY" = :changed_by_id WHERE "ID" = :typed_id',
+            "EHB_NR": 'UPDATE "COORDINATION_PROCUREMENT_TYPED_DATA" SET "EHB_NR" = :value_text, "CHANGED_BY" = :changed_by_id WHERE "ID" = :typed_id',
+            "REACHED_TIME": 'UPDATE "COORDINATION_PROCUREMENT_TYPED_DATA" SET "REACHED_TIME" = :value_text, "CHANGED_BY" = :changed_by_id WHERE "ID" = :typed_id',
+            "INFORMED_IMPLANTTEAM_TIME": 'UPDATE "COORDINATION_PROCUREMENT_TYPED_DATA" SET "INFORMED_IMPLANTTEAM_TIME" = :value_text, "CHANGED_BY" = :changed_by_id WHERE "ID" = :typed_id',
+            "INCISION_DONOR_TIME": 'UPDATE "COORDINATION_PROCUREMENT_TYPED_DATA" SET "INCISION_DONOR_TIME" = :value_text, "CHANGED_BY" = :changed_by_id WHERE "ID" = :typed_id',
+            "CROSS_CLAMP_TIME": 'UPDATE "COORDINATION_PROCUREMENT_TYPED_DATA" SET "CROSS_CLAMP_TIME" = :value_text, "CHANGED_BY" = :changed_by_id WHERE "ID" = :typed_id',
+            "PROCUREMENT_TEAM_DEPARTURE_TIME": 'UPDATE "COORDINATION_PROCUREMENT_TYPED_DATA" SET "PROCUREMENT_TEAM_DEPARTURE_TIME" = :value_text, "CHANGED_BY" = :changed_by_id WHERE "ID" = :typed_id',
+            "DEPARTURE_DONOR_TIME": 'UPDATE "COORDINATION_PROCUREMENT_TYPED_DATA" SET "DEPARTURE_DONOR_TIME" = :value_text, "CHANGED_BY" = :changed_by_id WHERE "ID" = :typed_id',
+            "ARRIVAL_TIME": 'UPDATE "COORDINATION_PROCUREMENT_TYPED_DATA" SET "ARRIVAL_TIME" = :value_text, "CHANGED_BY" = :changed_by_id WHERE "ID" = :typed_id',
+            "NMP_USED": 'UPDATE "COORDINATION_PROCUREMENT_TYPED_DATA" SET "NMP_USED" = CASE WHEN trim(lower(:value_text)) IN (\'1\',\'true\',\'yes\',\'y\',\'on\') THEN 1 WHEN trim(:value_text) = \'\' THEN NULL ELSE 0 END, "CHANGED_BY" = :changed_by_id WHERE "ID" = :typed_id',
+            "EVLP_USED": 'UPDATE "COORDINATION_PROCUREMENT_TYPED_DATA" SET "EVLP_USED" = CASE WHEN trim(lower(:value_text)) IN (\'1\',\'true\',\'yes\',\'y\',\'on\') THEN 1 WHEN trim(:value_text) = \'\' THEN NULL ELSE 0 END, "CHANGED_BY" = :changed_by_id WHERE "ID" = :typed_id',
+            "HOPE_USED": 'UPDATE "COORDINATION_PROCUREMENT_TYPED_DATA" SET "HOPE_USED" = CASE WHEN trim(lower(:value_text)) IN (\'1\',\'true\',\'yes\',\'y\',\'on\') THEN 1 WHEN trim(:value_text) = \'\' THEN NULL ELSE 0 END, "CHANGED_BY" = :changed_by_id WHERE "ID" = :typed_id',
+            "LIFEPORT_USED": 'UPDATE "COORDINATION_PROCUREMENT_TYPED_DATA" SET "LIFEPORT_USED" = CASE WHEN trim(lower(:value_text)) IN (\'1\',\'true\',\'yes\',\'y\',\'on\') THEN 1 WHEN trim(:value_text) = \'\' THEN NULL ELSE 0 END, "CHANGED_BY" = :changed_by_id WHERE "ID" = :typed_id',
+            "RECIPIENT": 'UPDATE "COORDINATION_PROCUREMENT_TYPED_DATA" SET "RECIPIENT_EPISODE_ID" = :episode_id, "CHANGED_BY" = :changed_by_id WHERE "ID" = :typed_id',
+        }
+
+        for row in value_rows:
+            payload = {
+                "coordination_id": row["coordination_id"],
+                "organ_id": row["organ_id"],
+                "slot_key": row["slot_key"] or "MAIN",
+                "changed_by_id": row["changed_by_id"],
+                "created_at": row["created_at"],
+                "updated_at": row["updated_at"],
+            }
+            before_count = conn.execute(
+                text(
+                    'SELECT COUNT(*) FROM "COORDINATION_PROCUREMENT_TYPED_DATA" '
+                    'WHERE "COORDINATION_ID" = :coordination_id AND "ORGAN_ID" = :organ_id AND "SLOT_KEY" = :slot_key'
+                ),
+                payload,
+            ).scalar_one()
+            conn.execute(
+                text(
+                    'INSERT OR IGNORE INTO "COORDINATION_PROCUREMENT_TYPED_DATA" ('
+                    '"COORDINATION_ID","ORGAN_ID","SLOT_KEY","CHANGED_BY","CREATED_AT","UPDATED_AT","ROW_VERSION"'
+                    ') VALUES (:coordination_id,:organ_id,:slot_key,:changed_by_id,:created_at,:updated_at,1)'
+                ),
+                payload,
+            )
+            after_count = conn.execute(
+                text(
+                    'SELECT COUNT(*) FROM "COORDINATION_PROCUREMENT_TYPED_DATA" '
+                    'WHERE "COORDINATION_ID" = :coordination_id AND "ORGAN_ID" = :organ_id AND "SLOT_KEY" = :slot_key'
+                ),
+                payload,
+            ).scalar_one()
+            if int(after_count) > int(before_count):
+                migrated_rows += 1
+            typed_id = conn.execute(
+                text(
+                    'SELECT "ID" FROM "COORDINATION_PROCUREMENT_TYPED_DATA" '
+                    'WHERE "COORDINATION_ID" = :coordination_id AND "ORGAN_ID" = :organ_id AND "SLOT_KEY" = :slot_key'
+                ),
+                payload,
+            ).scalar_one()
+
+            field_key = row["field_key"]
+            if field_key in scalar_sql_by_field_key:
+                conn.execute(
+                    text(scalar_sql_by_field_key[field_key]),
+                    {
+                        "typed_id": typed_id,
+                        "value_text": row["value_text"] or "",
+                        "episode_id": row["episode_id"],
+                        "changed_by_id": row["changed_by_id"],
+                    },
+                )
+                migrated_scalar_updates += 1
+
+            if field_key in {"ARZT_RESPONSIBLE", "CHIRURG_RESPONSIBLE", "ON_SITE_COORDINATORS", "PROCUREMENT_TEAM_INT"}:
+                person_rows = conn.execute(
+                    text(
+                        'SELECT "PERSON_ID" AS person_id, "POS" AS pos, "ID" AS id FROM "COORDINATION_PROCUREMENT_DATA_PERSON" '
+                        'WHERE "DATA_ID" = :data_id ORDER BY "POS", "ID"'
+                    ),
+                    {"data_id": row["data_id"]},
+                ).mappings().all()
+                if field_key == "ARZT_RESPONSIBLE" and person_rows:
+                    conn.execute(
+                        text(
+                            'UPDATE "COORDINATION_PROCUREMENT_TYPED_DATA" '
+                            'SET "ARZT_RESPONSIBLE_PERSON_ID" = :person_id, "CHANGED_BY" = :changed_by_id WHERE "ID" = :typed_id'
+                        ),
+                        {"typed_id": typed_id, "person_id": person_rows[0]["person_id"], "changed_by_id": row["changed_by_id"]},
+                    )
+                    migrated_scalar_updates += 1
+                elif field_key == "CHIRURG_RESPONSIBLE" and person_rows:
+                    conn.execute(
+                        text(
+                            'UPDATE "COORDINATION_PROCUREMENT_TYPED_DATA" '
+                            'SET "CHIRURG_RESPONSIBLE_PERSON_ID" = :person_id, "CHANGED_BY" = :changed_by_id WHERE "ID" = :typed_id'
+                        ),
+                        {"typed_id": typed_id, "person_id": person_rows[0]["person_id"], "changed_by_id": row["changed_by_id"]},
+                    )
+                    migrated_scalar_updates += 1
+                elif field_key in {"ON_SITE_COORDINATORS", "PROCUREMENT_TEAM_INT"}:
+                    list_key = field_key
+                    for person_row in person_rows:
+                        before_count = conn.execute(
+                            text(
+                                'SELECT COUNT(*) FROM "COORDINATION_PROCUREMENT_TYPED_DATA_PERSON_LIST" '
+                                'WHERE "DATA_ID" = :data_id AND "LIST_KEY" = :list_key AND "PERSON_ID" = :person_id'
+                            ),
+                            {"data_id": typed_id, "list_key": list_key, "person_id": person_row["person_id"]},
+                        ).scalar_one()
+                        conn.execute(
+                            text(
+                                'INSERT OR IGNORE INTO "COORDINATION_PROCUREMENT_TYPED_DATA_PERSON_LIST" ('
+                                '"DATA_ID","LIST_KEY","PERSON_ID","POS","CHANGED_BY","CREATED_AT","UPDATED_AT","ROW_VERSION"'
+                                ') VALUES (:data_id,:list_key,:person_id,:pos,:changed_by_id,:created_at,:updated_at,1)'
+                            ),
+                            {
+                                "data_id": typed_id,
+                                "list_key": list_key,
+                                "person_id": person_row["person_id"],
+                                "pos": person_row["pos"] or 0,
+                                "changed_by_id": row["changed_by_id"],
+                                "created_at": row["created_at"],
+                                "updated_at": row["updated_at"],
+                            },
+                        )
+                        after_count = conn.execute(
+                            text(
+                                'SELECT COUNT(*) FROM "COORDINATION_PROCUREMENT_TYPED_DATA_PERSON_LIST" '
+                                'WHERE "DATA_ID" = :data_id AND "LIST_KEY" = :list_key AND "PERSON_ID" = :person_id'
+                            ),
+                            {"data_id": typed_id, "list_key": list_key, "person_id": person_row["person_id"]},
+                        ).scalar_one()
+                        if int(after_count) > int(before_count):
+                            migrated_person_links += 1
+
+            if field_key in {"PROCURMENT_TEAM", "IMPLANT_TEAM"}:
+                team_rows = conn.execute(
+                    text(
+                        'SELECT "TEAM_ID" AS team_id, "POS" AS pos, "ID" AS id FROM "COORDINATION_PROCUREMENT_DATA_TEAM" '
+                        'WHERE "DATA_ID" = :data_id ORDER BY "POS", "ID"'
+                    ),
+                    {"data_id": row["data_id"]},
+                ).mappings().all()
+                if field_key == "PROCURMENT_TEAM" and team_rows:
+                    conn.execute(
+                        text(
+                            'UPDATE "COORDINATION_PROCUREMENT_TYPED_DATA" '
+                            'SET "PROCURMENT_TEAM_TEAM_ID" = :team_id, "CHANGED_BY" = :changed_by_id WHERE "ID" = :typed_id'
+                        ),
+                        {"typed_id": typed_id, "team_id": team_rows[0]["team_id"], "changed_by_id": row["changed_by_id"]},
+                    )
+                    migrated_scalar_updates += 1
+                elif field_key == "IMPLANT_TEAM":
+                    list_key = "IMPLANT_TEAM"
+                    for team_row in team_rows:
+                        before_count = conn.execute(
+                            text(
+                                'SELECT COUNT(*) FROM "COORDINATION_PROCUREMENT_TYPED_DATA_TEAM_LIST" '
+                                'WHERE "DATA_ID" = :data_id AND "LIST_KEY" = :list_key AND "TEAM_ID" = :team_id'
+                            ),
+                            {"data_id": typed_id, "list_key": list_key, "team_id": team_row["team_id"]},
+                        ).scalar_one()
+                        conn.execute(
+                            text(
+                                'INSERT OR IGNORE INTO "COORDINATION_PROCUREMENT_TYPED_DATA_TEAM_LIST" ('
+                                '"DATA_ID","LIST_KEY","TEAM_ID","POS","CHANGED_BY","CREATED_AT","UPDATED_AT","ROW_VERSION"'
+                                ') VALUES (:data_id,:list_key,:team_id,:pos,:changed_by_id,:created_at,:updated_at,1)'
+                            ),
+                            {
+                                "data_id": typed_id,
+                                "list_key": list_key,
+                                "team_id": team_row["team_id"],
+                                "pos": team_row["pos"] or 0,
+                                "changed_by_id": row["changed_by_id"],
+                                "created_at": row["created_at"],
+                                "updated_at": row["updated_at"],
+                            },
+                        )
+                        after_count = conn.execute(
+                            text(
+                                'SELECT COUNT(*) FROM "COORDINATION_PROCUREMENT_TYPED_DATA_TEAM_LIST" '
+                                'WHERE "DATA_ID" = :data_id AND "LIST_KEY" = :list_key AND "TEAM_ID" = :team_id'
+                            ),
+                            {"data_id": typed_id, "list_key": list_key, "team_id": team_row["team_id"]},
+                        ).scalar_one()
+                        if int(after_count) > int(before_count):
+                            migrated_team_links += 1
+
+    return {
+        "migrated_rows": migrated_rows,
+        "migrated_scalar_updates": migrated_scalar_updates,
+        "migrated_person_links": migrated_person_links,
+        "migrated_team_links": migrated_team_links,
+    }
+
+
 def main() -> int:
     parser = argparse.ArgumentParser(description="Data management (DML only).")
     parser.add_argument(
         "--mode",
-        choices=("clean", "seed", "refresh", "migrate-procurement-runtime", "export-translations-json"),
+        choices=("clean", "seed", "refresh", "migrate-procurement-runtime", "migrate-procurement-typed", "export-translations-json"),
         default="refresh",
-        help="clean=wipe data, seed=seed only, refresh=clean+seed, migrate-procurement-runtime=backfill legacy procurement runtime, export-translations-json=write DB translations to frontend/src/i18n/translations.json",
+        help="clean=wipe data, seed=seed only, refresh=clean+seed, migrate-procurement-runtime=backfill legacy procurement runtime, migrate-procurement-typed=backfill typed procurement model from generic runtime rows, export-translations-json=write DB translations to frontend/src/i18n/translations.json",
     )
     parser.add_argument("--env", default=os.getenv("TPL_ENV", "DEV"), help="Application env (DEV/TEST/PROD)")
     parser.add_argument("--seed-profile", default=os.getenv("TPL_SEED_PROFILE"), help="Optional seed profile override")
@@ -507,6 +753,16 @@ def main() -> int:
         print(
             "Procurement runtime migration complete: "
             + f"values={result['migrated_values']} "
+            + f"person_links={result['migrated_person_links']} "
+            + f"team_links={result['migrated_team_links']}"
+        )
+
+    if args.mode == "migrate-procurement-typed":
+        result = _migrate_procurement_to_typed()
+        print(
+            "Procurement typed migration complete: "
+            + f"rows={result['migrated_rows']} "
+            + f"scalar_updates={result['migrated_scalar_updates']} "
             + f"person_links={result['migrated_person_links']} "
             + f"team_links={result['migrated_team_links']}"
         )

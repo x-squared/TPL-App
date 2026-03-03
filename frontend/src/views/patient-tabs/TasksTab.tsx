@@ -9,6 +9,7 @@ interface TasksTabProps {
 export default function TasksTab({ patientId, episodeId = null, tplPhaseId = null }: TasksTabProps) {
   return (
     <TaskBoard
+      declaredContextType="PATIENT"
       criteria={{
         patientId,
         episodeId,

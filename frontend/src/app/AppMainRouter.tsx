@@ -5,7 +5,7 @@ import ColloquiumDetailView from '../views/ColloquiumDetailView';
 import ColloquiumsView from '../views/ColloquiumsView';
 import CoordinationDetailView from '../views/CoordinationDetailView';
 import CoordinationsView from '../views/CoordinationsView';
-import DonationsView from '../views/DonationsView';
+import DonorsView from '../views/DonorsView';
 import E2ETestsView from '../views/E2ETestsView';
 import MyWorkView from '../views/MyWorkView';
 import PatientDetailView from '../views/PatientDetailView';
@@ -17,12 +17,12 @@ import type { ColloquiumDetailTab } from '../views/colloquiums/detail/colloquium
 import type { CoordinationDetailTab } from '../views/coordinations/detail/useCoordinationDetailViewModel';
 import type { PatientDetailTab } from '../views/patient-detail/PatientDetailTabs';
 
-type Page = 'my-work' | 'patients' | 'donations' | 'colloquiums' | 'coordinations' | 'reports' | 'admin' | 'e2e-tests' | 'preferences';
+type Page = 'my-work' | 'patients' | 'donors' | 'colloquiums' | 'coordinations' | 'reports' | 'admin' | 'e2e-tests' | 'preferences';
 
 interface AppMainRouterProps {
   page: Page;
   canViewPatients: boolean;
-  canViewDonations: boolean;
+  canViewDonors: boolean;
   canViewColloquiums: boolean;
   canViewCoordinations: boolean;
   canViewReports: boolean;
@@ -54,7 +54,7 @@ interface AppMainRouterProps {
 export default function AppMainRouter({
   page,
   canViewPatients,
-  canViewDonations,
+  canViewDonors,
   canViewColloquiums,
   canViewCoordinations,
   canViewReports,
@@ -167,7 +167,7 @@ export default function AppMainRouter({
           }}
         />
       )}
-      {page === 'donations' && canViewDonations && <DonationsView />}
+      {page === 'donors' && canViewDonors && <DonorsView />}
       {page === 'colloquiums' && canViewColloquiums && selectedColloqiumId === null && (
         <ColloquiumsView onOpenColloqium={(id) => setSelectedColloqiumId(id)} />
       )}

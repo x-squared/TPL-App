@@ -1,4 +1,5 @@
 import { useEffect, useState } from 'react';
+import { useI18n } from '../i18n/i18n';
 import CoordinationsTable from './coordinations/list/CoordinationsTable';
 import { useCoordinationsListViewModel } from './coordinations/list/useCoordinationsListViewModel';
 import './layout/PanelLayout.css';
@@ -11,6 +12,7 @@ interface Props {
 }
 
 export default function CoordinationsView({ onOpenCoordination, quickCreateToken = 0 }: Props) {
+  const { t } = useI18n();
   const {
     loading,
     loadError,
@@ -45,13 +47,13 @@ export default function CoordinationsView({ onOpenCoordination, quickCreateToken
   return (
     <>
       <header className="patients-header">
-        <h1>Coordinations</h1>
+        <h1>{t('coordinations.title', 'Coordinations')}</h1>
         <button className="patients-add-btn" onClick={() => setAdding(true)} disabled={adding}>
-          + Add
+          {t('coordinations.actions.add', '+ Add')}
         </button>
       </header>
       {loading ? (
-        <p className="status">Loading...</p>
+        <p className="status">{t('common.loading', 'Loading...')}</p>
       ) : loadError ? (
         <p className="status">{loadError}</p>
       ) : (

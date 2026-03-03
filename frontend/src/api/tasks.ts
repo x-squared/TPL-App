@@ -1,5 +1,7 @@
 import { request, type AppUser, type Code } from './core';
 
+export type TaskKindKey = 'TASK' | 'EVENT';
+
 export interface TaskGroup {
   id: number;
   patient_id: number;
@@ -42,7 +44,8 @@ export interface TaskTemplate {
   task_group_template_id: number;
   task_group_template: TaskGroupTemplate | null;
   description: string;
-  kind_key: 'TASK' | 'EVENT';
+  comment_hint: string;
+  kind_key: TaskKindKey;
   priority_id: number | null;
   priority: Code | null;
   offset_minutes_default: number | null;
@@ -58,12 +61,14 @@ export interface Task {
   id: number;
   task_group_id: number;
   description: string;
-  kind_key: 'TASK' | 'EVENT';
+  comment_hint: string;
+  kind_key: TaskKindKey;
   priority_id: number | null;
   priority: Code | null;
   assigned_to_id: number | null;
   assigned_to: AppUser | null;
   until: string | null;
+  event_time: string | null;
   status_id: number | null;
   status: Code | null;
   closed_at: string | null;
@@ -80,10 +85,12 @@ export interface Task {
 export interface TaskUpdate {
   task_group_id?: number;
   description?: string;
-  kind_key?: 'TASK' | 'EVENT';
+  comment_hint?: string;
+  kind_key?: TaskKindKey;
   priority_id?: number | null;
   assigned_to_id?: number | null;
   until?: string;
+  event_time?: string | null;
   status_id?: number | null;
   comment?: string;
 }
@@ -91,10 +98,12 @@ export interface TaskUpdate {
 export interface TaskCreate {
   task_group_id: number;
   description?: string;
-  kind_key?: 'TASK' | 'EVENT';
+  comment_hint?: string;
+  kind_key?: TaskKindKey;
   priority_id?: number | null;
   assigned_to_id?: number | null;
   until: string;
+  event_time?: string | null;
   status_id?: number | null;
   comment?: string;
 }
@@ -105,6 +114,7 @@ export interface TaskGroupListParams {
   colloqium_agenda_id?: number;
   coordination_id?: number;
   organ_id?: number;
+  task_group_template_id?: number[];
 }
 
 export interface TaskGroupCreate {
@@ -165,7 +175,8 @@ export interface TaskTemplateListParams {
 export interface TaskTemplateCreate {
   task_group_template_id: number;
   description: string;
-  kind_key?: 'TASK' | 'EVENT';
+  comment_hint?: string;
+  kind_key?: TaskKindKey;
   priority_id?: number | null;
   offset_minutes_default?: number | null;
   is_active?: boolean;
@@ -175,11 +186,16 @@ export interface TaskTemplateCreate {
 export interface TaskTemplateUpdate {
   task_group_template_id?: number;
   description?: string;
-  kind_key?: 'TASK' | 'EVENT';
+  comment_hint?: string;
+  kind_key?: TaskKindKey;
   priority_id?: number | null;
   offset_minutes_default?: number | null;
   is_active?: boolean;
   sort_pos?: number;
+}
+
+export interface EnsureCoordinationProtocolTaskGroupsResponse {
+  created_group_count: number;
 }
 
 export const tasksApi = {
@@ -205,12 +221,20 @@ export const tasksApi = {
     if (params?.colloqium_agenda_id !== undefined) query.set('colloqium_agenda_id', String(params.colloqium_agenda_id));
     if (params?.coordination_id !== undefined) query.set('coordination_id', String(params.coordination_id));
     if (params?.organ_id !== undefined) query.set('organ_id', String(params.organ_id));
+    (params?.task_group_template_id ?? []).forEach((value) => query.append('task_group_template_id', String(value)));
     return request<TaskGroup[]>(`/task-groups/${query.toString() ? `?${query.toString()}` : ''}`);
   },
   createTaskGroup: (data: TaskGroupCreate) =>
     request<TaskGroup>('/task-groups/', { method: 'POST', body: JSON.stringify(data) }),
+  ensureCoordinationProtocolTaskGroups: (coordinationId: number, organId?: number) =>
+    request<EnsureCoordinationProtocolTaskGroupsResponse>(
+      `/task-groups/coordination/${coordinationId}/ensure-protocol${typeof organId === 'number' ? `?organ_id=${organId}` : ''}`,
+      { method: 'POST' },
+    ),
   updateTaskGroup: (taskGroupId: number, data: TaskGroupUpdate) =>
     request<TaskGroup>(`/task-groups/${taskGroupId}`, { method: 'PATCH', body: JSON.stringify(data) }),
+  deleteTaskGroup: (taskGroupId: number) =>
+    request<void>(`/task-groups/${taskGroupId}`, { method: 'DELETE' }),
   listTasks: (params?: TaskListParams) => {
     const query = new URLSearchParams();
     if (params?.task_group_id !== undefined) query.set('task_group_id', String(params.task_group_id));

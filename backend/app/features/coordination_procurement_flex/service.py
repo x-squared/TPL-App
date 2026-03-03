@@ -6,17 +6,28 @@ from fastapi import HTTPException
 from sqlalchemy.orm import Session, joinedload
 
 from ...enums import ProcurementSlotKey
+from ...features.coordination_procurement_flex.catalog import (
+    PERSON_LIST_KEY_BY_FIELD,
+    PROCUREMENT_TYPED_SPEC_BY_KEY,
+    TEAM_LIST_KEY_BY_FIELD,
+    format_scalar_value,
+    get_typed_column_value,
+    parse_scalar_value,
+    set_typed_column_value,
+)
 from ...models import (
     Coordination,
     CoordinationEpisode,
     CoordinationProcurementFieldGroupTemplate,
+    CoordinationProcurementProtocolTaskGroupSelection,
     CoordinationProcurement,
     CoordinationProcurementFieldTemplate,
-    CoordinationProcurementData,
-    CoordinationProcurementDataPerson,
-    CoordinationProcurementDataTeam,
+    CoordinationProcurementTypedData,
+    CoordinationProcurementTypedDataPersonList,
+    CoordinationProcurementTypedDataTeamList,
     Person,
     PersonTeam,
+    TaskGroupTemplate,
 )
 from ...schemas import (
     CoordinationProcurementFlexResponse,
@@ -37,69 +48,134 @@ def _ensure_coordination_exists(coordination_id: int, db: Session) -> None:
         raise HTTPException(status_code=404, detail="Coordination not found")
 
 
-def _build_flex_response_from_unified_data(
+def _load_typed_rows(*, coordination_id: int, db: Session) -> list[CoordinationProcurementTypedData]:
+    return (
+        db.query(CoordinationProcurementTypedData)
+        .options(
+            joinedload(CoordinationProcurementTypedData.organ),
+            joinedload(CoordinationProcurementTypedData.arzt_responsible_person),
+            joinedload(CoordinationProcurementTypedData.chirurg_responsible_person),
+            joinedload(CoordinationProcurementTypedData.procurment_team_team),
+            joinedload(CoordinationProcurementTypedData.recipient_episode),
+            joinedload(CoordinationProcurementTypedData.person_lists).joinedload(CoordinationProcurementTypedDataPersonList.person),
+            joinedload(CoordinationProcurementTypedData.team_lists).joinedload(CoordinationProcurementTypedDataTeamList.team),
+            joinedload(CoordinationProcurementTypedData.changed_by_user),
+        )
+        .filter(CoordinationProcurementTypedData.coordination_id == coordination_id)
+        .all()
+    )
+
+
+def _next_value_id(row: CoordinationProcurementTypedData, field_template_id: int) -> int:
+    return (row.id * 10000) + field_template_id
+
+
+def _enum_value(raw: object) -> str:
+    return raw.value if hasattr(raw, "value") else str(raw or "")
+
+
+def _build_value_response(
+    *,
+    row: CoordinationProcurementTypedData,
+    field_template: CoordinationProcurementFieldTemplate,
+) -> CoordinationProcurementValueResponse | None:
+    spec = PROCUREMENT_TYPED_SPEC_BY_KEY.get(field_template.key)
+    if not spec:
+        return None
+
+    persons: list[dict[str, object]] = []
+    teams: list[dict[str, object]] = []
+    episode_ref = None
+    value_text = ""
+
+    if spec.kind in {"string", "date", "datetime", "boolean"}:
+        raw_value = get_typed_column_value(row, field_template.key)
+        if raw_value is None:
+            return None
+        value_text = format_scalar_value(spec.kind, raw_value)
+    elif spec.kind == "person_single":
+        person = row.arzt_responsible_person if field_template.key == "ARZT_RESPONSIBLE" else row.chirurg_responsible_person
+        if not person:
+            return None
+        persons = [{"id": _next_value_id(row, field_template.id), "pos": 0, "person": person}]
+    elif spec.kind == "team_single":
+        team = row.procurment_team_team
+        if not team:
+            return None
+        teams = [{"id": _next_value_id(row, field_template.id), "pos": 0, "team": team}]
+    elif spec.kind == "episode_single":
+        episode = row.recipient_episode
+        if not episode:
+            return None
+        episode_ref = {"id": _next_value_id(row, field_template.id), "episode_id": episode.id, "episode": episode}
+    elif spec.kind == "person_list":
+        list_key = PERSON_LIST_KEY_BY_FIELD.get(field_template.key)
+        selected = [entry for entry in sorted(row.person_lists, key=lambda item: item.pos) if _enum_value(entry.list_key) == list_key]
+        if not selected:
+            return None
+        persons = [{"id": entry.id, "pos": entry.pos, "person": entry.person} for entry in selected if entry.person is not None]
+    elif spec.kind == "team_list":
+        list_key = TEAM_LIST_KEY_BY_FIELD.get(field_template.key)
+        selected = [entry for entry in sorted(row.team_lists, key=lambda item: item.pos) if _enum_value(entry.list_key) == list_key]
+        if not selected:
+            return None
+        teams = [{"id": entry.id, "pos": entry.pos, "team": entry.team} for entry in selected if entry.team is not None]
+    else:
+        return None
+
+    return CoordinationProcurementValueResponse(
+        id=_next_value_id(row, field_template.id),
+        slot_id=row.id,
+        field_template_id=field_template.id,
+        value=value_text,
+        field_template=field_template,
+        changed_by_id=row.changed_by_id,
+        changed_by_user=row.changed_by_user,
+        created_at=row.created_at,
+        updated_at=row.updated_at,
+        persons=persons,
+        teams=teams,
+        episode_ref=episode_ref,
+    )
+
+
+def _build_flex_response_from_typed_data(
     *,
     coordination_id: int,
     procurement: CoordinationProcurement | None,
     field_templates: list[CoordinationProcurementFieldTemplate],
     field_group_templates: list[CoordinationProcurementFieldGroupTemplate],
-    data_rows: list[CoordinationProcurementData],
+    protocol_task_group_selections: list[CoordinationProcurementProtocolTaskGroupSelection],
+    typed_rows: list[CoordinationProcurementTypedData],
 ) -> CoordinationProcurementFlexResponse:
-    values_by_organ_slot: dict[int, dict[str, list[CoordinationProcurementValueResponse]]] = {}
-    for row in data_rows:
-        persons = [
-            {
-                "id": person_ref.id,
-                "pos": person_ref.pos,
-                "person": person_ref.person,
-            }
-            for person_ref in sorted(row.persons, key=lambda item: item.pos)
-        ]
-        teams = [
-            {
-                "id": team_ref.id,
-                "pos": team_ref.pos,
-                "team": team_ref.team,
-            }
-            for team_ref in sorted(row.teams, key=lambda item: item.pos)
-        ]
-        episode_ref = None
-        if row.episode_id is not None:
-            episode_ref = {"id": row.id, "episode_id": row.episode_id, "episode": row.episode}
-        value_row = CoordinationProcurementValueResponse(
-            id=row.id,
-            slot_id=row.id,
-            field_template_id=row.field_template_id,
-            value=row.value or "",
-            field_template=row.field_template,
-            changed_by_id=row.changed_by_id,
-            changed_by_user=row.changed_by_user,
-            created_at=row.created_at,
-            updated_at=row.updated_at,
-            persons=persons,
-            teams=teams,
-            episode_ref=episode_ref,
-        )
-        values_by_organ_slot.setdefault(row.organ_id, {}).setdefault(row.slot_key.value if hasattr(row.slot_key, "value") else row.slot_key, []).append(value_row)
-
-    all_organ_ids = sorted(set(values_by_organ_slot.keys()))
-
+    slot_rows_by_organ: dict[int, list[CoordinationProcurementTypedData]] = {}
+    for row in typed_rows:
+        slot_rows_by_organ.setdefault(row.organ_id, []).append(row)
     organs: list[CoordinationProcurementOrganResponse] = []
-    for organ_id in all_organ_ids:
-        slot_map = values_by_organ_slot.get(organ_id, {})
-        sample_row = next((row for row in data_rows if row.organ_id == organ_id), None)
+    for organ_id in sorted(slot_rows_by_organ.keys()):
+        rows_for_organ = sorted(
+            slot_rows_by_organ[organ_id],
+            key=lambda item: item.slot_key.value if hasattr(item.slot_key, "value") else item.slot_key,
+        )
+        sample_row = rows_for_organ[0] if rows_for_organ else None
         slots: list[CoordinationProcurementSlotResponse] = []
-        for slot_key, values in sorted(slot_map.items(), key=lambda item: item[0]):
+        for row in rows_for_organ:
+            values = []
+            for field_template in field_templates:
+                value = _build_value_response(row=row, field_template=field_template)
+                if value is not None:
+                    values.append(value)
+            slot_key = row.slot_key.value if hasattr(row.slot_key, "value") else row.slot_key
             slots.append(
                 CoordinationProcurementSlotResponse(
-                    id=(organ_id * 1000) + len(slots) + 1,
+                    id=row.id,
                     coordination_procurement_organ_id=organ_id,
                     slot_key=slot_key,
                     values=values,
-                    changed_by_id=sample_row.changed_by_id if sample_row else None,
-                    changed_by_user=sample_row.changed_by_user if sample_row else None,
-                    created_at=sample_row.created_at if sample_row else None,
-                    updated_at=sample_row.updated_at if sample_row else None,
+                    changed_by_id=row.changed_by_id,
+                    changed_by_user=row.changed_by_user,
+                    created_at=row.created_at,
+                    updated_at=row.updated_at,
                 )
             )
         organs.append(
@@ -128,6 +204,7 @@ def _build_flex_response_from_unified_data(
             CoordinationProcurementFieldTemplateResponse.model_validate(template, from_attributes=True)
             for template in field_templates
         ],
+        protocol_task_group_selections=protocol_task_group_selections,
     )
 
 
@@ -139,20 +216,7 @@ def get_procurement_flex(*, coordination_id: int, db: Session) -> CoordinationPr
         .filter(CoordinationProcurement.coordination_id == coordination_id)
         .first()
     )
-    data_rows = (
-        db.query(CoordinationProcurementData)
-        .options(
-            joinedload(CoordinationProcurementData.organ),
-            joinedload(CoordinationProcurementData.field_template).joinedload(CoordinationProcurementFieldTemplate.group_template),
-            joinedload(CoordinationProcurementData.field_template).joinedload(CoordinationProcurementFieldTemplate.datatype_definition),
-            joinedload(CoordinationProcurementData.persons).joinedload(CoordinationProcurementDataPerson.person),
-            joinedload(CoordinationProcurementData.teams).joinedload(CoordinationProcurementDataTeam.team),
-            joinedload(CoordinationProcurementData.episode),
-            joinedload(CoordinationProcurementData.changed_by_user),
-        )
-        .filter(CoordinationProcurementData.coordination_id == coordination_id)
-        .all()
-    )
+    typed_rows = _load_typed_rows(coordination_id=coordination_id, db=db)
     field_templates = (
         db.query(CoordinationProcurementFieldTemplate)
         .options(
@@ -169,12 +233,24 @@ def get_procurement_flex(*, coordination_id: int, db: Session) -> CoordinationPr
         .order_by(CoordinationProcurementFieldGroupTemplate.pos.asc(), CoordinationProcurementFieldGroupTemplate.id.asc())
         .all()
     )
-    return _build_flex_response_from_unified_data(
+    protocol_task_group_selections = (
+        db.query(CoordinationProcurementProtocolTaskGroupSelection)
+        .options(
+            joinedload(CoordinationProcurementProtocolTaskGroupSelection.task_group_template).joinedload(TaskGroupTemplate.scope),
+            joinedload(CoordinationProcurementProtocolTaskGroupSelection.task_group_template).joinedload(TaskGroupTemplate.organ),
+            joinedload(CoordinationProcurementProtocolTaskGroupSelection.organ),
+            joinedload(CoordinationProcurementProtocolTaskGroupSelection.changed_by_user),
+        )
+        .order_by(CoordinationProcurementProtocolTaskGroupSelection.pos.asc(), CoordinationProcurementProtocolTaskGroupSelection.id.asc())
+        .all()
+    )
+    return _build_flex_response_from_typed_data(
         coordination_id=coordination_id,
         procurement=procurement,
         field_templates=field_templates,
         field_group_templates=field_group_templates,
-        data_rows=data_rows,
+        protocol_task_group_selections=protocol_task_group_selections,
+        typed_rows=typed_rows,
     )
 
 
@@ -235,39 +311,44 @@ def upsert_procurement_value(
     changed_by_id: int,
     db: Session,
 ) -> CoordinationProcurementValueResponse:
-    field_template = db.query(CoordinationProcurementFieldTemplate).filter(CoordinationProcurementFieldTemplate.id == field_template_id).first()
+    field_template = (
+        db.query(CoordinationProcurementFieldTemplate)
+        .options(joinedload(CoordinationProcurementFieldTemplate.group_template))
+        .filter(CoordinationProcurementFieldTemplate.id == field_template_id)
+        .first()
+    )
     if not field_template:
         raise HTTPException(status_code=404, detail="Field template not found")
     if not field_template.is_active:
         raise HTTPException(status_code=422, detail="Field template is inactive")
+    spec = PROCUREMENT_TYPED_SPEC_BY_KEY.get(field_template.key)
+    if not spec:
+        raise HTTPException(status_code=422, detail=f"No typed attribute mapping defined for field key '{field_template.key}'")
 
     _ensure_coordination_exists(coordination_id, db)
-    value = (
-        db.query(CoordinationProcurementData)
+    typed_row = (
+        db.query(CoordinationProcurementTypedData)
         .filter(
-            CoordinationProcurementData.coordination_id == coordination_id,
-            CoordinationProcurementData.organ_id == organ_id,
-            CoordinationProcurementData.slot_key == slot_key.value,
-            CoordinationProcurementData.field_template_id == field_template_id,
+            CoordinationProcurementTypedData.coordination_id == coordination_id,
+            CoordinationProcurementTypedData.organ_id == organ_id,
+            CoordinationProcurementTypedData.slot_key == slot_key.value,
         )
         .first()
     )
-    if not value:
-        value = CoordinationProcurementData(
+    if not typed_row:
+        typed_row = CoordinationProcurementTypedData(
             coordination_id=coordination_id,
             organ_id=organ_id,
             slot_key=slot_key.value,
-            field_template_id=field_template_id,
             changed_by_id=changed_by_id,
         )
-        db.add(value)
+        db.add(typed_row)
         db.flush()
-    value.value = payload.value
-    value.changed_by_id = changed_by_id
 
-    value_mode = field_template.value_mode.value if hasattr(field_template.value_mode, "value") else field_template.value_mode
-
-    if value_mode == "PERSON_SINGLE":
+    if spec.kind in {"string", "date", "datetime", "boolean"}:
+        parsed_value = parse_scalar_value(spec.kind, payload.value or "")
+        set_typed_column_value(typed_row, field_template.key, parsed_value)
+    elif spec.kind == "person_single":
         unique_person_ids = list(dict.fromkeys(payload.person_ids))
         if len(unique_person_ids) > 1:
             raise HTTPException(status_code=422, detail="PERSON_SINGLE mode accepts at most one person_id")
@@ -277,18 +358,9 @@ def upsert_procurement_value(
             missing = [person_id for person_id in unique_person_ids if person_id not in by_id]
             if missing:
                 raise HTTPException(status_code=422, detail=f"Unknown person_ids: {', '.join(map(str, missing))}")
-        value.persons.clear()
-        value.teams.clear()
-        for index, person_id in enumerate(unique_person_ids):
-            value.persons.append(
-                CoordinationProcurementDataPerson(
-                    person_id=person_id,
-                    pos=index,
-                    changed_by_id=changed_by_id,
-                )
-            )
-        value.episode_id = None
-    elif value_mode == "PERSON_LIST":
+        set_typed_column_value(typed_row, field_template.key, unique_person_ids[0] if unique_person_ids else None)
+    elif spec.kind == "person_list":
+        list_key = PERSON_LIST_KEY_BY_FIELD[field_template.key]
         unique_person_ids = list(dict.fromkeys(payload.person_ids))
         if unique_person_ids:
             existing_people = db.query(Person).filter(Person.id.in_(unique_person_ids)).all()
@@ -296,18 +368,17 @@ def upsert_procurement_value(
             missing = [person_id for person_id in unique_person_ids if person_id not in by_id]
             if missing:
                 raise HTTPException(status_code=422, detail=f"Unknown person_ids: {', '.join(map(str, missing))}")
-        value.persons.clear()
-        value.teams.clear()
+        typed_row.person_lists = [entry for entry in typed_row.person_lists if _enum_value(entry.list_key) != list_key]
         for index, person_id in enumerate(unique_person_ids):
-            value.persons.append(
-                CoordinationProcurementDataPerson(
+            typed_row.person_lists.append(
+                CoordinationProcurementTypedDataPersonList(
+                    list_key=list_key,
                     person_id=person_id,
                     pos=index,
                     changed_by_id=changed_by_id,
                 )
             )
-        value.episode_id = None
-    elif value_mode == "TEAM_SINGLE":
+    elif spec.kind == "team_single":
         unique_team_ids = list(dict.fromkeys(payload.team_ids))
         if len(unique_team_ids) > 1:
             raise HTTPException(status_code=422, detail="TEAM_SINGLE mode accepts at most one team_id")
@@ -317,18 +388,9 @@ def upsert_procurement_value(
             missing = [team_id for team_id in unique_team_ids if team_id not in by_id]
             if missing:
                 raise HTTPException(status_code=422, detail=f"Unknown team_ids: {', '.join(map(str, missing))}")
-        value.persons.clear()
-        value.teams.clear()
-        for index, team_id in enumerate(unique_team_ids):
-            value.teams.append(
-                CoordinationProcurementDataTeam(
-                    team_id=team_id,
-                    pos=index,
-                    changed_by_id=changed_by_id,
-                )
-            )
-        value.episode_id = None
-    elif value_mode == "TEAM_LIST":
+        set_typed_column_value(typed_row, field_template.key, unique_team_ids[0] if unique_team_ids else None)
+    elif spec.kind == "team_list":
+        list_key = TEAM_LIST_KEY_BY_FIELD[field_template.key]
         unique_team_ids = list(dict.fromkeys(payload.team_ids))
         if unique_team_ids:
             existing_teams = db.query(PersonTeam).filter(PersonTeam.id.in_(unique_team_ids)).all()
@@ -336,23 +398,20 @@ def upsert_procurement_value(
             missing = [team_id for team_id in unique_team_ids if team_id not in by_id]
             if missing:
                 raise HTTPException(status_code=422, detail=f"Unknown team_ids: {', '.join(map(str, missing))}")
-        value.persons.clear()
-        value.teams.clear()
+        typed_row.team_lists = [entry for entry in typed_row.team_lists if _enum_value(entry.list_key) != list_key]
         for index, team_id in enumerate(unique_team_ids):
-            value.teams.append(
-                CoordinationProcurementDataTeam(
+            typed_row.team_lists.append(
+                CoordinationProcurementTypedDataTeamList(
+                    list_key=list_key,
                     team_id=team_id,
                     pos=index,
                     changed_by_id=changed_by_id,
                 )
             )
-        value.episode_id = None
-    elif value_mode == "EPISODE":
+    elif spec.kind == "episode_single":
         episode_id = payload.episode_id
-        value.persons.clear()
-        value.teams.clear()
         if episode_id is None:
-            value.episode_id = None
+            set_typed_column_value(typed_row, field_template.key, None)
         else:
             linked_episode = (
                 db.query(CoordinationEpisode)
@@ -368,57 +427,38 @@ def upsert_procurement_value(
                     status_code=422,
                     detail="episode_id must reference a coordination episode linked to this coordination and organ",
                 )
-            value.episode_id = episode_id
-    else:
-        value.persons.clear()
-        value.teams.clear()
-        value.episode_id = None
+            set_typed_column_value(typed_row, field_template.key, episode_id)
 
+    typed_row.changed_by_id = changed_by_id
     db.commit()
     refreshed = (
-        db.query(CoordinationProcurementData)
+        db.query(CoordinationProcurementTypedData)
         .options(
-            joinedload(CoordinationProcurementData.field_template).joinedload(CoordinationProcurementFieldTemplate.group_template),
-            joinedload(CoordinationProcurementData.field_template).joinedload(CoordinationProcurementFieldTemplate.datatype_definition),
-            joinedload(CoordinationProcurementData.persons).joinedload(CoordinationProcurementDataPerson.person),
-            joinedload(CoordinationProcurementData.teams).joinedload(CoordinationProcurementDataTeam.team),
-            joinedload(CoordinationProcurementData.episode),
-            joinedload(CoordinationProcurementData.changed_by_user),
+            joinedload(CoordinationProcurementTypedData.arzt_responsible_person),
+            joinedload(CoordinationProcurementTypedData.chirurg_responsible_person),
+            joinedload(CoordinationProcurementTypedData.procurment_team_team),
+            joinedload(CoordinationProcurementTypedData.recipient_episode),
+            joinedload(CoordinationProcurementTypedData.person_lists).joinedload(CoordinationProcurementTypedDataPersonList.person),
+            joinedload(CoordinationProcurementTypedData.team_lists).joinedload(CoordinationProcurementTypedDataTeamList.team),
+            joinedload(CoordinationProcurementTypedData.changed_by_user),
         )
-        .filter(CoordinationProcurementData.id == value.id)
+        .filter(CoordinationProcurementTypedData.id == typed_row.id)
         .first()
     )
-    episode = refreshed.episode if refreshed and refreshed.episode_id else None
-    persons = [
-        {
-            "id": person_ref.id,
-            "pos": person_ref.pos,
-            "person": person_ref.person,
-        }
-        for person_ref in sorted(refreshed.persons, key=lambda item: item.pos)
-    ]
-    team_rows = [
-        {
-            "id": team_ref.id,
-            "pos": team_ref.pos,
-            "team": team_ref.team,
-        }
-        for team_ref in sorted(refreshed.teams, key=lambda item: item.pos)
-    ]
-    episode_ref = None
-    if refreshed.episode_id is not None:
-        episode_ref = {"id": refreshed.id, "episode_id": refreshed.episode_id, "episode": episode}
-    return CoordinationProcurementValueResponse(
-        id=refreshed.id,
-        slot_id=refreshed.id,
-        field_template_id=refreshed.field_template_id,
-        value=refreshed.value or "",
-        field_template=refreshed.field_template,
-        changed_by_id=refreshed.changed_by_id,
-        changed_by_user=refreshed.changed_by_user,
-        created_at=refreshed.created_at,
-        updated_at=refreshed.updated_at,
-        persons=persons,
-        teams=team_rows,
-        episode_ref=episode_ref,
-    )
+    response = _build_value_response(row=refreshed, field_template=field_template)
+    if response is None:
+        return CoordinationProcurementValueResponse(
+            id=_next_value_id(refreshed, field_template.id),
+            slot_id=refreshed.id,
+            field_template_id=field_template.id,
+            value="",
+            field_template=field_template,
+            changed_by_id=refreshed.changed_by_id,
+            changed_by_user=refreshed.changed_by_user,
+            created_at=refreshed.created_at,
+            updated_at=refreshed.updated_at,
+            persons=[],
+            teams=[],
+            episode_ref=None,
+        )
+    return response

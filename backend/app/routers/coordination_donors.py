@@ -19,7 +19,7 @@ router = APIRouter(prefix="/coordinations/{coordination_id}/donor", tags=["coord
 def get_coordination_donor(
     coordination_id: int,
     db: Session = Depends(get_db),
-    _: User = Depends(require_permission("view.donations")),
+    _: User = Depends(require_permission("view.donors")),
 ):
     return get_coordination_donor_service(coordination_id=coordination_id, db=db)
 
@@ -29,7 +29,7 @@ def upsert_coordination_donor(
     coordination_id: int,
     payload: CoordinationDonorCreate,
     db: Session = Depends(get_db),
-    current_user: User = Depends(require_permission("edit.donations")),
+    current_user: User = Depends(require_permission("edit.donors")),
 ):
     return upsert_coordination_donor_service(
         coordination_id=coordination_id,
@@ -44,7 +44,7 @@ def update_coordination_donor(
     coordination_id: int,
     payload: CoordinationDonorUpdate,
     db: Session = Depends(get_db),
-    current_user: User = Depends(require_permission("edit.donations")),
+    current_user: User = Depends(require_permission("edit.donors")),
 ):
     return update_coordination_donor_service(
         coordination_id=coordination_id,
@@ -58,7 +58,7 @@ def update_coordination_donor(
 def delete_coordination_donor(
     coordination_id: int,
     db: Session = Depends(get_db),
-    current_user: User = Depends(require_permission("edit.donations")),
+    current_user: User = Depends(require_permission("edit.donors")),
 ):
     _ = current_user
     delete_coordination_donor_service(coordination_id=coordination_id, db=db)

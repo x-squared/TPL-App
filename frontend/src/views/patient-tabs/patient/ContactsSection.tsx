@@ -1,4 +1,5 @@
 import type { PatientContactsModel } from '../../patient-detail/PatientDetailTabs';
+import { useI18n } from '../../../i18n/i18n';
 import InlineDeleteActions from '../../layout/InlineDeleteActions';
 
 type ContactsSectionProps = PatientContactsModel;
@@ -27,12 +28,13 @@ export default function ContactsSection({
   setCiForm,
   handleAddContact,
 }: ContactsSectionProps) {
+  const { t } = useI18n();
   return (
     <section className="detail-section">
       <div className="detail-section-heading">
-        <h2>Contact Information</h2>
+        <h2>{t('patient.contacts.title', 'Contact Information')}</h2>
         {!addingContact && (
-          <button className="ci-add-btn" onClick={() => setAddingContact(true)}>+ Add</button>
+          <button className="ci-add-btn" onClick={() => setAddingContact(true)}>{t('information.actions.add', '+ Add')}</button>
         )}
       </div>
       {sortedContactInfos.length > 0 ? (
@@ -93,9 +95,9 @@ export default function ContactsSection({
                   className={ciDragId === ci.id ? 'ci-dragging' : ciDragOverId === ci.id ? 'ci-drag-over' : ''}
                 >
                   <td className="detail-ci-main">
-                    {ci.main && <span className="main-badge">Main</span>}
+                    {ci.main && <span className="main-badge">{t('patients.contact.main', 'Main')}</span>}
                   </td>
-                  <td className="detail-ci-type">{ci.type?.name_default ?? ci.type?.key ?? '–'}</td>
+                  <td className="detail-ci-type">{ci.type?.name_default ?? ci.type?.key ?? t('common.emptySymbol', '–')}</td>
                   <td className="detail-ci-data">{ci.data}</td>
                   <td className="detail-ci-comment">{ci.comment || ''}</td>
                   <td className="detail-ci-actions">
@@ -113,7 +115,7 @@ export default function ContactsSection({
           </tbody>
         </table>
       ) : (
-        <p className="detail-empty">No contact information.</p>
+        <p className="detail-empty">{t('patients.contact.empty', 'No contact information.')}</p>
       )}
 
       {addingContact && (
@@ -129,13 +131,13 @@ export default function ContactsSection({
           </select>
           <input
             className="detail-input"
-            placeholder="Data"
+            placeholder={t('patient.contacts.data', 'Data')}
             value={ciForm.data}
             onChange={(e) => setCiForm((f) => ({ ...f, data: e.target.value }))}
           />
           <input
             className="detail-input"
-            placeholder="Comment"
+            placeholder={t('taskBoard.columns.comment', 'Comment')}
             value={ciForm.comment}
             onChange={(e) => setCiForm((f) => ({ ...f, comment: e.target.value }))}
           />
@@ -145,13 +147,13 @@ export default function ContactsSection({
               checked={ciForm.main}
               onChange={(e) => setCiForm((f) => ({ ...f, main: e.target.checked }))}
             />
-            Main
+            {t('patients.contact.main', 'Main')}
           </label>
           <div className="ci-add-actions">
             <button className="save-btn" onClick={handleAddContact} disabled={ciSaving || !ciForm.data.trim()}>
-              {ciSaving ? 'Saving...' : 'Save'}
+              {ciSaving ? t('coordinations.form.saving', 'Saving...') : t('actions.save', 'Save')}
             </button>
-            <button className="cancel-btn" onClick={() => setAddingContact(false)} disabled={ciSaving}>Cancel</button>
+            <button className="cancel-btn" onClick={() => setAddingContact(false)} disabled={ciSaving}>{t('actions.cancel', 'Cancel')}</button>
           </div>
         </div>
       )}

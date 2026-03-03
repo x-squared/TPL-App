@@ -3,6 +3,7 @@ import type { CoordinationListRow } from './useCoordinationsListViewModel';
 import ErrorBanner from '../../layout/ErrorBanner';
 import { formatDateDdMmYyyy } from '../../layout/dateFormat';
 import type { Code } from '../../../api';
+import { useI18n } from '../../../i18n/i18n';
 
 function fmt(value: string | null | undefined): string {
   return formatDateDdMmYyyy(value);
@@ -57,6 +58,7 @@ export default function CoordinationsTable({
   onSave,
   onCancel,
 }: Props) {
+  const { t } = useI18n();
   const donorNameInputRef = useRef<HTMLInputElement | null>(null);
 
   useEffect(() => {
@@ -72,13 +74,13 @@ export default function CoordinationsTable({
         <thead>
           <tr>
             <th className="open-col"></th>
-            <th>Status</th>
-            <th>Start</th>
-            <th>End</th>
-            <th>Donor Name</th>
-            <th>Date of Birth</th>
-            <th>Reason of Death</th>
-            <th>SWTPL Nr</th>
+            <th>{t('coordinations.table.status', 'Status')}</th>
+            <th>{t('coordinations.table.start', 'Start')}</th>
+            <th>{t('coordinations.table.end', 'End')}</th>
+            <th>{t('coordinations.table.donorName', 'Donor Name')}</th>
+            <th>{t('coordinations.table.dateOfBirth', 'Date of Birth')}</th>
+            <th>{t('coordinations.table.reasonOfDeath', 'Reason of Death')}</th>
+            <th>{t('coordinations.table.swtplNr', 'SWTPL Nr')}</th>
           </tr>
         </thead>
         <tbody>
@@ -101,14 +103,14 @@ export default function CoordinationsTable({
                   />
                   <input
                     type="text"
-                    placeholder="Donor name *"
+                    placeholder={t('coordinations.form.donorNameRequired', 'Donor name *')}
                     value={donorFullName}
                     ref={donorNameInputRef}
                     onChange={(e) => onDonorFullNameChange(e.target.value)}
                   />
                   <input
                     type="text"
-                    placeholder="Donor Nr"
+                    placeholder={t('coordinations.form.donorNr', 'Donor Nr')}
                     value={donorNr}
                     onChange={(e) => onFieldChange('donor_nr', e.target.value)}
                   />
@@ -122,7 +124,7 @@ export default function CoordinationsTable({
                     value={donorDeathKindId ?? ''}
                     onChange={(e) => onDonorDeathKindChange(e.target.value)}
                   >
-                    <option value="">Reason of death...</option>
+                    <option value="">{t('coordinations.form.reasonOfDeath', 'Reason of death...')}</option>
                     {deathKindCodes.map((code) => (
                       <option key={code.id} value={code.id}>
                         {code.name_default}
@@ -131,28 +133,28 @@ export default function CoordinationsTable({
                   </select>
                   <input
                     type="text"
-                    placeholder="SWTPL Nr"
+                    placeholder={t('coordinations.form.swtplNr', 'SWTPL Nr')}
                     value={swtplNr}
                     onChange={(e) => onFieldChange('swtpl_nr', e.target.value)}
                   />
                   <input
                     type="text"
-                    placeholder="National coordinator"
+                    placeholder={t('coordinations.form.nationalCoordinator', 'National coordinator')}
                     value={nationalCoordinator}
                     onChange={(e) => onFieldChange('national_coordinator', e.target.value)}
                   />
                   <input
                     type="text"
-                    placeholder="Comment"
+                    placeholder={t('coordinations.form.comment', 'Comment')}
                     value={comment}
                     onChange={(e) => onFieldChange('comment', e.target.value)}
                   />
                   <div className="patients-add-actions">
                     <button className="patients-save-btn" type="submit" disabled={creating}>
-                      {creating ? 'Saving...' : 'Save'}
+                      {creating ? t('coordinations.form.saving', 'Saving...') : t('actions.save', 'Save')}
                     </button>
                     <button className="patients-cancel-btn" type="button" onClick={onCancel} disabled={creating}>
-                      Cancel
+                      {t('actions.cancel', 'Cancel')}
                     </button>
                   </div>
                   <ErrorBanner message={createError} />
@@ -163,7 +165,7 @@ export default function CoordinationsTable({
           {rows.length === 0 ? (
             <tr>
               <td colSpan={8} className="status">
-                No coordinations found.
+                {t('coordinations.empty', 'No coordinations found.')}
               </td>
             </tr>
           ) : rows.map((row) => (
@@ -172,18 +174,18 @@ export default function CoordinationsTable({
                 <button
                   className="open-btn"
                   onClick={() => onOpenCoordination(row.coordination.id)}
-                  title="Open coordination"
+                  title={t('coordinations.actions.openCoordination', 'Open coordination')}
                 >
                   &#x279C;
                 </button>
               </td>
-              <td>{row.coordination.status?.name_default ?? '–'}</td>
+              <td>{row.coordination.status?.name_default ?? t('common.emptySymbol', '–')}</td>
               <td>{fmt(row.coordination.start)}</td>
               <td>{fmt(row.coordination.end)}</td>
-              <td>{row.donor?.full_name || '–'}</td>
+              <td>{row.donor?.full_name || t('common.emptySymbol', '–')}</td>
               <td>{fmt(row.donor?.birth_date ?? null)}</td>
-              <td>{row.donor?.death_kind?.name_default ?? '–'}</td>
-              <td>{row.coordination.swtpl_nr || '–'}</td>
+              <td>{row.donor?.death_kind?.name_default ?? t('common.emptySymbol', '–')}</td>
+              <td>{row.coordination.swtpl_nr || t('common.emptySymbol', '–')}</td>
             </tr>
           ))}
         </tbody>

@@ -1,4 +1,5 @@
 import type { MyWorkTabKey } from './useMyWorkTabsViewModel';
+import { useI18n } from '../../i18n/i18n';
 
 interface MyWorkTabsProps {
   activeTab: MyWorkTabKey;
@@ -13,6 +14,7 @@ export default function MyWorkTabs({
   unreadInformationCount,
   openTaskCount,
 }: MyWorkTabsProps) {
+  const { t } = useI18n();
   return (
     <>
       <button
@@ -20,21 +22,21 @@ export default function MyWorkTabs({
         onClick={() => setActiveTab('favorites')}
         type="button"
       >
-        Favorites
+        {t('myWork.tabs.favorites', 'Favorites')}
       </button>
       <button
         className={`detail-tab ${activeTab === 'tasks' ? 'active' : ''}`}
         onClick={() => setActiveTab('tasks')}
         type="button"
       >
-        Tasks ({openTaskCount})
+        {t('myWork.tabs.tasks', 'Tasks')} ({openTaskCount})
       </button>
       <button
         className={`detail-tab ${activeTab === 'information' ? 'active' : ''}`}
         onClick={() => setActiveTab('information')}
         type="button"
       >
-        Information ({unreadInformationCount})
+        {t('myWork.tabs.information', 'Information')} ({unreadInformationCount})
       </button>
     </>
   );

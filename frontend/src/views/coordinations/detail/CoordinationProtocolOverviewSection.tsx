@@ -1,4 +1,17 @@
 import type { Code } from '../../../api';
+import { useI18n } from '../../../i18n/i18n';
+
+const ENGLISH_ORGAN_LABEL_BY_KEY: Record<string, string> = {
+  KIDNEY: 'Kidney',
+  PANCREAS: 'Pancreas',
+  LIVER: 'Liver',
+  HEART: 'Heart',
+  HEART_VALVE: 'Heart valve',
+  LUNG: 'Lung',
+  ISLET: 'Islet cells',
+  VESSELS: 'Vessels',
+  INTESTINE: 'Intestine',
+};
 
 export interface ProtocolOverviewEntry {
   id: number;
@@ -26,20 +39,26 @@ interface Props {
 }
 
 export default function CoordinationProtocolOverviewSection({ groups, onOpenPatientEpisode }: Props) {
+  const { t } = useI18n();
+  const getOrganLabel = (organ: Code): string => {
+    const key = (organ.key ?? '').trim().toUpperCase();
+    if (!key) return organ.name_default;
+    return t(`coordinations.protocolOverview.organByKey.${key}`, ENGLISH_ORGAN_LABEL_BY_KEY[key] ?? organ.name_default);
+  };
   return (
     <section className="detail-section ui-panel-section">
       <div className="detail-section-heading">
-        <h2>Protocol Overview</h2>
+        <h2>{t('coordinations.protocolOverview.title', 'Protocol Overview')}</h2>
       </div>
       <div className="coord-protocol-overview">
         {groups.length === 0 ? (
-          <p className="detail-empty">No organs found.</p>
+          <p className="detail-empty">{t('coordinations.protocolOverview.noOrgans', 'No organs found.')}</p>
         ) : (
           groups.map(({ organ, entries }) => (
             <fieldset key={organ.id} className="coord-protocol-organ-box">
-              <legend>{organ.name_default}</legend>
+              <legend>{getOrganLabel(organ)}</legend>
               {entries.length === 0 ? (
-                <p className="detail-empty">No protocol data for this organ.</p>
+                <p className="detail-empty">{t('coordinations.protocolOverview.noDataForOrgan', 'No protocol data for this organ.')}</p>
               ) : (
                 entries.map((entry) => (
                   <div key={entry.id} className="coord-protocol-entry">
@@ -52,47 +71,47 @@ export default function CoordinationProtocolOverviewSection({ groups, onOpenPati
                           }
                         }}
                         disabled={entry.patientId == null || entry.episodeId == null}
-                        title="Open linked episode"
+                        title={t('coordinations.protocolOverview.openLinkedEpisode', 'Open linked episode')}
                       >
-                        Open
+                        {t('coordinations.protocolOverview.open', 'Open')}
                       </button>
                     </div>
                     <div className="coord-protocol-entry-grid">
                       <div className="detail-field">
-                        <span className="detail-label">Recipient full name</span>
+                        <span className="detail-label">{t('coordinations.protocolOverview.recipientFullName', 'Recipient full name')}</span>
                         <span className="detail-value">{entry.recipientName}</span>
                       </div>
                       <div className="detail-field">
-                        <span className="detail-label">Fallnummer</span>
+                        <span className="detail-label">{t('coordinations.protocolOverview.fallNumber', 'Fallnummer')}</span>
                         <span className="detail-value">{entry.fallNr}</span>
                       </div>
                       <div className="detail-field">
-                        <span className="detail-label">Date of birth</span>
+                        <span className="detail-label">{t('coordinations.table.dateOfBirth', 'Date of Birth')}</span>
                         <span className="detail-value">{entry.birthDate}</span>
                       </div>
                       <div className="detail-field">
-                        <span className="detail-label">Diagnosis (main)</span>
+                        <span className="detail-label">{t('coordinations.protocolOverview.mainDiagnosis', 'Diagnosis (main)')}</span>
                         <span className="detail-value">{entry.mainDiagnosis}</span>
                       </div>
                       <div className="detail-field">
-                        <span className="detail-label">RS-nr</span>
+                        <span className="detail-label">{t('coordinations.protocolOverview.rsNumber', 'RS-nr')}</span>
                         <span className="detail-value">{entry.rsNr}</span>
                       </div>
                       <div className="detail-field">
-                        <span className="detail-label">TPL date</span>
+                        <span className="detail-label">{t('coordinations.protocolOverview.tplDate', 'TPL date')}</span>
                         <span className="detail-value">{entry.tplDate}</span>
                       </div>
                       <div className="detail-field">
-                        <span className="detail-label">Procurement team</span>
+                        <span className="detail-label">{t('coordinations.protocolOverview.procurementTeam', 'Procurement team')}</span>
                         <span className="detail-value">{entry.procurementTeam}</span>
                       </div>
                       <div className="detail-field">
-                        <span className="detail-label">Perfusion applied</span>
+                        <span className="detail-label">{t('coordinations.protocolOverview.perfusionApplied', 'Perfusion applied')}</span>
                         <span className="detail-value">
                           {entry.perfusionApplied}
                           {entry.perfusionDone ? (
-                            <span className="coord-protocol-badge" title="Perfusion applied">
-                              Perfusion
+                            <span className="coord-protocol-badge" title={t('coordinations.protocolOverview.perfusionApplied', 'Perfusion applied')}>
+                              {t('coordinations.protocolOverview.perfusion', 'Perfusion')}
                             </span>
                           ) : null}
                         </span>

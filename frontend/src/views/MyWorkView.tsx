@@ -1,4 +1,5 @@
 import type { Favorite } from '../api';
+import { useI18n } from '../i18n/i18n';
 import InformationRowsSection from './information/InformationRowsSection';
 import FavoritesSection from './my-work/FavoritesSection';
 import MyWorkTabs from './my-work/MyWorkTabs';
@@ -17,12 +18,13 @@ interface Props {
 }
 
 export default function MyWorkView({ onOpenFavorite, onOpenTaskContext, currentUserId }: Props) {
+  const { t } = useI18n();
   const model = useMyWorkPageViewModel();
 
   return (
     <>
       <header className="patients-header">
-        <h1>My Work ({model.tasks.openTaskCount} | {model.information.unreadCount})</h1>
+        <h1>{t('myWork.title', 'My Work')} ({model.tasks.openTaskCount} | {model.information.unreadCount})</h1>
       </header>
       <div className="detail-tabs my-work-tabs">
         <MyWorkTabs
@@ -34,7 +36,7 @@ export default function MyWorkView({ onOpenFavorite, onOpenTaskContext, currentU
       </div>
       {model.tabs.activeTab === 'favorites' && model.favorites.error ? <p className="status">{model.favorites.error}</p> : null}
       {model.tabs.activeTab === 'favorites' && model.favorites.loading ? (
-        <p className="status">Loading...</p>
+        <p className="status">{t('common.loading', 'Loading...')}</p>
       ) : null}
       {model.tabs.activeTab === 'favorites' && !model.favorites.loading ? (
         <FavoritesSection
@@ -54,37 +56,38 @@ export default function MyWorkView({ onOpenFavorite, onOpenTaskContext, currentU
       {model.tabs.activeTab === 'tasks' ? (
         <section className="detail-section ui-panel-section">
           <div className="detail-section-heading">
-            <h2>Assigned Tasks</h2>
+            <h2>{t('myWork.assignedTasks.title', 'Assigned Tasks')}</h2>
           </div>
           <div className="detail-grid">
             <label className="detail-field">
-              <span className="detail-label">Scope</span>
+              <span className="detail-label">{t('myWork.assignedTasks.scope.label', 'Scope')}</span>
               <select
                 className="detail-input"
                 value={model.tasks.assignmentScope}
                 onChange={(event) => model.tasks.setAssignmentScope(event.target.value as typeof model.tasks.assignmentScope)}
               >
-                <option value="MINE">My tasks</option>
-                <option value="ALL">All tasks</option>
+                <option value="MINE">{t('myWork.assignedTasks.scope.mine', 'My tasks')}</option>
+                <option value="ALL">{t('myWork.assignedTasks.scope.all', 'All tasks')}</option>
               </select>
             </label>
             <label className="detail-field">
-              <span className="detail-label">Context</span>
+              <span className="detail-label">{t('myWork.assignedTasks.context.label', 'Context')}</span>
               <select
                 className="detail-input"
                 value={model.tasks.contextFilter}
                 onChange={(event) => model.tasks.setContextFilter(event.target.value as typeof model.tasks.contextFilter)}
               >
-                <option value="ALL">All</option>
-                <option value="PATIENT">Patient</option>
-                <option value="EPISODE">Episode</option>
-                <option value="COLLOQUIUM">Colloquium</option>
-                <option value="COORDINATION">Coordination</option>
+                <option value="ALL">{t('myWork.assignedTasks.context.all', 'All')}</option>
+                <option value="PATIENT">{t('myWork.assignedTasks.context.patient', 'Patient')}</option>
+                <option value="EPISODE">{t('myWork.assignedTasks.context.episode', 'Episode')}</option>
+                <option value="COLLOQUIUM">{t('myWork.assignedTasks.context.colloquium', 'Colloquium')}</option>
+                <option value="COORDINATION">{t('myWork.assignedTasks.context.coordination', 'Coordination')}</option>
               </select>
             </label>
           </div>
           <TaskBoard
-            title="Assigned Tasks"
+            declaredContextType={model.tasks.contextFilter}
+            title={t('myWork.assignedTasks.title', 'Assigned Tasks')}
             hideFilters
             hideAddButton
             showGroupHeadingsDefault={false}

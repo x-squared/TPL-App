@@ -73,6 +73,10 @@ from .coordination import (
     CoordinationProcurementFieldScopeTemplateBase,
     CoordinationProcurementFieldScopeTemplateCreate,
     CoordinationProcurementFieldScopeTemplateResponse,
+    CoordinationProcurementProtocolTaskGroupSelectionBase,
+    CoordinationProcurementProtocolTaskGroupSelectionCreate,
+    CoordinationProcurementProtocolTaskGroupSelectionResponse,
+    CoordinationProcurementProtocolTaskGroupSelectionUpdate,
     CoordinationProcurementFieldGroupTemplateBase,
     CoordinationProcurementFieldGroupTemplateCreate,
     CoordinationProcurementFieldGroupTemplateResponse,
@@ -155,6 +159,7 @@ from .reference import (
 )
 from .support_ticket import SupportTicketConfigResponse
 from .tasking import (
+    CoordinationProtocolTaskGroupsEnsureResponse,
     TaskBase,
     TaskCreate,
     TaskGroupBase,

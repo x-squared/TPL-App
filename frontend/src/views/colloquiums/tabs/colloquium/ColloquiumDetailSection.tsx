@@ -1,4 +1,5 @@
 import type { Colloqium, ColloqiumAgenda, PatientListItem, Person } from '../../../../api';
+import { useI18n } from '../../../../i18n/i18n';
 import ColloquiumAgendaTable from './ColloquiumAgendaTable';
 import EpisodePickerDialog from './EpisodePickerDialog';
 import EditableSectionHeader from '../../../layout/EditableSectionHeader';
@@ -123,17 +124,18 @@ export default function ColloquiumDetailSection({
   generalDirty,
   generalSaveError,
 }: Props) {
+  const { t } = useI18n();
   const formatDate = (iso: string) => {
-    if (!iso) return '–';
+    if (!iso) return t('common.emptySymbol', '–');
     const [y, m, d] = iso.split('-');
-    if (!y || !m || !d) return '–';
+    if (!y || !m || !d) return t('common.emptySymbol', '–');
     return `${d}.${m}.${y}`;
   };
 
   return (
     <section className="detail-section colloquiums-detail-section">
       <EditableSectionHeader
-        title="Colloquium Details"
+        title={t('colloquiums.detail.title', 'Colloquium Details')}
         editing={generalEditing}
         saving={savingGeneral}
         dirty={generalDirty}
@@ -143,7 +145,7 @@ export default function ColloquiumDetailSection({
       />
       <div className="detail-grid">
         <div className="detail-field">
-          <span className="detail-label">Name</span>
+          <span className="detail-label">{t('colloquiums.table.name', 'Name')}</span>
           {generalEditing ? (
             <input
               className="detail-input"
@@ -152,11 +154,11 @@ export default function ColloquiumDetailSection({
               onChange={(e) => onChangeName(e.target.value)}
             />
           ) : (
-            <span className="detail-value">{draftName || '–'}</span>
+            <span className="detail-value">{draftName || t('common.emptySymbol', '–')}</span>
           )}
         </div>
         <div className="detail-field">
-          <span className="detail-label">Date</span>
+          <span className="detail-label">{t('colloquiums.table.date', 'Date')}</span>
           {generalEditing ? (
             <input
               className="detail-input"
@@ -169,7 +171,7 @@ export default function ColloquiumDetailSection({
           )}
         </div>
         <div className="detail-field">
-          <span className="detail-label">Participants</span>
+          <span className="detail-label">{t('colloquiums.detail.participants', 'Participants')}</span>
           {generalEditing ? (
             <PersonMultiSelect
               selectedPeople={draftParticipantsPeople}
@@ -177,20 +179,20 @@ export default function ColloquiumDetailSection({
               disabled={savingGeneral}
             />
           ) : (
-            <span className="detail-value">{draftParticipants || '–'}</span>
+            <span className="detail-value">{draftParticipants || t('common.emptySymbol', '–')}</span>
           )}
         </div>
       </div>
       <ErrorBanner message={generalSaveError} />
       <div className="colloquiums-agenda-section">
         <div className="detail-section-heading">
-          <h3>Agenda</h3>
+          <h3>{t('colloquiums.table.agenda', 'Agenda')}</h3>
           {editingAgendaId === null && (
-            <button className="ci-add-btn" onClick={onStartAddAgenda}>+ Add</button>
+            <button className="ci-add-btn" onClick={onStartAddAgenda}>{t('colloquiums.actions.add', '+ Add')}</button>
           )}
         </div>
         {loadingAgendas ? (
-          <p className="status">Loading agenda...</p>
+          <p className="status">{t('colloquiums.agenda.loading', 'Loading agenda...')}</p>
         ) : (
           <ColloquiumAgendaTable
             agendas={agendas}
@@ -213,7 +215,7 @@ export default function ColloquiumDetailSection({
       </div>
       <EpisodePickerDialog
         open={pickerOpen}
-        organLabel={colloqium.colloqium_type?.organ?.name_default ?? 'Unknown organ'}
+        organLabel={colloqium.colloqium_type?.organ?.name_default ?? t('colloquiums.detail.unknownOrgan', 'Unknown organ')}
         rows={pickerRows}
         loading={pickerLoading}
         initialSelectedEpisodeIds={

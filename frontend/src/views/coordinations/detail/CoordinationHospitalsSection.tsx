@@ -1,5 +1,6 @@
 import type React from 'react';
 import type { Code, CoordinationOrigin } from '../../../api';
+import { useI18n } from '../../../i18n/i18n';
 import EditableSectionHeader from '../../layout/EditableSectionHeader';
 import ErrorBanner from '../../layout/ErrorBanner';
 
@@ -35,10 +36,11 @@ export default function CoordinationHospitalsSection({
   onSave,
   onCancel,
 }: Props) {
+  const { t } = useI18n();
   return (
     <section className="detail-section ui-panel-section">
       <EditableSectionHeader
-        title="Hospitals"
+        title={t('coordinations.hospitals.title', 'Hospitals')}
         editing={originEditing}
         saving={originSaving}
         dirty={originDirty}
@@ -48,7 +50,7 @@ export default function CoordinationHospitalsSection({
       />
       <div className="detail-grid">
         <div className="detail-field">
-          <span className="detail-label">Detection hospital</span>
+          <span className="detail-label">{t('coordinations.hospitals.detection', 'Detection hospital')}</span>
           {originEditing ? (
             <select
               className="detail-input"
@@ -60,7 +62,7 @@ export default function CoordinationHospitalsSection({
                 }))
               }
             >
-              <option value="">–</option>
+              <option value="">{t('common.emptySymbol', '–')}</option>
               {hospitals.map((h) => (
                 <option key={h.id} value={h.id}>
                   {h.name_default}
@@ -68,11 +70,11 @@ export default function CoordinationHospitalsSection({
               ))}
             </select>
           ) : (
-            <span className="detail-value">{origin?.detection_hospital?.name_default ?? '–'}</span>
+            <span className="detail-value">{origin?.detection_hospital?.name_default ?? t('common.emptySymbol', '–')}</span>
           )}
         </div>
         <div className="detail-field">
-          <span className="detail-label">Procurement hospital</span>
+          <span className="detail-label">{t('coordinations.hospitals.procurement', 'Procurement hospital')}</span>
           {originEditing ? (
             <select
               className="detail-input"
@@ -84,7 +86,7 @@ export default function CoordinationHospitalsSection({
                 }))
               }
             >
-              <option value="">–</option>
+              <option value="">{t('common.emptySymbol', '–')}</option>
               {hospitals.map((h) => (
                 <option key={h.id} value={h.id}>
                   {h.name_default}
@@ -92,7 +94,7 @@ export default function CoordinationHospitalsSection({
               ))}
             </select>
           ) : (
-            <span className="detail-value">{origin?.procurement_hospital?.name_default ?? '–'}</span>
+            <span className="detail-value">{origin?.procurement_hospital?.name_default ?? t('common.emptySymbol', '–')}</span>
           )}
         </div>
       </div>

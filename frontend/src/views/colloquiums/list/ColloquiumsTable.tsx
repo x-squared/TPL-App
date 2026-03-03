@@ -1,5 +1,6 @@
 import { Fragment } from 'react';
 import type { Colloqium, ColloqiumAgenda } from '../../../api';
+import { useI18n } from '../../../i18n/i18n';
 
 function formatDate(iso: string): string {
   const [y, m, d] = iso.split('-');
@@ -15,8 +16,8 @@ interface Props {
   onToggleAgenda: (colloqiumId: number) => void;
 }
 
-function agendaEpisodeSummary(agendas: ColloqiumAgenda[]): string {
-  if (agendas.length === 0) return 'No agenda entries.';
+function agendaEpisodeSummary(agendas: ColloqiumAgenda[], emptyText: string): string {
+  if (agendas.length === 0) return emptyText;
   return agendas
     .map((agenda) => agenda.episode?.fall_nr || `#${agenda.episode_id}`)
     .join(', ');
@@ -30,16 +31,17 @@ export default function ColloquiumsTable({
   onOpenColloqium,
   onToggleAgenda,
 }: Props) {
+  const { t } = useI18n();
   return (
     <div className="patients-table-wrap ui-table-wrap">
       <table className="data-table">
         <thead>
           <tr>
             <th className="open-col"></th>
-            <th>Type</th>
-            <th>Name</th>
-            <th>Date</th>
-            <th>agenda</th>
+            <th>{t('colloquiums.table.type', 'Type')}</th>
+            <th>{t('colloquiums.table.name', 'Name')}</th>
+            <th>{t('colloquiums.table.date', 'Date')}</th>
+            <th>{t('colloquiums.table.agenda', 'Agenda')}</th>
           </tr>
         </thead>
         <tbody>
@@ -56,13 +58,13 @@ export default function ColloquiumsTable({
                     <button
                       className="open-btn"
                       onClick={() => onOpenColloqium(item.id)}
-                      title="Open colloquium"
+                      title={t('colloquiums.actions.open', 'Open colloquium')}
                     >
                       &#x279C;
                     </button>
                   </td>
-                  <td>{item.colloqium_type?.organ?.name_default ?? '–'}</td>
-                  <td>{item.colloqium_type?.name ?? '–'}</td>
+                  <td>{item.colloqium_type?.organ?.name_default ?? t('common.emptySymbol', '–')}</td>
+                  <td>{item.colloqium_type?.name ?? t('common.emptySymbol', '–')}</td>
                   <td>{formatDate(item.date)}</td>
                   <td>
                     <button
@@ -72,7 +74,7 @@ export default function ColloquiumsTable({
                         onToggleAgenda(item.id);
                       }}
                     >
-                      {isAgendaExpanded ? 'Hide' : 'Show'}
+                      {isAgendaExpanded ? t('taskBoard.filters.hide', 'Hide') : t('taskBoard.filters.show', 'Show')}
                     </button>
                   </td>
                 </tr>
@@ -81,9 +83,9 @@ export default function ColloquiumsTable({
                     <td colSpan={5}>
                       <div className="contact-section">
                         {loadingAgenda ? (
-                          <p className="contact-empty">Loading agenda...</p>
+                          <p className="contact-empty">{t('colloquiums.agenda.loading', 'Loading agenda...')}</p>
                         ) : (
-                          <p className="contact-empty">{agendaEpisodeSummary(agendas)}</p>
+                          <p className="contact-empty">{agendaEpisodeSummary(agendas, t('colloquiums.agenda.empty', 'No agenda entries.'))}</p>
                         )}
                       </div>
                     </td>

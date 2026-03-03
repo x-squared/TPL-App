@@ -1,7 +1,7 @@
 import type { AppUser } from '../api';
 import { useI18n } from '../i18n/i18n';
 
-type Page = 'my-work' | 'patients' | 'donations' | 'colloquiums' | 'coordinations' | 'reports' | 'admin' | 'e2e-tests' | 'preferences';
+type Page = 'my-work' | 'patients' | 'donors' | 'colloquiums' | 'coordinations' | 'reports' | 'admin' | 'e2e-tests' | 'preferences';
 
 interface AppSidebarProps {
   user: AppUser;
@@ -12,7 +12,7 @@ interface AppSidebarProps {
   userMenuOpen: boolean;
   setUserMenuOpen: React.Dispatch<React.SetStateAction<boolean>>;
   canViewPatients: boolean;
-  canViewDonations: boolean;
+  canViewDonors: boolean;
   canViewColloquiums: boolean;
   canViewCoordinations: boolean;
   canViewReports: boolean;
@@ -41,7 +41,7 @@ export default function AppSidebar({
   userMenuOpen,
   setUserMenuOpen,
   canViewPatients,
-  canViewDonations,
+  canViewDonors,
   canViewColloquiums,
   canViewCoordinations,
   canViewReports,
@@ -68,17 +68,17 @@ export default function AppSidebar({
         <button
           className="sidebar-toggle"
           onClick={() => setSidebarOpen(!sidebarOpen)}
-          title={sidebarOpen ? 'Collapse' : 'Expand'}
+          title={sidebarOpen ? t('sidebar.actions.collapse', 'Collapse') : t('sidebar.actions.expand', 'Expand')}
         >
           {sidebarOpen ? '\u2039' : '\u203A'}
         </button>
-        {sidebarOpen && <span className="sidebar-brand">TPL App</span>}
+        {sidebarOpen && <span className="sidebar-brand">{t('sidebar.brand', 'TPL App')}</span>}
         {sidebarOpen && canViewCoordinations ? (
           <button
             type="button"
             className="sidebar-alert-btn"
-            title="Create coordination now"
-            aria-label="Create coordination now"
+            title={t('sidebar.actions.createCoordinationNow', 'Create coordination now')}
+            aria-label={t('sidebar.actions.createCoordinationNow', 'Create coordination now')}
             onClick={onQuickCreateCoordination}
           />
         ) : null}
@@ -109,11 +109,11 @@ export default function AppSidebar({
             {sidebarOpen && <span className="nav-label">{t('sidebar.nav.recipients', 'Recipients')}</span>}
           </button>
         )}
-        {canViewDonations && (
+        {canViewDonors && (
           <button
-            className={`nav-item ${page === 'donations' ? 'active' : ''}`}
+            className={`nav-item ${page === 'donors' ? 'active' : ''}`}
             onClick={() => {
-              setPage('donations');
+              setPage('donors');
               onResetSelection();
             }}
             title={t('sidebar.nav.donors', 'Donors')}
@@ -165,7 +165,7 @@ export default function AppSidebar({
           <>
             <div className="nav-divider-dev" aria-hidden="true">
               <span className="nav-divider-line" />
-              {sidebarOpen && <span className="nav-divider-label">ADMIN</span>}
+              {sidebarOpen && <span className="nav-divider-label">{t('sidebar.sections.admin', 'ADMIN')}</span>}
               <span className="nav-divider-line" />
             </div>
             <button
@@ -185,7 +185,7 @@ export default function AppSidebar({
           <>
             <div className="nav-divider-dev" aria-hidden="true">
               <span className="nav-divider-line" />
-              {sidebarOpen && <span className="nav-divider-label">DEV</span>}
+              {sidebarOpen && <span className="nav-divider-label">{t('sidebar.sections.dev', 'DEV')}</span>}
               <span className="nav-divider-line" />
             </div>
             <button
@@ -194,21 +194,21 @@ export default function AppSidebar({
                 setPage('e2e-tests');
                 onResetSelection();
               }}
-              title="E2E Tests"
+              title={t('navigation.dev.e2eTests', 'E2E Tests')}
             >
               <span className="nav-icon">{'\u2699'}</span>
-              {sidebarOpen && <span className="nav-label">E2E Tests</span>}
+              {sidebarOpen && <span className="nav-label">{t('navigation.dev.e2eTests', 'E2E Tests')}</span>}
             </button>
           </>
         )}
       </nav>
 
-      <div className="sidebar-history" aria-label="Navigation history">
+      <div className="sidebar-history" aria-label={t('sidebar.history.label', 'Navigation history')}>
         <button
           className={`history-nav-btn ${canGoBack ? 'enabled' : 'disabled'}`}
           onClick={onGoBack}
           disabled={!canGoBack}
-          title="Go back"
+          title={t('sidebar.history.back', 'Go back')}
           type="button"
         >
           {canGoBack ? '\u25C0' : '\u25C1'}
@@ -216,7 +216,9 @@ export default function AppSidebar({
         <button
           className={`history-nav-btn history-mark-btn ${hasMarkedLocation ? 'enabled' : 'disabled'}`}
           onClick={onToggleMarkedLocation}
-          title={hasMarkedLocation ? 'Return to marked location' : 'Mark current location'}
+          title={hasMarkedLocation
+            ? t('sidebar.history.returnToMarkedLocation', 'Return to marked location')
+            : t('sidebar.history.markCurrentLocation', 'Mark current location')}
           type="button"
         >
           {hasMarkedLocation ? '\u25CF' : '\u25CB'}
@@ -225,7 +227,7 @@ export default function AppSidebar({
           className={`history-nav-btn ${canGoForward ? 'enabled' : 'disabled'}`}
           onClick={onGoForward}
           disabled={!canGoForward}
-          title="Go forward"
+          title={t('sidebar.history.forward', 'Go forward')}
           type="button"
         >
           {canGoForward ? '\u25B6' : '\u25B7'}

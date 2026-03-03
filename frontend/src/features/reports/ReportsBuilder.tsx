@@ -1,12 +1,14 @@
 import type { ReportExecuteResponse } from '../../api';
+import { useI18n } from '../../i18n/i18n';
 import { useReportsViewModel } from './useReportsViewModel';
 import { exportReportResultAsCsv } from './reportExport';
 
 type Model = ReturnType<typeof useReportsViewModel>;
 
 function ReportsResultTable({ result }: { result: ReportExecuteResponse | null }) {
-  if (!result) return <p className="status">Run a report to see results.</p>;
-  if (result.row_count === 0) return <p className="status">No rows found for current criteria.</p>;
+  const { t } = useI18n();
+  if (!result) return <p className="status">{t('reports.builder.result.runToSee', 'Run a report to see results.')}</p>;
+  if (result.row_count === 0) return <p className="status">{t('reports.builder.result.emptyForCriteria', 'No rows found for current criteria.')}</p>;
 
   return (
     <div className="patients-table-wrap ui-table-wrap reports-results">
@@ -22,7 +24,7 @@ function ReportsResultTable({ result }: { result: ReportExecuteResponse | null }
           {result.rows.map((row, idx) => (
             <tr key={idx}>
               {result.columns.map((col) => (
-                <td key={col.key}>{row[col.key] ?? '–'}</td>
+                <td key={col.key}>{row[col.key] ?? t('common.emptySymbol', '–')}</td>
               ))}
             </tr>
           ))}
@@ -33,6 +35,7 @@ function ReportsResultTable({ result }: { result: ReportExecuteResponse | null }
 }
 
 export default function ReportsBuilder({ model }: { model: Model }) {
+  const { t } = useI18n();
   const allFieldKeys = model.sourceFields.map((field) => field.key);
   const allSelected = allFieldKeys.length > 0 && allFieldKeys.every((key) => model.selectedFields.includes(key));
 
@@ -40,12 +43,12 @@ export default function ReportsBuilder({ model }: { model: Model }) {
     <>
       <section className="detail-section ui-panel-section">
         <div className="detail-section-heading">
-          <h2>Query Builder</h2>
+          <h2>{t('reports.builder.query.title', 'Query Builder')}</h2>
         </div>
 
         <div className="reports-grid">
           <label className="reports-field">
-            <span className="detail-label">Source</span>
+            <span className="detail-label">{t('reports.builder.query.source', 'Source')}</span>
             <select
               className="detail-input"
               value={model.selectedSourceKey}
@@ -60,7 +63,7 @@ export default function ReportsBuilder({ model }: { model: Model }) {
           </label>
 
           <label className="reports-field">
-            <span className="detail-label">Limit</span>
+            <span className="detail-label">{t('reports.builder.query.limit', 'Limit')}</span>
             <input
               className="detail-input"
               type="number"
@@ -74,7 +77,7 @@ export default function ReportsBuilder({ model }: { model: Model }) {
 
         {model.joinOptions.length > 0 ? (
           <div className="reports-field-list">
-            <p className="detail-label">Joins</p>
+            <p className="detail-label">{t('reports.builder.query.joins', 'Joins')}</p>
             <div className="reports-checkbox-grid">
               {model.joinOptions.map((join) => (
                 <label key={join.key} className="reports-checkbox">
@@ -96,13 +99,13 @@ export default function ReportsBuilder({ model }: { model: Model }) {
 
         <div className="reports-field-list">
           <div className="detail-section-heading reports-subheading">
-            <h3>Columns</h3>
+            <h3>{t('reports.builder.query.columns', 'Columns')}</h3>
             <button
               className="ci-add-btn"
               onClick={() => model.setSelectedFields(allSelected ? [] : allFieldKeys)}
               disabled={allFieldKeys.length === 0}
             >
-              {allSelected ? 'Deselect all' : 'Select all'}
+              {allSelected ? t('reports.builder.query.deselectAll', 'Deselect all') : t('reports.builder.query.selectAll', 'Select all')}
             </button>
           </div>
           <div className="reports-checkbox-grid">
@@ -125,13 +128,13 @@ export default function ReportsBuilder({ model }: { model: Model }) {
 
         <div className="reports-filters">
           <div className="detail-section-heading">
-            <h3>Filters</h3>
+            <h3>{t('reports.builder.query.filters', 'Filters')}</h3>
             <button className="ci-add-btn" onClick={model.addFilter}>
-              + Add filter
+              {t('reports.builder.query.addFilter', '+ Add filter')}
             </button>
           </div>
           {model.filters.length === 0 ? (
-            <p className="status">No filters. Report will use all rows for this source.</p>
+            <p className="status">{t('reports.builder.query.noFilters', 'No filters. Report will use all rows for this source.')}</p>
           ) : (
             model.filters.map((filter) => {
               const field = model.sourceFields.find((item) => item.key === filter.field);
@@ -165,9 +168,9 @@ export default function ReportsBuilder({ model }: { model: Model }) {
                     type="text"
                     value={filter.value}
                     onChange={(e) => model.updateFilter(filter.id, { value: e.target.value })}
-                    placeholder="value"
+                    placeholder={t('reports.builder.query.valuePlaceholder', 'value')}
                   />
-                  <button className="ci-delete-btn" onClick={() => model.removeFilter(filter.id)} title="Delete filter">
+                  <button className="ci-delete-btn" onClick={() => model.removeFilter(filter.id)} title={t('reports.builder.query.deleteFilter', 'Delete filter')}>
                     ✕
                   </button>
                 </div>
@@ -180,8 +183,8 @@ export default function ReportsBuilder({ model }: { model: Model }) {
       <section className="detail-section ui-panel-section">
         <div className="detail-section-heading">
           <div className="reports-results-heading-left">
-            <h2>Results</h2>
-            <span className="status">{model.result ? `${model.result.row_count} row(s)` : 'No run yet'}</span>
+            <h2>{t('reports.builder.result.title', 'Results')}</h2>
+            <span className="status">{model.result ? `${model.result.row_count} ${t('reports.builder.result.rows', 'row(s)')}` : t('reports.builder.result.noRunYet', 'No run yet')}</span>
           </div>
           <div className="reports-results-actions">
             <button
@@ -192,14 +195,14 @@ export default function ReportsBuilder({ model }: { model: Model }) {
               }}
               disabled={!model.result || model.result.row_count === 0}
             >
-              Export CSV
+              {t('reports.builder.result.exportCsv', 'Export CSV')}
             </button>
             <button
               className="ci-add-btn"
               onClick={() => void model.runReport()}
               disabled={model.running || !model.selectedSource || model.selectedFields.length === 0}
             >
-              {model.running ? 'Running...' : 'Run report'}
+              {model.running ? t('reports.builder.result.running', 'Running...') : t('reports.builder.result.runReport', 'Run report')}
             </button>
           </div>
         </div>

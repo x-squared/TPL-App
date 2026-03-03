@@ -2,6 +2,7 @@ import type React from 'react';
 import { useEffect, useMemo, useState } from 'react';
 import type { Code, Coordination, CoordinationDonor, CoordinationEpisode, CoordinationOrigin, Patient } from '../../../api';
 import { ApiError, toUserErrorMessage } from '../../../api/error';
+import { useI18n } from '../../../i18n/i18n';
 import { formatDateDdMmYyyy } from '../../layout/dateFormat';
 import CoordinationBasicDataSection from './CoordinationBasicDataSection';
 import CoordinationDonorDataSection from './CoordinationDonorDataSection';
@@ -124,6 +125,7 @@ export default function CoordinationDetailTabs({
   onRefresh,
   onOpenPatientEpisode,
 }: Props) {
+  const { t } = useI18n();
   const initialCoreDraft = useMemo(
     () => ({
       start: toInputDate(coordination.start),
@@ -267,7 +269,7 @@ export default function CoordinationDetailTabs({
       });
       setCoreEditing(false);
     } catch (err) {
-      const message = toUserErrorMessage(err, 'Failed to save basic data');
+      const message = toUserErrorMessage(err, t('coordinations.errors.saveBasicData', 'Failed to save basic data'));
       if (err instanceof ApiError && err.status === 409) {
         await onRefresh();
         setCoreEditing(false);
@@ -295,7 +297,7 @@ export default function CoordinationDetailTabs({
       });
       setDonorEditing(false);
     } catch (err) {
-      const message = toUserErrorMessage(err, 'Failed to save donor data');
+      const message = toUserErrorMessage(err, t('coordinations.errors.saveDonorData', 'Failed to save donor data'));
       if (err instanceof ApiError && err.status === 409) {
         await onRefresh();
         setDonorEditing(false);
@@ -316,7 +318,7 @@ export default function CoordinationDetailTabs({
       });
       setOriginEditing(false);
     } catch (err) {
-      const message = toUserErrorMessage(err, 'Failed to save hospitals');
+      const message = toUserErrorMessage(err, t('coordinations.errors.saveHospitals', 'Failed to save hospitals'));
       if (err instanceof ApiError && err.status === 409) {
         await onRefresh();
         setOriginEditing(false);
@@ -350,22 +352,22 @@ export default function CoordinationDetailTabs({
           const patientId = item.episode?.patient_id;
           const patient = typeof patientId === 'number' ? patientsById[patientId] : undefined;
           const recipientName = patient
-            ? `${patient.first_name ?? ''} ${patient.name ?? ''}`.trim() || '–'
-            : '–';
-          const mainDiagnosis = patient?.diagnoses?.[0]?.catalogue?.name_default ?? '–';
+            ? `${patient.first_name ?? ''} ${patient.name ?? ''}`.trim() || t('common.emptySymbol', '–')
+            : t('common.emptySymbol', '–');
+          const mainDiagnosis = patient?.diagnoses?.[0]?.catalogue?.name_default ?? t('common.emptySymbol', '–');
           return {
             id: item.id,
             patientId: item.episode?.patient_id ?? null,
             episodeId: item.episode_id,
             recipientName,
-            fallNr: item.episode?.fall_nr || '–',
+            fallNr: item.episode?.fall_nr || t('common.emptySymbol', '–'),
             birthDate: formatDateDdMmYyyy(patient?.date_of_birth),
             mainDiagnosis,
-            rsNr: item.episode?.list_rs_nr || '–',
+            rsNr: item.episode?.list_rs_nr || t('common.emptySymbol', '–'),
             tplDate: formatDateDdMmYyyy(item.tpl_date ?? item.episode?.tpl_date),
-            procurementTeam: item.procurement_team || '–',
+            procurementTeam: item.procurement_team || t('common.emptySymbol', '–'),
             perfusionDone: item.exvivo_perfusion_done,
-            perfusionApplied: item.exvivo_perfusion_done ? 'Yes' : 'No',
+            perfusionApplied: item.exvivo_perfusion_done ? t('common.yes', 'Yes') : t('common.no', 'No'),
           };
         });
       return { organ, entries };
@@ -493,15 +495,15 @@ export default function CoordinationDetailTabs({
       className={`coord-panel-wrap ${tab === 'protocol' ? 'coord-panel-wrap-protocol' : ''}`}
       style={tab === 'protocol' && protocolBackground !== 'transparent' ? { backgroundColor: protocolBackground } : undefined}
     >
-      <nav className="detail-tabs">
+      <nav className="detail-tabs coord-detail-tabs">
         <button className={`detail-tab ${tab === 'coordination' ? 'active' : ''}`} onClick={() => setTab('coordination')}>
-          Coordination
+          {t('coordination.tabs.coordination', 'Coordination')}
         </button>
         <button className={`detail-tab ${tab === 'protocol' ? 'active' : ''}`} onClick={() => setTab('protocol')}>
-          Protocol
+          {t('coordination.tabs.protocol', 'Protocol')}
         </button>
         <button className={`detail-tab ${tab === 'time-log' ? 'active' : ''}`} onClick={() => setTab('time-log')}>
-          Time Log
+          {t('coordination.tabs.timeLog', 'Time Log')}
         </button>
       </nav>
       <div
@@ -511,7 +513,7 @@ export default function CoordinationDetailTabs({
           {tab === 'protocol' && (
             <section className="coord-time-strip coord-protocol-color-box stopped">
               <div className="coord-time-strip-head">
-                <strong>Protocol color</strong>
+                <strong>{t('coordinations.protocolColor.title', 'Protocol color')}</strong>
               </div>
               <div className="coord-protocol-color-options">
                 {protocolBackgroundOptions.map((color) => (
@@ -521,8 +523,12 @@ export default function CoordinationDetailTabs({
                     className={`coord-protocol-color-dot ${protocolBackground === color ? 'active' : ''}`}
                     style={{ backgroundColor: color === 'transparent' ? '#f5f5fa' : color }}
                     onClick={() => setProtocolBackground(color)}
-                    title={color === 'transparent' ? 'Set normal background' : `Set protocol background ${color}`}
-                    aria-label={color === 'transparent' ? 'Set normal background' : `Set protocol background ${color}`}
+                    title={color === 'transparent'
+                      ? t('coordinations.protocolColor.setNormalBackground', 'Set normal background')
+                      : `${t('coordinations.protocolColor.setProtocolBackground', 'Set protocol background')} ${color}`}
+                    aria-label={color === 'transparent'
+                      ? t('coordinations.protocolColor.setNormalBackground', 'Set normal background')
+                      : `${t('coordinations.protocolColor.setProtocolBackground', 'Set protocol background')} ${color}`}
                   />
                 ))}
               </div>
@@ -530,7 +536,7 @@ export default function CoordinationDetailTabs({
           )}
           <section className={`coord-time-strip ${running ? 'running' : 'stopped'}`}>
             <div className="coord-time-strip-head">
-              <strong>Time Log</strong>
+              <strong>{t('coordinations.timeLog.title', 'Time Log')}</strong>
               <div className="coord-time-clock">{formatElapsed(elapsedSec)}</div>
               <div className="coord-time-controls">
                 <button
@@ -538,14 +544,14 @@ export default function CoordinationDetailTabs({
                   onClick={onStartClock}
                   disabled={running}
                 >
-                  Start
+                  {t('coordinations.timeLog.startAction', 'Start')}
                 </button>
                 <button
                   className={`${running ? 'save-btn' : 'cancel-btn'} coord-time-btn`}
                   onClick={onRequestStopClock}
                   disabled={!running}
                 >
-                  Stop
+                  {t('coordinations.timeLog.stopAction', 'Stop')}
                 </button>
               </div>
             </div>
@@ -554,15 +560,15 @@ export default function CoordinationDetailTabs({
                 <textarea
                   className="detail-input coord-time-comment"
                   value={stopComment}
-                  placeholder="Comment"
+                  placeholder={t('taskBoard.columns.comment', 'Comment')}
                   onChange={(e) => setStopComment(e.target.value)}
                 />
                 <div className="edit-actions">
                   <button className="save-btn" onClick={onSaveStopClock}>
-                    Save Time Log
+                    {t('coordinations.timeLog.saveTimeLog', 'Save Time Log')}
                   </button>
                   <button className="cancel-btn" onClick={onCancelStopClock}>
-                    Cancel
+                    {t('actions.cancel', 'Cancel')}
                   </button>
                 </div>
               </div>

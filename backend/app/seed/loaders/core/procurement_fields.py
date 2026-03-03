@@ -7,10 +7,11 @@ from ....models import (
     CoordinationProcurementFieldTemplate,
     DatatypeDefinition,
 )
+from ....features.coordination_procurement_flex.catalog import PROCUREMENT_TYPED_SPEC_BY_KEY
 
 
 def sync_coordination_procurement_field_templates(db: Session) -> None:
-    """Replace procurement field templates with core definitions."""
+    """Replace procurement field templates with fixed typed-model overlay definitions."""
     from ...datasets.core.coordination_procurement_field_templates import GROUPS as groups
     from ...datasets.core.coordination_procurement_field_templates import RECORDS as records
 
@@ -68,6 +69,9 @@ def sync_coordination_procurement_field_templates(db: Session) -> None:
     for raw in grouped_records:
         datatype_key = raw.pop("datatype_key")
         group_key = raw.pop("group_key", None)
+        field_key = raw.get("key")
+        if not field_key or field_key not in PROCUREMENT_TYPED_SPEC_BY_KEY:
+            raise RuntimeError(f"Unknown procurement field template key for typed model: {field_key!r}")
         raw.pop("group_name_default", None)
         raw.pop("group_comment", None)
         raw.pop("group_is_active", None)

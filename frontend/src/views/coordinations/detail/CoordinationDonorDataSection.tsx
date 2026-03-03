@@ -1,5 +1,6 @@
 import type React from 'react';
 import type { Code, CoordinationDonor } from '../../../api';
+import { useI18n } from '../../../i18n/i18n';
 import EditableSectionHeader from '../../layout/EditableSectionHeader';
 import ErrorBanner from '../../layout/ErrorBanner';
 import { formatDateDdMmYyyy } from '../../layout/dateFormat';
@@ -49,10 +50,11 @@ export default function CoordinationDonorDataSection({
   onSave,
   onCancel,
 }: Props) {
+  const { t } = useI18n();
   return (
     <section className="detail-section ui-panel-section">
       <EditableSectionHeader
-        title="Donor data"
+        title={t('coordinations.donorData.title', 'Donor data')}
         editing={donorEditing}
         saving={donorSaving}
         dirty={donorDirty}
@@ -62,7 +64,7 @@ export default function CoordinationDonorDataSection({
       />
       <div className="detail-grid">
         <div className="detail-field">
-          <span className="detail-label">Full name</span>
+          <span className="detail-label">{t('coordinations.donorData.fullName', 'Full name')}</span>
           {donorEditing ? (
             <input
               className="detail-input"
@@ -70,11 +72,11 @@ export default function CoordinationDonorDataSection({
               onChange={(e) => setDonorDraft((prev) => ({ ...prev, full_name: e.target.value }))}
             />
           ) : (
-            <span className="detail-value">{donor?.full_name || '–'}</span>
+            <span className="detail-value">{donor?.full_name || t('common.emptySymbol', '–')}</span>
           )}
         </div>
         <div className="detail-field">
-          <span className="detail-label">Date of birth</span>
+          <span className="detail-label">{t('coordinations.table.dateOfBirth', 'Date of Birth')}</span>
           {donorEditing ? (
             <input
               className="detail-input"
@@ -87,7 +89,7 @@ export default function CoordinationDonorDataSection({
           )}
         </div>
         <div className="detail-field">
-          <span className="detail-label">Reason of death</span>
+          <span className="detail-label">{t('coordinations.table.reasonOfDeath', 'Reason of Death')}</span>
           {donorEditing ? (
             <select
               className="detail-input"
@@ -96,7 +98,7 @@ export default function CoordinationDonorDataSection({
                 setDonorDraft((prev) => ({ ...prev, death_kind_id: e.target.value ? Number(e.target.value) : 0 }))
               }
             >
-              <option value="">–</option>
+              <option value="">{t('common.emptySymbol', '–')}</option>
               {deathKinds.map((kind) => (
                 <option key={kind.id} value={kind.id}>
                   {kind.name_default}
@@ -104,11 +106,11 @@ export default function CoordinationDonorDataSection({
               ))}
             </select>
           ) : (
-            <span className="detail-value">{donor?.death_kind?.name_default ?? '–'}</span>
+            <span className="detail-value">{donor?.death_kind?.name_default ?? t('common.emptySymbol', '–')}</span>
           )}
         </div>
         <div className="detail-field">
-          <span className="detail-label">Sex</span>
+          <span className="detail-label">{t('coordinations.donorData.sex', 'Sex')}</span>
           {donorEditing ? (
             <select
               className="detail-input"
@@ -117,7 +119,7 @@ export default function CoordinationDonorDataSection({
                 setDonorDraft((prev) => ({ ...prev, sex_id: e.target.value ? Number(e.target.value) : null }))
               }
             >
-              <option value="">–</option>
+              <option value="">{t('common.emptySymbol', '–')}</option>
               {sexCodes.map((sex) => (
                 <option key={sex.id} value={sex.id}>
                   {sex.name_default}
@@ -125,11 +127,11 @@ export default function CoordinationDonorDataSection({
               ))}
             </select>
           ) : (
-            <span className="detail-value">{sexCodes.find((s) => s.id === donor?.sex_id)?.name_default ?? '–'}</span>
+            <span className="detail-value">{sexCodes.find((s) => s.id === donor?.sex_id)?.name_default ?? t('common.emptySymbol', '–')}</span>
           )}
         </div>
         <div className="detail-field">
-          <span className="detail-label">Blood type</span>
+          <span className="detail-label">{t('coordinations.donorData.bloodType', 'Blood type')}</span>
           {donorEditing ? (
             <select
               className="detail-input"
@@ -138,7 +140,7 @@ export default function CoordinationDonorDataSection({
                 setDonorDraft((prev) => ({ ...prev, blood_type_id: e.target.value ? Number(e.target.value) : null }))
               }
             >
-              <option value="">–</option>
+              <option value="">{t('common.emptySymbol', '–')}</option>
               {bloodTypes.map((bt) => (
                 <option key={bt.id} value={bt.id}>
                   {bt.name_default}
@@ -146,11 +148,11 @@ export default function CoordinationDonorDataSection({
               ))}
             </select>
           ) : (
-            <span className="detail-value">{bloodTypes.find((bt) => bt.id === donor?.blood_type_id)?.name_default ?? '–'}</span>
+            <span className="detail-value">{bloodTypes.find((bt) => bt.id === donor?.blood_type_id)?.name_default ?? t('common.emptySymbol', '–')}</span>
           )}
         </div>
         <div className="detail-field">
-          <span className="detail-label">Height (cm)</span>
+          <span className="detail-label">{t('coordinations.donorData.heightCm', 'Height (cm)')}</span>
           {donorEditing ? (
             <input
               className="detail-input"
@@ -161,11 +163,11 @@ export default function CoordinationDonorDataSection({
               }
             />
           ) : (
-            <span className="detail-value">{donor?.height ?? '–'}</span>
+            <span className="detail-value">{donor?.height ?? t('common.emptySymbol', '–')}</span>
           )}
         </div>
         <div className="detail-field">
-          <span className="detail-label">Weight (kg)</span>
+          <span className="detail-label">{t('coordinations.donorData.weightKg', 'Weight (kg)')}</span>
           {donorEditing ? (
             <input
               className="detail-input"
@@ -176,11 +178,11 @@ export default function CoordinationDonorDataSection({
               }
             />
           ) : (
-            <span className="detail-value">{donor?.weight ?? '–'}</span>
+            <span className="detail-value">{donor?.weight ?? t('common.emptySymbol', '–')}</span>
           )}
         </div>
         <div className="detail-field">
-          <span className="detail-label">Organ FO</span>
+          <span className="detail-label">{t('coordinations.donorData.organFo', 'Organ FO')}</span>
           {donorEditing ? (
             <input
               className="detail-input"
@@ -188,11 +190,11 @@ export default function CoordinationDonorDataSection({
               onChange={(e) => setDonorDraft((prev) => ({ ...prev, organ_fo: e.target.value }))}
             />
           ) : (
-            <span className="detail-value">{donor?.organ_fo || '–'}</span>
+            <span className="detail-value">{donor?.organ_fo || t('common.emptySymbol', '–')}</span>
           )}
         </div>
         <div className="detail-field">
-          <span className="detail-label">Diagnosis</span>
+          <span className="detail-label">{t('coordinations.donorData.diagnosis', 'Diagnosis')}</span>
           {donorEditing ? (
             <select
               className="detail-input"
@@ -201,7 +203,7 @@ export default function CoordinationDonorDataSection({
                 setDonorDraft((prev) => ({ ...prev, diagnosis_id: e.target.value ? Number(e.target.value) : null }))
               }
             >
-              <option value="">–</option>
+              <option value="">{t('common.emptySymbol', '–')}</option>
               {diagnosisDonorOptions.map((diag) => (
                 <option key={diag.id} value={diag.id}>
                   {diag.name_default}
@@ -210,7 +212,7 @@ export default function CoordinationDonorDataSection({
             </select>
           ) : (
             <span className="detail-value">
-              {diagnosisDonorOptions.find((diag) => diag.id === donor?.diagnosis_id)?.name_default ?? '–'}
+              {diagnosisDonorOptions.find((diag) => diag.id === donor?.diagnosis_id)?.name_default ?? t('common.emptySymbol', '–')}
             </span>
           )}
         </div>

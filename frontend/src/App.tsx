@@ -41,7 +41,7 @@ function App() {
   } = useAppSession('TALL');
   const {
     canViewPatients,
-    canViewDonations,
+    canViewDonors,
     canViewColloquiums,
     canViewCoordinations,
     canViewReports,
@@ -55,14 +55,14 @@ function App() {
   const startViewOptions = useMemo(() => {
     return buildStartViewOptions({
       canViewPatients,
-      canViewDonations,
+      canViewDonors,
       canViewColloquiums,
       canViewCoordinations,
       canViewReports,
       canViewAdmin,
       devToolsEnabled,
     });
-  }, [canViewAdmin, canViewColloquiums, canViewCoordinations, canViewDonations, canViewPatients, canViewReports, devToolsEnabled]);
+  }, [canViewAdmin, canViewColloquiums, canViewCoordinations, canViewDonors, canViewPatients, canViewReports, devToolsEnabled]);
   const allowedStartPages = startViewOptions.map((option) => option.key);
   const defaultStartPage: UserPreferences['start_page'] = allowedStartPages.includes('patients') ? 'patients' : 'my-work';
   const startPagePreference: Page = allowedStartPages.includes(preferences.start_page)
@@ -113,7 +113,7 @@ function App() {
     toggleMarkedLocation,
   } = useAppNavigation({
     canViewPatients,
-    canViewDonations,
+    canViewDonors,
     canViewColloquiums,
     canViewCoordinations,
     canViewReports,
@@ -149,7 +149,7 @@ function App() {
     return (
       <div className="login-page">
         <div className="login-card">
-          <h1>TPL App</h1>
+          <h1>{t('app.title', 'TPL App')}</h1>
           <p className="subtitle">{t('app.login.subtitle', 'Please log in to continue')}</p>
           <form className="login-form" onSubmit={handleLogin}>
             <input
@@ -216,7 +216,7 @@ function App() {
         userMenuOpen={userMenuOpen}
         setUserMenuOpen={setUserMenuOpen}
         canViewPatients={canViewPatients}
-        canViewDonations={canViewDonations}
+        canViewDonors={canViewDonors}
         canViewColloquiums={canViewColloquiums}
         canViewCoordinations={canViewCoordinations}
         canViewReports={canViewReports}
@@ -241,7 +241,7 @@ function App() {
       <AppMainRouter
         page={page}
         canViewPatients={canViewPatients}
-        canViewDonations={canViewDonations}
+        canViewDonors={canViewDonors}
         canViewColloquiums={canViewColloquiums}
         canViewCoordinations={canViewCoordinations}
         canViewReports={canViewReports}

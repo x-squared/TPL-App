@@ -2,6 +2,7 @@ import ColloquiumsAddForm from './colloquiums/list/ColloquiumsAddForm';
 import ColloquiumsFilters from './colloquiums/list/ColloquiumsFilters';
 import ColloquiumsTable from './colloquiums/list/ColloquiumsTable';
 import { useColloquiumsListViewModel } from './colloquiums/list/useColloquiumsListViewModel';
+import { useI18n } from '../i18n/i18n';
 import './layout/PanelLayout.css';
 import './PatientsView.css';
 import './ColloquiumsView.css';
@@ -11,6 +12,7 @@ interface Props {
 }
 
 export default function ColloquiumsView({ onOpenColloqium }: Props) {
+  const { t } = useI18n();
   const {
     loading,
     adding,
@@ -34,10 +36,10 @@ export default function ColloquiumsView({ onOpenColloqium }: Props) {
   return (
     <>
       <header className="patients-header">
-        <h1>Colloquiums</h1>
+        <h1>{t('colloquiums.title', 'Colloquiums')}</h1>
         {!adding && (
           <button className="patients-add-btn" onClick={() => setAdding(true)}>
-            + Add
+            {t('colloquiums.actions.add', '+ Add')}
           </button>
         )}
       </header>
@@ -60,9 +62,9 @@ export default function ColloquiumsView({ onOpenColloqium }: Props) {
       <ColloquiumsFilters filters={filters} types={types} onChange={setFilters} />
 
       {loading ? (
-        <p className="status">Loading...</p>
+        <p className="status">{t('common.loading', 'Loading...')}</p>
       ) : filtered.length === 0 ? (
-        <p className="status">No colloquiums match the filter.</p>
+        <p className="status">{t('colloquiums.emptyFiltered', 'No colloquiums match the filter.')}</p>
       ) : (
         <ColloquiumsTable
           rows={filtered}

@@ -15,7 +15,7 @@ export interface AppUser {
   permissions: string[];
 }
 
-export type AppStartPage = 'my-work' | 'patients' | 'donations' | 'colloquiums' | 'coordinations' | 'reports' | 'admin' | 'e2e-tests';
+export type AppStartPage = 'my-work' | 'patients' | 'donors' | 'colloquiums' | 'coordinations' | 'reports' | 'admin' | 'e2e-tests';
 
 export interface UserPreferences {
   locale: 'en' | 'de';
@@ -267,10 +267,31 @@ export interface CoordinationProcurementFieldScopeTemplate {
   slot_key: ProcurementSlotKey;
 }
 
+export interface CoordinationProcurementProtocolTaskGroupSelection {
+  id: number;
+  task_group_template_id: number;
+  task_group_template: {
+    id: number;
+    key: string;
+    name: string;
+    description: string;
+    scope_id: number;
+    scope: Code | null;
+    organ_id: number | null;
+    organ: Code | null;
+    is_active: boolean;
+    sort_pos: number;
+  } | null;
+  organ_id: number | null;
+  organ: Code | null;
+  pos: number;
+}
+
 export interface ProcurementAdminConfig {
   field_group_templates: CoordinationProcurementFieldGroupTemplate[];
   field_templates: CoordinationProcurementFieldTemplate[];
   field_scope_templates: CoordinationProcurementFieldScopeTemplate[];
+  protocol_task_group_selections: CoordinationProcurementProtocolTaskGroupSelection[];
   datatype_definitions: DatatypeDefinition[];
   organs: Code[];
 }
@@ -394,7 +415,7 @@ export const adminProcurementConfigApi = {
     }),
   updateProcurementFieldGroupTemplate: (
     id: number,
-    data: { key?: string; name_default?: string; comment?: string; is_active?: boolean; pos?: number },
+    data: { pos?: number },
   ) =>
     request<CoordinationProcurementFieldGroupTemplate>(`/admin/procurement-config/groups/${id}`, {
       method: 'PATCH',
@@ -419,14 +440,8 @@ export const adminProcurementConfigApi = {
   updateProcurementFieldTemplate: (
     id: number,
     data: {
-      key?: string;
-      name_default?: string;
-      comment?: string;
-      is_active?: boolean;
       pos?: number;
-      datatype_def_id?: number;
       group_template_id?: number | null;
-      value_mode?: ProcurementValueMode;
     },
   ) =>
     request<CoordinationProcurementFieldTemplate>(`/admin/procurement-config/fields/${id}`, {
@@ -446,4 +461,26 @@ export const adminProcurementConfigApi = {
     }),
   deleteProcurementFieldScopeTemplate: (id: number) =>
     request<void>(`/admin/procurement-config/scopes/${id}`, { method: 'DELETE' }),
+  createProcurementProtocolTaskGroupSelection: (data: {
+    task_group_template_id: number;
+    organ_id?: number | null;
+    pos?: number;
+  }) =>
+    request<CoordinationProcurementProtocolTaskGroupSelection>('/admin/procurement-config/protocol-task-groups', {
+      method: 'POST',
+      body: JSON.stringify(data),
+    }),
+  updateProcurementProtocolTaskGroupSelection: (
+    id: number,
+    data: {
+      organ_id?: number | null;
+      pos?: number;
+    },
+  ) =>
+    request<CoordinationProcurementProtocolTaskGroupSelection>(`/admin/procurement-config/protocol-task-groups/${id}`, {
+      method: 'PATCH',
+      body: JSON.stringify(data),
+    }),
+  deleteProcurementProtocolTaskGroupSelection: (id: number) =>
+    request<void>(`/admin/procurement-config/protocol-task-groups/${id}`, { method: 'DELETE' }),
 };

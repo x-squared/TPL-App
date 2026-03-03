@@ -1,5 +1,6 @@
 import { useEffect, useState } from 'react';
 import { toUserErrorMessage } from '../../api/error';
+import { useI18n } from '../../i18n/i18n';
 import { openTicketDraft } from './openTicket';
 
 interface ErrorBannerProps {
@@ -8,6 +9,7 @@ interface ErrorBannerProps {
 }
 
 export default function ErrorBanner({ message, className = '' }: ErrorBannerProps) {
+  const { t } = useI18n();
   const [openingTicket, setOpeningTicket] = useState(false);
   const [ticketError, setTicketError] = useState('');
   const [dismissed, setDismissed] = useState(false);
@@ -25,8 +27,8 @@ export default function ErrorBanner({ message, className = '' }: ErrorBannerProp
         type="button"
         className="ui-error-close-btn"
         onClick={() => setDismissed(true)}
-        aria-label="Close error message"
-        title="Close"
+        aria-label={t('errorBanner.closeMessage', 'Close error message')}
+        title={t('actions.close', 'Close')}
       >
         ×
       </button>
@@ -42,14 +44,14 @@ export default function ErrorBanner({ message, className = '' }: ErrorBannerProp
               setTicketError('');
               void openTicketDraft(message)
                 .catch((error) => {
-                  setTicketError(toUserErrorMessage(error, 'Could not create support ticket draft.'));
+                  setTicketError(toUserErrorMessage(error, t('errorBanner.ticketCreateFailed', 'Could not create support ticket draft.')));
                 })
                 .finally(() => {
                   setOpeningTicket(false);
                 });
             }}
           >
-            {openingTicket ? 'Preparing...' : 'Open Ticket'}
+            {openingTicket ? t('errorBanner.preparing', 'Preparing...') : t('errorBanner.openTicket', 'Open Ticket')}
           </button>
         </div>
       </div>

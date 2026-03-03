@@ -4,7 +4,7 @@ from typing import Literal
 
 from pydantic import BaseModel, ConfigDict
 
-StartPageKey = Literal["my-work", "patients", "donations", "colloquiums", "coordinations", "reports", "admin", "e2e-tests"]
+StartPageKey = Literal["my-work", "patients", "donors", "colloquiums", "coordinations", "reports", "admin", "e2e-tests"]
 LocaleKey = Literal["en", "de"]
 
 

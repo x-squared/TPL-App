@@ -1,11 +1,24 @@
 import { useEffect, useMemo, useState } from 'react';
+import { useI18n } from '../../../i18n/i18n';
 import type { ProtocolOverviewEntry } from './CoordinationProtocolOverviewSection';
 import CoordinationProtocolDataPanel from './CoordinationProtocolDataPanel';
 import CoordinationProtocolEventLogPanel from './CoordinationProtocolEventLogPanel';
 import CoordinationProtocolTasksPanel from './CoordinationProtocolTasksPanel';
 
+const ENGLISH_ORGAN_LABEL_BY_KEY: Record<string, string> = {
+  KIDNEY: 'Kidney',
+  PANCREAS: 'Pancreas',
+  LIVER: 'Liver',
+  HEART: 'Heart',
+  HEART_VALVE: 'Heart valve',
+  LUNG: 'Lung',
+  ISLET: 'Islet cells',
+  VESSELS: 'Vessels',
+  INTESTINE: 'Intestine',
+};
+
 interface ProtocolOverviewGroup {
-  organ: { id: number; name_default: string };
+  organ: { id: number; key?: string; name_default: string; pos?: number | null };
   entries: ProtocolOverviewEntry[];
 }
 
@@ -16,10 +29,20 @@ interface CoordinationProtocolTabProps {
 }
 
 export default function CoordinationProtocolTab({ coordinationId, groups, onOpenPatientEpisode }: CoordinationProtocolTabProps) {
+  const { t } = useI18n();
   void onOpenPatientEpisode;
+  const getOrganLabel = (organ: ProtocolOverviewGroup['organ']): string => {
+    const key = (organ.key ?? '').trim().toUpperCase();
+    if (!key) return organ.name_default;
+    return t(`coordinations.protocolOverview.organByKey.${key}`, ENGLISH_ORGAN_LABEL_BY_KEY[key] ?? organ.name_default);
+  };
   const sortedGroups = useMemo(
-    () => [...groups].sort((a, b) => a.organ.name_default.localeCompare(b.organ.name_default)),
-    [groups],
+    () => [...groups].sort((a, b) => {
+      const ap = a.organ.pos ?? Number.MAX_SAFE_INTEGER;
+      const bp = b.organ.pos ?? Number.MAX_SAFE_INTEGER;
+      return ap - bp || getOrganLabel(a.organ).localeCompare(getOrganLabel(b.organ));
+    }),
+    [groups, t],
   );
   const [activeOrganId, setActiveOrganId] = useState<number | null>(sortedGroups[0]?.organ.id ?? null);
 
@@ -32,7 +55,7 @@ export default function CoordinationProtocolTab({ coordinationId, groups, onOpen
   if (sortedGroups.length === 0) {
     return (
       <section className="detail-section ui-panel-section">
-        <p className="detail-empty">No organs found.</p>
+        <p className="detail-empty">{t('coordinations.protocolOverview.noOrgans', 'No organs found.')}</p>
       </section>
     );
   }
@@ -49,7 +72,7 @@ export default function CoordinationProtocolTab({ coordinationId, groups, onOpen
             className={`coord-protocol-organ-tab ${group.organ.id === activeGroup.organ.id ? 'active' : ''}`}
             onClick={() => setActiveOrganId(group.organ.id)}
           >
-            {group.organ.name_default}
+            {getOrganLabel(group.organ)}
           </button>
         ))}
       </nav>

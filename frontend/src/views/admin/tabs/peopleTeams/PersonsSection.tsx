@@ -1,5 +1,6 @@
 import { useState } from 'react';
 import type { Person } from '../../../../api';
+import { useI18n } from '../../../../i18n/i18n';
 import InlineDeleteActions from '../../../layout/InlineDeleteActions';
 import type { PersonUpsertPayload } from './types';
 
@@ -18,6 +19,7 @@ export default function PersonsSection({
   onUpdatePerson,
   onDeletePerson,
 }: PersonsSectionProps) {
+  const { t } = useI18n();
   const [addingPerson, setAddingPerson] = useState(false);
   const [personDraft, setPersonDraft] = useState({ first_name: '', surname: '', user_id: '' });
   const [editingPersonId, setEditingPersonId] = useState<number | null>(null);
@@ -47,10 +49,10 @@ export default function PersonsSection({
   return (
     <div className="admin-people-card">
       <div className="detail-section-heading">
-        <h3>Persons</h3>
+        <h3>{t('admin.peopleTeams.persons.title', 'Persons')}</h3>
         {!addingPerson && (
           <button className="ci-add-btn" onClick={() => setAddingPerson(true)}>
-            + Add
+            {t('information.actions.add', '+ Add')}
           </button>
         )}
       </div>
@@ -58,9 +60,9 @@ export default function PersonsSection({
         <table className="data-table">
           <thead>
             <tr>
-              <th>First Name</th>
-              <th>Surname</th>
-              <th>User ID</th>
+              <th>{t('patients.table.firstName', 'First Name')}</th>
+              <th>{t('personMultiSelect.surnameRequired', 'Surname *')}</th>
+              <th>{t('admin.peopleTeams.userId', 'User ID')}</th>
               <th />
             </tr>
           </thead>
@@ -72,7 +74,7 @@ export default function PersonsSection({
                     className="detail-input ci-inline-input"
                     value={personDraft.first_name}
                     onChange={(event) => setPersonDraft((prev) => ({ ...prev, first_name: event.target.value }))}
-                    placeholder="First name"
+                    placeholder={t('patients.filters.firstName', 'First name')}
                   />
                 </td>
                 <td>
@@ -80,7 +82,7 @@ export default function PersonsSection({
                     className="detail-input ci-inline-input"
                     value={personDraft.surname}
                     onChange={(event) => setPersonDraft((prev) => ({ ...prev, surname: event.target.value }))}
-                    placeholder="Surname"
+                    placeholder={t('admin.peopleTeams.surname', 'Surname')}
                   />
                 </td>
                 <td>
@@ -88,7 +90,7 @@ export default function PersonsSection({
                     className="detail-input ci-inline-input"
                     value={personDraft.user_id}
                     onChange={(event) => setPersonDraft((prev) => ({ ...prev, user_id: event.target.value }))}
-                    placeholder="Optional user ID (max 12)"
+                    placeholder={t('admin.peopleTeams.userIdOptional', 'Optional user ID (max 12)')}
                     maxLength={12}
                   />
                 </td>
@@ -156,7 +158,7 @@ export default function PersonsSection({
                 <tr key={person.id} onDoubleClick={() => startEdit(person)}>
                   <td>{person.first_name}</td>
                   <td>{person.surname}</td>
-                  <td>{person.user_id || '–'}</td>
+                  <td>{person.user_id || t('common.emptySymbol', '–')}</td>
                   <td className="detail-ci-actions">
                     <InlineDeleteActions
                       confirming={confirmDeletePersonId === person.id}

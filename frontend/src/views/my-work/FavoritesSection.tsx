@@ -1,6 +1,7 @@
 import type { Favorite } from '../../api';
 import { useState, type Dispatch, type SetStateAction } from 'react';
 import InlineDeleteActions from '../layout/InlineDeleteActions';
+import { useI18n } from '../../i18n/i18n';
 
 interface FavoritesSectionProps {
   favorites: Favorite[];
@@ -29,26 +30,27 @@ export default function FavoritesSection({
   onDropFavorite,
   onDeleteFavorite,
 }: FavoritesSectionProps) {
+  const { t } = useI18n();
   const [confirmDeleteId, setConfirmDeleteId] = useState<number | null>(null);
 
   return (
     <section className="detail-section ui-panel-section">
       <div className="detail-section-heading">
-        <h2>Favorites</h2>
+        <h2>{t('myWork.favorites.title', 'Favorites')}</h2>
       </div>
       <table className="detail-contact-table my-work-favorites-table">
         <thead>
           <tr>
             <th className="open-col"></th>
-            <th>Type</th>
-            <th>Name</th>
+            <th>{t('myWork.favorites.columns.type', 'Type')}</th>
+            <th>{t('myWork.favorites.columns.name', 'Name')}</th>
             <th></th>
           </tr>
         </thead>
         <tbody>
           {favorites.length === 0 ? (
             <tr>
-              <td colSpan={4} className="detail-empty">No favorites yet.</td>
+              <td colSpan={4} className="detail-empty">{t('myWork.favorites.empty', 'No favorites yet.')}</td>
             </tr>
           ) : (
             favorites.map((favorite) => (
@@ -66,7 +68,7 @@ export default function FavoritesSection({
                 <td className="open-col">
                   <button
                     className="open-btn"
-                    title="Open favorite target"
+                    title={t('myWork.favorites.openTarget', 'Open favorite target')}
                     onClick={() => onOpenFavorite(favorite)}
                   >
                     &#x279C;

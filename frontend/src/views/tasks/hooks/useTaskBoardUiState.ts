@@ -26,14 +26,17 @@ export function useTaskBoardFilters(includeClosedTasks: boolean, showGroupHeadin
 }
 
 export function useTaskBoardActionState() {
-  const [actionState, setActionState] = useState<{ task: Task; type: 'complete' | 'discard' } | null>(null);
+  const [actionState, setActionState] = useState<{ task: Task; type: 'complete' | 'discard'; hint?: string } | null>(null);
   const [actionComment, setActionComment] = useState('');
+  const [actionEventTime, setActionEventTime] = useState('');
   const [actionSaving, setActionSaving] = useState(false);
   return {
     actionState,
     setActionState,
     actionComment,
     setActionComment,
+    actionEventTime,
+    setActionEventTime,
     actionSaving,
     setActionSaving,
   };

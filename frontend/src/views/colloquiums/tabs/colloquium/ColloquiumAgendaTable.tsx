@@ -1,5 +1,6 @@
 import { useState } from 'react';
 import type { ColloqiumAgenda, PatientListItem } from '../../../../api';
+import { useI18n } from '../../../../i18n/i18n';
 import { formatEpisodeDisplayName } from '../../../layout/episodeDisplay';
 import InlineDeleteActions from '../../../layout/InlineDeleteActions';
 
@@ -66,6 +67,7 @@ export default function ColloquiumAgendaTable({
   onEditFormChange,
   selectedEpisodeLabel,
 }: Props) {
+  const { t } = useI18n();
   const [confirmDeleteAgendaId, setConfirmDeleteAgendaId] = useState<number | null>(null);
   const hasRows = agendas.length > 0;
   const hasEpisodeSelection = (editingForm.episode_ids?.length ?? 0) > 0 || Boolean(editingForm.episode_id);
@@ -76,17 +78,17 @@ export default function ColloquiumAgendaTable({
         <thead>
           <tr>
             <th className="open-col"></th>
-            <th>Episode</th>
-            <th>Name</th>
-            <th>First Name</th>
-            <th>PID</th>
-            <th>Organ</th>
-            <th>Status</th>
-            <th>Start</th>
-            <th>End</th>
-            <th>Presented By</th>
-            <th>Decision</th>
-            <th>Comment</th>
+            <th>{t('episodePicker.episode', 'Episode')}</th>
+            <th>{t('patients.table.lastName', 'Last Name')}</th>
+            <th>{t('patients.table.firstName', 'First Name')}</th>
+            <th>{t('patients.filters.pid', 'PID')}</th>
+            <th>{t('coordinations.table.organ', 'Organ')}</th>
+            <th>{t('coordinations.table.status', 'Status')}</th>
+            <th>{t('coordinations.table.start', 'Start')}</th>
+            <th>{t('coordinations.table.end', 'End')}</th>
+            <th>{t('colloquiums.protocol.presentedBy', 'Presented By')}</th>
+            <th>{t('colloquiums.protocol.decision', 'Decision')}</th>
+            <th>{t('taskBoard.columns.comment', 'Comment')}</th>
             <th></th>
           </tr>
         </thead>
@@ -94,7 +96,7 @@ export default function ColloquiumAgendaTable({
           {!hasRows && editingAgendaId === null && (
             <tr>
               <td colSpan={13}>
-                <p className="contact-empty">No agenda entries.</p>
+                <p className="contact-empty">{t('colloquiums.agenda.empty', 'No agenda entries.')}</p>
               </td>
             </tr>
           )}
@@ -118,7 +120,7 @@ export default function ColloquiumAgendaTable({
                       if (!canOpenEpisode || !agenda.episode) return;
                       onOpenEpisode(agenda.episode.patient_id, agenda.episode.id);
                     }}
-                    title="Open episode"
+                    title={t('colloquiums.actions.openEpisode', 'Open episode')}
                     disabled={!canOpenEpisode}
                   >
                     &#x279C;
@@ -137,11 +139,11 @@ export default function ColloquiumAgendaTable({
                     })
                   )}
                 </td>
-                <td>{patient?.name ?? '–'}</td>
-                <td>{patient?.first_name ?? '–'}</td>
-                <td>{patient?.pid ?? '–'}</td>
-                <td>{isEditing ? (selectedPreview?.organName ?? (selectedEpisodePreviews.length > 1 ? 'Multiple' : '–')) : (agenda.episode?.organ?.name_default ?? '–')}</td>
-                <td>{isEditing ? (selectedPreview?.statusName ?? (selectedEpisodePreviews.length > 1 ? 'Multiple' : '–')) : (agenda.episode?.status?.name_default ?? '–')}</td>
+                <td>{patient?.name ?? t('common.emptySymbol', '–')}</td>
+                <td>{patient?.first_name ?? t('common.emptySymbol', '–')}</td>
+                <td>{patient?.pid ?? t('common.emptySymbol', '–')}</td>
+                <td>{isEditing ? (selectedPreview?.organName ?? (selectedEpisodePreviews.length > 1 ? t('colloquiums.protocol.multiple', 'Multiple') : t('common.emptySymbol', '–'))) : (agenda.episode?.organ?.name_default ?? t('common.emptySymbol', '–'))}</td>
+                <td>{isEditing ? (selectedPreview?.statusName ?? (selectedEpisodePreviews.length > 1 ? t('colloquiums.protocol.multiple', 'Multiple') : t('common.emptySymbol', '–'))) : (agenda.episode?.status?.name_default ?? t('common.emptySymbol', '–'))}</td>
                 <td>{isEditing ? formatDate(selectedPreview?.start ?? null) : formatDate(agenda.episode?.start ?? null)}</td>
                 <td>{isEditing ? formatDate(selectedPreview?.end ?? null) : formatDate(agenda.episode?.end ?? null)}</td>
                 <td>
@@ -152,7 +154,7 @@ export default function ColloquiumAgendaTable({
                       onChange={(e) => onEditFormChange({ presented_by: e.target.value })}
                     />
                   ) : (
-                    agenda.presented_by || '–'
+                    agenda.presented_by || t('common.emptySymbol', '–')
                   )}
                 </td>
                 <td>
@@ -163,7 +165,7 @@ export default function ColloquiumAgendaTable({
                       onChange={(e) => onEditFormChange({ decision: e.target.value })}
                     />
                   ) : (
-                    agenda.decision || '–'
+                    agenda.decision || t('common.emptySymbol', '–')
                   )}
                 </td>
                 <td>
@@ -174,7 +176,7 @@ export default function ColloquiumAgendaTable({
                       onChange={(e) => onEditFormChange({ comment: e.target.value })}
                     />
                   ) : (
-                    agenda.comment || '–'
+                    agenda.comment || t('common.emptySymbol', '–')
                   )}
                 </td>
                 <td className="detail-ci-actions">
@@ -192,8 +194,8 @@ export default function ColloquiumAgendaTable({
                     />
                   ) : (
                     <>
-                      <button className="ci-save-inline" onClick={onSave} disabled={savingAgenda || !hasEpisodeSelection} title="Save" aria-label="Save">✓</button>
-                      <button className="ci-cancel-inline" onClick={onCancelEdit} disabled={savingAgenda} title="Cancel" aria-label="Cancel">✕</button>
+                      <button className="ci-save-inline" onClick={onSave} disabled={savingAgenda || !hasEpisodeSelection} title={t('actions.save', 'Save')} aria-label={t('actions.save', 'Save')}>✓</button>
+                      <button className="ci-cancel-inline" onClick={onCancelEdit} disabled={savingAgenda} title={t('actions.cancel', 'Cancel')} aria-label={t('actions.cancel', 'Cancel')}>✕</button>
                     </>
                   )}
                 </td>
@@ -203,7 +205,7 @@ export default function ColloquiumAgendaTable({
           {editingAgendaId === 0 && (
             <tr className="ci-editing-row">
               <td className="open-col">
-                <button className="open-btn" disabled title="Open episode">
+                <button className="open-btn" disabled title={t('colloquiums.actions.openEpisode', 'Open episode')}>
                   &#x279C;
                 </button>
               </td>
@@ -212,11 +214,11 @@ export default function ColloquiumAgendaTable({
                   {selectedEpisodeLabel}
                 </button>
               </td>
-              <td>{selectedPreview?.patientName ?? (selectedEpisodePreviews.length > 1 ? 'Multiple' : '–')}</td>
-              <td>{selectedPreview?.patientFirstName ?? (selectedEpisodePreviews.length > 1 ? 'Multiple' : '–')}</td>
-              <td>{selectedPreview?.patientPid ?? (selectedEpisodePreviews.length > 1 ? 'Multiple' : '–')}</td>
-              <td>{selectedPreview?.organName ?? (selectedEpisodePreviews.length > 1 ? 'Multiple' : '–')}</td>
-              <td>{selectedPreview?.statusName ?? (selectedEpisodePreviews.length > 1 ? 'Multiple' : '–')}</td>
+              <td>{selectedPreview?.patientName ?? (selectedEpisodePreviews.length > 1 ? t('colloquiums.protocol.multiple', 'Multiple') : t('common.emptySymbol', '–'))}</td>
+              <td>{selectedPreview?.patientFirstName ?? (selectedEpisodePreviews.length > 1 ? t('colloquiums.protocol.multiple', 'Multiple') : t('common.emptySymbol', '–'))}</td>
+              <td>{selectedPreview?.patientPid ?? (selectedEpisodePreviews.length > 1 ? t('colloquiums.protocol.multiple', 'Multiple') : t('common.emptySymbol', '–'))}</td>
+              <td>{selectedPreview?.organName ?? (selectedEpisodePreviews.length > 1 ? t('colloquiums.protocol.multiple', 'Multiple') : t('common.emptySymbol', '–'))}</td>
+              <td>{selectedPreview?.statusName ?? (selectedEpisodePreviews.length > 1 ? t('colloquiums.protocol.multiple', 'Multiple') : t('common.emptySymbol', '–'))}</td>
               <td>{formatDate(selectedPreview?.start ?? null)}</td>
               <td>{formatDate(selectedPreview?.end ?? null)}</td>
               <td>
@@ -241,8 +243,8 @@ export default function ColloquiumAgendaTable({
                 />
               </td>
               <td className="detail-ci-actions">
-                <button className="ci-save-inline" onClick={onSave} disabled={savingAgenda || !hasEpisodeSelection} title="Save" aria-label="Save">✓</button>
-                <button className="ci-cancel-inline" onClick={onCancelEdit} disabled={savingAgenda} title="Cancel" aria-label="Cancel">✕</button>
+                <button className="ci-save-inline" onClick={onSave} disabled={savingAgenda || !hasEpisodeSelection} title={t('actions.save', 'Save')} aria-label={t('actions.save', 'Save')}>✓</button>
+                <button className="ci-cancel-inline" onClick={onCancelEdit} disabled={savingAgenda} title={t('actions.cancel', 'Cancel')} aria-label={t('actions.cancel', 'Cancel')}>✕</button>
               </td>
             </tr>
           )}
@@ -251,7 +253,7 @@ export default function ColloquiumAgendaTable({
               <td colSpan={13}>
                 <div className="contact-section">
                   <p className="contact-empty">
-                    Selected episodes:{' '}
+                    {t('colloquiums.protocol.selectedEpisodes', 'Selected episodes:')}{' '}
                     {selectedEpisodePreviews.map((item) =>
                       `${item.fallNr} (${item.patientName}, ${item.patientFirstName}, ${item.patientPid})`,
                     ).join(' | ')}

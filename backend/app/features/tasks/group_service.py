@@ -154,6 +154,7 @@ def list_task_groups(
     colloqium_agenda_id: int | None,
     coordination_id: int | None,
     organ_id: int | None,
+    task_group_template_ids: list[int] | None,
     db: Session,
 ) -> list[TaskGroup]:
     episode_direct = aliased(Episode)
@@ -190,6 +191,8 @@ def list_task_groups(
         query = query.filter(TaskGroup.coordination_id == coordination_id)
     if organ_id is not None:
         query = query.filter(TaskGroup.organ_id == organ_id)
+    if task_group_template_ids:
+        query = query.filter(TaskGroup.task_group_template_id.in_(task_group_template_ids))
     return query.distinct().all()
 
 

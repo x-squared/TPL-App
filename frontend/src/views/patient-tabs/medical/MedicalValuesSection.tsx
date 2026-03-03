@@ -1,4 +1,5 @@
 import { useState } from 'react';
+import { useI18n } from '../../../i18n/i18n';
 import type { PatientMedicalValuesModel } from '../../patient-detail/PatientDetailTabs';
 import InlineDeleteActions from '../../layout/InlineDeleteActions';
 
@@ -50,6 +51,7 @@ export default function MedicalValuesSection({
   cancelEditingGroupRenew,
   saveGroupRenewDate,
 }: MedicalValuesSectionProps) {
+  const { t } = useI18n();
   const [addingMvGroupId, setAddingMvGroupId] = useState<number | null>(null);
 
   const openAddForGroup = (group: { id: number; key: string }, groupTemplateOptions: typeof mvTemplates) => {
@@ -87,17 +89,17 @@ export default function MedicalValuesSection({
   return (
     <section className="detail-section medical-values-section">
       <div className="detail-section-heading">
-        <h2>Medical Values</h2>
+        <h2>{t('medicalValues.title', 'Medical Values')}</h2>
         {!addingMv && (
           <>
-            <button className="ci-add-btn" onClick={handleAddAllMv} disabled={mvSaving}>+ Add all</button>
+            <button className="ci-add-btn" onClick={handleAddAllMv} disabled={mvSaving}>{t('medicalValues.actions.addAll', '+ Add all')}</button>
           </>
         )}
       </div>
       {groupedMedicalValues.length === 0 ? (
         <table className="detail-contact-table">
           <tbody>
-            <tr><td colSpan={6} className="detail-empty">No medical values.</td></tr>
+            <tr><td colSpan={6} className="detail-empty">{t('patients.medicalTable.empty', 'No medical values.')}</td></tr>
           </tbody>
         </table>
       ) : (
@@ -119,15 +121,15 @@ export default function MedicalValuesSection({
                     value={groupRenewDraft}
                     onChange={(e) => setGroupRenewDraft(e.target.value)}
                   />
-                  <button className="ci-save-inline" onClick={() => void saveGroupRenewDate(group.id)} title="Save renewal">✓</button>
-                  <button className="ci-cancel-inline" onClick={cancelEditingGroupRenew} title="Cancel">✕</button>
-                  <button className="mv-group-add-inline" onClick={() => openAddForGroup(group, templateOptions)} title={`Add value to ${group.name_default || group.key}`}>+ Add</button>
+                  <button className="ci-save-inline" onClick={() => void saveGroupRenewDate(group.id)} title={t('medicalValues.actions.saveRenewal', 'Save renewal')}>✓</button>
+                  <button className="ci-cancel-inline" onClick={cancelEditingGroupRenew} title={t('actions.cancel', 'Cancel')}>✕</button>
+                  <button className="mv-group-add-inline" onClick={() => openAddForGroup(group, templateOptions)} title={`${t('medicalValues.actions.addValueTo', 'Add value to')} ${group.name_default || group.key}`}>{t('information.actions.add', '+ Add')}</button>
                 </div>
               ) : (
                 <div className="mv-group-renew-read">
-                  <span className="detail-label">Renewal: {formatDate(group.renew_date)}</span>
-                  <button className="ci-edit-inline" onClick={() => startEditingGroupRenew(group)} title="Edit group renewal">✎</button>
-                  <button className="mv-group-add-inline" onClick={() => openAddForGroup(group, templateOptions)} title={`Add value to ${group.name_default || group.key}`}>+ Add</button>
+                  <span className="detail-label">{t('medicalValues.renewal', 'Renewal')}: {formatDate(group.renew_date)}</span>
+                  <button className="ci-edit-inline" onClick={() => startEditingGroupRenew(group)} title={t('medicalValues.actions.editGroupRenewal', 'Edit group renewal')}>✎</button>
+                  <button className="mv-group-add-inline" onClick={() => openAddForGroup(group, templateOptions)} title={`${t('medicalValues.actions.addValueTo', 'Add value to')} ${group.name_default || group.key}`}>{t('information.actions.add', '+ Add')}</button>
                 </div>
               )}
             </div>
@@ -150,7 +152,7 @@ export default function MedicalValuesSection({
                       }));
                     }}
                   >
-                    <option value="" disabled>Template...</option>
+                    <option value="" disabled>{t('medicalValues.templatePlaceholder', 'Template...')}</option>
                     {templateOptions.map((t) => (
                       <option key={t.id} value={t.id}>{t.name_default}</option>
                     ))}
@@ -162,21 +164,21 @@ export default function MedicalValuesSection({
                       value={mvForm.datatype_id ?? ''}
                       onChange={(e) => setMvForm((f) => ({ ...f, datatype_id: Number(e.target.value) }))}
                     >
-                      <option value="" disabled>Datatype...</option>
+                      <option value="" disabled>{t('medicalValues.datatypePlaceholder', 'Datatype...')}</option>
                       {datatypeCodes.map((c) => (
                         <option key={c.id} value={c.id}>{c.name_default}</option>
                       ))}
                     </select>
                     <input
                       className="detail-input"
-                      placeholder="Name"
+                      placeholder={t('patients.filters.name', 'Name')}
                       value={mvForm.name}
                       onChange={(e) => setMvForm((f) => ({ ...f, name: e.target.value }))}
                     />
                   </>
                 )}
                 {effectiveAddMode === 'template' && !mvForm.medical_value_template_id ? (
-                  <input className="detail-input" value="" placeholder="Choose template first" disabled />
+                  <input className="detail-input" value="" placeholder={t('medicalValues.chooseTemplateFirst', 'Choose template first')} disabled />
                 ) : (
                   renderValueInput(
                     mvForm.value ?? '',
@@ -188,7 +190,7 @@ export default function MedicalValuesSection({
                   )
                 )}
                 <div className="mv-renew-capture-field">
-                  <span className="mv-renew-capture-label">Renewal</span>
+                  <span className="mv-renew-capture-label">{t('medicalValues.renewal', 'Renewal')}</span>
                   <input
                     className="detail-input"
                     type="date"
@@ -214,9 +216,9 @@ export default function MedicalValuesSection({
                       )
                     }
                   >
-                    {mvSaving ? 'Saving...' : 'Save'}
+                    {mvSaving ? t('coordinations.form.saving', 'Saving...') : t('actions.save', 'Save')}
                   </button>
-                  <button className="cancel-btn" onClick={closeAddForGroup} disabled={mvSaving}>Cancel</button>
+                  <button className="cancel-btn" onClick={closeAddForGroup} disabled={mvSaving}>{t('actions.cancel', 'Cancel')}</button>
                 </div>
               </div>
             )}
@@ -224,10 +226,10 @@ export default function MedicalValuesSection({
               <thead>
                 <tr>
                   <th className="mv-pos sortable-th" onClick={() => toggleMvSort('pos')}>#{mvSortIndicator('pos')}</th>
-                  <th className="mv-name sortable-th" onClick={() => toggleMvSort('name')}>Name{mvSortIndicator('name')}</th>
-                  <th className="mv-value">Value</th>
-                  <th className="mv-renew-date sortable-th" onClick={() => toggleMvSort('renew_date')}>Renew Date{mvSortIndicator('renew_date')}</th>
-                  <th className="diag-date">Edited</th>
+                  <th className="mv-name sortable-th" onClick={() => toggleMvSort('name')}>{t('patients.filters.name', 'Name')}{mvSortIndicator('name')}</th>
+                  <th className="mv-value">{t('patients.medicalTable.value', 'Value')}</th>
+                  <th className="mv-renew-date sortable-th" onClick={() => toggleMvSort('renew_date')}>{t('medicalValues.renewDate', 'Renew Date')}{mvSortIndicator('renew_date')}</th>
+                  <th className="diag-date">{t('medicalValues.edited', 'Edited')}</th>
                   <th className="detail-ci-actions"></th>
                 </tr>
               </thead>
@@ -301,9 +303,9 @@ export default function MedicalValuesSection({
                         <td className="mv-pos mv-drag-handle">{mv.pos || ''}</td>
                         <td className="mv-name">
                           {mv.medical_value_template?.is_main ? (
-                            <span className="mv-main-badge" title="Primary value" aria-label="Primary value" />
+                            <span className="mv-main-badge" title={t('medicalValues.primaryValue', 'Primary value')} aria-label={t('medicalValues.primaryValue', 'Primary value')} />
                           ) : null}
-                          {mv.name || mv.medical_value_template?.name_default || '–'}
+                          {mv.name || mv.medical_value_template?.name_default || t('common.emptySymbol', '–')}
                         </td>
                         <td className="mv-value">{formatValue(mv.value, mv.datatype, catalogueCache[getCatalogueType(mv.datatype)])}</td>
                         <td className="mv-renew-date">{formatDate(mv.renew_date)}</td>
@@ -328,7 +330,7 @@ export default function MedicalValuesSection({
                     )
                   ))
                 ) : (
-                  <tr><td colSpan={6} className="detail-empty">No values in this bunch.</td></tr>
+                  <tr><td colSpan={6} className="detail-empty">{t('medicalValues.emptyGroup', 'No values in this bunch.')}</td></tr>
                 )}
               </tbody>
             </table>

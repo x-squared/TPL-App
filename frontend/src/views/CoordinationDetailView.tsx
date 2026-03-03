@@ -3,6 +3,7 @@ import FavoriteButton from './layout/FavoriteButton';
 import { useCoordinationDetailViewModel } from './coordinations/detail/useCoordinationDetailViewModel';
 import { formatDateDdMmYyyy } from './layout/dateFormat';
 import { useFavoriteToggle } from './layout/useFavoriteToggle';
+import { useI18n } from '../i18n/i18n';
 import type { CoordinationDetailTab } from './coordinations/detail/useCoordinationDetailViewModel';
 import './layout/PanelLayout.css';
 import './PatientDetailView.css';
@@ -24,14 +25,15 @@ export default function CoordinationDetailView({
   initialTab = 'coordination',
   onTabChange,
 }: Props) {
+  const { t } = useI18n();
   const model = useCoordinationDetailViewModel(coordinationId, initialTab);
   const donorName = model.donor?.full_name?.trim() || '';
   const donorBirthDate = formatDateDdMmYyyy(model.donor?.birth_date);
   const coordinationTitle = model.coordination
     ? (
       donorName || donorBirthDate
-        ? `${donorName || 'Unknown donor'}${donorBirthDate !== '–' ? ` (${donorBirthDate})` : ''}`
-        : `Coordination #${model.coordination.id}`
+        ? `${donorName || t('coordinations.unknownDonor', 'Unknown donor')}${donorBirthDate !== '–' ? ` (${donorBirthDate})` : ''}`
+        : `${t('coordinations.entity', 'Coordination')} #${model.coordination.id}`
     )
     : '';
   const coordinationFavorite = useFavoriteToggle(model.coordination ? {
@@ -45,13 +47,13 @@ export default function CoordinationDetailView({
     window.open(url, '_blank', 'popup=yes,width=1200,height=900');
   };
 
-  if (model.loading) return <p className="status">Loading...</p>;
-  if (model.error || !model.coordination) return <p className="status">{model.error || 'Coordination not found.'}</p>;
+  if (model.loading) return <p className="status">{t('common.loading', 'Loading...')}</p>;
+  if (model.error || !model.coordination) return <p className="status">{model.error || t('coordinations.notFound', 'Coordination not found.')}</p>;
 
   return (
     <div className="patient-detail">
       <div className="ui-detail-heading">
-        <button className="ui-back-btn" onClick={onBack} title="Back to list">
+        <button className="ui-back-btn" onClick={onBack} title={t('common.backToList', 'Back to list')}>
           &larr;
         </button>
         <div className="ui-heading-title-with-favorite">
@@ -60,12 +62,14 @@ export default function CoordinationDetailView({
             active={coordinationFavorite.isFavorite}
             disabled={coordinationFavorite.loading || coordinationFavorite.saving}
             onClick={() => void coordinationFavorite.toggle()}
-            title={coordinationFavorite.isFavorite ? 'Remove coordination from favorites' : 'Add coordination to favorites'}
+            title={coordinationFavorite.isFavorite
+              ? t('coordinations.favorites.remove', 'Remove coordination from favorites')
+              : t('coordinations.favorites.add', 'Add coordination to favorites')}
           />
         </div>
         <div className="patients-add-actions">
           <button className="patients-cancel-btn" onClick={openDetachedProtocol}>
-            Open detached protocol
+            {t('coordinations.actions.openDetachedProtocol', 'Open detached protocol')}
           </button>
         </div>
       </div>

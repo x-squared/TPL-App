@@ -1,4 +1,5 @@
 import TaskBoard from './tasks/TaskBoard';
+import { useI18n } from '../i18n/i18n';
 import PatientsAddForm from './patients/PatientsAddForm';
 import PatientsFilters from './patients/PatientsFilters';
 import PatientsTable from './patients/PatientsTable';
@@ -11,6 +12,7 @@ interface Props {
 }
 
 export default function PatientsView({ onSelectPatient }: Props) {
+  const { t } = useI18n();
   const {
     patientDetails,
     loadingDetails,
@@ -52,9 +54,11 @@ export default function PatientsView({ onSelectPatient }: Props) {
   return (
     <>
       <header className="patients-header">
-        <h1>Patients</h1>
+        <h1>{t('patients.title', 'Patients')}</h1>
         {!addingPatient && (
-          <button className="patients-add-btn" onClick={() => setAddingPatient(true)}>+ Add Patient</button>
+          <button className="patients-add-btn" onClick={() => setAddingPatient(true)}>
+            {t('patients.actions.addPatient', '+ Add Patient')}
+          </button>
         )}
       </header>
 
@@ -89,9 +93,9 @@ export default function PatientsView({ onSelectPatient }: Props) {
       />
 
       {loading ? (
-        <p className="status">Loading...</p>
+        <p className="status">{t('common.loading', 'Loading...')}</p>
       ) : filteredPatients.length === 0 ? (
-        <p className="status">No patients match the filter.</p>
+        <p className="status">{t('patients.emptyFiltered', 'No patients match the filter.')}</p>
       ) : (
         <PatientsTable
           filteredPatients={filteredPatients}
@@ -111,22 +115,23 @@ export default function PatientsView({ onSelectPatient }: Props) {
 
       <section className="patients-tasks-section ui-panel-section">
         <TaskBoard
+          declaredContextType="ALL"
           criteria={{
             patientId: selectedTaskPatientId ?? undefined,
           }}
-          title="Tasks"
+          title={t('taskBoard.title', 'Tasks')}
           maxTableHeight={360}
           onAddClick={() => undefined}
           headerMeta={(
             <>
               <p className="patients-tasks-selection-hint">
                 ({selectedTaskPatientId !== null
-                  ? `filtered to patient #${selectedTaskPatientId}`
-                  : 'showing tasks for all patients'})
+                  ? `${t('patients.tasks.filteredToPatient', 'filtered to patient')} #${selectedTaskPatientId}`
+                  : t('patients.tasks.showingAll', 'showing tasks for all patients')})
               </p>
               {selectedTaskPatientId !== null && (
                 <button className="patients-clear-selection-btn" onClick={() => setSelectedTaskPatientId(null)}>
-                  Clear patient selection
+                  {t('patients.tasks.clearSelection', 'Clear patient selection')}
                 </button>
               )}
             </>

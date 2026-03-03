@@ -13,6 +13,16 @@ def _normalize_locale(locale: str) -> str:
     return normalized or "en"
 
 
+def _normalize_translation_key(key: str) -> str:
+    if key == "app.views.donations":
+        return "app.views.donors"
+    if key == "donations":
+        return "donors"
+    if key.startswith("donations."):
+        return f"donors.{key.removeprefix('donations.')}"
+    return key
+
+
 def get_translation_overrides(*, locale: str, db: Session) -> TranslationOverridesResponse:
     target_locale = _normalize_locale(locale)
     entries: dict[str, str] = {}
@@ -25,7 +35,7 @@ def get_translation_overrides(*, locale: str, db: Session) -> TranslationOverrid
                     normalized_key = (str(key) if isinstance(key, str) else "").strip()
                     normalized_text = (str(value) if isinstance(value, str) else "").strip()
                     if normalized_key and normalized_text:
-                        entries[normalized_key] = normalized_text
+                        entries[_normalize_translation_key(normalized_key)] = normalized_text
         except json.JSONDecodeError:
             entries = {}
     return TranslationOverridesResponse(locale=target_locale, entries=entries)
@@ -46,7 +56,7 @@ def replace_translation_overrides(
         normalized_text = (str(text) if isinstance(text, str) else "").strip()
         if not normalized_key or not normalized_text:
             continue
-        normalized_entries[normalized_key] = normalized_text
+        normalized_entries[_normalize_translation_key(normalized_key)] = normalized_text
     row = db.query(TranslationBundle).filter(TranslationBundle.locale == target_locale).first()
     if row is None:
         row = TranslationBundle(

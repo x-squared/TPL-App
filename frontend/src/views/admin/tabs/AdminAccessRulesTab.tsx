@@ -1,5 +1,6 @@
 import type { AccessControlMatrix } from '../../../api';
 import ErrorBanner from '../../layout/ErrorBanner';
+import { useI18n } from '../../../i18n/i18n';
 
 interface AdminAccessRulesTabProps {
   matrix: AccessControlMatrix | null;
@@ -28,12 +29,13 @@ export default function AdminAccessRulesTab({
   onTogglePermission,
   onSave,
 }: AdminAccessRulesTabProps) {
+  const { t } = useI18n();
   return (
     <section className="detail-section ui-panel-section">
       <div className="detail-section-heading">
-        <h2>Access Rules</h2>
+        <h2>{t('app.admin.tabs.accessRules', 'Access Rules')}</h2>
       </div>
-      {loading && <p className="status">Loading access matrix...</p>}
+      {loading && <p className="status">{t('admin.accessRules.loading', 'Loading access matrix...')}</p>}
       {error && <ErrorBanner message={error} />}
       {status && <p className="status">{status}</p>}
 
@@ -41,7 +43,7 @@ export default function AdminAccessRulesTab({
         <div className="admin-people-card">
           <div className="admin-access-controls">
             <label className="admin-access-role-field">
-              <span>Role</span>
+              <span>{t('admin.accessRules.role', 'Role')}</span>
               <select
                 className="detail-input"
                 value={selectedRoleKey}
@@ -62,7 +64,7 @@ export default function AdminAccessRulesTab({
               }}
               disabled={!dirty || saving || !selectedRoleKey}
             >
-              {saving ? 'Saving...' : 'Save'}
+              {saving ? t('admin.accessRules.saving', 'Saving...') : t('actions.save', 'Save')}
             </button>
           </div>
 
@@ -70,8 +72,8 @@ export default function AdminAccessRulesTab({
             <table className="data-table">
               <thead>
                 <tr>
-                  <th>Permission</th>
-                  <th>Allowed</th>
+                  <th>{t('admin.accessRules.permission', 'Permission')}</th>
+                  <th>{t('admin.accessRules.allowed', 'Allowed')}</th>
                 </tr>
               </thead>
               <tbody>
@@ -89,7 +91,7 @@ export default function AdminAccessRulesTab({
                           type="checkbox"
                           checked={selectedPermissionKeys.includes(permission.key)}
                           onChange={() => onTogglePermission(permission.key)}
-                          aria-label={`Toggle ${permission.key}`}
+                          aria-label={`${t('admin.accessRules.toggle', 'Toggle')} ${permission.key}`}
                         />
                       </label>
                     </td>

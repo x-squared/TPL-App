@@ -1,5 +1,6 @@
 import type React from 'react';
 import type { Coordination } from '../../../api';
+import { useI18n } from '../../../i18n/i18n';
 import EditableSectionHeader from '../../layout/EditableSectionHeader';
 import ErrorBanner from '../../layout/ErrorBanner';
 import { formatDateDdMmYyyy } from '../../layout/dateFormat';
@@ -37,10 +38,11 @@ export default function CoordinationBasicDataSection({
   onSave,
   onCancel,
 }: Props) {
+  const { t } = useI18n();
   return (
     <section className="detail-section ui-panel-section">
       <EditableSectionHeader
-        title="Basic data"
+        title={t('coordinations.basicData.title', 'Basic data')}
         editing={coreEditing}
         saving={coreSaving}
         dirty={coreDirty}
@@ -50,11 +52,11 @@ export default function CoordinationBasicDataSection({
       />
       <div className="detail-grid">
         <div className="detail-field">
-          <span className="detail-label">Status</span>
-          <span className="detail-value">{coordination.status?.name_default ?? '–'}</span>
+          <span className="detail-label">{t('coordinations.basicData.status', 'Status')}</span>
+          <span className="detail-value">{coordination.status?.name_default ?? t('common.emptySymbol', '–')}</span>
         </div>
         <div className="detail-field">
-          <span className="detail-label">Start</span>
+          <span className="detail-label">{t('coordinations.basicData.start', 'Start')}</span>
           {coreEditing ? (
             <input
               className="detail-input"
@@ -67,7 +69,7 @@ export default function CoordinationBasicDataSection({
           )}
         </div>
         <div className="detail-field">
-          <span className="detail-label">End</span>
+          <span className="detail-label">{t('coordinations.basicData.end', 'End')}</span>
           {coreEditing ? (
             <input
               className="detail-input"
@@ -80,7 +82,7 @@ export default function CoordinationBasicDataSection({
           )}
         </div>
         <div className="detail-field">
-          <span className="detail-label">SWTPL Nr</span>
+          <span className="detail-label">{t('coordinations.basicData.swtplNr', 'SWTPL Nr')}</span>
           {coreEditing ? (
             <input
               className="detail-input"
@@ -88,11 +90,11 @@ export default function CoordinationBasicDataSection({
               onChange={(e) => setCoreDraft((prev) => ({ ...prev, swtpl_nr: e.target.value }))}
             />
           ) : (
-            <span className="detail-value">{coordination.swtpl_nr || '–'}</span>
+            <span className="detail-value">{coordination.swtpl_nr || t('common.emptySymbol', '–')}</span>
           )}
         </div>
         <div className="detail-field">
-          <span className="detail-label">National coordinator</span>
+          <span className="detail-label">{t('coordinations.basicData.nationalCoordinator', 'National coordinator')}</span>
           {coreEditing ? (
             <input
               className="detail-input"
@@ -100,12 +102,12 @@ export default function CoordinationBasicDataSection({
               onChange={(e) => setCoreDraft((prev) => ({ ...prev, national_coordinator: e.target.value }))}
             />
           ) : (
-            <span className="detail-value">{coordination.national_coordinator || '–'}</span>
+            <span className="detail-value">{coordination.national_coordinator || t('common.emptySymbol', '–')}</span>
           )}
         </div>
       </div>
       <div className="detail-field coord-comment-field">
-        <span className="detail-label">Comment</span>
+        <span className="detail-label">{t('taskBoard.columns.comment', 'Comment')}</span>
         {coreEditing ? (
           <textarea
             className="detail-input coord-comment-input"
@@ -113,7 +115,7 @@ export default function CoordinationBasicDataSection({
             onChange={(e) => setCoreDraft((prev) => ({ ...prev, comment: e.target.value }))}
           />
         ) : (
-          <div className="detail-value coord-comment-value">{coordination.comment || '–'}</div>
+          <div className="detail-value coord-comment-value">{coordination.comment || t('common.emptySymbol', '–')}</div>
         )}
       </div>
       <ErrorBanner message={coreError} />

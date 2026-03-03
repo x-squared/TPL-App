@@ -7,11 +7,14 @@ from ..features.coordination_procurement_admin import (
     create_field_group_template as create_field_group_template_service,
     create_field_scope_template as create_field_scope_template_service,
     create_field_template as create_field_template_service,
+    create_protocol_task_group_selection as create_protocol_task_group_selection_service,
     delete_field_group_template as delete_field_group_template_service,
     delete_field_scope_template as delete_field_scope_template_service,
+    delete_protocol_task_group_selection as delete_protocol_task_group_selection_service,
     get_procurement_admin_config as get_procurement_admin_config_service,
     update_field_group_template as update_field_group_template_service,
     update_field_template as update_field_template_service,
+    update_protocol_task_group_selection as update_protocol_task_group_selection_service,
 )
 from ..models import User
 from ..schemas import (
@@ -21,6 +24,9 @@ from ..schemas import (
     CoordinationProcurementFieldGroupTemplateUpdate,
     CoordinationProcurementFieldScopeTemplateCreate,
     CoordinationProcurementFieldScopeTemplateResponse,
+    CoordinationProcurementProtocolTaskGroupSelectionCreate,
+    CoordinationProcurementProtocolTaskGroupSelectionResponse,
+    CoordinationProcurementProtocolTaskGroupSelectionUpdate,
     CoordinationProcurementFieldTemplateCreate,
     CoordinationProcurementFieldTemplateResponse,
     CoordinationProcurementFieldTemplateUpdate,
@@ -119,3 +125,36 @@ def delete_field_scope_template(
     _: User = Depends(require_admin),
 ):
     delete_field_scope_template_service(scope_template_id=scope_template_id, db=db)
+
+
+@router.post("/protocol-task-groups", response_model=CoordinationProcurementProtocolTaskGroupSelectionResponse, status_code=201)
+def create_protocol_task_group_selection(
+    payload: CoordinationProcurementProtocolTaskGroupSelectionCreate,
+    db: Session = Depends(get_db),
+    current_user: User = Depends(require_admin),
+):
+    return create_protocol_task_group_selection_service(payload=payload, changed_by_id=current_user.id, db=db)
+
+
+@router.patch("/protocol-task-groups/{selection_id}", response_model=CoordinationProcurementProtocolTaskGroupSelectionResponse)
+def update_protocol_task_group_selection(
+    selection_id: int,
+    payload: CoordinationProcurementProtocolTaskGroupSelectionUpdate,
+    db: Session = Depends(get_db),
+    current_user: User = Depends(require_admin),
+):
+    return update_protocol_task_group_selection_service(
+        selection_id=selection_id,
+        payload=payload,
+        changed_by_id=current_user.id,
+        db=db,
+    )
+
+
+@router.delete("/protocol-task-groups/{selection_id}", status_code=204)
+def delete_protocol_task_group_selection(
+    selection_id: int,
+    db: Session = Depends(get_db),
+    _: User = Depends(require_admin),
+):
+    delete_protocol_task_group_selection_service(selection_id=selection_id, db=db)

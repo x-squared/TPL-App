@@ -76,6 +76,7 @@ def create_task_template(*, payload: TaskTemplateCreate, changed_by_id: int, db:
     template = TaskTemplate(
         task_group_template_id=payload.task_group_template_id,
         description=payload.description,
+        comment_hint=payload.comment_hint,
         kind_key=_normalize_kind_or_422(payload.kind_key, field_name="kind_key"),
         priority_id=priority.id,
         priority_key=priority.key,

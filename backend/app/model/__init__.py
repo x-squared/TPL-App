@@ -11,6 +11,10 @@ from .coordination_procurement import (
     CoordinationProcurementData,
     CoordinationProcurementDataPerson,
     CoordinationProcurementDataTeam,
+    CoordinationProcurementTypedData,
+    CoordinationProcurementTypedDataPersonList,
+    CoordinationProcurementTypedDataTeamList,
+    CoordinationProcurementProtocolTaskGroupSelection,
 )
 from .coordination_time_log import CoordinationTimeLog
 from .coordination_origin import CoordinationOrigin
@@ -74,6 +78,10 @@ __all__ = [
     "CoordinationProcurementData",
     "CoordinationProcurementDataPerson",
     "CoordinationProcurementDataTeam",
+    "CoordinationProcurementTypedData",
+    "CoordinationProcurementTypedDataPersonList",
+    "CoordinationProcurementTypedDataTeamList",
+    "CoordinationProcurementProtocolTaskGroupSelection",
     "CoordinationTimeLog",
     "CoordinationOrigin",
     "TaskGroupTemplate",

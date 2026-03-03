@@ -57,6 +57,9 @@ export default function useTaskBoardData(criteria: TaskBoardCriteria, statusKeys
           ...(typeof extraTaskGroupParams.organ_id === 'number'
             ? { organ_id: extraTaskGroupParams.organ_id }
             : {}),
+          ...(Array.isArray(extraTaskGroupParams.task_group_template_id)
+            ? { task_group_template_id: extraTaskGroupParams.task_group_template_id.filter((entry): entry is number => typeof entry === 'number') }
+            : {}),
         };
         const groups = await api.listTaskGroups(groupParams);
         const [me, users, organs, priorities, taskStatuses] = await Promise.all([

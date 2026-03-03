@@ -1,13 +1,16 @@
 import { useMemo } from 'react';
 
-import type { ProcurementAdminConfig } from '../../../api';
+import type { ProcurementAdminConfig, TaskGroupTemplate } from '../../../api';
 import ErrorBanner from '../../layout/ErrorBanner';
+import { useI18n } from '../../../i18n/i18n';
 import ConfiguredFieldsSection from './procurementConfig/ConfiguredFieldsSection';
 import ConfiguredGroupsSection from './procurementConfig/ConfiguredGroupsSection';
+import ConfiguredProtocolTaskGroupsSection from './procurementConfig/ConfiguredProtocolTaskGroupsSection';
 import type {
   ProcurementFieldCreatePayload,
   ProcurementFieldUpdatePayload,
   ProcurementGroupCreatePayload,
+  ProcurementProtocolTaskGroupSelectionCreatePayload,
   ProcurementGroupUpdatePayload,
   ProcurementScopeCreatePayload,
 } from './procurementConfig/types';
@@ -30,6 +33,10 @@ interface AdminProcurementConfigTabProps {
   ) => Promise<void>;
   onCreateScope: (payload: ProcurementScopeCreatePayload) => Promise<void>;
   onDeleteScope: (scopeId: number) => Promise<void>;
+  coordinationProtocolTaskGroupTemplates: TaskGroupTemplate[];
+  onCreateProtocolTaskGroupSelection: (payload: ProcurementProtocolTaskGroupSelectionCreatePayload) => Promise<void>;
+  onUpdateProtocolTaskGroupSelection: (selectionId: number, payload: { organ_id?: number | null; pos?: number }) => Promise<void>;
+  onDeleteProtocolTaskGroupSelection: (selectionId: number) => Promise<void>;
 }
 
 export default function AdminProcurementConfigTab({
@@ -48,7 +55,12 @@ export default function AdminProcurementConfigTab({
   onReorderFields,
   onCreateScope,
   onDeleteScope,
+  coordinationProtocolTaskGroupTemplates,
+  onCreateProtocolTaskGroupSelection,
+  onUpdateProtocolTaskGroupSelection,
+  onDeleteProtocolTaskGroupSelection,
 }: AdminProcurementConfigTabProps) {
+  const { t } = useI18n();
   const sortedDatatypes = useMemo(
     () => [...(config?.datatype_definitions ?? [])].sort((a, b) => (a.code?.name_default ?? '').localeCompare(b.code?.name_default ?? '')),
     [config?.datatype_definitions],
@@ -95,7 +107,7 @@ export default function AdminProcurementConfigTab({
 
   return (
     <section className="detail-section ui-panel-section">
-      {loading && <p className="status">Loading procurement configuration...</p>}
+      {loading && <p className="status">{t('admin.procurement.loading', 'Loading procurement configuration...')}</p>}
       {error && <ErrorBanner message={error} />}
       {status && <p className="status">{status}</p>}
       {!loading && config && (
@@ -107,6 +119,15 @@ export default function AdminProcurementConfigTab({
             onUpdateGroup={onUpdateGroup}
             onReorderGroups={onReorderGroups}
             onDeleteGroup={onDeleteGroup}
+          />
+
+          <ConfiguredProtocolTaskGroupsSection
+            config={config}
+            sortedTaskGroupTemplates={coordinationProtocolTaskGroupTemplates}
+            saving={saving}
+            onCreateSelection={onCreateProtocolTaskGroupSelection}
+            onUpdateSelection={onUpdateProtocolTaskGroupSelection}
+            onDeleteSelection={onDeleteProtocolTaskGroupSelection}
           />
 
           <ConfiguredFieldsSection

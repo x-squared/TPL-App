@@ -1,12 +1,18 @@
 from sqlalchemy.orm import Session
 
-from ....models import Code, TaskGroupTemplate, TaskTemplate
+from ....models import Code, CoordinationProcurementProtocolTaskGroupSelection, TaskGroupTemplate, TaskTemplate
 
 
 def sync_task_templates(db: Session) -> None:
     """Replace all TASK_GROUP_TEMPLATE and TASK_TEMPLATE rows with seed data."""
-    from ...datasets.sample.task_templates import TASK_GROUP_TEMPLATES, TASK_TEMPLATES
+    from ...datasets.sample.task_templates import (
+        PROTOCOL_TASK_GROUP_SELECTIONS,
+        SAMPLE_CHANGED_BY_ID,
+        TASK_GROUP_TEMPLATES,
+        TASK_TEMPLATES,
+    )
 
+    db.query(CoordinationProcurementProtocolTaskGroupSelection).delete()
     db.query(TaskTemplate).delete()
     db.query(TaskGroupTemplate).delete()
     db.flush()
@@ -67,6 +73,26 @@ def sync_task_templates(db: Session) -> None:
                 priority_id=priority.id,
                 priority_key=priority.key,
                 **raw,
+            )
+        )
+
+    for entry in PROTOCOL_TASK_GROUP_SELECTIONS:
+        template = created_group_templates.get(entry["task_group_template_key"])
+        if not template:
+            continue
+        organ_id = None
+        organ_key = entry.get("organ_key")
+        if organ_key:
+            organ = db.query(Code).filter(Code.type == "ORGAN", Code.key == organ_key).first()
+            if not organ:
+                continue
+            organ_id = organ.id
+        db.add(
+            CoordinationProcurementProtocolTaskGroupSelection(
+                task_group_template_id=template.id,
+                organ_id=organ_id,
+                pos=entry.get("pos", 0),
+                changed_by_id=SAMPLE_CHANGED_BY_ID,
             )
         )
 

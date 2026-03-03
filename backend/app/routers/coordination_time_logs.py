@@ -23,7 +23,7 @@ router = APIRouter(prefix="/coordinations/{coordination_id}/time-logs", tags=["c
 def list_coordination_time_logs(
     coordination_id: int,
     db: Session = Depends(get_db),
-    _: User = Depends(require_permission("view.donations")),
+    _: User = Depends(require_permission("view.donors")),
 ):
     return list_coordination_time_logs_service(coordination_id=coordination_id, db=db)
 
@@ -33,7 +33,7 @@ def create_coordination_time_log(
     coordination_id: int,
     payload: CoordinationTimeLogCreate,
     db: Session = Depends(get_db),
-    current_user: User = Depends(require_permission("edit.donations")),
+    current_user: User = Depends(require_permission("edit.donors")),
 ):
     return create_coordination_time_log_service(
         coordination_id=coordination_id,
@@ -49,7 +49,7 @@ def update_coordination_time_log(
     time_log_id: int,
     payload: CoordinationTimeLogUpdate,
     db: Session = Depends(get_db),
-    current_user: User = Depends(require_permission("edit.donations")),
+    current_user: User = Depends(require_permission("edit.donors")),
 ):
     return update_coordination_time_log_service(
         coordination_id=coordination_id,
@@ -65,6 +65,6 @@ def delete_coordination_time_log(
     coordination_id: int,
     time_log_id: int,
     db: Session = Depends(get_db),
-    _: User = Depends(require_permission("edit.donations")),
+    _: User = Depends(require_permission("edit.donors")),
 ):
     delete_coordination_time_log_service(coordination_id=coordination_id, time_log_id=time_log_id, db=db)

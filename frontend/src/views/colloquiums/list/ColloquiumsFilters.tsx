@@ -1,4 +1,5 @@
 import type { ColloqiumType } from '../../../api';
+import { useI18n } from '../../../i18n/i18n';
 import type { ColloquiumsFilterState } from './listTypes';
 
 interface Props {
@@ -8,16 +9,17 @@ interface Props {
 }
 
 export default function ColloquiumsFilters({ filters, types, onChange }: Props) {
+  const { t } = useI18n();
   return (
     <div className="filter-bar colloquiums-filter-bar">
       <label className="colloquiums-filter-field">
-        Type
+        {t('colloquiums.filters.type', 'Type')}
         <select
           className="filter-select colloquiums-filter-control"
           value={filters.typeId}
           onChange={(e) => onChange({ ...filters, typeId: e.target.value })}
         >
-          <option value="">All</option>
+          <option value="">{t('taskBoard.filters.all', 'All')}</option>
           {types.map((t) => (
             <option key={t.id} value={t.id}>
               {t.name}
@@ -26,7 +28,7 @@ export default function ColloquiumsFilters({ filters, types, onChange }: Props) 
         </select>
       </label>
       <label className="colloquiums-filter-field">
-        Anchor Date
+        {t('colloquiums.filters.anchorDate', 'Anchor Date')}
         <input
           className="colloquiums-filter-control"
           type="date"
@@ -35,7 +37,7 @@ export default function ColloquiumsFilters({ filters, types, onChange }: Props) 
         />
       </label>
       <label className="colloquiums-filter-field">
-        Range (days)
+        {t('colloquiums.filters.rangeDays', 'Range (days)')}
         <input
           className="colloquiums-filter-control"
           type="number"

@@ -1,6 +1,7 @@
 import { useEffect, useMemo, useState } from 'react';
 import { api, type ColloqiumAgenda, type ColloqiumType } from '../../api';
 import { toUserErrorMessage } from '../../api/error';
+import { useI18n } from '../../i18n/i18n';
 import ErrorBanner from '../layout/ErrorBanner';
 import { formatEpisodeFavoriteName, formatOrganNames } from '../layout/episodeDisplay';
 import FavoriteButton from '../layout/FavoriteButton';
@@ -15,6 +16,7 @@ import type { EpisodeDetailForm, EpisodeDetailTab, EpisodeMetaForm, EpisodesTabP
 import './EpisodesTab.css';
 
 export default function EpisodesTab(props: EpisodesTabProps) {
+  const { t } = useI18n();
   const {
     patient,
     formatDate,
@@ -124,7 +126,7 @@ export default function EpisodesTab(props: EpisodesTabProps) {
       await refreshPatient();
       setEditingDetailTab(null);
     } catch (err) {
-      setDetailSaveError(toUserErrorMessage(err, 'Could not save episode details.'));
+      setDetailSaveError(toUserErrorMessage(err, t('episode.errors.saveDetails', 'Could not save episode details.')));
     } finally {
       setDetailSaving(false);
     }
@@ -154,7 +156,7 @@ export default function EpisodesTab(props: EpisodesTabProps) {
       await refreshPatient();
       setEditingEpisodeMeta(false);
     } catch (err) {
-      setDetailSaveError(toUserErrorMessage(err, 'Could not save episode details.'));
+      setDetailSaveError(toUserErrorMessage(err, t('episode.errors.saveDetails', 'Could not save episode details.')));
     } finally {
       setDetailSaving(false);
     }
@@ -173,7 +175,7 @@ export default function EpisodesTab(props: EpisodesTabProps) {
       await api.addEpisodeOrgan(patient.id, selectedEpisode.id, payload);
       await refreshPatient();
     } catch (err) {
-      setDetailSaveError(toUserErrorMessage(err, 'Could not add or reactivate organ.'));
+      setDetailSaveError(toUserErrorMessage(err, t('episode.errors.addOrReactivateOrgan', 'Could not add or reactivate organ.')));
     } finally {
       setOrganActionLoading(false);
     }
@@ -195,7 +197,7 @@ export default function EpisodesTab(props: EpisodesTabProps) {
       await api.updateEpisodeOrgan(patient.id, selectedEpisode.id, episodeOrganId, payload);
       await refreshPatient();
     } catch (err) {
-      setDetailSaveError(toUserErrorMessage(err, 'Could not update episode organ.'));
+      setDetailSaveError(toUserErrorMessage(err, t('episode.errors.updateOrgan', 'Could not update episode organ.')));
     } finally {
       setOrganActionLoading(false);
     }
@@ -262,7 +264,7 @@ export default function EpisodesTab(props: EpisodesTabProps) {
       await reloadEpisodeColloqiums(selectedEpisode.id);
       setAssignDialogOpen(false);
     } catch (err) {
-      setAssignError(toUserErrorMessage(err, 'Could not assign episode to colloquium.'));
+      setAssignError(toUserErrorMessage(err, t('episode.colloquium.assignDialog.assignError', 'Could not assign episode to colloquium.')));
     } finally {
       setAssigningColloqium(false);
     }
@@ -271,9 +273,9 @@ export default function EpisodesTab(props: EpisodesTabProps) {
   return (
     <section className="detail-section" style={{ marginTop: '1.5rem' }}>
       <div className="detail-section-heading">
-        <h2>Episodes</h2>
+        <h2>{t('episode.list.title', 'Episodes')}</h2>
         {!episodes.addingEpisode && (
-          <button className="ci-add-btn" onClick={() => episodes.setAddingEpisode(true)}>+ Add</button>
+          <button className="ci-add-btn" onClick={() => episodes.setAddingEpisode(true)}>{t('information.actions.add', '+ Add')}</button>
         )}
       </div>
 
@@ -327,7 +329,9 @@ export default function EpisodesTab(props: EpisodesTabProps) {
                 active={episodeFavorite.isFavorite}
                 disabled={episodeFavorite.loading || episodeFavorite.saving}
                 onClick={() => void episodeFavorite.toggle()}
-                title={episodeFavorite.isFavorite ? 'Remove episode from favorites' : 'Add episode to favorites'}
+                title={episodeFavorite.isFavorite
+                  ? t('episode.favorites.remove', 'Remove episode from favorites')
+                  : t('episode.favorites.add', 'Add episode to favorites')}
               />
             )}
           />

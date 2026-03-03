@@ -61,6 +61,7 @@ def create_coordination_protocol_event(
         coordination_id=coordination_id,
         organ_id=payload.organ_id,
         event=payload.event,
+        time=payload.effective_time,
         task_id=payload.task_id,
         task_text=(payload.task_text.strip() if payload.task_text else None) or (task.description if task else None),
         task_comment=(payload.task_comment.strip() if payload.task_comment else None),

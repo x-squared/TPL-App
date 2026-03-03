@@ -128,11 +128,13 @@ def instantiate_task_group_template(
             Task(
                 task_group_id=task_group.id,
                 description=item.description,
+                comment_hint=item.comment_hint,
                 kind_key=item.kind_key or TaskKindKey.TASK.value,
                 priority_id=item.priority_id,
                 priority_key=item.priority_key or (item.priority.key if item.priority else None),
                 assigned_to_id=None,
                 until=until,
+                event_time=None,
                 status_id=pending_status.id,
                 status_key=pending_status.key,
                 closed_at=None,

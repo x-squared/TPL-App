@@ -1,4 +1,12 @@
-import { request, type AppUser, type Code, type DatatypeDefinition, type Person, type PersonTeam } from './core';
+import {
+  request,
+  type AppUser,
+  type Code,
+  type CoordinationProcurementProtocolTaskGroupSelection,
+  type DatatypeDefinition,
+  type Person,
+  type PersonTeam,
+} from './core';
 
 export interface Coordination {
   id: number;
@@ -133,6 +141,7 @@ export interface CoordinationProtocolEventLog {
 export interface CoordinationProtocolEventLogCreate {
   organ_id: number;
   event: string;
+  effective_time?: string | null;
   task_id?: number | null;
   task_text?: string | null;
   task_comment?: string | null;
@@ -232,6 +241,7 @@ export interface CoordinationProcurementOrgan {
 export interface CoordinationProcurementFlex {
   field_group_templates: CoordinationProcurementFieldGroupTemplate[];
   field_templates: CoordinationProcurementFieldTemplate[];
+  protocol_task_group_selections: CoordinationProcurementProtocolTaskGroupSelection[];
   organs: CoordinationProcurementOrgan[];
 }
 

@@ -49,6 +49,7 @@ class TaskGroupTemplateResponse(TaskGroupTemplateBase):
 class TaskTemplateBase(BaseModel):
     task_group_template_id: int
     description: str
+    comment_hint: str = ""
     kind_key: str = "TASK"
     priority_id: int | None = None
     offset_minutes_default: int | None = None
@@ -63,6 +64,7 @@ class TaskTemplateCreate(TaskTemplateBase):
 class TaskTemplateUpdate(BaseModel):
     task_group_template_id: int | None = None
     description: str | None = None
+    comment_hint: str | None = None
     kind_key: str | None = None
     priority_id: int | None = None
     offset_minutes_default: int | None = None
@@ -87,6 +89,10 @@ class TaskGroupTemplateInstantiateRequest(BaseModel):
     episode_id: int | None = None
     tpl_phase_id: int | None = None
     anchor_at: datetime
+
+
+class CoordinationProtocolTaskGroupsEnsureResponse(BaseModel):
+    created_group_count: int
 
 
 class TaskGroupBase(BaseModel):
@@ -134,10 +140,12 @@ class TaskGroupResponse(TaskGroupBase):
 class TaskBase(BaseModel):
     task_group_id: int
     description: str = ""
+    comment_hint: str = ""
     kind_key: str = "TASK"
     priority_id: int | None = None
     assigned_to_id: int | None = None
     until: datetime
+    event_time: datetime | None = None
     status_id: int | None = None
     closed_at: datetime | None = None
     closed_by_id: int | None = None
@@ -145,20 +153,32 @@ class TaskBase(BaseModel):
 
 
 class TaskCreate(TaskBase):
-    pass
+    @model_validator(mode="after")
+    def event_time_only_for_event(self):
+        if self.kind_key != "EVENT" and self.event_time is not None:
+            raise ValueError("event_time can only be set for kind_key EVENT")
+        return self
 
 
 class TaskUpdate(BaseModel):
     task_group_id: int | None = None
     description: str | None = None
+    comment_hint: str | None = None
     kind_key: str | None = None
     priority_id: int | None = None
     assigned_to_id: int | None = None
     until: datetime | None = None
+    event_time: datetime | None = None
     status_id: int | None = None
     closed_at: datetime | None = None
     closed_by_id: int | None = None
     comment: str | None = None
+
+    @model_validator(mode="after")
+    def event_time_only_for_event_when_kind_present(self):
+        if self.kind_key is not None and self.kind_key != "EVENT" and self.event_time is not None:
+            raise ValueError("event_time can only be set for kind_key EVENT")
+        return self
 
 
 class TaskResponse(TaskBase):

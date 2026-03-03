@@ -2,15 +2,23 @@ import { useEffect, useMemo, useState } from 'react';
 
 import { api, type Person } from '../../api';
 import { toUserErrorMessage } from '../../api/error';
+import { useI18n } from '../../i18n/i18n';
 import ErrorBanner from './ErrorBanner';
 
 interface PersonMultiSelectProps {
   selectedPeople: Person[];
   onChange: (next: Person[]) => void;
   disabled?: boolean;
+  disableAdd?: boolean;
 }
 
-export default function PersonMultiSelect({ selectedPeople, onChange, disabled = false }: PersonMultiSelectProps) {
+export default function PersonMultiSelect({
+  selectedPeople,
+  onChange,
+  disabled = false,
+  disableAdd = false,
+}: PersonMultiSelectProps) {
+  const { t } = useI18n();
   const [query, setQuery] = useState('');
   const [suggestions, setSuggestions] = useState<Person[]>([]);
   const [loading, setLoading] = useState(false);
@@ -43,7 +51,7 @@ export default function PersonMultiSelect({ selectedPeople, onChange, disabled =
       })
       .catch((err) => {
         if (!active) return;
-        setError(toUserErrorMessage(err, 'Could not search people.'));
+        setError(toUserErrorMessage(err, t('personMultiSelect.errors.search', 'Could not search people.')));
       })
       .finally(() => {
         if (active) setLoading(false);
@@ -69,9 +77,10 @@ export default function PersonMultiSelect({ selectedPeople, onChange, disabled =
   };
 
   const canCreate = createFirstName.trim().length > 0 && createSurname.trim().length > 0;
+  const addDisabled = disabled || disableAdd;
 
   const createPerson = async () => {
-    if (!canCreate || disabled) return;
+    if (!canCreate || addDisabled) return;
     setError('');
     try {
       const created = await api.createPerson({
@@ -84,7 +93,7 @@ export default function PersonMultiSelect({ selectedPeople, onChange, disabled =
       setCreateSurname('');
       setCreateUserId('');
     } catch (err) {
-      setError(toUserErrorMessage(err, 'Could not create person.'));
+      setError(toUserErrorMessage(err, t('personMultiSelect.errors.create', 'Could not create person.')));
     }
   };
 
@@ -92,7 +101,7 @@ export default function PersonMultiSelect({ selectedPeople, onChange, disabled =
     <div className="person-multi-select">
       <div className="person-pill-list">
         {selectedPeople.length === 0 ? (
-          <span className="detail-value">–</span>
+          <span className="detail-value">{t('common.emptySymbol', '–')}</span>
         ) : (
           selectedPeople.map((person) => (
             <span key={person.id} className="person-pill">
@@ -102,7 +111,7 @@ export default function PersonMultiSelect({ selectedPeople, onChange, disabled =
                 className="person-pill-remove"
                 onClick={() => removePerson(person.id)}
                 disabled={disabled}
-                title="Remove"
+                title={t('actions.remove', 'Remove')}
               >
                 ×
               </button>
@@ -114,7 +123,7 @@ export default function PersonMultiSelect({ selectedPeople, onChange, disabled =
       <input
         className="detail-input"
         type="text"
-        placeholder="Search by first name, surname, or user ID"
+        placeholder={t('personMultiSelect.searchPlaceholder', 'Search by first name, surname, or user ID')}
         value={query}
         onChange={(event) => setQuery(event.target.value)}
         onKeyDown={(event) => {
@@ -123,13 +132,13 @@ export default function PersonMultiSelect({ selectedPeople, onChange, disabled =
             addPerson(availableSuggestions[0]);
           }
         }}
-        disabled={disabled}
+        disabled={addDisabled}
       />
 
       {query.trim() && (
         <div className="person-suggestion-list">
           {loading ? (
-            <div className="status">Searching...</div>
+            <div className="status">{t('personMultiSelect.searching', 'Searching...')}</div>
           ) : availableSuggestions.length > 0 ? (
             availableSuggestions.map((person) => (
               <button
@@ -137,43 +146,43 @@ export default function PersonMultiSelect({ selectedPeople, onChange, disabled =
                 type="button"
                 className="person-suggestion-item"
                 onClick={() => addPerson(person)}
-                disabled={disabled}
+                disabled={addDisabled}
               >
                 <strong>{`${person.first_name} ${person.surname}`.trim()}</strong>
-                <span>{person.user_id || 'no user ID'}</span>
+                <span>{person.user_id || t('personMultiSelect.noUserId', 'no user ID')}</span>
               </button>
             ))
           ) : (
             <div className="person-create-box">
-              <div className="status">No match found. Create new person:</div>
+              <div className="status">{t('personMultiSelect.noMatchCreate', 'No match found. Create new person:')}</div>
               <div className="person-create-grid">
                 <input
                   className="detail-input"
                   type="text"
-                  placeholder="First name *"
+                  placeholder={t('patients.addForm.firstNameRequired', 'First name *')}
                   value={createFirstName}
                   onChange={(event) => setCreateFirstName(event.target.value)}
-                  disabled={disabled}
+                  disabled={addDisabled}
                 />
                 <input
                   className="detail-input"
                   type="text"
-                  placeholder="Surname *"
+                  placeholder={t('personMultiSelect.surnameRequired', 'Surname *')}
                   value={createSurname}
                   onChange={(event) => setCreateSurname(event.target.value)}
-                  disabled={disabled}
+                  disabled={addDisabled}
                 />
                 <input
                   className="detail-input"
                   type="text"
-                  placeholder="User ID (optional, up to 12 chars)"
+                  placeholder={t('personMultiSelect.userIdOptional', 'User ID (optional, up to 12 chars)')}
                   maxLength={12}
                   value={createUserId}
                   onChange={(event) => setCreateUserId(event.target.value)}
-                  disabled={disabled}
+                  disabled={addDisabled}
                 />
-                <button type="button" className="patients-save-btn" onClick={() => void createPerson()} disabled={!canCreate || disabled}>
-                  Create & Add
+                <button type="button" className="patients-save-btn" onClick={() => void createPerson()} disabled={!canCreate || addDisabled}>
+                  {t('personMultiSelect.createAndAdd', 'Create & Add')}
                 </button>
               </div>
             </div>

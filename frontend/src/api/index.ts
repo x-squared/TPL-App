@@ -37,8 +37,10 @@ export type {
 } from './patients';
 export { tasksApi } from './tasks';
 export type {
+  EnsureCoordinationProtocolTaskGroupsResponse,
   Task,
   TaskCreate,
+  TaskKindKey,
   TaskGroup,
   TaskGroupCreate,
   TaskGroupListParams,

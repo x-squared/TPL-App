@@ -1,4 +1,5 @@
-import type { Code, ColloqiumAgenda, Episode, Patient, Task, TaskGroup } from '../../api';
+import type { Code, ColloqiumAgenda, Episode, Patient, Task, TaskGroup, TaskKindKey } from '../../api';
+import { useI18n } from '../../i18n/i18n';
 import TaskBoardActionForm from './TaskBoardActionForm';
 import {
   buildTaskReferences,
@@ -9,7 +10,6 @@ import {
   isDoneTask,
   statusIndicator,
   taskKindIcon,
-  taskKindLabel,
 } from './taskBoardUtils';
 import type {
   TaskActionState,
@@ -40,6 +40,8 @@ interface TaskBoardRowsProps {
   actionState: TaskActionState | null;
   actionComment: string;
   setActionComment: (value: string) => void;
+  actionEventTime: string;
+  setActionEventTime: (value: string) => void;
   actionSaving: boolean;
   onConfirmAction: () => void;
   onCancelAction: () => void;
@@ -60,6 +62,13 @@ interface TaskBoardRowsProps {
   onOpenTaskContext?: (target: TaskBoardContextTarget) => void;
   selectedTaskId: number | null;
   onSelectTask: (taskId: number) => void;
+  showPriority: boolean;
+  showReference: boolean;
+  showAssignedTo: boolean;
+  showComment: boolean;
+  showClosedAt: boolean;
+  showClosedBy: boolean;
+  columnCount: number;
 }
 
 function buildContextTarget(
@@ -75,11 +84,11 @@ function buildContextTarget(
   return { type: 'PATIENT', patientId: group.patient_id };
 }
 
-function toKindSpecificUntil(kindKey: 'TASK' | 'EVENT', value: string): string {
+function toKindSpecificUntil(kindKey: TaskKindKey, value: string): string {
   const raw = value.trim();
   if (!raw) return raw;
   const day = raw.slice(0, 10);
-  if (kindKey === 'TASK') return day;
+  if (kindKey !== 'EVENT') return day;
   if (raw.includes('T')) return raw.slice(0, 16);
   return `${day}T00:00`;
 }
@@ -120,6 +129,8 @@ export default function TaskBoardRows({
   actionState,
   actionComment,
   setActionComment,
+  actionEventTime,
+  setActionEventTime,
   actionSaving,
   onConfirmAction,
   onCancelAction,
@@ -140,7 +151,22 @@ export default function TaskBoardRows({
   onOpenTaskContext,
   selectedTaskId,
   onSelectTask,
+  showPriority,
+  showReference,
+  showAssignedTo,
+  showComment,
+  showClosedAt,
+  showClosedBy,
+  columnCount,
 }: TaskBoardRowsProps) {
+  const { t } = useI18n();
+  const groupLabelColSpan = 3
+    + (showPriority ? 1 : 0)
+    + (showReference ? 1 : 0)
+    + (showAssignedTo ? 1 : 0)
+    + (showComment ? 1 : 0)
+    + (showClosedAt ? 1 : 0)
+    + (showClosedBy ? 1 : 0);
   return (
     <>
       {rows.map((row, idx) => {
@@ -151,10 +177,14 @@ export default function TaskBoardRows({
           return [
             <tr key={`group-${row.group.id}-${idx}`} className="task-board-group-row">
               <td className="open-col"></td>
-              <td className="task-board-state" title="Task group state" aria-label="Task group state">
+              <td
+                className="task-board-state"
+                title={t('taskBoard.group.state', 'Task group state')}
+                aria-label={t('taskBoard.group.state', 'Task group state')}
+              >
                 {groupStateIndicator(row.state)}
               </td>
-              <td colSpan={9} className="task-board-group-label">
+              <td colSpan={groupLabelColSpan} className="task-board-group-label">
                 {row.group.name || `Group #${row.group.id}`}
               </td>
               <td>
@@ -163,8 +193,8 @@ export default function TaskBoardRows({
                     className="edit-btn"
                     onClick={() => onStartEditGroup(row.group)}
                     disabled={editingGroupId !== null && editingGroupId !== row.group.id}
-                    title="Edit task group"
-                    aria-label="Edit task group"
+                    title={t('taskBoard.group.edit', 'Edit task group')}
+                    aria-label={t('taskBoard.group.edit', 'Edit task group')}
                   >
                     ✎
                   </button>
@@ -176,8 +206,10 @@ export default function TaskBoardRows({
                       || (creatingGroupId !== null && creatingGroupId !== row.group.id)
                       || editingGroupId !== null
                     }
-                    title={isClosedGroup ? 'Task group is closed (completed/discarded); no new tasks allowed' : 'Add task to group'}
-                    aria-label="Add task to group"
+                    title={isClosedGroup
+                      ? t('taskBoard.group.closedNoNewTasks', 'Task group is closed (completed/discarded); no new tasks allowed')
+                      : t('taskBoard.group.addTask', 'Add task to group')}
+                    aria-label={t('taskBoard.group.addTask', 'Add task to group')}
                   >
                     +
                   </button>
@@ -186,14 +218,14 @@ export default function TaskBoardRows({
             </tr>,
             isEditingGroup ? (
               <tr key={`group-edit-${row.group.id}`} className="task-board-inline-group-edit-row">
-                <td colSpan={12}>
+                <td colSpan={columnCount}>
                   <div className="task-board-action-form">
                     <p className="task-board-action-title">
-                      Edit group #{row.group.id}
+                      {t('taskBoard.group.editHeading', 'Edit group')} #{row.group.id}
                     </p>
                     <div className="ui-filter-bar task-board-group-edit-fields">
                       <label>
-                        Name
+                        {t('taskBoard.group.name', 'Name')}
                         <input
                           className="ui-filter-input"
                           value={groupEditForm.name}
@@ -213,8 +245,8 @@ export default function TaskBoardRows({
                         className="save-btn"
                         onClick={() => onSaveEditGroup(row.group.id)}
                         disabled={groupEditSaving || groupEditForm.name.trim() === ''}
-                        title="Save group"
-                        aria-label="Save group"
+                        title={t('taskBoard.group.save', 'Save group')}
+                        aria-label={t('taskBoard.group.save', 'Save group')}
                       >
                         {groupEditSaving ? '…' : '✓'}
                       </button>
@@ -222,8 +254,8 @@ export default function TaskBoardRows({
                         className="cancel-btn"
                         onClick={onCancelEditGroup}
                         disabled={groupEditSaving}
-                        title="Cancel group edit"
-                        aria-label="Cancel group edit"
+                        title={t('taskBoard.group.cancelEdit', 'Cancel group edit')}
+                        aria-label={t('taskBoard.group.cancelEdit', 'Cancel group edit')}
                       >
                         ✕
                       </button>
@@ -236,6 +268,23 @@ export default function TaskBoardRows({
               <tr key={`group-add-${row.group.id}`} className="task-board-inline-create-row">
                 <td className="open-col"></td>
                 <td className="task-board-state">●</td>
+                {showPriority ? (
+                  <td>
+                    <select
+                      className="ui-filter-input task-board-cell-input"
+                      value={createForm.priority_id ?? ''}
+                      onChange={(e) =>
+                        setCreateForm((prev) => (prev ? { ...prev, priority_id: e.target.value ? Number(e.target.value) : null } : prev))
+                      }
+                    >
+                      <option value="">{t('taskBoard.common.empty', '–')}</option>
+                      {priorityCodes.map((priority) => (
+                        <option key={priority.id} value={priority.id}>{priority.name_default}</option>
+                      ))}
+                    </select>
+                  </td>
+                ) : null}
+                {showReference ? <td>{t('taskBoard.group.label', 'Group')} #{row.group.id}</td> : null}
                 <td>
                   <select
                     className="ui-filter-input task-board-cell-input"
@@ -243,7 +292,7 @@ export default function TaskBoardRows({
                     onChange={(e) =>
                       setCreateForm((prev) => {
                         if (!prev) return prev;
-                        const nextKind = e.target.value as 'TASK' | 'EVENT';
+                        const nextKind = e.target.value as TaskKindKey;
                         return {
                           ...prev,
                           kind_key: nextKind,
@@ -252,73 +301,62 @@ export default function TaskBoardRows({
                       })
                     }
                   >
-                    <option value="TASK">Task</option>
-                    <option value="EVENT">Event</option>
+                    <option value="TASK">{t('taskBoard.kind.task', 'Task')}</option>
+                    <option value="EVENT">{t('taskBoard.kind.event', 'Event')}</option>
                   </select>
                 </td>
-                <td>
-                  <select
-                    className="ui-filter-input task-board-cell-input"
-                    value={createForm.priority_id ?? ''}
-                    onChange={(e) =>
-                      setCreateForm((prev) => (prev ? { ...prev, priority_id: e.target.value ? Number(e.target.value) : null } : prev))
-                    }
-                  >
-                    <option value="">–</option>
-                    {priorityCodes.map((priority) => (
-                      <option key={priority.id} value={priority.id}>{priority.name_default}</option>
-                    ))}
-                  </select>
-                </td>
-                <td>Group #{row.group.id}</td>
                 <td className="task-col-description">
                   <input
                     className="ui-filter-input task-board-cell-input"
                     value={createForm.description}
                     onChange={(e) => setCreateForm((prev) => (prev ? { ...prev, description: e.target.value } : prev))}
-                    placeholder="Description"
+                    placeholder={t('taskBoard.columns.description', 'Description')}
                   />
                 </td>
-                <td>
-                  <select
-                    className="ui-filter-input task-board-cell-input"
-                    value={createForm.assigned_to_id ?? ''}
-                    onChange={(e) =>
-                      setCreateForm((prev) => (prev ? { ...prev, assigned_to_id: e.target.value ? Number(e.target.value) : null } : prev))
-                    }
-                  >
-                    <option value="">–</option>
-                    {allUserOptions.map((user) => (
-                      <option key={user.id} value={user.id}>{user.name}</option>
-                    ))}
-                  </select>
-                </td>
+                {showAssignedTo ? (
+                  <td>
+                    <select
+                      className="ui-filter-input task-board-cell-input"
+                      value={createForm.assigned_to_id ?? ''}
+                      onChange={(e) =>
+                        setCreateForm((prev) => (prev ? { ...prev, assigned_to_id: e.target.value ? Number(e.target.value) : null } : prev))
+                      }
+                    >
+                      <option value="">{t('taskBoard.common.empty', '–')}</option>
+                      {allUserOptions.map((user) => (
+                        <option key={user.id} value={user.id}>{user.name}</option>
+                      ))}
+                    </select>
+                  </td>
+                ) : null}
                 <td>
                   <input
                     className="ui-filter-input task-board-cell-input"
-                    type={createForm.kind_key === 'TASK' ? 'date' : 'datetime-local'}
+                    type={createForm.kind_key === 'EVENT' ? 'datetime-local' : 'date'}
                     value={createForm.until}
                     onChange={(e) => setCreateForm((prev) => (prev ? { ...prev, until: e.target.value } : prev))}
                   />
                 </td>
-                <td className="task-col-comment">
-                  <input
-                    className="ui-filter-input task-board-cell-input"
-                    value={createForm.comment}
-                    onChange={(e) => setCreateForm((prev) => (prev ? { ...prev, comment: e.target.value } : prev))}
-                    placeholder="Comment"
-                  />
-                </td>
-                <td>–</td>
-                <td>–</td>
+                {showComment ? (
+                  <td className="task-col-comment">
+                    <input
+                      className="ui-filter-input task-board-cell-input"
+                      value={createForm.comment}
+                      onChange={(e) => setCreateForm((prev) => (prev ? { ...prev, comment: e.target.value } : prev))}
+                      placeholder={t('taskBoard.columns.comment', 'Comment')}
+                    />
+                  </td>
+                ) : null}
+                {showClosedAt ? <td>{t('taskBoard.common.empty', '–')}</td> : null}
+                {showClosedBy ? <td>{t('taskBoard.common.empty', '–')}</td> : null}
                 <td>
                   <div className="task-board-row-actions">
                     <button
                       className="save-btn"
                       onClick={() => onSaveCreateTask(row.group.id)}
                       disabled={createSaving || createForm.description.trim() === '' || createForm.until.trim() === ''}
-                      title="Create task"
-                      aria-label="Create task"
+                      title={t('taskBoard.actions.createTask', 'Create task')}
+                      aria-label={t('taskBoard.actions.createTask', 'Create task')}
                     >
                       {createSaving ? '…' : '✓'}
                     </button>
@@ -326,8 +364,8 @@ export default function TaskBoardRows({
                       className="cancel-btn"
                       onClick={onCancelCreateTask}
                       disabled={createSaving}
-                      title="Cancel task creation"
-                      aria-label="Cancel task creation"
+                      title={t('taskBoard.actions.cancelTaskCreation', 'Cancel task creation')}
+                      aria-label={t('taskBoard.actions.cancelTaskCreation', 'Cancel task creation')}
                     >
                       ✕
                     </button>
@@ -361,32 +399,49 @@ export default function TaskBoardRows({
                 <button
                   className="open-btn"
                   onClick={() => onOpenTaskContext(contextTarget)}
-                  title="Open context"
-                  aria-label="Open context"
+                  title={t('taskBoard.actions.openContext', 'Open context')}
+                  aria-label={t('taskBoard.actions.openContext', 'Open context')}
                 >
                   &#x279C;
                 </button>
               ) : null}
             </td>
-            <td className="task-board-state">{statusIndicator(task)}</td>
-            <td>
-              {isEditing ? (
-                <select
-                  className="ui-filter-input task-board-cell-input"
-                  value={editForm.priority_id ?? ''}
-                  onChange={(e) =>
-                    setEditForm((prev) => (prev ? { ...prev, priority_id: e.target.value ? Number(e.target.value) : null } : prev))
-                  }
+            <td className="task-board-state">
+              {canFinalize ? (
+                <button
+                  className="task-board-status-btn"
+                  onClick={() => onStartComplete(task)}
+                  title={task.kind_key === 'EVENT'
+                    ? t('taskBoard.actions.registerEventOccurrence', 'Register event occurrence')
+                    : t('taskBoard.actions.completeTask', 'Complete task')}
+                  aria-label={task.kind_key === 'EVENT'
+                    ? t('taskBoard.actions.registerEventOccurrence', 'Register event occurrence')
+                    : t('taskBoard.actions.completeTask', 'Complete task')}
                 >
-                  <option value="">–</option>
-                  {priorityCodes.map((priority) => (
-                    <option key={priority.id} value={priority.id}>{priority.name_default}</option>
-                  ))}
-                </select>
-              ) : (task.priority?.name_default ?? task.priority?.key ?? '–')}
+                  {statusIndicator(task)}
+                </button>
+              ) : statusIndicator(task)}
             </td>
-            <td><ReferenceCell references={references} /></td>
-            <td title={taskKindLabel(task)}>
+            {showPriority ? (
+              <td>
+                {isEditing ? (
+                  <select
+                    className="ui-filter-input task-board-cell-input"
+                    value={editForm.priority_id ?? ''}
+                    onChange={(e) =>
+                      setEditForm((prev) => (prev ? { ...prev, priority_id: e.target.value ? Number(e.target.value) : null } : prev))
+                    }
+                  >
+                    <option value="">{t('taskBoard.common.empty', '–')}</option>
+                    {priorityCodes.map((priority) => (
+                      <option key={priority.id} value={priority.id}>{priority.name_default}</option>
+                    ))}
+                  </select>
+                ) : (task.priority?.name_default ?? task.priority?.key ?? t('taskBoard.common.empty', '–'))}
+              </td>
+            ) : null}
+            {showReference ? <td><ReferenceCell references={references} /></td> : null}
+            <td title={task.kind_key === 'EVENT' ? t('taskBoard.kind.event', 'Event') : t('taskBoard.kind.task', 'Task')}>
               {isEditing ? (
                 <select
                   className="ui-filter-input task-board-cell-input task-board-kind-select"
@@ -394,7 +449,7 @@ export default function TaskBoardRows({
                   onChange={(e) =>
                     setEditForm((prev) => {
                       if (!prev) return prev;
-                      const nextKind = e.target.value as 'TASK' | 'EVENT';
+                      const nextKind = e.target.value as TaskKindKey;
                       return {
                         ...prev,
                         kind_key: nextKind,
@@ -403,8 +458,8 @@ export default function TaskBoardRows({
                     })
                   }
                 >
-                  <option value="TASK">Task</option>
-                  <option value="EVENT">Event</option>
+                  <option value="TASK">{t('taskBoard.kind.task', 'Task')}</option>
+                  <option value="EVENT">{t('taskBoard.kind.event', 'Event')}</option>
                 </select>
               ) : taskKindIcon(task)}
             </td>
@@ -415,45 +470,49 @@ export default function TaskBoardRows({
                   value={editForm.description}
                   onChange={(e) => setEditForm((prev) => (prev ? { ...prev, description: e.target.value } : prev))}
                 />
-              ) : (task.description || '–')}
+              ) : (task.description || t('taskBoard.common.empty', '–'))}
             </td>
-            <td>
-              {isEditing ? (
-                <select
-                  className="ui-filter-input task-board-cell-input"
-                  value={editForm.assigned_to_id ?? ''}
-                  onChange={(e) =>
-                    setEditForm((prev) => (prev ? { ...prev, assigned_to_id: e.target.value ? Number(e.target.value) : null } : prev))
-                  }
-                >
-                  <option value="">–</option>
-                  {allUserOptions.map((user) => (
-                    <option key={user.id} value={user.id}>{user.name}</option>
-                  ))}
-                </select>
-              ) : (task.assigned_to?.name ?? '–')}
-            </td>
+            {showAssignedTo ? (
+              <td>
+                {isEditing ? (
+                  <select
+                    className="ui-filter-input task-board-cell-input"
+                    value={editForm.assigned_to_id ?? ''}
+                    onChange={(e) =>
+                      setEditForm((prev) => (prev ? { ...prev, assigned_to_id: e.target.value ? Number(e.target.value) : null } : prev))
+                    }
+                  >
+                    <option value="">–</option>
+                    {allUserOptions.map((user) => (
+                      <option key={user.id} value={user.id}>{user.name}</option>
+                    ))}
+                  </select>
+                ) : (task.assigned_to?.name ?? t('taskBoard.common.empty', '–'))}
+              </td>
+            ) : null}
             <td>
               {isEditing ? (
                 <input
                   className="ui-filter-input task-board-cell-input"
-                  type={editForm.kind_key === 'TASK' ? 'date' : 'datetime-local'}
+                  type={editForm.kind_key === 'EVENT' ? 'datetime-local' : 'date'}
                   value={editForm.until}
                   onChange={(e) => setEditForm((prev) => (prev ? { ...prev, until: e.target.value } : prev))}
                 />
               ) : formatDue(task)}
             </td>
-            <td className="task-col-comment">
-              {isEditing ? (
-                <input
-                  className="ui-filter-input task-board-cell-input"
-                  value={editForm.comment}
-                  onChange={(e) => setEditForm((prev) => (prev ? { ...prev, comment: e.target.value } : prev))}
-                />
-              ) : (task.comment || '–')}
-            </td>
-            <td>{formatDate(task.closed_at)}</td>
-            <td>{task.closed_by?.name ?? '–'}</td>
+            {showComment ? (
+              <td className="task-col-comment">
+                {isEditing ? (
+                  <input
+                    className="ui-filter-input task-board-cell-input"
+                    value={editForm.comment}
+                    onChange={(e) => setEditForm((prev) => (prev ? { ...prev, comment: e.target.value } : prev))}
+                  />
+                ) : (task.comment || t('taskBoard.common.empty', '–'))}
+              </td>
+            ) : null}
+            {showClosedAt ? <td>{formatDate(task.closed_at)}</td> : null}
+            {showClosedBy ? <td>{task.closed_by?.name ?? t('taskBoard.common.empty', '–')}</td> : null}
             <td>
               {isEditing ? (
                 <div className="task-board-row-actions">
@@ -461,8 +520,8 @@ export default function TaskBoardRows({
                     className="save-btn"
                     onClick={() => onSaveEdit(task.id)}
                     disabled={editSaving || editForm.until.trim() === ''}
-                    title="Save edit"
-                    aria-label="Save edit"
+                    title={t('taskBoard.actions.saveEdit', 'Save edit')}
+                    aria-label={t('taskBoard.actions.saveEdit', 'Save edit')}
                   >
                     {editSaving ? '…' : '✓'}
                   </button>
@@ -470,8 +529,8 @@ export default function TaskBoardRows({
                     className="cancel-btn"
                     onClick={onCancelEdit}
                     disabled={editSaving}
-                    title="Cancel edit"
-                    aria-label="Cancel edit"
+                    title={t('taskBoard.actions.cancelEdit', 'Cancel edit')}
+                    aria-label={t('taskBoard.actions.cancelEdit', 'Cancel edit')}
                   >
                     ✕
                   </button>
@@ -482,8 +541,12 @@ export default function TaskBoardRows({
                     className="edit-btn"
                     onClick={() => onStartComplete(task)}
                     disabled={!canFinalize}
-                    title={task.kind_key === 'EVENT' ? 'Register event occurrence' : 'Complete task'}
-                    aria-label={task.kind_key === 'EVENT' ? 'Register event occurrence' : 'Complete task'}
+                    title={task.kind_key === 'EVENT'
+                      ? t('taskBoard.actions.registerEventOccurrence', 'Register event occurrence')
+                      : t('taskBoard.actions.completeTask', 'Complete task')}
+                    aria-label={task.kind_key === 'EVENT'
+                      ? t('taskBoard.actions.registerEventOccurrence', 'Register event occurrence')
+                      : t('taskBoard.actions.completeTask', 'Complete task')}
                   >
                     ✓
                   </button>
@@ -491,8 +554,8 @@ export default function TaskBoardRows({
                     className="cancel-btn"
                     onClick={() => onStartDiscard(task)}
                     disabled={!canFinalize}
-                    title="Discard task"
-                    aria-label="Discard task"
+                    title={t('taskBoard.actions.discardTask', 'Discard task')}
+                    aria-label={t('taskBoard.actions.discardTask', 'Discard task')}
                   >
                     −
                   </button>
@@ -500,8 +563,8 @@ export default function TaskBoardRows({
                     className="edit-btn"
                     onClick={() => onStartEdit(task)}
                     disabled={editingTaskId !== null}
-                    title="Edit task"
-                    aria-label="Edit task"
+                    title={t('taskBoard.actions.editTask', 'Edit task')}
+                    aria-label={t('taskBoard.actions.editTask', 'Edit task')}
                   >
                     ✎
                   </button>
@@ -511,11 +574,13 @@ export default function TaskBoardRows({
           </tr>,
           actionState?.task.id === task.id ? (
             <tr key={`task-action-${task.id}`} className="task-board-inline-action-row">
-              <td colSpan={12}>
+              <td colSpan={columnCount}>
                 <TaskBoardActionForm
                   actionState={actionState}
                   actionComment={actionComment}
                   setActionComment={setActionComment}
+                  actionEventTime={actionEventTime}
+                  setActionEventTime={setActionEventTime}
                   actionSaving={actionSaving}
                   onConfirm={onConfirmAction}
                   onCancel={onCancelAction}

@@ -1,5 +1,6 @@
 import { useMemo, useState } from 'react';
 import type { Code, Episode, EpisodeOrgan } from '../../../api';
+import { useI18n } from '../../../i18n/i18n';
 import type { EpisodeMetaForm } from './types';
 
 interface EpisodeMetaSectionProps {
@@ -45,6 +46,7 @@ export default function EpisodeMetaSection({
   onUpdateOrgan,
   favoriteControl,
 }: EpisodeMetaSectionProps) {
+  const { t } = useI18n();
   const [addingOrgan, setAddingOrgan] = useState(false);
   const [newOrganId, setNewOrganId] = useState<number | null>(null);
   const [newOrganDateAdded, setNewOrganDateAdded] = useState(() => new Date().toISOString().slice(0, 10));
@@ -60,7 +62,7 @@ export default function EpisodeMetaSection({
       .map((row) => row.organ?.name_default)
       .filter((name): name is string => Boolean(name));
     if (active.length > 0) return active.join(' / ');
-    return selectedEpisode.organ?.name_default ?? '–';
+    return selectedEpisode.organ?.name_default ?? t('common.emptySymbol', '–');
   }, [selectedEpisode]);
 
   const currentOrganIds = new Set(selectedEpisode.episode_organs.map((row) => row.organ_id));
@@ -115,7 +117,7 @@ export default function EpisodeMetaSection({
     <>
       <div className="detail-section-heading">
         <div className="ui-heading-title-with-favorite">
-          <h2>Episode {activeOrganName}</h2>
+          <h2>{t('server.entities.episode', 'Episode')} {activeOrganName}</h2>
           {favoriteControl}
         </div>
         {!addingOrgan ? (
@@ -128,7 +130,7 @@ export default function EpisodeMetaSection({
             }}
             disabled={organActionLoading}
           >
-            + Add organ
+            {t('episode.meta.addOrgan', '+ Add organ')}
           </button>
         ) : null}
       </div>
@@ -136,24 +138,24 @@ export default function EpisodeMetaSection({
         <table className="detail-contact-table episode-organs-table">
           <thead>
             <tr>
-              <th>Organ</th>
-              <th>Date added</th>
-              <th>Comment</th>
-              <th>Active</th>
-              <th>Date inactivated</th>
-              <th>Reason</th>
+              <th>{t('coordinations.table.organ', 'Organ')}</th>
+              <th>{t('episode.meta.dateAdded', 'Date added')}</th>
+              <th>{t('taskBoard.columns.comment', 'Comment')}</th>
+              <th>{t('episode.meta.active', 'Active')}</th>
+              <th>{t('episode.meta.dateInactivated', 'Date inactivated')}</th>
+              <th>{t('episode.meta.reason', 'Reason')}</th>
               <th></th>
             </tr>
           </thead>
           <tbody>
             {sortedRows.length === 0 && !addingOrgan ? (
               <tr>
-                <td colSpan={7} className="detail-empty">No organs linked to this episode.</td>
+                <td colSpan={7} className="detail-empty">{t('episode.meta.emptyOrgans', 'No organs linked to this episode.')}</td>
               </tr>
             ) : null}
             {sortedRows.map((row) => (
               <tr key={row.id} className={row.is_active ? '' : 'episode-organ-row-inactive'}>
-                <td>{row.organ?.name_default ?? '–'}</td>
+                <td>{row.organ?.name_default ?? t('common.emptySymbol', '–')}</td>
                 <td>{formatDate(row.date_added)}</td>
                 <td>
                   {editingOrganId === row.id ? (
@@ -165,10 +167,10 @@ export default function EpisodeMetaSection({
                       disabled={organActionLoading}
                     />
                   ) : (
-                    row.comment || '–'
+                    row.comment || t('common.emptySymbol', '–')
                   )}
                 </td>
-                <td>{row.is_active ? 'Yes' : 'No'}</td>
+                <td>{row.is_active ? t('common.yes', 'Yes') : t('common.no', 'No')}</td>
                 <td>{formatDate(row.date_inactivated)}</td>
                 <td>
                   {editingOrganId === row.id ? (
@@ -180,7 +182,7 @@ export default function EpisodeMetaSection({
                       disabled={organActionLoading}
                     />
                   ) : (
-                    row.reason_activation_change || '–'
+                    row.reason_activation_change || t('common.emptySymbol', '–')
                   )}
                 </td>
                 <td className="detail-ci-actions">
@@ -191,7 +193,7 @@ export default function EpisodeMetaSection({
                         className="ci-save-inline"
                         onClick={() => saveEditingOrgan(row)}
                         disabled={organActionLoading}
-                        title="Save"
+                        title={t('actions.save', 'Save')}
                       >
                         ✓
                       </button>
@@ -200,7 +202,7 @@ export default function EpisodeMetaSection({
                         className="ci-cancel-inline"
                         onClick={cancelEditingOrgan}
                         disabled={organActionLoading}
-                        title="Cancel"
+                        title={t('actions.cancel', 'Cancel')}
                       >
                         ✕
                       </button>
@@ -212,7 +214,7 @@ export default function EpisodeMetaSection({
                         className="ci-edit-inline"
                         onClick={() => startEditingOrgan(row)}
                         disabled={organActionLoading}
-                        title="Edit"
+                        title={t('actions.edit', 'Edit')}
                       >
                         ✎
                       </button>
@@ -226,7 +228,7 @@ export default function EpisodeMetaSection({
                           })
                         }
                         disabled={organActionLoading}
-                        title={row.is_active ? 'Deactivate' : 'Reactivate'}
+                        title={row.is_active ? t('episode.meta.deactivate', 'Deactivate') : t('episode.meta.reactivate', 'Reactivate')}
                       >
                         {row.is_active ? '×' : '↺'}
                       </button>
@@ -244,11 +246,11 @@ export default function EpisodeMetaSection({
                     onChange={(e) => setNewOrganId(e.target.value ? Number(e.target.value) : null)}
                     disabled={organActionLoading}
                   >
-                    <option value="">Select organ...</option>
+                    <option value="">{t('episode.meta.selectOrgan', 'Select organ...')}</option>
                     {organCodes.map((code) => (
                       <option key={code.id} value={code.id}>
                         {code.name_default}
-                        {currentOrganIds.has(code.id) ? ' (existing)' : ''}
+                        {currentOrganIds.has(code.id) ? ` (${t('episode.meta.existing', 'existing')})` : ''}
                       </option>
                     ))}
                   </select>
@@ -271,8 +273,8 @@ export default function EpisodeMetaSection({
                     disabled={organActionLoading}
                   />
                 </td>
-                <td>Yes</td>
-                <td>–</td>
+                <td>{t('common.yes', 'Yes')}</td>
+                <td>{t('common.emptySymbol', '–')}</td>
                 <td>
                   <input
                     className="detail-input ci-inline-input"
@@ -288,7 +290,7 @@ export default function EpisodeMetaSection({
                     className="ci-save-inline"
                     onClick={handleAdd}
                     disabled={organActionLoading || !newOrganId}
-                    title="Save"
+                    title={t('actions.save', 'Save')}
                   >
                     ✓
                   </button>
@@ -303,7 +305,7 @@ export default function EpisodeMetaSection({
                       setNewOrganReason('');
                     }}
                     disabled={organActionLoading}
-                    title="Cancel"
+                    title={t('actions.cancel', 'Cancel')}
                   >
                     ✕
                   </button>
@@ -313,7 +315,7 @@ export default function EpisodeMetaSection({
           </tbody>
         </table>
         <div className="detail-section-heading episode-meta-notes-heading">
-          <h3>Episode Data</h3>
+          <h3>{t('episode.meta.episodeData', 'Episode Data')}</h3>
           {editingEpisodeMeta ? (
             <div className="edit-actions">
               <button
@@ -322,7 +324,7 @@ export default function EpisodeMetaSection({
                 onClick={handleSaveEpisodeMeta}
                 disabled={detailSaving}
               >
-                {detailSaving ? 'Saving...' : 'Save'}
+                {detailSaving ? t('coordinations.form.saving', 'Saving...') : t('actions.save', 'Save')}
               </button>
               <button
                 type="button"
@@ -330,16 +332,16 @@ export default function EpisodeMetaSection({
                 onClick={() => setEditingEpisodeMeta(false)}
                 disabled={detailSaving}
               >
-                Cancel
+                {t('actions.cancel', 'Cancel')}
               </button>
             </div>
           ) : (
-            <button type="button" className="edit-btn" onClick={startEditingEpisodeMeta}>Edit</button>
+            <button type="button" className="edit-btn" onClick={startEditingEpisodeMeta}>{t('actions.edit', 'Edit')}</button>
           )}
         </div>
         <div className="episode-meta-grid">
           <div className="episode-detail-field episode-meta-case">
-            <span className="episode-detail-label">Fall-Nr.</span>
+            <span className="episode-detail-label">{t('episode.meta.fallNr', 'Fall-Nr.')}</span>
             {editingEpisodeMeta ? (
               <input
                 className="detail-input"
@@ -347,11 +349,11 @@ export default function EpisodeMetaSection({
                 onChange={(e) => setEpisodeMetaForm((f) => ({ ...f, fall_nr: e.target.value }))}
               />
             ) : (
-              <span className="episode-detail-value">{selectedEpisode.fall_nr || '–'}</span>
+              <span className="episode-detail-value">{selectedEpisode.fall_nr || t('common.emptySymbol', '–')}</span>
             )}
           </div>
           <div className="episode-detail-field episode-meta-comment">
-            <span className="episode-detail-label">Comment</span>
+            <span className="episode-detail-label">{t('taskBoard.columns.comment', 'Comment')}</span>
             {editingEpisodeMeta ? (
               <textarea
                 className="detail-input episode-meta-textarea"
@@ -369,7 +371,7 @@ export default function EpisodeMetaSection({
             )}
           </div>
           <div className="episode-detail-field episode-meta-cave">
-            <span className="episode-detail-label">Cave</span>
+            <span className="episode-detail-label">{t('episode.meta.cave', 'Cave')}</span>
             {editingEpisodeMeta ? (
               <textarea
                 className="detail-input episode-meta-textarea"

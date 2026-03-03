@@ -19,7 +19,7 @@ router = APIRouter(prefix="/coordinations", tags=["coordinations"])
 @router.get("/", response_model=list[CoordinationResponse])
 def list_coordinations(
     db: Session = Depends(get_db),
-    _: User = Depends(require_permission("view.donations")),
+    _: User = Depends(require_permission("view.donors")),
 ):
     return list_coordinations_service(db)
 
@@ -28,7 +28,7 @@ def list_coordinations(
 def get_coordination(
     coordination_id: int,
     db: Session = Depends(get_db),
-    _: User = Depends(require_permission("view.donations")),
+    _: User = Depends(require_permission("view.donors")),
 ):
     return get_coordination_or_404(coordination_id, db)
 
@@ -37,7 +37,7 @@ def get_coordination(
 def create_coordination(
     payload: CoordinationCreate,
     db: Session = Depends(get_db),
-    current_user: User = Depends(require_permission("edit.donations")),
+    current_user: User = Depends(require_permission("edit.donors")),
 ):
     return create_coordination_service(payload=payload, changed_by_id=current_user.id, db=db)
 
@@ -47,7 +47,7 @@ def update_coordination(
     coordination_id: int,
     payload: CoordinationUpdate,
     db: Session = Depends(get_db),
-    current_user: User = Depends(require_permission("edit.donations")),
+    current_user: User = Depends(require_permission("edit.donors")),
 ):
     return update_coordination_service(
         coordination_id=coordination_id,
@@ -61,6 +61,6 @@ def update_coordination(
 def delete_coordination(
     coordination_id: int,
     db: Session = Depends(get_db),
-    current_user: User = Depends(require_permission("edit.donations")),
+    current_user: User = Depends(require_permission("edit.donors")),
 ):
     delete_coordination_service(coordination_id=coordination_id, db=db)

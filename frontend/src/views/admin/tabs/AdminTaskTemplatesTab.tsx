@@ -3,6 +3,7 @@ import { useEffect, useMemo, useState } from 'react';
 import type { Code, TaskGroupTemplate, TaskTemplate } from '../../../api';
 import ErrorBanner from '../../layout/ErrorBanner';
 import { combineOffsetMinutes, splitOffsetMinutes } from '../hooks/useAdminTaskTemplates';
+import { useI18n } from '../../../i18n/i18n';
 
 interface OffsetParts {
   days: number;
@@ -13,6 +14,7 @@ interface OffsetParts {
 interface EditFormState {
   task_group_template_id: number;
   description: string;
+  comment_hint: string;
   kind_key: 'TASK' | 'EVENT';
   priority_id: number | null;
   is_active: boolean;
@@ -72,6 +74,7 @@ interface AdminTaskTemplatesTabProps {
   onCreateTemplate: (payload: {
     task_group_template_id: number;
     description: string;
+    comment_hint: string;
     kind_key: 'TASK' | 'EVENT';
     priority_id: number | null;
     offset_minutes_default: number;
@@ -83,6 +86,7 @@ interface AdminTaskTemplatesTabProps {
     payload: {
       task_group_template_id: number;
       description: string;
+      comment_hint: string;
       kind_key: 'TASK' | 'EVENT';
       priority_id: number | null;
       offset_minutes_default: number;
@@ -96,6 +100,7 @@ function buildInitialCreateForm(groupTemplates: TaskGroupTemplate[]): CreateForm
   return {
     task_group_template_id: groupTemplates[0]?.id ?? 0,
     description: '',
+    comment_hint: '',
     kind_key: 'TASK',
     priority_id: null,
     is_active: true,
@@ -118,6 +123,7 @@ export default function AdminTaskTemplatesTab({
   onCreateTemplate,
   onUpdateTemplate,
 }: AdminTaskTemplatesTabProps) {
+  const { t } = useI18n();
   const [editingTemplateId, setEditingTemplateId] = useState<number | null>(null);
   const [editForm, setEditForm] = useState<EditFormState | null>(null);
   const [createForm, setCreateForm] = useState<CreateFormState>(buildInitialCreateForm(groupTemplates));
@@ -131,6 +137,7 @@ export default function AdminTaskTemplatesTab({
     is_active: true,
     sort_pos: 0,
   });
+  const [selectedGroupTemplateId, setSelectedGroupTemplateId] = useState<number | null>(null);
 
   useEffect(() => {
     if (groupTemplates.length === 0) return;
@@ -140,7 +147,6 @@ export default function AdminTaskTemplatesTab({
         : { ...prev, task_group_template_id: groupTemplates[0].id }
     ));
   }, [groupTemplates]);
-
   const sortedTemplates = useMemo(
     () => [...templates].sort((a, b) => (a.sort_pos - b.sort_pos) || (a.id - b.id)),
     [templates],
@@ -149,13 +155,39 @@ export default function AdminTaskTemplatesTab({
     () => [...groupTemplates].sort((a, b) => (a.sort_pos - b.sort_pos) || (a.id - b.id)),
     [groupTemplates],
   );
+  const selectedGroupTemplate = useMemo(
+    () => sortedGroupTemplates.find((entry) => entry.id === selectedGroupTemplateId) ?? null,
+    [selectedGroupTemplateId, sortedGroupTemplates],
+  );
+  const filteredTemplates = useMemo(
+    () => (
+      selectedGroupTemplateId
+        ? sortedTemplates.filter((entry) => entry.task_group_template_id === selectedGroupTemplateId)
+        : []
+    ),
+    [selectedGroupTemplateId, sortedTemplates],
+  );
   const coordinationProtocolScopeId = taskScopeCodes.find((entry) => entry.key === 'COORDINATION_PROTOCOL')?.id ?? null;
+  useEffect(() => {
+    if (sortedGroupTemplates.length === 0) {
+      setSelectedGroupTemplateId(null);
+      return;
+    }
+    if (!selectedGroupTemplateId || !sortedGroupTemplates.some((entry) => entry.id === selectedGroupTemplateId)) {
+      setSelectedGroupTemplateId(sortedGroupTemplates[0].id);
+    }
+  }, [selectedGroupTemplateId, sortedGroupTemplates]);
+  useEffect(() => {
+    if (!selectedGroupTemplateId) return;
+    setCreateForm((prev) => ({ ...prev, task_group_template_id: selectedGroupTemplateId }));
+  }, [selectedGroupTemplateId]);
 
   const startEdit = (template: TaskTemplate) => {
     setEditingTemplateId(template.id);
     setEditForm({
       task_group_template_id: template.task_group_template_id,
       description: template.description,
+      comment_hint: template.comment_hint ?? '',
       kind_key: template.kind_key ?? 'TASK',
       priority_id: template.priority_id,
       is_active: template.is_active,
@@ -169,6 +201,7 @@ export default function AdminTaskTemplatesTab({
     await onUpdateTemplate(templateId, {
       task_group_template_id: editForm.task_group_template_id,
       description: editForm.description.trim(),
+      comment_hint: editForm.comment_hint.trim(),
       kind_key: editForm.kind_key,
       priority_id: editForm.priority_id,
       offset_minutes_default: combineOffsetMinutes(editForm.offset),
@@ -184,6 +217,7 @@ export default function AdminTaskTemplatesTab({
     await onCreateTemplate({
       task_group_template_id: createForm.task_group_template_id,
       description: createForm.description.trim(),
+      comment_hint: createForm.comment_hint.trim(),
       kind_key: createForm.kind_key,
       priority_id: createForm.priority_id,
       offset_minutes_default: combineOffsetMinutes(createForm.offset),
@@ -244,33 +278,37 @@ export default function AdminTaskTemplatesTab({
   return (
     <section className="detail-section ui-panel-section">
       <div className="detail-section-heading">
-        <h2>Coordination Protocol Task Templates</h2>
+        <h2>{t('admin.taskTemplates.title', 'Task Templates')}</h2>
       </div>
-      {loading && <p className="status">Loading task templates...</p>}
+      {loading && <p className="status">{t('admin.taskTemplates.loading', 'Loading task templates...')}</p>}
       {error && <ErrorBanner message={error} />}
       {!loading && (
         <>
+          <div className="admin-people-card">
+            <div className="detail-section-heading">
+              <h3>{t('admin.taskTemplates.groupsSection', 'Groups')}</h3>
+            </div>
           <div className="admin-task-template-create admin-people-form">
             <label>
-              <span>Group Key</span>
+              <span>{t('admin.taskTemplates.groupKey', 'Group Key')}</span>
               <input
                 className="detail-input"
                 value={createGroupTemplateForm.key}
                 onChange={(e) => setCreateGroupTemplateForm((prev) => ({ ...prev, key: e.target.value }))}
-                placeholder="COORD_PROTOCOL_COMMON"
+                placeholder={t('admin.taskTemplates.groupKeyPlaceholder', 'COORD_PROTOCOL_COMMON')}
               />
             </label>
             <label>
-              <span>Group Name</span>
+              <span>{t('admin.taskTemplates.groupName', 'Group Name')}</span>
               <input
                 className="detail-input"
                 value={createGroupTemplateForm.name}
                 onChange={(e) => setCreateGroupTemplateForm((prev) => ({ ...prev, name: e.target.value }))}
-                placeholder="Protocol - Common"
+                placeholder={t('admin.taskTemplates.groupNamePlaceholder', 'Protocol - Common')}
               />
             </label>
             <label>
-              <span>Description</span>
+              <span>{t('taskBoard.columns.description', 'Description')}</span>
               <input
                 className="detail-input"
                 value={createGroupTemplateForm.description}
@@ -278,13 +316,13 @@ export default function AdminTaskTemplatesTab({
               />
             </label>
             <label>
-              <span>Organ</span>
+              <span>{t('taskBoard.filters.organ', 'Organ')}</span>
               <select
                 className="detail-input"
                 value={createGroupTemplateForm.organ_id ?? ''}
                 onChange={(e) => setCreateGroupTemplateForm((prev) => ({ ...prev, organ_id: e.target.value ? Number(e.target.value) : null }))}
               >
-                <option value="">All organs</option>
+                <option value="">{t('admin.taskTemplates.allOrgans', 'All organs')}</option>
                 {organCodes.map((organ) => (
                   <option key={organ.id} value={organ.id}>
                     {organ.name_default}
@@ -293,15 +331,18 @@ export default function AdminTaskTemplatesTab({
               </select>
             </label>
             <label>
-              <span>Active</span>
-              <input
-                type="checkbox"
-                checked={createGroupTemplateForm.is_active}
-                onChange={(e) => setCreateGroupTemplateForm((prev) => ({ ...prev, is_active: e.target.checked }))}
-              />
+              <span>{t('admin.taskTemplates.active', 'Active')}</span>
+              <select
+                className="detail-input"
+                value={createGroupTemplateForm.is_active ? 'true' : 'false'}
+                onChange={(e) => setCreateGroupTemplateForm((prev) => ({ ...prev, is_active: e.target.value === 'true' }))}
+              >
+                <option value="true">{t('common.yes', 'Yes')}</option>
+                <option value="false">{t('common.no', 'No')}</option>
+              </select>
             </label>
             <label>
-              <span>Pos</span>
+              <span>{t('admin.taskTemplates.position', 'Pos')}</span>
               <input
                 className="detail-input"
                 type="number"
@@ -315,7 +356,7 @@ export default function AdminTaskTemplatesTab({
                 disabled={saving || !createGroupTemplateForm.key.trim() || !createGroupTemplateForm.name.trim() || !coordinationProtocolScopeId}
                 onClick={() => { void saveCreateGroupTemplate(); }}
               >
-                + Add Group Template
+                {t('admin.taskTemplates.addGroupTemplate', '+ Add Group Template')}
               </button>
             </div>
           </div>
@@ -324,20 +365,24 @@ export default function AdminTaskTemplatesTab({
             <table className="data-table">
               <thead>
                 <tr>
-                  <th>Key</th>
-                  <th>Name</th>
-                  <th>Description</th>
-                  <th>Organ</th>
-                  <th>Active</th>
-                  <th>Pos</th>
-                  <th>Actions</th>
+                  <th>{t('admin.taskTemplates.table.key', 'Key')}</th>
+                  <th>{t('admin.taskTemplates.table.name', 'Name')}</th>
+                  <th>{t('taskBoard.columns.description', 'Description')}</th>
+                  <th>{t('taskBoard.filters.organ', 'Organ')}</th>
+                  <th>{t('admin.taskTemplates.active', 'Active')}</th>
+                  <th>{t('admin.taskTemplates.position', 'Pos')}</th>
+                  <th>{t('taskBoard.columns.actions', 'Actions')}</th>
                 </tr>
               </thead>
               <tbody>
                 {sortedGroupTemplates.map((groupTemplate) => {
                   const isEditing = editingGroupTemplateId === groupTemplate.id && editGroupTemplateForm !== null;
                   return (
-                    <tr key={groupTemplate.id}>
+                    <tr
+                      key={groupTemplate.id}
+                      className={selectedGroupTemplateId === groupTemplate.id ? 'admin-task-template-group-row-selected' : ''}
+                      onClick={() => setSelectedGroupTemplateId(groupTemplate.id)}
+                    >
                       <td>
                         {isEditing ? (
                           <input
@@ -372,23 +417,26 @@ export default function AdminTaskTemplatesTab({
                             value={editGroupTemplateForm.organ_id ?? ''}
                             onChange={(e) => setEditGroupTemplateForm((prev) => (prev ? { ...prev, organ_id: e.target.value ? Number(e.target.value) : null } : prev))}
                           >
-                            <option value="">All organs</option>
+                            <option value="">{t('admin.taskTemplates.allOrgans', 'All organs')}</option>
                             {organCodes.map((organ) => (
                               <option key={organ.id} value={organ.id}>
                                 {organ.name_default}
                               </option>
                             ))}
                           </select>
-                        ) : (groupTemplate.organ?.name_default ?? 'All organs')}
+                        ) : (groupTemplate.organ?.name_default ?? t('admin.taskTemplates.allOrgans', 'All organs'))}
                       </td>
                       <td>
                         {isEditing ? (
-                          <input
-                            type="checkbox"
-                            checked={editGroupTemplateForm.is_active}
-                            onChange={(e) => setEditGroupTemplateForm((prev) => (prev ? { ...prev, is_active: e.target.checked } : prev))}
-                          />
-                        ) : (groupTemplate.is_active ? 'Yes' : 'No')}
+                          <select
+                            className="detail-input"
+                            value={editGroupTemplateForm.is_active ? 'true' : 'false'}
+                            onChange={(e) => setEditGroupTemplateForm((prev) => (prev ? { ...prev, is_active: e.target.value === 'true' } : prev))}
+                          >
+                            <option value="true">{t('common.yes', 'Yes')}</option>
+                            <option value="false">{t('common.no', 'No')}</option>
+                          </select>
+                        ) : (groupTemplate.is_active ? t('common.yes', 'Yes') : t('common.no', 'No'))}
                       </td>
                       <td>
                         {isEditing ? (
@@ -429,30 +477,21 @@ export default function AdminTaskTemplatesTab({
                 })}
                 {sortedGroupTemplates.length === 0 && (
                   <tr>
-                    <td colSpan={7}>No coordination protocol group templates available.</td>
+                    <td colSpan={7}>{t('admin.taskTemplates.emptyGroupTemplates', 'No coordination protocol group templates available.')}</td>
                   </tr>
                 )}
               </tbody>
             </table>
           </div>
+          </div>
 
+          <div className="admin-people-card">
+            <div className="detail-section-heading">
+              <h3>{t('admin.taskTemplates.templatesSection', 'Tasks')}</h3>
+            </div>
           <div className="admin-task-template-create admin-people-form">
             <label>
-              <span>Group Template</span>
-              <select
-                className="detail-input"
-                value={createForm.task_group_template_id}
-                onChange={(e) => setCreateForm((prev) => ({ ...prev, task_group_template_id: Number(e.target.value) }))}
-              >
-                {groupTemplates.map((groupTemplate) => (
-                  <option key={groupTemplate.id} value={groupTemplate.id}>
-                    {groupTemplate.name}
-                  </option>
-                ))}
-              </select>
-            </label>
-            <label>
-              <span>Description</span>
+              <span>{t('taskBoard.columns.description', 'Description')}</span>
               <input
                 className="detail-input"
                 value={createForm.description}
@@ -460,31 +499,40 @@ export default function AdminTaskTemplatesTab({
               />
             </label>
             <label>
-              <span>Kind</span>
+              <span>{t('admin.taskTemplates.commentHint', 'Comment Hint')}</span>
+              <input
+                className="detail-input"
+                value={createForm.comment_hint}
+                onChange={(e) => setCreateForm((prev) => ({ ...prev, comment_hint: e.target.value }))}
+                placeholder={t('admin.taskTemplates.commentHintPlaceholder', 'e.g. Document who confirmed and at what time')}
+              />
+            </label>
+            <label>
+              <span>{t('taskBoard.columns.kind', 'Kind')}</span>
               <select
                 className="detail-input"
                 value={createForm.kind_key}
                 onChange={(e) => setCreateForm((prev) => ({ ...prev, kind_key: e.target.value as 'TASK' | 'EVENT' }))}
               >
-                <option value="TASK">Task</option>
-                <option value="EVENT">Event</option>
+                <option value="TASK">{t('taskBoard.kind.task', 'Task')}</option>
+                <option value="EVENT">{t('taskBoard.kind.event', 'Event')}</option>
               </select>
             </label>
             <label>
-              <span>Priority</span>
+              <span>{t('taskBoard.columns.priority', 'Priority')}</span>
               <select
                 className="detail-input"
                 value={createForm.priority_id ?? ''}
                 onChange={(e) => setCreateForm((prev) => ({ ...prev, priority_id: e.target.value ? Number(e.target.value) : null }))}
               >
-                <option value="">(default)</option>
+                <option value="">{t('admin.taskTemplates.defaultPriority', '(default)')}</option>
                 {priorityCodes.map((priority) => (
                   <option key={priority.id} value={priority.id}>{priority.name_default}</option>
                 ))}
               </select>
             </label>
             <label>
-              <span>Offset Days</span>
+              <span>{t('admin.taskTemplates.offsetDays', 'Offset Days')}</span>
               <input
                 className="detail-input"
                 type="number"
@@ -493,7 +541,7 @@ export default function AdminTaskTemplatesTab({
               />
             </label>
             <label>
-              <span>Offset Hours</span>
+              <span>{t('admin.taskTemplates.offsetHours', 'Offset Hours')}</span>
               <input
                 className="detail-input"
                 type="number"
@@ -502,7 +550,7 @@ export default function AdminTaskTemplatesTab({
               />
             </label>
             <label>
-              <span>Offset Minutes</span>
+              <span>{t('admin.taskTemplates.offsetMinutes', 'Offset Minutes')}</span>
               <input
                 className="detail-input"
                 type="number"
@@ -511,8 +559,12 @@ export default function AdminTaskTemplatesTab({
               />
             </label>
             <div className="admin-proc-action-cell">
-              <button className="save-btn" disabled={saving || !createForm.description.trim()} onClick={() => { void saveCreate(); }}>
-                + Add Template
+              <button
+                className="save-btn"
+                disabled={saving || !createForm.description.trim() || !selectedGroupTemplate}
+                onClick={() => { void saveCreate(); }}
+              >
+                {t('admin.taskTemplates.addTemplate', '+ Add Template')}
               </button>
             </div>
           </div>
@@ -521,20 +573,21 @@ export default function AdminTaskTemplatesTab({
             <table className="data-table">
               <thead>
                 <tr>
-                  <th>Group</th>
-                  <th>Kind</th>
-                  <th>Description</th>
-                  <th>Priority</th>
-                  <th>Days</th>
-                  <th>Hours</th>
-                  <th>Minutes</th>
-                  <th>Active</th>
-                  <th>Pos</th>
-                  <th>Actions</th>
+                  <th>{t('admin.taskTemplates.table.group', 'Group')}</th>
+                  <th>{t('taskBoard.columns.kind', 'Kind')}</th>
+                  <th>{t('taskBoard.columns.description', 'Description')}</th>
+                  <th>{t('admin.taskTemplates.commentHint', 'Comment Hint')}</th>
+                  <th>{t('taskBoard.columns.priority', 'Priority')}</th>
+                  <th>{t('admin.taskTemplates.table.days', 'Days')}</th>
+                  <th>{t('admin.taskTemplates.table.hours', 'Hours')}</th>
+                  <th>{t('admin.taskTemplates.table.minutes', 'Minutes')}</th>
+                  <th>{t('admin.taskTemplates.active', 'Active')}</th>
+                  <th>{t('admin.taskTemplates.position', 'Pos')}</th>
+                  <th>{t('taskBoard.columns.actions', 'Actions')}</th>
                 </tr>
               </thead>
               <tbody>
-                {sortedTemplates.map((template) => {
+                {filteredTemplates.map((template) => {
                   const isEditing = editingTemplateId === template.id && editForm !== null;
                   const offset = splitOffsetMinutes(template.offset_minutes_default);
                   return (
@@ -561,8 +614,8 @@ export default function AdminTaskTemplatesTab({
                             value={editForm.kind_key}
                             onChange={(e) => setEditForm((prev) => (prev ? { ...prev, kind_key: e.target.value as 'TASK' | 'EVENT' } : prev))}
                           >
-                            <option value="TASK">Task</option>
-                            <option value="EVENT">Event</option>
+                            <option value="TASK">{t('taskBoard.kind.task', 'Task')}</option>
+                            <option value="EVENT">{t('taskBoard.kind.event', 'Event')}</option>
                           </select>
                         ) : template.kind_key}
                       </td>
@@ -577,17 +630,26 @@ export default function AdminTaskTemplatesTab({
                       </td>
                       <td>
                         {isEditing ? (
+                          <input
+                            className="detail-input"
+                            value={editForm.comment_hint}
+                            onChange={(e) => setEditForm((prev) => (prev ? { ...prev, comment_hint: e.target.value } : prev))}
+                          />
+                        ) : (template.comment_hint || t('common.emptySymbol', '–'))}
+                      </td>
+                      <td>
+                        {isEditing ? (
                           <select
                             className="detail-input"
                             value={editForm.priority_id ?? ''}
                             onChange={(e) => setEditForm((prev) => (prev ? { ...prev, priority_id: e.target.value ? Number(e.target.value) : null } : prev))}
                           >
-                            <option value="">(default)</option>
+                            <option value="">{t('admin.taskTemplates.defaultPriority', '(default)')}</option>
                             {priorityCodes.map((priority) => (
                               <option key={priority.id} value={priority.id}>{priority.name_default}</option>
                             ))}
                           </select>
-                        ) : (template.priority?.name_default ?? '–')}
+                        ) : (template.priority?.name_default ?? t('common.emptySymbol', '–'))}
                       </td>
                       <td>
                         {isEditing ? (
@@ -621,12 +683,15 @@ export default function AdminTaskTemplatesTab({
                       </td>
                       <td>
                         {isEditing ? (
-                          <input
-                            type="checkbox"
-                            checked={editForm.is_active}
-                            onChange={(e) => setEditForm((prev) => (prev ? { ...prev, is_active: e.target.checked } : prev))}
-                          />
-                        ) : (template.is_active ? 'Yes' : 'No')}
+                          <select
+                            className="detail-input"
+                            value={editForm.is_active ? 'true' : 'false'}
+                            onChange={(e) => setEditForm((prev) => (prev ? { ...prev, is_active: e.target.value === 'true' } : prev))}
+                          >
+                            <option value="true">{t('common.yes', 'Yes')}</option>
+                            <option value="false">{t('common.no', 'No')}</option>
+                          </select>
+                        ) : (template.is_active ? t('common.yes', 'Yes') : t('common.no', 'No'))}
                       </td>
                       <td>
                         {isEditing ? (
@@ -657,13 +722,14 @@ export default function AdminTaskTemplatesTab({
                     </tr>
                   );
                 })}
-                {sortedTemplates.length === 0 && (
+                {filteredTemplates.length === 0 && (
                   <tr>
-                    <td colSpan={10}>No task templates available.</td>
+                    <td colSpan={11}>{t('admin.taskTemplates.emptyTemplates', 'No task templates available.')}</td>
                   </tr>
                 )}
               </tbody>
             </table>
+          </div>
           </div>
         </>
       )}

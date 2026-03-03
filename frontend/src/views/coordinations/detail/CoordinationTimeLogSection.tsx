@@ -1,4 +1,5 @@
 import type React from 'react';
+import { useI18n } from '../../../i18n/i18n';
 import InlineDeleteActions from '../../layout/InlineDeleteActions';
 import ErrorBanner from '../../layout/ErrorBanner';
 import { formatDateTimeDdMmYyyy } from '../../layout/dateFormat';
@@ -67,20 +68,21 @@ export default function CoordinationTimeLogSection({
   totalsByUser,
   formatElapsed,
 }: CoordinationTimeLogSectionProps) {
+  const { t } = useI18n();
   return (
     <section className="detail-section ui-panel-section">
       <div className="detail-section-heading">
-        <h2>Time log</h2>
+        <h2>{t('coordinations.timeLog.title', 'Time log')}</h2>
         {!hasEditorOpen && (
           <button className="ci-add-btn" onClick={onOpenAddLog}>
-            + Add
+            {t('information.actions.add', '+ Add')}
           </button>
         )}
       </div>
       <div className="coord-time-totals">
-        <span className="detail-label">Total time per user</span>
+        <span className="detail-label">{t('coordinations.timeLog.totalPerUser', 'Total time per user')}</span>
         {totalsByUser.length === 0 ? (
-          <p className="detail-empty">No completed time intervals yet.</p>
+          <p className="detail-empty">{t('coordinations.timeLog.noCompletedIntervals', 'No completed time intervals yet.')}</p>
         ) : (
           <div className="coord-time-total-list">
             {totalsByUser.map(([userName, seconds]) => (
@@ -96,10 +98,10 @@ export default function CoordinationTimeLogSection({
         <table className="data-table">
           <thead>
             <tr>
-              <th>User</th>
-              <th>Start</th>
-              <th>End</th>
-              <th>Comment</th>
+              <th>{t('coordinations.timeLog.user', 'User')}</th>
+              <th>{t('coordinations.basicData.start', 'Start')}</th>
+              <th>{t('coordinations.basicData.end', 'End')}</th>
+              <th>{t('taskBoard.columns.comment', 'Comment')}</th>
               <th></th>
             </tr>
           </thead>
@@ -112,7 +114,7 @@ export default function CoordinationTimeLogSection({
                     value={logDraft.user_id || ''}
                     onChange={(e) => setLogDraft((prev) => ({ ...prev, user_id: Number(e.target.value) }))}
                   >
-                    <option value="">Select user</option>
+                    <option value="">{t('coordinations.timeLog.selectUser', 'Select user')}</option>
                     {users.map((u) => (
                       <option key={u.id} value={u.id}>
                         {u.name}
@@ -142,15 +144,15 @@ export default function CoordinationTimeLogSection({
                   <input
                     className="detail-input ci-inline-input"
                     value={logDraft.comment}
-                    placeholder="Comment"
+                    placeholder={t('taskBoard.columns.comment', 'Comment')}
                     onChange={(e) => setLogDraft((prev) => ({ ...prev, comment: e.target.value }))}
                   />
                 </td>
                 <td className="coord-time-actions">
-                  <button className="ci-save-inline" onClick={onSaveLogDraft} title="Save" aria-label="Save">
+                  <button className="ci-save-inline" onClick={onSaveLogDraft} title={t('actions.save', 'Save')} aria-label={t('actions.save', 'Save')}>
                     ✓
                   </button>
-                  <button className="ci-cancel-inline" onClick={onCloseLogEditor} title="Cancel" aria-label="Cancel">
+                  <button className="ci-cancel-inline" onClick={onCloseLogEditor} title={t('actions.cancel', 'Cancel')} aria-label={t('actions.cancel', 'Cancel')}>
                     ✕
                   </button>
                 </td>
@@ -158,7 +160,7 @@ export default function CoordinationTimeLogSection({
             )}
             {timeLogs.length === 0 && !addingLog ? (
               <tr>
-                <td colSpan={5} className="status">No time logs found.</td>
+                <td colSpan={5} className="status">{t('coordinations.timeLog.empty', 'No time logs found.')}</td>
               </tr>
             ) : null}
             {timeLogs.map((log) => (
@@ -170,7 +172,7 @@ export default function CoordinationTimeLogSection({
                       value={logDraft.user_id || ''}
                       onChange={(e) => setLogDraft((prev) => ({ ...prev, user_id: Number(e.target.value) }))}
                     >
-                      <option value="">Select user</option>
+                      <option value="">{t('coordinations.timeLog.selectUser', 'Select user')}</option>
                       {users.map((u) => (
                         <option key={u.id} value={u.id}>
                           {u.name}
@@ -200,15 +202,15 @@ export default function CoordinationTimeLogSection({
                     <input
                       className="detail-input ci-inline-input"
                       value={logDraft.comment}
-                      placeholder="Comment"
+                      placeholder={t('taskBoard.columns.comment', 'Comment')}
                       onChange={(e) => setLogDraft((prev) => ({ ...prev, comment: e.target.value }))}
                     />
                   </td>
                   <td className="coord-time-actions">
-                    <button className="ci-save-inline" onClick={onSaveLogDraft} title="Save" aria-label="Save">
+                    <button className="ci-save-inline" onClick={onSaveLogDraft} title={t('actions.save', 'Save')} aria-label={t('actions.save', 'Save')}>
                       ✓
                     </button>
-                    <button className="ci-cancel-inline" onClick={onCloseLogEditor} title="Cancel" aria-label="Cancel">
+                    <button className="ci-cancel-inline" onClick={onCloseLogEditor} title={t('actions.cancel', 'Cancel')} aria-label={t('actions.cancel', 'Cancel')}>
                       ✕
                     </button>
                   </td>
@@ -218,7 +220,7 @@ export default function CoordinationTimeLogSection({
                   <td>{log.user?.name ?? `#${log.user_id}`}</td>
                   <td>{fmtDateTime(log.start)}</td>
                   <td>{fmtDateTime(log.end)}</td>
-                  <td>{log.comment || '–'}</td>
+                  <td>{log.comment || t('common.emptySymbol', '–')}</td>
                   <td className="coord-time-actions">
                     <InlineDeleteActions
                       confirming={confirmDeleteLogId === log.id}

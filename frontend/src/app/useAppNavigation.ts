@@ -5,11 +5,11 @@ import type { PatientDetailTab } from '../views/patient-detail/PatientDetailTabs
 import type { ColloquiumDetailTab } from '../views/colloquiums/detail/colloquiumDetailViewModelTypes';
 import type { CoordinationDetailTab } from '../views/coordinations/detail/useCoordinationDetailViewModel';
 
-export type Page = 'my-work' | 'patients' | 'donations' | 'colloquiums' | 'coordinations' | 'reports' | 'admin' | 'e2e-tests' | 'preferences';
+export type Page = 'my-work' | 'patients' | 'donors' | 'colloquiums' | 'coordinations' | 'reports' | 'admin' | 'e2e-tests' | 'preferences';
 
 interface UseAppNavigationArgs {
   canViewPatients: boolean;
-  canViewDonations: boolean;
+  canViewDonors: boolean;
   canViewColloquiums: boolean;
   canViewCoordinations: boolean;
   canViewReports: boolean;
@@ -56,7 +56,7 @@ function parseFavoriteContext(favorite: Favorite): Record<string, unknown> {
 
 export function useAppNavigation({
   canViewPatients,
-  canViewDonations,
+  canViewDonors,
   canViewColloquiums,
   canViewCoordinations,
   canViewReports,
@@ -127,7 +127,7 @@ export function useAppNavigation({
     const pagePermissions: Partial<Record<Page, boolean>> = {
       preferences: true,
       patients: canViewPatients,
-      donations: canViewDonations,
+      donors: canViewDonors,
       colloquiums: canViewColloquiums,
       coordinations: canViewCoordinations,
       reports: canViewReports,
@@ -145,7 +145,7 @@ export function useAppNavigation({
     canViewAdmin,
     canViewColloquiums,
     canViewCoordinations,
-    canViewDonations,
+    canViewDonors,
     canViewPatients,
     canViewReports,
     page,

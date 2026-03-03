@@ -65,17 +65,17 @@ Model references:
 
 Two concepts must be kept separate:
 
-- **GUI view**: an application page/screen (for example Donations, Reports, Admin)
+- **GUI view**: an application page/screen (for example Donors, Reports, Admin)
 - **view-right**: a permission that allows seeing/using a view and its read APIs
 
 Write operations use separate **edit-rights**.
 
 Example policy currently implemented:
 
-- `view.donations` allows viewing donation/coordinations data
-- `edit.donations` allows changing donation/coordinations data
+- `view.donors` allows viewing donor/coordinations data
+- `edit.donors` allows changing donor/coordinations data
 
-So a user can be read-only for Donations when they have `view.donations` but not `edit.donations`.
+So a user can be read-only for Donors when they have `view.donors` but not `edit.donors`.
 
 ### 3.2 Seeded roles and permissions
 
@@ -87,9 +87,9 @@ Seed source for role codes:
 
 - `backend/app/seed/datasets/core/codes.py`
 
-Important role currently used for donation editing:
+Important role currently used for donor editing:
 
-- `KOORD_DONATION` (separate from generic coordinator role)
+- `KOORD_DONOR` (separate from generic coordinator role)
 
 ### 3.3 How permissions are resolved
 
@@ -256,11 +256,11 @@ Minimum recurring checks:
 4. stale concurrent update on a versioned entity returns `409`
 5. CORS blocks requests from non-allowed origins
 6. admin access endpoints are inaccessible without admin permission
-7. Login as user with `view.donations` only:
-   - donations/coordinations pages are visible
+7. Login as user with `view.donors` only:
+   - donors/coordinations pages are visible
    - read APIs work
-   - create/update/delete donation operations are blocked (`403`)
-8. Login as user with `view.donations` + `edit.donations`:
+   - create/update/delete donor operations are blocked (`403`)
+8. Login as user with `view.donors` + `edit.donors`:
    - mutation operations succeed
 9. Edit the same versioned record in two windows:
    - first save succeeds

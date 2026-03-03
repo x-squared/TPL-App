@@ -75,7 +75,23 @@ def create_coordination(*, payload: CoordinationCreate, changed_by_id: int, db: 
     db.add(item)
     db.commit()
     db.refresh(item)
-    ensure_coordination_protocol_task_groups(coordination_id=item.id, changed_by_id=changed_by_id, db=db)
+    organ_ids = [
+        row.id
+        for row in db.query(Code)
+        .filter(Code.type == "ORGAN")
+        .order_by(Code.pos.asc(), Code.id.asc())
+        .all()
+    ]
+    if organ_ids:
+        for organ_id in organ_ids:
+            ensure_coordination_protocol_task_groups(
+                coordination_id=item.id,
+                changed_by_id=changed_by_id,
+                db=db,
+                organ_id=organ_id,
+            )
+    else:
+        ensure_coordination_protocol_task_groups(coordination_id=item.id, changed_by_id=changed_by_id, db=db)
     return get_coordination_or_404(item.id, db)
 
 

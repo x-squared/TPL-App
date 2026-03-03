@@ -1,6 +1,7 @@
 import { useMemo, useState } from 'react';
-import { api, type ColloqiumAgenda, type PatientListItem, type Person, type Task } from '../../../../api';
-import { exportProtocolPdf } from './exportProtocolPdf';
+import { type ColloqiumAgenda, type PatientListItem, type Person } from '../../../../api';
+import { useI18n } from '../../../../i18n/i18n';
+import { exportColloquiumProtocolPdf } from './exportColloquiumProtocol';
 import TaskBoard from '../../../tasks/TaskBoard';
 import PersonMultiSelect from '../../../layout/PersonMultiSelect';
 
@@ -29,17 +30,6 @@ function formatDate(iso: string | null): string {
   return `${d}.${m}.${y}`;
 }
 
-function resolvePhase(agenda: ColloqiumAgenda): { label: string; from: string | null; to: string | null } {
-  const episode = agenda.episode;
-  if (!episode) return { label: 'Unknown', from: null, to: null };
-  if (episode.closed) return { label: 'Closed', from: episode.start, to: episode.end };
-  if (episode.fup_recipient_card_date) return { label: 'Follow-Up', from: episode.fup_recipient_card_date, to: null };
-  if (episode.tpl_date) return { label: 'Transplantation', from: episode.tpl_date, to: null };
-  if (episode.list_start || episode.list_end) return { label: 'Listing', from: episode.list_start, to: episode.list_end };
-  if (episode.eval_start || episode.eval_end) return { label: 'Evaluation', from: episode.eval_start, to: episode.eval_end };
-  return { label: 'Episode', from: episode.start, to: episode.end };
-}
-
 export default function ColloquiumProtocolTab({
   draftName,
   draftDate,
@@ -52,6 +42,7 @@ export default function ColloquiumProtocolTab({
   onChangeAgendaDraft,
   onChangeDraftParticipantsPeople,
 }: Props) {
+  const { t } = useI18n();
   const [exportingPdf, setExportingPdf] = useState(false);
   const [visibleTaskListsByAgendaId, setVisibleTaskListsByAgendaId] = useState<Record<number, boolean>>({});
   const [taskAutoCreateTokenByAgendaId, setTaskAutoCreateTokenByAgendaId] = useState<Record<number, number>>({});
@@ -59,39 +50,28 @@ export default function ColloquiumProtocolTab({
     () => [...agendas].sort((a, b) => (a.episode?.start ?? '').localeCompare(b.episode?.start ?? '')),
     [agendas],
   );
+  const resolvePhase = (agenda: ColloqiumAgenda): { label: string; from: string | null; to: string | null } => {
+    const episode = agenda.episode;
+    if (!episode) return { label: t('colloquiums.protocol.phaseLabels.unknown', 'Unknown'), from: null, to: null };
+    if (episode.closed) return { label: t('colloquiums.protocol.phaseLabels.closed', 'Closed'), from: episode.start, to: episode.end };
+    if (episode.fup_recipient_card_date) return { label: t('colloquiums.protocol.phaseLabels.followUp', 'Follow-Up'), from: episode.fup_recipient_card_date, to: null };
+    if (episode.tpl_date) return { label: t('colloquiums.protocol.phaseLabels.transplantation', 'Transplantation'), from: episode.tpl_date, to: null };
+    if (episode.list_start || episode.list_end) return { label: t('colloquiums.protocol.phaseLabels.listing', 'Listing'), from: episode.list_start, to: episode.list_end };
+    if (episode.eval_start || episode.eval_end) return { label: t('colloquiums.protocol.phaseLabels.evaluation', 'Evaluation'), from: episode.eval_start, to: episode.eval_end };
+    return { label: t('server.entities.episode', 'Episode'), from: episode.start, to: episode.end };
+  };
 
   const handleExportPdf = async () => {
     if (exportingPdf) return;
     setExportingPdf(true);
     try {
-      const tasksByAgendaId: Record<number, Task[]> = {};
-      await Promise.all(sortedAgendas.map(async (agenda) => {
-        const episode = agenda.episode;
-        if (!episode) {
-          tasksByAgendaId[agenda.id] = [];
-          return;
-        }
-        const groupsInEpisode = await api.listTaskGroups({
-          patient_id: episode.patient_id,
-          episode_id: agenda.episode_id,
-        });
-        const exactGroups = groupsInEpisode.filter((group) => group.colloqium_agenda_id === agenda.id);
-        const fallbackGroups = groupsInEpisode.filter((group) =>
-          group.colloqium_agenda_id == null && group.task_group_template_id == null);
-        const groupsForExport = exactGroups.length > 0 ? exactGroups : fallbackGroups;
-        const groupedTasks = await Promise.all(
-          groupsForExport.map((group) => api.listTasks({ task_group_id: group.id })),
-        );
-        tasksByAgendaId[agenda.id] = groupedTasks.flat().sort((a, b) => a.id - b.id);
-      }));
-      exportProtocolPdf({
+      await exportColloquiumProtocolPdf({
         draftName,
         draftDate,
         draftParticipants,
         agendas: sortedAgendas,
         agendaDrafts,
         patientsById,
-        tasksByAgendaId,
       });
     } finally {
       setExportingPdf(false);
@@ -101,9 +81,9 @@ export default function ColloquiumProtocolTab({
   return (
     <section className="colloquiums-protocol paper-layout">
       <header className="colloquiums-protocol-header">
-        <h2>Protocol</h2>
+        <h2>{t('coordination.tabs.protocol', 'Protocol')}</h2>
         <button className="patients-save-btn" onClick={handleExportPdf} disabled={exportingPdf}>
-          {exportingPdf ? 'Creating PDF...' : 'PDF'}
+          {exportingPdf ? t('colloquiums.protocol.creatingPdf', 'Creating PDF...') : t('colloquiums.protocol.pdf', 'PDF')}
         </button>
       </header>
 
@@ -111,28 +91,28 @@ export default function ColloquiumProtocolTab({
         <section className="colloquiums-protocol-meta detail-section">
           <div className="detail-grid">
             <div className="detail-field">
-              <span className="detail-label">Name</span>
-              <span className="detail-value">{draftName || '–'}</span>
+              <span className="detail-label">{t('colloquiums.table.name', 'Name')}</span>
+              <span className="detail-value">{draftName || t('common.emptySymbol', '–')}</span>
             </div>
             <div className="detail-field">
-              <span className="detail-label">Date</span>
+              <span className="detail-label">{t('colloquiums.table.date', 'Date')}</span>
               <span className="detail-value">{formatDate(draftDate || null)}</span>
             </div>
             <div className="detail-field">
-              <span className="detail-label">Participants</span>
+              <span className="detail-label">{t('colloquiums.detail.participants', 'Participants')}</span>
               <PersonMultiSelect
                 selectedPeople={draftParticipantsPeople}
                 onChange={onChangeDraftParticipantsPeople}
               />
-              <span className="detail-value">{draftParticipants || '–'}</span>
+              <span className="detail-value">{draftParticipants || t('common.emptySymbol', '–')}</span>
             </div>
           </div>
         </section>
 
         {loadingAgendas ? (
-          <p className="status">Loading agenda...</p>
+          <p className="status">{t('colloquiums.agenda.loading', 'Loading agenda...')}</p>
         ) : sortedAgendas.length === 0 ? (
-          <p className="status">No agenda entries.</p>
+          <p className="status">{t('colloquiums.agenda.empty', 'No agenda entries.')}</p>
         ) : (
           <div className="colloquiums-protocol-agenda">
             {sortedAgendas.map((agenda, idx) => {
@@ -150,20 +130,20 @@ export default function ColloquiumProtocolTab({
                     <strong>
                       {patient
                         ? `${patient.name}, ${patient.first_name} (${patient.pid})`
-                        : `Unknown patient (Episode ${agenda.episode?.fall_nr || `#${agenda.episode_id}`})`}
+                        : `${t('colloquiums.protocol.unknownPatient', 'Unknown patient')} (${t('server.entities.episode', 'Episode')} ${agenda.episode?.fall_nr || `#${agenda.episode_id}`})`}
                     </strong>
                   </div>
                   <div className="colloquiums-protocol-episode-meta">
-                    <span>Episode: {agenda.episode?.fall_nr || `#${agenda.episode_id}`}</span>
-                    <span>Status: {agenda.episode?.status?.name_default ?? '–'}</span>
+                    <span>{t('server.entities.episode', 'Episode')}: {agenda.episode?.fall_nr || `#${agenda.episode_id}`}</span>
+                    <span>{t('coordinations.table.status', 'Status')}: {agenda.episode?.status?.name_default ?? t('common.emptySymbol', '–')}</span>
                     <span>
-                      Phase: {phase.label} ({formatDate(phase.from)} – {formatDate(phase.to)})
+                      {t('colloquiums.protocol.phase', 'Phase')}: {phase.label} ({formatDate(phase.from)} – {formatDate(phase.to)})
                     </span>
                   </div>
 
                   <div className="colloquiums-protocol-episode-fields">
                     <label>
-                      Presented By
+                      {t('colloquiums.protocol.presentedBy', 'Presented By')}
                       <input
                         type="text"
                         value={draft.presented_by}
@@ -171,7 +151,7 @@ export default function ColloquiumProtocolTab({
                       />
                     </label>
                     <label>
-                      Decision
+                      {t('colloquiums.protocol.decision', 'Decision')}
                       <input
                         type="text"
                         value={draft.decision}
@@ -179,7 +159,7 @@ export default function ColloquiumProtocolTab({
                       />
                     </label>
                     <label>
-                      Comment
+                      {t('taskBoard.columns.comment', 'Comment')}
                       <textarea
                         rows={3}
                         value={draft.comment}
@@ -198,7 +178,7 @@ export default function ColloquiumProtocolTab({
                             setVisibleTaskListsByAgendaId((prev) => ({ ...prev, [agenda.id]: true }))
                           }
                         >
-                          Show tasks
+                          {t('colloquiums.protocol.showTasks', 'Show tasks')}
                         </button>
                         <button
                           className="patients-add-btn"
@@ -211,7 +191,7 @@ export default function ColloquiumProtocolTab({
                             }));
                           }}
                         >
-                          + Add task
+                          {t('colloquiums.protocol.addTask', '+ Add task')}
                         </button>
                       </>
                     ) : (
@@ -221,13 +201,14 @@ export default function ColloquiumProtocolTab({
                           setVisibleTaskListsByAgendaId((prev) => ({ ...prev, [agenda.id]: false }))
                         }
                       >
-                        Hide tasks
+                        {t('colloquiums.protocol.hideTasks', 'Hide tasks')}
                       </button>
                     )}
                   </div>
                   {tasksVisible && canOpenTasks && (
                     <TaskBoard
-                      title="Task list"
+                      declaredContextType="COLLOQUIUM"
+                      title={t('colloquiums.protocol.taskList', 'Task list')}
                       criteria={{
                         patientId: agenda.episode!.patient_id,
                         episodeId: agenda.episode_id,

@@ -1,4 +1,5 @@
 import type { Code, ColloqiumAgenda, Episode, Patient, Task, TaskGroup } from '../../api';
+import { useI18n } from '../../i18n/i18n';
 import { boardStateSymbol } from './taskBoardUtils';
 import TaskBoardRows from './TaskBoardRows';
 import type {
@@ -31,6 +32,8 @@ export interface TaskBoardTableProps {
   actionState: TaskActionState | null;
   actionComment: string;
   setActionComment: (value: string) => void;
+  actionEventTime: string;
+  setActionEventTime: (value: string) => void;
   actionSaving: boolean;
   onConfirmAction: () => void;
   onCancelAction: () => void;
@@ -53,6 +56,14 @@ export interface TaskBoardTableProps {
   onSelectTask: (taskId: number) => void;
   taskSort?: TaskBoardSort | null;
   onTaskSortChange?: (sort: TaskBoardSort | null) => void;
+  columnVisibility?: {
+    priority?: boolean;
+    reference?: boolean;
+    assignedTo?: boolean;
+    comment?: boolean;
+    closedAt?: boolean;
+    closedBy?: boolean;
+  };
   maxTableHeight: number | string;
 }
 
@@ -75,6 +86,8 @@ export default function TaskBoardTable({
   actionState,
   actionComment,
   setActionComment,
+  actionEventTime,
+  setActionEventTime,
   actionSaving,
   onConfirmAction,
   onCancelAction,
@@ -97,9 +110,24 @@ export default function TaskBoardTable({
   onSelectTask,
   taskSort = null,
   onTaskSortChange,
+  columnVisibility,
   maxTableHeight,
 }: TaskBoardTableProps) {
+  const { t } = useI18n();
   const headerStateSymbol = boardStateSymbol(rows);
+  const showPriority = columnVisibility?.priority ?? true;
+  const showReference = columnVisibility?.reference ?? true;
+  const showAssignedTo = columnVisibility?.assignedTo ?? true;
+  const showComment = columnVisibility?.comment ?? true;
+  const showClosedAt = columnVisibility?.closedAt ?? true;
+  const showClosedBy = columnVisibility?.closedBy ?? true;
+  const columnCount = 6
+    + (showPriority ? 1 : 0)
+    + (showReference ? 1 : 0)
+    + (showAssignedTo ? 1 : 0)
+    + (showComment ? 1 : 0)
+    + (showClosedAt ? 1 : 0)
+    + (showClosedBy ? 1 : 0);
   const onSortHeaderClick = (key: TaskBoardSortKey) => {
     if (!onTaskSortChange) return;
     if (!taskSort || taskSort.key !== key) {
@@ -124,41 +152,43 @@ export default function TaskBoardTable({
           <tr>
             <th className="open-col"></th>
             <th
-              aria-label="State"
-              title={onTaskSortChange ? 'Sort by status (asc/desc/off)' : 'State'}
+              aria-label={t('taskBoard.columns.state', 'State')}
+              title={onTaskSortChange ? t('taskBoard.sort.statusHint', 'Sort by status (asc/desc/off)') : t('taskBoard.columns.state', 'State')}
               className={onTaskSortChange ? 'task-sortable-header' : undefined}
               onClick={onTaskSortChange ? () => onSortHeaderClick('status') : undefined}
             >
               {headerStateSymbol}{sortSymbol('status')}
             </th>
-            <th
-              className={onTaskSortChange ? 'task-sortable-header' : undefined}
-              onClick={onTaskSortChange ? () => onSortHeaderClick('priority') : undefined}
-              title={onTaskSortChange ? 'Sort by priority (asc/desc/off)' : undefined}
-            >
-              Priority {sortSymbol('priority')}
-            </th>
-            <th>Reference</th>
-            <th>Kind</th>
-            <th className="task-col-description">Description</th>
-            <th>Assigned To</th>
+            {showPriority ? (
+              <th
+                className={onTaskSortChange ? 'task-sortable-header' : undefined}
+                onClick={onTaskSortChange ? () => onSortHeaderClick('priority') : undefined}
+                title={onTaskSortChange ? t('taskBoard.sort.priorityHint', 'Sort by priority (asc/desc/off)') : undefined}
+              >
+                {t('taskBoard.columns.priority', 'Priority')} {sortSymbol('priority')}
+              </th>
+            ) : null}
+            {showReference ? <th>{t('taskBoard.columns.reference', 'Reference')}</th> : null}
+            <th>{t('taskBoard.columns.kind', 'Kind')}</th>
+            <th className="task-col-description">{t('taskBoard.columns.description', 'Description')}</th>
+            {showAssignedTo ? <th>{t('taskBoard.columns.assignedTo', 'Assigned To')}</th> : null}
             <th
               className={onTaskSortChange ? 'task-sortable-header' : undefined}
               onClick={onTaskSortChange ? () => onSortHeaderClick('due_date') : undefined}
-              title={onTaskSortChange ? 'Sort by due date (asc/desc/off)' : undefined}
+              title={onTaskSortChange ? t('taskBoard.sort.dueDateHint', 'Sort by due date (asc/desc/off)') : undefined}
             >
-              Due At {sortSymbol('due_date')}
+              {t('taskBoard.columns.dueAt', 'Due At')} {sortSymbol('due_date')}
             </th>
-            <th className="task-col-comment">Comment</th>
-            <th>Closed At</th>
-            <th>Closed By</th>
-            <th>Actions</th>
+            {showComment ? <th className="task-col-comment">{t('taskBoard.columns.comment', 'Comment')}</th> : null}
+            {showClosedAt ? <th>{t('taskBoard.columns.closedAt', 'Closed At')}</th> : null}
+            {showClosedBy ? <th>{t('taskBoard.columns.closedBy', 'Closed By')}</th> : null}
+            <th>{t('taskBoard.columns.actions', 'Actions')}</th>
           </tr>
         </thead>
         <tbody>
           {rows.length === 0 && (
             <tr>
-              <td colSpan={12}>No tasks match the current filters.</td>
+              <td colSpan={columnCount}>{t('taskBoard.empty', 'No tasks match the current filters.')}</td>
             </tr>
           )}
           <TaskBoardRows
@@ -180,6 +210,8 @@ export default function TaskBoardTable({
             actionState={actionState}
             actionComment={actionComment}
             setActionComment={setActionComment}
+            actionEventTime={actionEventTime}
+            setActionEventTime={setActionEventTime}
             actionSaving={actionSaving}
             onConfirmAction={onConfirmAction}
             onCancelAction={onCancelAction}
@@ -200,6 +232,13 @@ export default function TaskBoardTable({
             onOpenTaskContext={onOpenTaskContext}
             selectedTaskId={selectedTaskId}
             onSelectTask={onSelectTask}
+            showPriority={showPriority}
+            showReference={showReference}
+            showAssignedTo={showAssignedTo}
+            showComment={showComment}
+            showClosedAt={showClosedAt}
+            showClosedBy={showClosedBy}
+            columnCount={columnCount}
           />
         </tbody>
       </table>

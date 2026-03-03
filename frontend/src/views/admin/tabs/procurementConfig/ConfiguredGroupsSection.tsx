@@ -1,6 +1,7 @@
 import { useState } from 'react';
 
 import type { ProcurementAdminConfig } from '../../../../api';
+import { useI18n } from '../../../../i18n/i18n';
 import InlineDeleteActions from '../../../layout/InlineDeleteActions';
 import type { ProcurementGroupCreatePayload, ProcurementGroupUpdatePayload } from './types';
 import { suggestConfigKey } from './utils';
@@ -22,6 +23,7 @@ export default function ConfiguredGroupsSection({
   onReorderGroups,
   onDeleteGroup,
 }: ConfiguredGroupsSectionProps) {
+  const { t } = useI18n();
   const [groupDraft, setGroupDraft] = useState({ key: '', name_default: '', comment: '' });
   const [groupKeyEdited, setGroupKeyEdited] = useState(false);
   const [editingGroupId, setEditingGroupId] = useState<number | null>(null);
@@ -63,14 +65,14 @@ export default function ConfiguredGroupsSection({
   return (
     <section className="admin-proc-block">
       <div className="detail-section-heading admin-proc-block-heading">
-        <h2>Groups</h2>
+        <h2>{t('admin.procurementConfig.groups.title', 'Groups')}</h2>
       </div>
       <div className="admin-proc-block-grid">
         <div className="admin-proc-pane admin-proc-define-pane">
-          <h3>Definition Area</h3>
+          <h3>{t('admin.procurementConfig.groups.definitionArea', 'Definition Area')}</h3>
           <div className="admin-people-form">
             <label>
-              <span>Name</span>
+              <span>{t('patients.filters.name', 'Name')}</span>
               <input
                 className="detail-input"
                 value={groupDraft.name_default}
@@ -85,7 +87,7 @@ export default function ConfiguredGroupsSection({
               />
             </label>
             <label>
-              <span>Key</span>
+              <span>{t('admin.procurementConfig.fields.key', 'Key')}</span>
               <input
                 className="detail-input"
                 value={groupDraft.key}
@@ -98,7 +100,7 @@ export default function ConfiguredGroupsSection({
               />
             </label>
             <label>
-              <span>Comment</span>
+              <span>{t('taskBoard.columns.comment', 'Comment')}</span>
               <input
                 className="detail-input"
                 value={groupDraft.comment}
@@ -109,7 +111,8 @@ export default function ConfiguredGroupsSection({
               <button
                 type="button"
                 className="patients-save-btn"
-                disabled={saving || !groupDraft.key.trim() || !groupDraft.name_default.trim()}
+                disabled
+                title={t('admin.procurementConfig.groups.fixedModelHint', 'Group templates are fixed and cannot be created here.')}
                 onClick={() => {
                   const nextPos = groups.reduce((maxPos, group) => Math.max(maxPos, group.pos), 0) + 1;
                   void onCreateGroup({
@@ -123,25 +126,25 @@ export default function ConfiguredGroupsSection({
                   setGroupKeyEdited(false);
                 }}
               >
-                Create Group
+                {t('admin.procurementConfig.groups.createGroup', 'Create Group')}
               </button>
             </div>
           </div>
         </div>
         <div className="admin-proc-pane admin-proc-data-pane">
-          <h3>Configured Data</h3>
+          <h3>{t('admin.procurementConfig.fields.configuredData', 'Configured Data')}</h3>
           {groups.length === 0 ? (
-            <p className="detail-empty">No groups configured.</p>
+            <p className="detail-empty">{t('admin.procurementConfig.groups.noGroups', 'No groups configured.')}</p>
           ) : (
             <div className="patients-table-wrap ui-table-wrap">
               <table className="data-table">
                 <thead>
                   <tr>
-                    <th>Name</th>
-                    <th>Key</th>
-                    <th>Comment</th>
-                    <th>Active</th>
-                    <th>Pos</th>
+                    <th>{t('patients.filters.name', 'Name')}</th>
+                    <th>{t('admin.procurementConfig.fields.key', 'Key')}</th>
+                    <th>{t('taskBoard.columns.comment', 'Comment')}</th>
+                    <th>{t('admin.taskTemplates.active', 'Active')}</th>
+                    <th>{t('admin.taskTemplates.position', 'Pos')}</th>
                     <th />
                   </tr>
                 </thead>
@@ -153,6 +156,7 @@ export default function ConfiguredGroupsSection({
                           <input
                             className="detail-input ci-inline-input"
                             value={editingGroupDraft.name_default}
+                            disabled
                             onChange={(e) => setEditingGroupDraft((prev) => ({ ...prev, name_default: e.target.value }))}
                           />
                         </td>
@@ -160,6 +164,7 @@ export default function ConfiguredGroupsSection({
                           <input
                             className="detail-input ci-inline-input"
                             value={editingGroupDraft.key}
+                            disabled
                             onChange={(e) =>
                               applyUppercaseWithCaret(e.currentTarget, (value) => {
                                 setEditingGroupDraft((prev) => ({ ...prev, key: value }));
@@ -170,6 +175,7 @@ export default function ConfiguredGroupsSection({
                           <input
                             className="detail-input ci-inline-input"
                             value={editingGroupDraft.comment}
+                            disabled
                             onChange={(e) => setEditingGroupDraft((prev) => ({ ...prev, comment: e.target.value }))}
                           />
                         </td>
@@ -177,6 +183,7 @@ export default function ConfiguredGroupsSection({
                           <input
                             type="checkbox"
                             checked={editingGroupDraft.is_active}
+                            disabled
                             onChange={(e) => setEditingGroupDraft((prev) => ({ ...prev, is_active: e.target.checked }))}
                           />
                         </td>
@@ -193,15 +200,11 @@ export default function ConfiguredGroupsSection({
                             className="ci-save-inline"
                             onClick={() => {
                               void onUpdateGroup(group.id, {
-                                key: editingGroupDraft.key.trim().toUpperCase(),
-                                name_default: editingGroupDraft.name_default.trim(),
-                                comment: editingGroupDraft.comment.trim(),
-                                is_active: editingGroupDraft.is_active,
                                 pos: editingGroupDraft.pos,
                               });
                               setEditingGroupId(null);
                             }}
-                            disabled={saving || !editingGroupDraft.key.trim() || !editingGroupDraft.name_default.trim()}
+                            disabled={saving || editingGroupDraft.pos === group.pos}
                           >
                             ✓
                           </button>
@@ -242,8 +245,8 @@ export default function ConfiguredGroupsSection({
                       >
                         <td>{group.name_default}</td>
                         <td><span className="admin-access-permission-key">{group.key}</span></td>
-                        <td>{group.comment || '–'}</td>
-                        <td>{group.is_active ? 'Yes' : 'No'}</td>
+                        <td>{group.comment || t('common.emptySymbol', '–')}</td>
+                        <td>{group.is_active ? t('common.yes', 'Yes') : t('common.no', 'No')}</td>
                         <td>{group.pos}</td>
                         <td className="detail-ci-actions">
                           <InlineDeleteActions
@@ -262,7 +265,10 @@ export default function ConfiguredGroupsSection({
                             onRequestDelete={() => setConfirmDeleteGroupId(group.id)}
                             onConfirmDelete={() => {
                               const confirmed = window.confirm(
-                                'Deleting this group will unassign fields from the group. Do you want to continue?',
+                                t(
+                                  'admin.procurementConfig.groups.deleteConfirm',
+                                  'Deleting this group will unassign fields from the group. Do you want to continue?',
+                                ),
                               );
                               if (!confirmed) return;
                               void onDeleteGroup(group.id);

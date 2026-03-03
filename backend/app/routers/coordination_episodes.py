@@ -23,7 +23,7 @@ router = APIRouter(prefix="/coordinations/{coordination_id}/episodes", tags=["co
 def list_coordination_episodes(
     coordination_id: int,
     db: Session = Depends(get_db),
-    _: User = Depends(require_permission("view.donations")),
+    _: User = Depends(require_permission("view.donors")),
 ):
     return list_coordination_episodes_service(coordination_id=coordination_id, db=db)
 
@@ -33,7 +33,7 @@ def create_coordination_episode(
     coordination_id: int,
     payload: CoordinationEpisodeCreate,
     db: Session = Depends(get_db),
-    current_user: User = Depends(require_permission("edit.donations")),
+    current_user: User = Depends(require_permission("edit.donors")),
 ):
     return create_coordination_episode_service(
         coordination_id=coordination_id,
@@ -49,7 +49,7 @@ def update_coordination_episode(
     coordination_episode_id: int,
     payload: CoordinationEpisodeUpdate,
     db: Session = Depends(get_db),
-    current_user: User = Depends(require_permission("edit.donations")),
+    current_user: User = Depends(require_permission("edit.donors")),
 ):
     return update_coordination_episode_service(
         coordination_id=coordination_id,
@@ -65,7 +65,7 @@ def delete_coordination_episode(
     coordination_id: int,
     coordination_episode_id: int,
     db: Session = Depends(get_db),
-    current_user: User = Depends(require_permission("edit.donations")),
+    current_user: User = Depends(require_permission("edit.donors")),
 ):
     _ = current_user
     delete_coordination_episode_service(

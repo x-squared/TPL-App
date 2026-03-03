@@ -1,6 +1,7 @@
 import { useEffect, useMemo, useState } from 'react';
 import { api, type CoordinationEpisode, type CoordinationProcurementFlex, type CoordinationProcurementValue, type Person, type PersonTeam } from '../../../api';
 import { toUserErrorMessage } from '../../../api/error';
+import { useI18n } from '../../../i18n/i18n';
 import { getConfigFromMetadata } from '../../../utils/datatypeFramework';
 import PersonMultiSelect from '../../layout/PersonMultiSelect';
 
@@ -12,6 +13,7 @@ interface CoordinationProtocolDataPanelProps {
 type DraftsByField = Record<number, string>;
 
 export default function CoordinationProtocolDataPanel({ coordinationId, organId }: CoordinationProtocolDataPanelProps) {
+  const { t } = useI18n();
   const [flex, setFlex] = useState<CoordinationProcurementFlex | null>(null);
   const [teams, setTeams] = useState<PersonTeam[]>([]);
   const [coordinationEpisodes, setCoordinationEpisodes] = useState<CoordinationEpisode[]>([]);
@@ -41,7 +43,7 @@ export default function CoordinationProtocolDataPanel({ coordinationId, organId 
         return next;
       });
     } catch (err) {
-      setError(toUserErrorMessage(err, 'Failed to load grouped procurement values.'));
+      setError(toUserErrorMessage(err, t('coordinations.protocolData.errors.load', 'Failed to load grouped procurement values.')));
     }
   };
 
@@ -72,9 +74,18 @@ export default function CoordinationProtocolDataPanel({ coordinationId, organId 
           existing.fields.push(field);
           return acc;
         }
-        return [...acc, { key, name: group?.name_default ?? 'Other', fields: [field] }];
+        return [
+          ...acc,
+          {
+            key,
+            name: group
+              ? t(`coordinations.protocolData.groupsByKey.${group.key}`, group.name_default)
+              : t('coordinations.protocolData.groups.other', 'Other'),
+            fields: [field],
+          },
+        ];
       }, []);
-  }, [flex]);
+  }, [flex, t]);
 
   const saveValue = async (
     fieldId: number,
@@ -88,7 +99,7 @@ export default function CoordinationProtocolDataPanel({ coordinationId, organId 
       await api.upsertCoordinationProcurementValue(coordinationId, organId, slotKey, fieldId, payload);
       await load();
     } catch (err) {
-      setError(toUserErrorMessage(err, 'Failed to save procurement value.'));
+      setError(toUserErrorMessage(err, t('coordinations.protocolData.errors.save', 'Failed to save procurement value.')));
     } finally {
       setSavingFieldId((prev) => (prev === fieldId ? null : prev));
     }
@@ -108,6 +119,7 @@ export default function CoordinationProtocolDataPanel({ coordinationId, organId 
           <div className="coord-proc-group-grid">
             {group.fields.map((field) => {
               const valueRow = flex ? resolveValueForField(flex, organId, field.id) : null;
+              const stateClass = getFieldStateClass(field, valueRow, drafts);
               if (field.value_mode === 'PERSON_SINGLE') {
                 const selected = [...(valueRow?.persons ?? [])]
                   .sort((a, b) => a.pos - b.pos)
@@ -116,15 +128,18 @@ export default function CoordinationProtocolDataPanel({ coordinationId, organId 
                   .slice(0, 1);
                 return (
                   <div className="detail-field coord-proc-field-wide" key={field.id}>
-                    <span className="detail-label">{field.name_default}</span>
-                    <PersonMultiSelect
-                      selectedPeople={selected}
-                      onChange={(next) => {
-                        const single = next.slice(0, 1);
-                        void saveValue(field.id, { person_ids: single.map((person) => person.id), value: '' });
-                      }}
-                      disabled={savingFieldId === field.id}
-                    />
+                    <span className="detail-label">{t(`coordinations.protocolData.fieldsByKey.${field.key}`, field.name_default)}</span>
+                    <div className={`coord-protocol-data-control ${stateClass}`}>
+                      <PersonMultiSelect
+                        selectedPeople={selected}
+                        onChange={(next) => {
+                          const single = next.slice(0, 1);
+                          void saveValue(field.id, { person_ids: single.map((person) => person.id), value: '' });
+                        }}
+                        disabled={savingFieldId === field.id}
+                        disableAdd={selected.length > 0}
+                      />
+                    </div>
                   </div>
                 );
               }
@@ -135,14 +150,16 @@ export default function CoordinationProtocolDataPanel({ coordinationId, organId 
                   .filter((entry): entry is Person => !!entry);
                 return (
                   <div className="detail-field coord-proc-field-wide" key={field.id}>
-                    <span className="detail-label">{field.name_default}</span>
-                    <PersonMultiSelect
-                      selectedPeople={selected}
-                      onChange={(next) => {
-                        void saveValue(field.id, { person_ids: next.map((person) => person.id), value: '' });
-                      }}
-                      disabled={savingFieldId === field.id}
-                    />
+                    <span className="detail-label">{t(`coordinations.protocolData.fieldsByKey.${field.key}`, field.name_default)}</span>
+                    <div className={`coord-protocol-data-control ${stateClass}`}>
+                      <PersonMultiSelect
+                        selectedPeople={selected}
+                        onChange={(next) => {
+                          void saveValue(field.id, { person_ids: next.map((person) => person.id), value: '' });
+                        }}
+                        disabled={savingFieldId === field.id}
+                      />
+                    </div>
                   </div>
                 );
               }
@@ -154,11 +171,11 @@ export default function CoordinationProtocolDataPanel({ coordinationId, organId 
                 const selectedTeamIds = new Set(selectedTeams.map((team) => team.id));
                 return (
                   <div className="detail-field coord-proc-field-wide" key={field.id}>
-                    <span className="detail-label">{field.name_default}</span>
-                    <div className="coord-proc-team-picker">
+                    <span className="detail-label">{t(`coordinations.protocolData.fieldsByKey.${field.key}`, field.name_default)}</span>
+                    <div className={`coord-proc-team-picker coord-protocol-data-control ${stateClass}`}>
                       <div className="person-pill-list">
                         {selectedTeams.length === 0 ? (
-                          <span className="detail-value">–</span>
+                          <span className="detail-value">{t('common.emptySymbol', '–')}</span>
                         ) : (
                           selectedTeams.map((team) => (
                             <span key={team.id} className="person-pill">
@@ -171,7 +188,7 @@ export default function CoordinationProtocolDataPanel({ coordinationId, organId 
                                   void saveValue(field.id, { team_ids: nextIds, value: '' });
                                 }}
                                 disabled={savingFieldId === field.id}
-                                title="Remove"
+                                title={t('actions.remove', 'Remove')}
                               >
                                 ×
                               </button>
@@ -191,7 +208,7 @@ export default function CoordinationProtocolDataPanel({ coordinationId, organId 
                         }}
                         disabled={savingFieldId === field.id}
                       >
-                        <option value="">Add team...</option>
+                        <option value="">{t('coordinations.protocolData.team.addTeam', 'Add team...')}</option>
                         {teams
                           .filter((team) => !selectedTeamIds.has(team.id))
                           .map((team) => (
@@ -211,11 +228,11 @@ export default function CoordinationProtocolDataPanel({ coordinationId, organId 
                 const selectedTeamIds = new Set(selectedTeams.map((team) => team.id));
                 return (
                   <div className="detail-field coord-proc-field-wide" key={field.id}>
-                    <span className="detail-label">{field.name_default}</span>
-                    <div className="coord-proc-team-picker">
+                    <span className="detail-label">{t(`coordinations.protocolData.fieldsByKey.${field.key}`, field.name_default)}</span>
+                    <div className={`coord-proc-team-picker coord-protocol-data-control ${stateClass}`}>
                       <div className="person-pill-list">
                         {selectedTeams.length === 0 ? (
-                          <span className="detail-value">–</span>
+                          <span className="detail-value">{t('common.emptySymbol', '–')}</span>
                         ) : (
                           selectedTeams.map((team) => (
                             <span key={team.id} className="person-pill">
@@ -227,7 +244,7 @@ export default function CoordinationProtocolDataPanel({ coordinationId, organId 
                                   void saveValue(field.id, { team_ids: [], value: '' });
                                 }}
                                 disabled={savingFieldId === field.id}
-                                title="Remove"
+                                title={t('actions.remove', 'Remove')}
                               >
                                 ×
                               </button>
@@ -245,7 +262,7 @@ export default function CoordinationProtocolDataPanel({ coordinationId, organId 
                         }}
                         disabled={savingFieldId === field.id}
                       >
-                        <option value="">Select team...</option>
+                        <option value="">{t('coordinations.protocolData.team.selectTeam', 'Select team...')}</option>
                         {teams.map((team) => (
                           <option key={team.id} value={team.id} disabled={selectedTeamIds.has(team.id)}>
                             {team.name}
@@ -264,9 +281,9 @@ export default function CoordinationProtocolDataPanel({ coordinationId, organId 
                 const selectedEpisodeId = valueRow?.episode_ref?.episode_id ?? 0;
                 return (
                   <div className="detail-field coord-proc-field-wide" key={field.id}>
-                    <span className="detail-label">{field.name_default}</span>
+                    <span className="detail-label">{t(`coordinations.protocolData.fieldsByKey.${field.key}`, field.name_default)}</span>
                     <select
-                      className="detail-input"
+                      className={`detail-input coord-protocol-data-input ${stateClass}`}
                       value={selectedEpisodeId}
                       onChange={(event) => {
                         const nextEpisodeId = Number(event.target.value) || null;
@@ -274,10 +291,10 @@ export default function CoordinationProtocolDataPanel({ coordinationId, organId 
                       }}
                       disabled={savingFieldId === field.id}
                     >
-                      <option value={0}>Select recipient episode...</option>
+                      <option value={0}>{t('coordinations.protocolData.episode.selectRecipientEpisode', 'Select recipient episode...')}</option>
                       {availableEpisodes.map((episode) => (
                         <option key={episode.id} value={episode.id}>
-                          {episode.fall_nr || `Episode ${episode.id}`}
+                          {episode.fall_nr || `${t('server.entities.episode', 'Episode')} ${episode.id}`}
                         </option>
                       ))}
                     </select>
@@ -293,11 +310,9 @@ export default function CoordinationProtocolDataPanel({ coordinationId, organId 
                   : cfg.inputType === 'datetime'
                     ? 'datetime-local'
                     : 'text';
-              const committed = (valueRow?.value ?? '').trim().length > 0;
-              const stateClass = committed ? 'committed' : draftValue.trim().length === 0 ? 'pending' : 'editing';
               return (
                 <div className="detail-field" key={field.id}>
-                  <span className="detail-label">{field.name_default}</span>
+                  <span className="detail-label">{t(`coordinations.protocolData.fieldsByKey.${field.key}`, field.name_default)}</span>
                   <input
                     type={inputType}
                     className={`detail-input coord-protocol-data-input ${stateClass}`}
@@ -339,6 +354,25 @@ function resolveValueForField(
     if (found) return found;
   }
   return null;
+}
+
+function getFieldStateClass(
+  field: CoordinationProcurementFlex['field_templates'][number],
+  valueRow: CoordinationProcurementValue | null,
+  drafts: DraftsByField,
+): 'pending' | 'committed' | 'editing' {
+  if (field.value_mode === 'PERSON_SINGLE' || field.value_mode === 'PERSON_LIST') {
+    return (valueRow?.persons?.length ?? 0) > 0 ? 'committed' : 'pending';
+  }
+  if (field.value_mode === 'TEAM_SINGLE' || field.value_mode === 'TEAM_LIST') {
+    return (valueRow?.teams?.length ?? 0) > 0 ? 'committed' : 'pending';
+  }
+  if (field.value_mode === 'EPISODE') {
+    return valueRow?.episode_ref?.episode_id ? 'committed' : 'pending';
+  }
+  const draftValue = drafts[field.id] ?? valueRow?.value ?? '';
+  const committed = (valueRow?.value ?? '').trim().length > 0;
+  return committed ? 'committed' : draftValue.trim().length === 0 ? 'pending' : 'editing';
 }
 
 function isGroupTouched(

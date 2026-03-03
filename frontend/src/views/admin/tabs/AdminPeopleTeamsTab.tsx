@@ -3,6 +3,7 @@ import ErrorBanner from '../../layout/ErrorBanner';
 import PersonsSection from './peopleTeams/PersonsSection';
 import TeamsSection from './peopleTeams/TeamsSection';
 import type { PersonUpsertPayload } from './peopleTeams/types';
+import { useI18n } from '../../../i18n/i18n';
 
 interface AdminPeopleTeamsTabProps {
   people: Person[];
@@ -37,12 +38,13 @@ export default function AdminPeopleTeamsTab({
   onEnsureTeamMembersLoaded,
   onSetTeamMembers,
 }: AdminPeopleTeamsTabProps) {
+  const { t } = useI18n();
   return (
     <section className="detail-section ui-panel-section">
       <div className="detail-section-heading">
-        <h2>People & Teams</h2>
+        <h2>{t('app.admin.tabs.peopleTeams', 'People & Teams')}</h2>
       </div>
-      {loading && <p className="status">Loading people and teams...</p>}
+      {loading && <p className="status">{t('admin.peopleTeams.loading', 'Loading people and teams...')}</p>}
       {error && <ErrorBanner message={error} />}
       {!loading && (
         <>

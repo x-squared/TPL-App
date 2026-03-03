@@ -1,5 +1,6 @@
 import type React from 'react';
 import type { PatientCreate } from '../../api';
+import { useI18n } from '../../i18n/i18n';
 import ErrorBanner from '../layout/ErrorBanner';
 
 interface Props {
@@ -21,23 +22,24 @@ export default function PatientsAddForm({
   setCreatePatientError,
   handleCreatePatient,
 }: Props) {
+  const { t } = useI18n();
   return (
     <div className="patients-add-form">
       <input
         type="text"
-        placeholder="PID *"
+        placeholder={t('patients.addForm.pidRequired', 'PID *')}
         value={newPatient.pid}
         onChange={(e) => setNewPatient((p) => ({ ...p, pid: e.target.value }))}
       />
       <input
         type="text"
-        placeholder="First name *"
+        placeholder={t('patients.addForm.firstNameRequired', 'First name *')}
         value={newPatient.first_name}
         onChange={(e) => setNewPatient((p) => ({ ...p, first_name: e.target.value }))}
       />
       <input
         type="text"
-        placeholder="Name *"
+        placeholder={t('patients.addForm.lastNameRequired', 'Name *')}
         value={newPatient.name}
         onChange={(e) => setNewPatient((p) => ({ ...p, name: e.target.value }))}
       />
@@ -52,7 +54,7 @@ export default function PatientsAddForm({
           onClick={handleCreatePatient}
           disabled={creatingPatient || !newPatient.pid?.trim() || !newPatient.first_name?.trim() || !newPatient.name?.trim() || !newPatient.date_of_birth}
         >
-          {creatingPatient ? 'Saving...' : 'Save'}
+          {creatingPatient ? t('coordinations.form.saving', 'Saving...') : t('actions.save', 'Save')}
         </button>
         <button
           className="patients-cancel-btn"
@@ -62,7 +64,7 @@ export default function PatientsAddForm({
           }}
           disabled={creatingPatient}
         >
-          Cancel
+          {t('actions.cancel', 'Cancel')}
         </button>
       </div>
       <ErrorBanner message={createPatientError} />

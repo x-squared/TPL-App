@@ -1,4 +1,5 @@
 import type { Code, Episode, EpisodeCreate, EpisodeUpdate } from '../../../api';
+import { useI18n } from '../../../i18n/i18n';
 import InlineDeleteActions from '../../layout/InlineDeleteActions';
 import { formatOrganNames } from '../../layout/episodeDisplay';
 
@@ -51,20 +52,21 @@ export default function EpisodeTable({
   selectedEpisodeId,
   onSelectEpisode,
 }: EpisodeTableProps) {
+  const { t } = useI18n();
   return (
     <>
       {patientEpisodes && patientEpisodes.length > 0 ? (
         <table className="detail-contact-table episode-table">
           <thead>
             <tr>
-              <th>Organ</th>
-              <th>Status</th>
-              <th>Start</th>
-              <th>End</th>
-              <th>Fall Nr</th>
-              <th>TPL Date</th>
-              <th>Closed</th>
-              <th>Rec. Card</th>
+              <th>{t('patients.episodes.organ', 'Organ')}</th>
+              <th>{t('patients.episodes.status', 'Status')}</th>
+              <th>{t('patients.episodes.start', 'Start')}</th>
+              <th>{t('patients.episodes.end', 'End')}</th>
+              <th>{t('patients.episodes.fallNr', 'Fall Nr')}</th>
+              <th>{t('episode.table.tplDate', 'TPL Date')}</th>
+              <th>{t('patients.episodes.closed', 'Closed')}</th>
+              <th>{t('episode.table.recCard', 'Rec. Card')}</th>
               <th></th>
             </tr>
           </thead>
@@ -79,7 +81,7 @@ export default function EpisodeTable({
                   </td>
                   <td>
                     <select className="detail-input ci-inline-input" value={epEditForm.status_id ?? ''} onChange={(e) => setEpEditForm((f) => ({ ...f, status_id: e.target.value ? Number(e.target.value) : null }))}>
-                      <option value="">–</option>
+                      <option value="">{t('common.emptySymbol', '–')}</option>
                       {tplStatusCodes.map((c) => <option key={c.id} value={c.id}>{c.name_default}</option>)}
                     </select>
                   </td>
@@ -110,13 +112,16 @@ export default function EpisodeTable({
                   className={selectedEpisodeId === ep.id ? 'episode-row-selected' : ''}
                 >
                   <td>{formatOrganNames(ep.organs, ep.organ?.name_default ?? null)}</td>
-                  <td>{ep.status?.name_default ?? '–'}</td>
+                  <td>{ep.status?.name_default ?? t('common.emptySymbol', '–')}</td>
                   <td>{formatDate(ep.start)}</td>
                   <td>{formatDate(ep.end)}</td>
-                  <td>{ep.fall_nr || '–'}</td>
+                  <td>{ep.fall_nr || t('common.emptySymbol', '–')}</td>
                   <td>{formatDate(ep.tpl_date)}</td>
-                  <td>{ep.closed ? 'Yes' : 'No'}</td>
-                  <td>{ep.fup_recipient_card_done ? (ep.fup_recipient_card_date ? formatDate(ep.fup_recipient_card_date) : 'Yes') : 'No'}</td>
+                  <td>{ep.closed ? t('common.yes', 'Yes') : t('common.no', 'No')}</td>
+                  <td>{ep.fup_recipient_card_done
+                    ? (ep.fup_recipient_card_date ? formatDate(ep.fup_recipient_card_date) : t('common.yes', 'Yes'))
+                    : t('common.no', 'No')}
+                  </td>
                   <td className="detail-ci-actions">
                     <InlineDeleteActions
                       confirming={confirmDeleteEpId === ep.id}
@@ -132,7 +137,7 @@ export default function EpisodeTable({
           </tbody>
         </table>
       ) : (
-        <p className="detail-empty">No episodes.</p>
+        <p className="detail-empty">{t('patients.episodes.empty', 'No episodes.')}</p>
       )}
 
       {addingEpisode && (
@@ -141,17 +146,17 @@ export default function EpisodeTable({
             {organCodes.map((c) => <option key={c.id} value={c.id}>{c.name_default}</option>)}
           </select>
           <select className="detail-input" value={epForm.status_id ?? ''} onChange={(e) => setEpForm((f) => ({ ...f, status_id: e.target.value ? Number(e.target.value) : null }))}>
-            <option value="">Status...</option>
+            <option value="">{t('episode.add.statusPlaceholder', 'Status...')}</option>
             {tplStatusCodes.map((c) => <option key={c.id} value={c.id}>{c.name_default}</option>)}
           </select>
-          <input type="date" className="detail-input" placeholder="Start" value={epForm.start ?? ''} onChange={(e) => setEpForm((f) => ({ ...f, start: e.target.value || null }))} />
-          <input type="date" className="detail-input" placeholder="End" value={epForm.end ?? ''} onChange={(e) => setEpForm((f) => ({ ...f, end: e.target.value || null }))} />
-          <input className="detail-input" placeholder="Fall Nr" value={epForm.fall_nr ?? ''} onChange={(e) => setEpForm((f) => ({ ...f, fall_nr: e.target.value }))} />
+          <input type="date" className="detail-input" placeholder={t('patients.episodes.start', 'Start')} value={epForm.start ?? ''} onChange={(e) => setEpForm((f) => ({ ...f, start: e.target.value || null }))} />
+          <input type="date" className="detail-input" placeholder={t('patients.episodes.end', 'End')} value={epForm.end ?? ''} onChange={(e) => setEpForm((f) => ({ ...f, end: e.target.value || null }))} />
+          <input className="detail-input" placeholder={t('patients.episodes.fallNr', 'Fall Nr')} value={epForm.fall_nr ?? ''} onChange={(e) => setEpForm((f) => ({ ...f, fall_nr: e.target.value }))} />
           <div className="ci-add-actions">
             <button className="save-btn" onClick={handleAddEpisode} disabled={epSaving || !epForm.organ_id}>
-              {epSaving ? 'Saving...' : 'Save'}
+              {epSaving ? t('coordinations.form.saving', 'Saving...') : t('actions.save', 'Save')}
             </button>
-            <button className="cancel-btn" onClick={() => setAddingEpisode(false)} disabled={epSaving}>Cancel</button>
+            <button className="cancel-btn" onClick={() => setAddingEpisode(false)} disabled={epSaving}>{t('actions.cancel', 'Cancel')}</button>
           </div>
         </div>
       )}

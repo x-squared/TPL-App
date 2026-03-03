@@ -1,3 +1,5 @@
+import { useI18n } from '../../i18n/i18n';
+
 interface InlineDeleteActionsProps {
   confirming: boolean;
   onRequestDelete: () => void;
@@ -15,15 +17,16 @@ export default function InlineDeleteActions({
   onEdit,
   deleting = false,
 }: InlineDeleteActionsProps) {
+  const { t } = useI18n();
   if (confirming) {
     return (
       <span className="ci-confirm">
-        <span className="ci-confirm-text">Delete?</span>
+        <span className="ci-confirm-text">{t('common.delete.confirmPrompt', 'Delete?')}</span>
         <button className="ci-confirm-yes" onClick={onConfirmDelete} disabled={deleting}>
-          Yes
+          {t('common.delete.yes', 'Yes')}
         </button>
         <button className="ci-confirm-no" onClick={onCancelDelete} disabled={deleting}>
-          No
+          {t('common.delete.no', 'No')}
         </button>
       </span>
     );
@@ -32,11 +35,11 @@ export default function InlineDeleteActions({
   return (
     <>
       {onEdit ? (
-        <button className="ci-edit-inline" onClick={onEdit} title="Edit">
+        <button className="ci-edit-inline" onClick={onEdit} title={t('actions.edit', 'Edit')}>
           ✎
         </button>
       ) : null}
-      <button className="ci-delete-btn" onClick={onRequestDelete} title="Delete" disabled={deleting}>
+      <button className="ci-delete-btn" onClick={onRequestDelete} title={t('actions.delete', 'Delete')} disabled={deleting}>
         {deleting ? '…' : '×'}
       </button>
     </>

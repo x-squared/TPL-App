@@ -1,0 +1,20 @@
+---
+description: Enforce translation keys for all visible UI text
+alwaysApply: true
+---
+
+# UI Text Must Use i18n Keys
+
+- Never hardcode visible UI text in frontend source files.
+- All user-visible labels, headings, button text, placeholders, tooltips, table headers, empty states, and status messages must use `t("<key>", "<english default>")`.
+- Every new UI text must be added to `frontend/src/i18n/translations.json` with both:
+  - `text.en` (English)
+  - `text.de` (German)
+- Keep `label.en`/`label.de` metadata for translation-admin readability.
+- Reuse existing keys when semantics match; only add new keys when needed.
+- Avoid embedding translated literals in helper utilities; pass translated text from components/hooks.
+
+## Required Check Before Finish
+
+- Scan changed frontend files for hardcoded visible strings.
+- If a visible literal remains, move it to `translations.json` and replace with `t(...)`.

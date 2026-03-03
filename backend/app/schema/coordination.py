@@ -9,7 +9,7 @@ from .clinical import EpisodeResponse
 from .clinical_medical_values import DatatypeDefinitionResponse
 from .person import PersonResponse, PersonTeamListResponse
 from .reference import CatalogueResponse, CodeResponse, UserResponse
-from .tasking import TaskResponse
+from .tasking import TaskGroupTemplateResponse, TaskResponse
 
 
 class CoordinationBase(BaseModel):
@@ -150,6 +150,7 @@ class CoordinationProtocolEventLogBase(BaseModel):
 class CoordinationProtocolEventLogCreate(BaseModel):
     organ_id: int
     event: str
+    effective_time: datetime | None = None
     task_id: int | None = None
     task_text: str | None = None
     task_comment: str | None = None
@@ -303,10 +304,6 @@ class CoordinationProcurementFieldGroupTemplateCreate(CoordinationProcurementFie
 
 
 class CoordinationProcurementFieldGroupTemplateUpdate(BaseModel):
-    key: str | None = None
-    name_default: str | None = None
-    comment: str | None = None
-    is_active: bool | None = None
     pos: int | None = None
 
 
@@ -329,6 +326,33 @@ class CoordinationProcurementFieldScopeTemplateResponse(CoordinationProcurementF
 
 class CoordinationProcurementFieldScopeTemplateCreate(CoordinationProcurementFieldScopeTemplateBase):
     pass
+
+
+class CoordinationProcurementProtocolTaskGroupSelectionBase(BaseModel):
+    task_group_template_id: int
+    organ_id: int | None = None
+    pos: int = 0
+
+
+class CoordinationProcurementProtocolTaskGroupSelectionResponse(CoordinationProcurementProtocolTaskGroupSelectionBase):
+    model_config = ConfigDict(from_attributes=True)
+
+    id: int
+    task_group_template: TaskGroupTemplateResponse | None = None
+    organ: CodeResponse | None = None
+    changed_by_id: int | None = None
+    changed_by_user: UserResponse | None = None
+    created_at: datetime
+    updated_at: datetime | None = None
+
+
+class CoordinationProcurementProtocolTaskGroupSelectionCreate(CoordinationProcurementProtocolTaskGroupSelectionBase):
+    pass
+
+
+class CoordinationProcurementProtocolTaskGroupSelectionUpdate(BaseModel):
+    organ_id: int | None = None
+    pos: int | None = None
 
 
 class CoordinationProcurementValueBase(BaseModel):
@@ -431,6 +455,7 @@ class CoordinationProcurementFlexResponse(BaseModel):
     organs: list[CoordinationProcurementOrganResponse] = []
     field_group_templates: list[CoordinationProcurementFieldGroupTemplateResponse] = []
     field_templates: list[CoordinationProcurementFieldTemplateResponse] = []
+    protocol_task_group_selections: list[CoordinationProcurementProtocolTaskGroupSelectionResponse] = []
 
 
 class CoordinationProcurementFieldTemplateCreate(BaseModel):
@@ -445,14 +470,8 @@ class CoordinationProcurementFieldTemplateCreate(BaseModel):
 
 
 class CoordinationProcurementFieldTemplateUpdate(BaseModel):
-    key: str | None = None
-    name_default: str | None = None
-    comment: str | None = None
-    is_active: bool | None = None
-    pos: int | None = None
-    datatype_def_id: int | None = None
     group_template_id: int | None = None
-    value_mode: ProcurementValueMode | None = None
+    pos: int | None = None
 
 
 class CoordinationProcurementAdminConfigResponse(BaseModel):
@@ -461,6 +480,7 @@ class CoordinationProcurementAdminConfigResponse(BaseModel):
     field_group_templates: list[CoordinationProcurementFieldGroupTemplateResponse] = []
     field_templates: list[CoordinationProcurementFieldTemplateResponse] = []
     field_scope_templates: list[CoordinationProcurementFieldScopeTemplateResponse] = []
+    protocol_task_group_selections: list[CoordinationProcurementProtocolTaskGroupSelectionResponse] = []
     datatype_definitions: list[DatatypeDefinitionResponse] = []
     organs: list[CodeResponse] = []
 

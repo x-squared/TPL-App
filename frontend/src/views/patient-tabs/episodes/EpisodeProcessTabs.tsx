@@ -1,4 +1,5 @@
 import type { EpisodeDetailTab } from './types';
+import { useI18n } from '../../../i18n/i18n';
 
 interface EpisodeProcessTabsProps {
   episodeDetailTabs: readonly EpisodeDetailTab[];
@@ -23,9 +24,17 @@ export default function EpisodeProcessTabs({
   startEditingDetailTab,
   setDetailSaveError,
 }: EpisodeProcessTabsProps) {
+  const { t } = useI18n();
+  const tabLabel = (tab: EpisodeDetailTab): string => {
+    if (tab === 'Evaluation') return t('episode.tabs.evaluation', 'Evaluation');
+    if (tab === 'Listing') return t('episode.tabs.listing', 'Listing');
+    if (tab === 'Transplantation') return t('episode.tabs.transplantation', 'Transplantation');
+    if (tab === 'Follow-Up') return t('episode.tabs.followUp', 'Follow-Up');
+    return t('episode.tabs.closed', 'Closed');
+  };
   return (
     <div className="episode-tabs-header-row">
-      <div className="episode-process-tabs" role="tablist" aria-label="Episode process tabs">
+      <div className="episode-process-tabs" role="tablist" aria-label={t('episode.processTabs.ariaLabel', 'Episode process tabs')}>
         {episodeDetailTabs.map((tab, idx) => (
           <div key={tab} className="episode-process-step">
             <button
@@ -34,7 +43,7 @@ export default function EpisodeProcessTabs({
               className={`episode-process-tab ${activeEpisodeTab === tab ? 'active' : ''}`}
               onClick={() => setActiveEpisodeTab(tab)}
             >
-              {tab}
+              {tabLabel(tab)}
             </button>
             {idx < episodeDetailTabs.length - 1 && (
               <span className="episode-process-arrow" aria-hidden="true">→</span>
@@ -51,7 +60,7 @@ export default function EpisodeProcessTabs({
               onClick={handleSaveDetailTab}
               disabled={detailSaving}
             >
-              {detailSaving ? 'Saving...' : 'Save'}
+              {detailSaving ? t('coordinations.form.saving', 'Saving...') : t('actions.save', 'Save')}
             </button>
             <button
               type="button"
@@ -59,7 +68,7 @@ export default function EpisodeProcessTabs({
               onClick={() => setEditingDetailTab(null)}
               disabled={detailSaving}
             >
-              Cancel
+              {t('actions.cancel', 'Cancel')}
             </button>
           </div>
         ) : (
@@ -71,7 +80,7 @@ export default function EpisodeProcessTabs({
               startEditingDetailTab(activeEpisodeTab);
             }}
           >
-            Edit
+            {t('actions.edit', 'Edit')}
           </button>
         )}
       </div>

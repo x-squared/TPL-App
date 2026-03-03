@@ -18,7 +18,7 @@ def list_coordination_protocol_events(
     coordination_id: int,
     organ_id: int,
     db: Session = Depends(get_db),
-    _: User = Depends(require_permission("view.donations")),
+    _: User = Depends(require_permission("view.donors")),
 ):
     return list_coordination_protocol_events_service(coordination_id=coordination_id, organ_id=organ_id, db=db)
 
@@ -28,7 +28,7 @@ def create_coordination_protocol_event(
     coordination_id: int,
     payload: CoordinationProtocolEventLogCreate,
     db: Session = Depends(get_db),
-    current_user: User = Depends(require_permission("edit.donations")),
+    current_user: User = Depends(require_permission("edit.donors")),
 ):
     return create_coordination_protocol_event_service(
         coordination_id=coordination_id,

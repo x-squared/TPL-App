@@ -1,5 +1,5 @@
 import type { ReactNode } from 'react';
-import type { Episode, Patient, Task, TaskGroup } from '../../api';
+import type { Episode, Patient, Task, TaskGroup, TaskKindKey } from '../../api';
 
 export interface TaskBoardCriteria {
   patientId?: number;
@@ -9,7 +9,7 @@ export interface TaskBoardCriteria {
   tplPhaseId?: number | null;
   assignedToId?: number | null;
   contextType?: TaskBoardContextType;
-  extraParams?: Record<string, string | number | boolean | null | undefined>;
+  extraParams?: Record<string, string | number | boolean | number[] | string[] | null | undefined>;
 }
 
 export type TaskBoardContext = TaskBoardCriteria;
@@ -52,6 +52,7 @@ export interface TaskBoardHandle {
 }
 
 export interface TaskBoardProps {
+  declaredContextType: TaskBoardContextType;
   criteria?: TaskBoardCriteria;
   context?: TaskBoardContext;
   title?: string;
@@ -69,6 +70,14 @@ export interface TaskBoardProps {
   onOpenTaskContext?: (target: TaskBoardContextTarget) => void;
   taskSort?: TaskBoardSort | null;
   onTaskSortChange?: (sort: TaskBoardSort | null) => void;
+  columnVisibility?: {
+    priority?: boolean;
+    reference?: boolean;
+    assignedTo?: boolean;
+    comment?: boolean;
+    closedAt?: boolean;
+    closedBy?: boolean;
+  };
 }
 
 export interface TaskReferenceContext {
@@ -94,13 +103,14 @@ export type TaskActionType = 'complete' | 'discard';
 export interface TaskActionState {
   task: Task;
   type: TaskActionType;
+  hint?: string;
 }
 
 export type TaskGroupState = 'HIGH_OPEN' | 'PENDING' | 'COMPLETED' | 'DISCARDED' | 'NONE';
 
 export interface TaskEditFormState {
   description: string;
-  kind_key: 'TASK' | 'EVENT';
+  kind_key: TaskKindKey;
   priority_id: number | null;
   assigned_to_id: number | null;
   until: string;
@@ -109,7 +119,7 @@ export interface TaskEditFormState {
 
 export interface TaskCreateFormState {
   description: string;
-  kind_key: 'TASK' | 'EVENT';
+  kind_key: TaskKindKey;
   priority_id: number | null;
   assigned_to_id: number | null;
   until: string;
@@ -164,6 +174,8 @@ export interface TaskBoardActionModel {
   actionState: TaskActionState | null;
   actionComment: string;
   setActionComment: (value: string) => void;
+  actionEventTime: string;
+  setActionEventTime: (value: string) => void;
   actionSaving: boolean;
   onConfirmAction: () => void;
   onCancelAction: () => void;

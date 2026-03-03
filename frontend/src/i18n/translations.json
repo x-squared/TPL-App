@@ -1,41 +1,96 @@
 {
   "app": {
+    "title": {
+      "label": {
+        "en": "Application title",
+        "de": "Applikationstitel"
+      },
+      "text": {
+        "en": "TPL App",
+        "de": "TPL App"
+      }
+    },
     "views": {
       "myWork": {
-        "label": { "en": "View name: My Work", "de": "Ansichtsname: Meine Arbeit" },
-        "text": { "de": "Meine Arbeit" }
+        "label": {
+          "en": "View name: My Work",
+          "de": "Ansichtsname: Meine Arbeit"
+        },
+        "text": {
+          "de": "Meine Arbeit"
+        }
       },
       "patients": {
-        "label": { "en": "View name: Recipients", "de": "Ansichtsname: Empfaenger" },
-        "text": { "de": "Empfaenger" }
+        "label": {
+          "en": "View name: Recipients",
+          "de": "Ansichtsname: Empfänger"
+        },
+        "text": {
+          "de": "Empfänger"
+        }
       },
-      "donations": {
-        "label": { "en": "View name: Donors", "de": "Ansichtsname: Spender" },
-        "text": { "de": "Spender" }
+      "donors": {
+        "label": {
+          "en": "View name: Donors",
+          "de": "Ansichtsname: Spender"
+        },
+        "text": {
+          "de": "Spender"
+        }
       },
       "colloquiums": {
-        "label": { "en": "View name: Colloquiums", "de": "Ansichtsname: Kolloquien" },
-        "text": { "de": "Kolloquien" }
+        "label": {
+          "en": "View name: Colloquiums",
+          "de": "Ansichtsname: Kolloquien"
+        },
+        "text": {
+          "de": "Kolloquien"
+        }
       },
       "coordinations": {
-        "label": { "en": "View name: Coordinations", "de": "Ansichtsname: Koordinationen" },
-        "text": { "de": "Koordinationen" }
+        "label": {
+          "en": "View name: Coordinations",
+          "de": "Ansichtsname: Koordinationen"
+        },
+        "text": {
+          "de": "Koordinationen"
+        }
       },
       "reports": {
-        "label": { "en": "View name: Reports", "de": "Ansichtsname: Berichte" },
-        "text": { "de": "Berichte" }
+        "label": {
+          "en": "View name: Reports",
+          "de": "Ansichtsname: Berichte"
+        },
+        "text": {
+          "de": "Berichte"
+        }
       },
       "admin": {
-        "label": { "en": "View name: Admin", "de": "Ansichtsname: Admin" },
-        "text": { "de": "Admin" }
+        "label": {
+          "en": "View name: Admin",
+          "de": "Ansichtsname: Admin"
+        },
+        "text": {
+          "de": "Admin"
+        }
       },
       "preferences": {
-        "label": { "en": "View name: User Preferences", "de": "Ansichtsname: Benutzereinstellungen" },
-        "text": { "de": "Benutzereinstellungen" }
+        "label": {
+          "en": "View name: User Preferences",
+          "de": "Ansichtsname: Benutzereinstellungen"
+        },
+        "text": {
+          "de": "Benutzereinstellungen"
+        }
       },
       "e2eTests": {
-        "label": { "en": "View name: E2E Tests", "de": "Ansichtsname: E2E-Tests" },
-        "text": { "de": "E2E-Tests" }
+        "label": {
+          "en": "View name: E2E Tests",
+          "de": "Ansichtsname: E2E-Tests"
+        },
+        "text": {
+          "de": "E2E-Tests"
+        }
       }
     },
     "login": {
@@ -80,77 +135,157 @@
     },
     "preferences": {
       "title": {
-        "label": { "en": "Preferences page title", "de": "Titel Einstellungsseite" },
-        "text": { "de": "Benutzereinstellungen" }
+        "label": {
+          "en": "Preferences page title",
+          "de": "Titel Einstellungsseite"
+        },
+        "text": {
+          "de": "Benutzereinstellungen"
+        }
       },
       "sections": {
         "general": {
-          "label": { "en": "Preferences section heading: General", "de": "Einstellungen Abschnitt: Allgemein" },
-          "text": { "de": "Allgemein" }
+          "label": {
+            "en": "Preferences section heading: General",
+            "de": "Einstellungen Abschnitt: Allgemein"
+          },
+          "text": {
+            "de": "Allgemein"
+          }
         },
         "actions": {
-          "label": { "en": "Preferences section heading: Actions", "de": "Einstellungen Abschnitt: Aktionen" },
-          "text": { "de": "Aktionen" }
+          "label": {
+            "en": "Preferences section heading: Actions",
+            "de": "Einstellungen Abschnitt: Aktionen"
+          },
+          "text": {
+            "de": "Aktionen"
+          }
         }
       },
       "fields": {
         "language": {
-          "label": { "en": "Preferences field label: Language", "de": "Einstellungen Feld: Sprache" },
-          "text": { "de": "Sprache" }
+          "label": {
+            "en": "Preferences field label: Language",
+            "de": "Einstellungen Feld: Sprache"
+          },
+          "text": {
+            "de": "Sprache"
+          }
         },
         "startView": {
-          "label": { "en": "Preferences field label: Start View", "de": "Einstellungen Feld: Startansicht" },
-          "text": { "de": "Startansicht" }
+          "label": {
+            "en": "Preferences field label: Start View",
+            "de": "Einstellungen Feld: Startansicht"
+          },
+          "text": {
+            "de": "Startansicht"
+          }
         },
         "languageEn": {
-          "label": { "en": "Preferences language option: English", "de": "Sprache Option: Englisch" },
-          "text": { "de": "Englisch" }
+          "label": {
+            "en": "Preferences language option: English",
+            "de": "Sprache Option: Englisch"
+          },
+          "text": {
+            "de": "Englisch"
+          }
         },
         "languageDe": {
-          "label": { "en": "Preferences language option: German", "de": "Sprache Option: Deutsch" },
-          "text": { "de": "Deutsch" }
+          "label": {
+            "en": "Preferences language option: German",
+            "de": "Sprache Option: Deutsch"
+          },
+          "text": {
+            "de": "Deutsch"
+          }
         }
       },
       "actions": {
         "save": {
-          "label": { "en": "Preferences action button: Save Preferences", "de": "Einstellungen Aktion: Speichern" },
-          "text": { "de": "Einstellungen speichern" }
+          "label": {
+            "en": "Preferences action button: Save Preferences",
+            "de": "Einstellungen Aktion: Speichern"
+          },
+          "text": {
+            "de": "Einstellungen speichern"
+          }
         },
         "saving": {
-          "label": { "en": "Preferences action button: Saving", "de": "Einstellungen Aktion: Speichern laeuft" },
-          "text": { "de": "Speichern..." }
+          "label": {
+            "en": "Preferences action button: Saving",
+            "de": "Einstellungen Aktion: Speichern läuft"
+          },
+          "text": {
+            "de": "Speichern..."
+          }
         }
       }
     },
     "admin": {
       "title": {
-        "label": { "en": "Admin page title", "de": "Titel Adminseite" },
-        "text": { "de": "Admin" }
+        "label": {
+          "en": "Admin page title",
+          "de": "Titel Adminseite"
+        },
+        "text": {
+          "de": "Admin"
+        }
       },
       "tabs": {
         "overview": {
-          "label": { "en": "Admin tab name: Overview", "de": "Admin Tab: Uebersicht" },
-          "text": { "de": "Uebersicht" }
+          "label": {
+            "en": "Admin tab name: Overview",
+            "de": "Admin Tab: Uebersicht"
+          },
+          "text": {
+            "de": "Uebersicht"
+          }
         },
         "accessRules": {
-          "label": { "en": "Admin tab name: Access Rules", "de": "Admin Tab: Zugriffsregeln" },
-          "text": { "de": "Zugriffsregeln" }
+          "label": {
+            "en": "Admin tab name: Access Rules",
+            "de": "Admin Tab: Zugriffsregeln"
+          },
+          "text": {
+            "de": "Zugriffsregeln"
+          }
         },
         "peopleTeams": {
-          "label": { "en": "Admin tab name: People and Teams", "de": "Admin Tab: Personen und Teams" },
-          "text": { "de": "Personen und Teams" }
+          "label": {
+            "en": "Admin tab name: People and Teams",
+            "de": "Admin Tab: Personen und Teams"
+          },
+          "text": {
+            "de": "Personen und Teams"
+          }
         },
         "taskTemplates": {
-          "label": { "en": "Admin tab name: Task Templates", "de": "Admin Tab: Aufgabenvorlagen" },
-          "text": { "de": "Aufgabenvorlagen" }
+          "label": {
+            "en": "Admin tab name: Task Templates",
+            "de": "Admin Tab: Aufgabenvorlagen"
+          },
+          "text": {
+            "de": "Aufgabenvorlagen"
+          }
         },
         "protocolConfig": {
-          "label": { "en": "Admin tab name: Protocol Config", "de": "Admin Tab: Protokollkonfiguration" },
-          "text": { "de": "Protokollkonfiguration" }
+          "label": {
+            "en": "Admin tab name: Protocol Config",
+            "de": "Admin Tab: Protokollkonfiguration"
+          },
+          "text": {
+            "de": "Protokollkonfiguration"
+          }
         },
         "translations": {
-          "label": { "en": "Admin tab name: Translations", "de": "Admin Tab: Uebersetzungen" },
-          "text": { "de": "Uebersetzungen" }
+          "label": {
+            "en": "Admin tab name: Translations",
+            "de": "Admin Tab: Uebersetzungen"
+          },
+          "text": {
+            "de": "Uebersetzungen"
+          }
         }
       }
     }
@@ -158,16 +293,31 @@
   "coordination": {
     "tabs": {
       "coordination": {
-        "label": { "en": "Coordination detail tab: Coordination", "de": "Koordination Detail Tab: Koordination" },
-        "text": { "de": "Koordination" }
+        "label": {
+          "en": "Coordination detail tab: Coordination",
+          "de": "Koordination Detail Tab: Koordination"
+        },
+        "text": {
+          "de": "Koordination"
+        }
       },
       "protocol": {
-        "label": { "en": "Coordination detail tab: Protocol", "de": "Koordination Detail Tab: Protokoll" },
-        "text": { "de": "Protokoll" }
+        "label": {
+          "en": "Coordination detail tab: Protocol",
+          "de": "Koordination Detail Tab: Protokoll"
+        },
+        "text": {
+          "de": "Protokoll"
+        }
       },
       "timeLog": {
-        "label": { "en": "Coordination detail tab: Time Log", "de": "Koordination Detail Tab: Zeitprotokoll" },
-        "text": { "de": "Zeitprotokoll" }
+        "label": {
+          "en": "Coordination detail tab: Time Log",
+          "de": "Koordination Detail Tab: Zeitprotokoll"
+        },
+        "text": {
+          "de": "Zeitprotokoll"
+        }
       }
     }
   },
@@ -185,10 +335,10 @@
       "recipients": {
         "label": {
           "en": "Sidebar navigation item: Recipients",
-          "de": "Seitenleiste Navigation: Empfaenger"
+          "de": "Seitenleiste Navigation: Empfänger"
         },
         "text": {
-          "de": "Empfaenger"
+          "de": "Empfänger"
         }
       },
       "donors": {
@@ -241,7 +391,7 @@
       "logout": {
         "label": {
           "en": "Sidebar user menu action: logout",
-          "de": "Benutzermenue Aktion: Abmelden"
+          "de": "Benutzermenü Aktion: Abmelden"
         },
         "text": {
           "de": "Abmelden"
@@ -250,10 +400,126 @@
       "preferences": {
         "label": {
           "en": "Sidebar user menu action: preferences",
-          "de": "Benutzermenue Aktion: Einstellungen"
+          "de": "Benutzermenü Aktion: Einstellungen"
         },
         "text": {
           "de": "Einstellungen"
+        }
+      }
+    },
+    "brand": {
+      "label": {
+        "en": "Sidebar brand",
+        "de": "Seitenleiste Marke"
+      },
+      "text": {
+        "en": "TPL App",
+        "de": "TPL App"
+      }
+    },
+    "sections": {
+      "admin": {
+        "label": {
+          "en": "Sidebar section label admin",
+          "de": "Seitenleiste Abschnitt Admin"
+        },
+        "text": {
+          "en": "ADMIN",
+          "de": "ADMIN"
+        }
+      },
+      "dev": {
+        "label": {
+          "en": "Sidebar section label dev",
+          "de": "Seitenleiste Abschnitt Dev"
+        },
+        "text": {
+          "en": "DEV",
+          "de": "DEV"
+        }
+      }
+    },
+    "actions": {
+      "collapse": {
+        "label": {
+          "en": "Sidebar action collapse",
+          "de": "Seitenleiste Aktion Einklappen"
+        },
+        "text": {
+          "en": "Collapse",
+          "de": "Einklappen"
+        }
+      },
+      "expand": {
+        "label": {
+          "en": "Sidebar action expand",
+          "de": "Seitenleiste Aktion Ausklappen"
+        },
+        "text": {
+          "en": "Expand",
+          "de": "Ausklappen"
+        }
+      },
+      "createCoordinationNow": {
+        "label": {
+          "en": "Sidebar action create coordination now",
+          "de": "Seitenleiste Aktion Koordination jetzt erstellen"
+        },
+        "text": {
+          "en": "Create coordination now",
+          "de": "Koordination jetzt erstellen"
+        }
+      }
+    },
+    "history": {
+      "label": {
+        "label": {
+          "en": "Sidebar navigation history aria label",
+          "de": "Seitenleiste Navigationsverlauf Aria-Label"
+        },
+        "text": {
+          "en": "Navigation history",
+          "de": "Navigationsverlauf"
+        }
+      },
+      "back": {
+        "label": {
+          "en": "Sidebar history action back",
+          "de": "Seitenleiste Verlauf Aktion Zurück"
+        },
+        "text": {
+          "en": "Go back",
+          "de": "Zurück"
+        }
+      },
+      "forward": {
+        "label": {
+          "en": "Sidebar history action forward",
+          "de": "Seitenleiste Verlauf Aktion Vorwärts"
+        },
+        "text": {
+          "en": "Go forward",
+          "de": "Vorwärts"
+        }
+      },
+      "markCurrentLocation": {
+        "label": {
+          "en": "Sidebar history action mark current location",
+          "de": "Seitenleiste Verlauf Aktion Aktülle Position markieren"
+        },
+        "text": {
+          "en": "Mark current location",
+          "de": "Aktülle Position markieren"
+        }
+      },
+      "returnToMarkedLocation": {
+        "label": {
+          "en": "Sidebar history action return to marked location",
+          "de": "Seitenleiste Verlauf Aktion Zur markierten Position"
+        },
+        "text": {
+          "en": "Return to marked location",
+          "de": "Zur markierten Position"
         }
       }
     }
@@ -266,7 +532,5658 @@
           "de": "Navigationseintrag: E2E-Tests"
         },
         "text": {
+          "en": "E2E Tests",
           "de": "E2E-Tests"
+        }
+      }
+    }
+  },
+  "common": {
+    "loading": {
+      "label": {
+        "en": "Common loading text",
+        "de": "Allgemeiner Ladehinweis"
+      },
+      "text": {
+        "en": "Loading...",
+        "de": "Laden..."
+      }
+    },
+    "delete": {
+      "confirmPrompt": {
+        "label": {
+          "en": "Delete confirmation prompt",
+          "de": "Löschen Bestätigung"
+        },
+        "text": {
+          "en": "Delete?",
+          "de": "Löschen?"
+        }
+      },
+      "yes": {
+        "label": {
+          "en": "Delete confirmation yes",
+          "de": "Löschen Ja"
+        },
+        "text": {
+          "en": "Yes",
+          "de": "Ja"
+        }
+      },
+      "no": {
+        "label": {
+          "en": "Delete confirmation no",
+          "de": "Löschen Nein"
+        },
+        "text": {
+          "en": "No",
+          "de": "Nein"
+        }
+      }
+    },
+    "yes": {
+      "label": {
+        "en": "Generic yes",
+        "de": "Allgemein Ja"
+      },
+      "text": {
+        "en": "Yes",
+        "de": "Ja"
+      }
+    },
+    "no": {
+      "label": {
+        "en": "Generic no",
+        "de": "Allgemein Nein"
+      },
+      "text": {
+        "en": "No",
+        "de": "Nein"
+      }
+    },
+    "emptySymbol": {
+      "label": {
+        "en": "Generic empty symbol",
+        "de": "Allgemein Leersymbol"
+      },
+      "text": {
+        "en": "–",
+        "de": "–"
+      }
+    },
+    "backToList": {
+      "label": {
+        "en": "Generic back to list action",
+        "de": "Allgemein Zurück zur Liste Aktion"
+      },
+      "text": {
+        "en": "Back to list",
+        "de": "Zurück zur Liste"
+      }
+    }
+  },
+  "actions": {
+    "edit": {
+      "label": {
+        "en": "Generic action: edit",
+        "de": "Aktion: Bearbeiten"
+      },
+      "text": {
+        "en": "Edit",
+        "de": "Bearbeiten"
+      }
+    },
+    "save": {
+      "label": {
+        "en": "Generic action: save",
+        "de": "Aktion: Speichern"
+      },
+      "text": {
+        "en": "Save",
+        "de": "Speichern"
+      }
+    },
+    "delete": {
+      "label": {
+        "en": "Generic action: delete",
+        "de": "Aktion: Löschen"
+      },
+      "text": {
+        "en": "Delete",
+        "de": "Löschen"
+      }
+    },
+    "confirm": {
+      "label": {
+        "en": "Generic action: confirm",
+        "de": "Aktion: Bestätigen"
+      },
+      "text": {
+        "en": "Confirm",
+        "de": "Bestätigen"
+      }
+    },
+    "cancel": {
+      "label": {
+        "en": "Generic action: cancel",
+        "de": "Aktion: Abbrechen"
+      },
+      "text": {
+        "en": "Cancel",
+        "de": "Abbrechen"
+      }
+    },
+    "close": {
+      "label": {
+        "en": "Generic action: close",
+        "de": "Aktion: Schliessen"
+      },
+      "text": {
+        "en": "Close",
+        "de": "Schliessen"
+      }
+    },
+    "remove": {
+      "label": {
+        "en": "Generic action: remove",
+        "de": "Aktion: Entfernen"
+      },
+      "text": {
+        "en": "Remove",
+        "de": "Entfernen"
+      }
+    }
+  },
+  "errorBanner": {
+    "closeMessage": {
+      "label": {
+        "en": "Error banner close message aria label",
+        "de": "Fehlerbanner Schliessen Nachricht Aria-Label"
+      },
+      "text": {
+        "en": "Close error message",
+        "de": "Fehlermeldung schliessen"
+      }
+    },
+    "preparing": {
+      "label": {
+        "en": "Error banner preparing ticket text",
+        "de": "Fehlerbanner Ticket vorbereiten Text"
+      },
+      "text": {
+        "en": "Preparing...",
+        "de": "Vorbereiten..."
+      }
+    },
+    "openTicket": {
+      "label": {
+        "en": "Error banner open ticket action",
+        "de": "Fehlerbanner Ticket öffnen Aktion"
+      },
+      "text": {
+        "en": "Open Ticket",
+        "de": "Ticket öffnen"
+      }
+    },
+    "ticketCreateFailed": {
+      "label": {
+        "en": "Error banner ticket create failed message",
+        "de": "Fehlerbanner Ticket erstellen fehlgeschlagen Meldung"
+      },
+      "text": {
+        "en": "Could not create support ticket draft.",
+        "de": "Support-Ticket-Entwurf konnte nicht erstellt werden."
+      }
+    }
+  },
+  "myWork": {
+    "title": {
+      "label": {
+        "en": "My Work page title",
+        "de": "Meine Arbeit Seitentitel"
+      },
+      "text": {
+        "en": "My Work",
+        "de": "Meine Arbeit"
+      }
+    },
+    "tabs": {
+      "favorites": {
+        "label": {
+          "en": "My Work tab: Favorites",
+          "de": "Meine Arbeit Tab: Favoriten"
+        },
+        "text": {
+          "en": "Favorites",
+          "de": "Favoriten"
+        }
+      },
+      "tasks": {
+        "label": {
+          "en": "My Work tab: Tasks",
+          "de": "Meine Arbeit Tab: Aufgaben"
+        },
+        "text": {
+          "en": "Tasks",
+          "de": "Aufgaben"
+        }
+      },
+      "information": {
+        "label": {
+          "en": "My Work tab: Information",
+          "de": "Meine Arbeit Tab: Information"
+        },
+        "text": {
+          "en": "Information",
+          "de": "Information"
+        }
+      }
+    },
+    "assignedTasks": {
+      "title": {
+        "label": {
+          "en": "Assigned tasks section title",
+          "de": "Bereichstitel Zugewiesene Aufgaben"
+        },
+        "text": {
+          "en": "Assigned Tasks",
+          "de": "Zugewiesene Aufgaben"
+        }
+      },
+      "scope": {
+        "label": {
+          "label": {
+            "en": "Assigned tasks scope label",
+            "de": "Zugewiesene Aufgaben Scope Feld"
+          },
+          "text": {
+            "en": "Scope",
+            "de": "Umfang"
+          }
+        },
+        "mine": {
+          "label": {
+            "en": "Assigned tasks scope: my tasks",
+            "de": "Zugewiesene Aufgaben Scope: Meine Aufgaben"
+          },
+          "text": {
+            "en": "My tasks",
+            "de": "Meine Aufgaben"
+          }
+        },
+        "all": {
+          "label": {
+            "en": "Assigned tasks scope: all tasks",
+            "de": "Zugewiesene Aufgaben Scope: Alle Aufgaben"
+          },
+          "text": {
+            "en": "All tasks",
+            "de": "Alle Aufgaben"
+          }
+        }
+      },
+      "context": {
+        "label": {
+          "label": {
+            "en": "Assigned tasks context label",
+            "de": "Zugewiesene Aufgaben Kontext Feld"
+          },
+          "text": {
+            "en": "Context",
+            "de": "Kontext"
+          }
+        },
+        "all": {
+          "label": {
+            "en": "Assigned tasks context: all",
+            "de": "Zugewiesene Aufgaben Kontext: Alle"
+          },
+          "text": {
+            "en": "All",
+            "de": "Alle"
+          }
+        },
+        "patient": {
+          "label": {
+            "en": "Assigned tasks context: patient",
+            "de": "Zugewiesene Aufgaben Kontext: Patient"
+          },
+          "text": {
+            "en": "Patient",
+            "de": "Patient"
+          }
+        },
+        "episode": {
+          "label": {
+            "en": "Assigned tasks context: episode",
+            "de": "Zugewiesene Aufgaben Kontext: Episode"
+          },
+          "text": {
+            "en": "Episode",
+            "de": "Episode"
+          }
+        },
+        "colloquium": {
+          "label": {
+            "en": "Assigned tasks context: colloquium",
+            "de": "Zugewiesene Aufgaben Kontext: Kolloquium"
+          },
+          "text": {
+            "en": "Colloquium",
+            "de": "Kolloquium"
+          }
+        },
+        "coordination": {
+          "label": {
+            "en": "Assigned tasks context: coordination",
+            "de": "Zugewiesene Aufgaben Kontext: Koordination"
+          },
+          "text": {
+            "en": "Coordination",
+            "de": "Koordination"
+          }
+        }
+      }
+    },
+    "favorites": {
+      "title": {
+        "label": {
+          "en": "Favorites section title",
+          "de": "Favoriten Bereichstitel"
+        },
+        "text": {
+          "en": "Favorites",
+          "de": "Favoriten"
+        }
+      },
+      "columns": {
+        "type": {
+          "label": {
+            "en": "Favorites table column: type",
+            "de": "Favoriten Spalte: Typ"
+          },
+          "text": {
+            "en": "Type",
+            "de": "Typ"
+          }
+        },
+        "name": {
+          "label": {
+            "en": "Favorites table column: name",
+            "de": "Favoriten Spalte: Name"
+          },
+          "text": {
+            "en": "Name",
+            "de": "Name"
+          }
+        }
+      },
+      "empty": {
+        "label": {
+          "en": "Favorites table empty state",
+          "de": "Favoriten Leerer Zustand"
+        },
+        "text": {
+          "en": "No favorites yet.",
+          "de": "Noch keine Favoriten."
+        }
+      },
+      "openTarget": {
+        "label": {
+          "en": "Favorites action: open target",
+          "de": "Favoriten Aktion: Ziel öffnen"
+        },
+        "text": {
+          "en": "Open favorite target",
+          "de": "Favoritenziel öffnen"
+        }
+      }
+    }
+  },
+  "taskBoard": {
+    "title": {
+      "label": {
+        "en": "Task board title",
+        "de": "Aufgabenboard Titel"
+      },
+      "text": {
+        "en": "Tasks",
+        "de": "Aufgaben"
+      }
+    },
+    "loading": {
+      "label": {
+        "en": "Task board loading text",
+        "de": "Aufgabenboard Ladehinweis"
+      },
+      "text": {
+        "en": "Loading tasks...",
+        "de": "Aufgaben werden geladen..."
+      }
+    },
+    "empty": {
+      "label": {
+        "en": "Task board empty state",
+        "de": "Aufgabenboard Leerer Zustand"
+      },
+      "text": {
+        "en": "No tasks match the current filters.",
+        "de": "Keine Aufgaben passen zu den aktüllen Filtern."
+      }
+    },
+    "common": {
+      "empty": {
+        "label": {
+          "en": "Task board empty symbol",
+          "de": "Aufgabenboard Leerzeichen"
+        },
+        "text": {
+          "en": "–",
+          "de": "–"
+        }
+      }
+    },
+    "columns": {
+      "state": {
+        "label": {
+          "en": "Task board column: state",
+          "de": "Aufgabenboard Spalte: Status"
+        },
+        "text": {
+          "en": "State",
+          "de": "Status"
+        }
+      },
+      "priority": {
+        "label": {
+          "en": "Task board column: priority",
+          "de": "Aufgabenboard Spalte: Priorität"
+        },
+        "text": {
+          "en": "Priority",
+          "de": "Priorität"
+        }
+      },
+      "reference": {
+        "label": {
+          "en": "Task board column: reference",
+          "de": "Aufgabenboard Spalte: Referenz"
+        },
+        "text": {
+          "en": "Reference",
+          "de": "Referenz"
+        }
+      },
+      "kind": {
+        "label": {
+          "en": "Task board column: kind",
+          "de": "Aufgabenboard Spalte: Art"
+        },
+        "text": {
+          "en": "Kind",
+          "de": "Art"
+        }
+      },
+      "description": {
+        "label": {
+          "en": "Task board column: description",
+          "de": "Aufgabenboard Spalte: Beschreibung"
+        },
+        "text": {
+          "en": "Description",
+          "de": "Beschreibung"
+        }
+      },
+      "assignedTo": {
+        "label": {
+          "en": "Task board column: assigned to",
+          "de": "Aufgabenboard Spalte: Zugewiesen an"
+        },
+        "text": {
+          "en": "Assigned To",
+          "de": "Zugewiesen an"
+        }
+      },
+      "dueAt": {
+        "label": {
+          "en": "Task board column: due at",
+          "de": "Aufgabenboard Spalte: Fällig am"
+        },
+        "text": {
+          "en": "Due At",
+          "de": "Fällig am"
+        }
+      },
+      "comment": {
+        "label": {
+          "en": "Task board column: comment",
+          "de": "Aufgabenboard Spalte: Kommentar"
+        },
+        "text": {
+          "en": "Comment",
+          "de": "Kommentar"
+        }
+      },
+      "closedAt": {
+        "label": {
+          "en": "Task board column: closed at",
+          "de": "Aufgabenboard Spalte: Geschlossen am"
+        },
+        "text": {
+          "en": "Closed At",
+          "de": "Geschlossen am"
+        }
+      },
+      "closedBy": {
+        "label": {
+          "en": "Task board column: closed by",
+          "de": "Aufgabenboard Spalte: Geschlossen von"
+        },
+        "text": {
+          "en": "Closed By",
+          "de": "Geschlossen von"
+        }
+      },
+      "actions": {
+        "label": {
+          "en": "Task board column: actions",
+          "de": "Aufgabenboard Spalte: Aktionen"
+        },
+        "text": {
+          "en": "Actions",
+          "de": "Aktionen"
+        }
+      }
+    },
+    "kind": {
+      "task": {
+        "label": {
+          "en": "Task board kind: task",
+          "de": "Aufgabenboard Art: Aufgabe"
+        },
+        "text": {
+          "en": "Task",
+          "de": "Aufgabe"
+        }
+      },
+      "event": {
+        "label": {
+          "en": "Task board kind: event",
+          "de": "Aufgabenboard Art: Ereignis"
+        },
+        "text": {
+          "en": "Event",
+          "de": "Ereignis"
+        }
+      },
+      "confirmation": {
+        "label": {
+          "en": "Task board kind: confirmation",
+          "de": "Aufgabenboard Art: Bestätigung"
+        },
+        "text": {
+          "en": "Task",
+          "de": "Aufgabe"
+        }
+      }
+    },
+    "sort": {
+      "statusHint": {
+        "label": {
+          "en": "Task board sort hint: status",
+          "de": "Aufgabenboard Sortierhinweis: Status"
+        },
+        "text": {
+          "en": "Sort by status (asc/desc/off)",
+          "de": "Nach Status sortieren (auf/ab/aus)"
+        }
+      },
+      "priorityHint": {
+        "label": {
+          "en": "Task board sort hint: priority",
+          "de": "Aufgabenboard Sortierhinweis: Priorität"
+        },
+        "text": {
+          "en": "Sort by priority (asc/desc/off)",
+          "de": "Nach Priorität sortieren (auf/ab/aus)"
+        }
+      },
+      "dueDateHint": {
+        "label": {
+          "en": "Task board sort hint: due date",
+          "de": "Aufgabenboard Sortierhinweis: Fälligkeit"
+        },
+        "text": {
+          "en": "Sort by due date (asc/desc/off)",
+          "de": "Nach Fälligkeit sortieren (auf/ab/aus)"
+        }
+      }
+    },
+    "filters": {
+      "organ": {
+        "label": {
+          "en": "Task board filter: organ",
+          "de": "Aufgabenboard Filter: Organ"
+        },
+        "text": {
+          "en": "Organ",
+          "de": "Organ"
+        }
+      },
+      "assignedTo": {
+        "label": {
+          "en": "Task board filter: assigned to",
+          "de": "Aufgabenboard Filter: Zugewiesen an"
+        },
+        "text": {
+          "en": "Assigned To",
+          "de": "Zugewiesen an"
+        }
+      },
+      "dueBefore": {
+        "label": {
+          "en": "Task board filter: due before",
+          "de": "Aufgabenboard Filter: Fällig vor"
+        },
+        "text": {
+          "en": "Due Before",
+          "de": "Fällig vor"
+        }
+      },
+      "completedTasks": {
+        "label": {
+          "en": "Task board filter: completed tasks",
+          "de": "Aufgabenboard Filter: Erledigte Aufgaben"
+        },
+        "text": {
+          "en": "Completed Tasks",
+          "de": "Erledigte Aufgaben"
+        }
+      },
+      "discardedTasks": {
+        "label": {
+          "en": "Task board filter: discarded tasks",
+          "de": "Aufgabenboard Filter: Verwarfene Aufgaben"
+        },
+        "text": {
+          "en": "Discarded Tasks",
+          "de": "Verworfene Aufgaben"
+        }
+      },
+      "groupHeadings": {
+        "label": {
+          "en": "Task board filter: group headings",
+          "de": "Aufgabenboard Filter: Gruppenüberschriften"
+        },
+        "text": {
+          "en": "Group Headings",
+          "de": "Gruppenüberschriften"
+        }
+      },
+      "all": {
+        "label": {
+          "en": "Task board filter option: all",
+          "de": "Aufgabenboard Filteroption: Alle"
+        },
+        "text": {
+          "en": "All",
+          "de": "Alle"
+        }
+      },
+      "show": {
+        "label": {
+          "en": "Task board filter option: show",
+          "de": "Aufgabenboard Filteroption: Anzeigen"
+        },
+        "text": {
+          "en": "Show",
+          "de": "Anzeigen"
+        }
+      },
+      "hide": {
+        "label": {
+          "en": "Task board filter option: hide",
+          "de": "Aufgabenboard Filteroption: Ausblenden"
+        },
+        "text": {
+          "en": "Hide",
+          "de": "Ausblenden"
+        }
+      }
+    },
+    "group": {
+      "state": {
+        "label": {
+          "en": "Task group state icon title",
+          "de": "Aufgabengruppe Status Icon Titel"
+        },
+        "text": {
+          "en": "Task group state",
+          "de": "Aufgabengruppenstatus"
+        }
+      },
+      "edit": {
+        "label": {
+          "en": "Task group action: edit",
+          "de": "Aufgabengruppe Aktion: Bearbeiten"
+        },
+        "text": {
+          "en": "Edit task group",
+          "de": "Aufgabengruppe bearbeiten"
+        }
+      },
+      "addTask": {
+        "label": {
+          "en": "Task group action: add task",
+          "de": "Aufgabengruppe Aktion: Aufgabe hinzufügen"
+        },
+        "text": {
+          "en": "Add task to group",
+          "de": "Aufgabe zur Gruppe hinzufügen"
+        }
+      },
+      "closedNoNewTasks": {
+        "label": {
+          "en": "Task group closed hint",
+          "de": "Aufgabengruppe geschlossen Hinweis"
+        },
+        "text": {
+          "en": "Task group is closed (completed/discarded); no new tasks allowed",
+          "de": "Aufgabengruppe ist geschlossen (erledigt/verworfen); keine neün Aufgaben erlaubt"
+        }
+      },
+      "editHeading": {
+        "label": {
+          "en": "Task group edit heading",
+          "de": "Aufgabengruppe Bearbeiten Ueberschrift"
+        },
+        "text": {
+          "en": "Edit group",
+          "de": "Gruppe bearbeiten"
+        }
+      },
+      "name": {
+        "label": {
+          "en": "Task group field: name",
+          "de": "Aufgabengruppe Feld: Name"
+        },
+        "text": {
+          "en": "Name",
+          "de": "Name"
+        }
+      },
+      "save": {
+        "label": {
+          "en": "Task group action: save",
+          "de": "Aufgabengruppe Aktion: Speichern"
+        },
+        "text": {
+          "en": "Save group",
+          "de": "Gruppe speichern"
+        }
+      },
+      "cancelEdit": {
+        "label": {
+          "en": "Task group action: cancel edit",
+          "de": "Aufgabengruppe Aktion: Bearbeiten abbrechen"
+        },
+        "text": {
+          "en": "Cancel group edit",
+          "de": "Gruppenbearbeitung abbrechen"
+        }
+      },
+      "label": {
+        "label": {
+          "en": "Task group label prefix",
+          "de": "Aufgabengruppe Label Prefix"
+        },
+        "text": {
+          "en": "Group",
+          "de": "Gruppe"
+        }
+      }
+    },
+    "comment": {
+      "required": {
+        "label": {
+          "en": "Task action comment required placeholder",
+          "de": "Aufgabenaktion Kommentar erforderlich Platzhalter"
+        },
+        "text": {
+          "en": "Comment (required)",
+          "de": "Kommentar (erforderlich)"
+        }
+      },
+      "optional": {
+        "label": {
+          "en": "Task action comment optional placeholder",
+          "de": "Aufgabenaktion Kommentar optional Platzhalter"
+        },
+        "text": {
+          "en": "Comment (optional)",
+          "de": "Kommentar (optional)"
+        }
+      }
+    },
+    "actions": {
+      "openContext": {
+        "label": {
+          "en": "Task action: open context",
+          "de": "Aufgabenaktion: Kontext öffnen"
+        },
+        "text": {
+          "en": "Open context",
+          "de": "Kontext öffnen"
+        }
+      },
+      "registerEventOccurrence": {
+        "label": {
+          "en": "Task action: register event occurrence",
+          "de": "Aufgabenaktion: Ereignis registrieren"
+        },
+        "text": {
+          "en": "Register event occurrence",
+          "de": "Ereignis registrieren"
+        }
+      },
+      "completeTask": {
+        "label": {
+          "en": "Task action: complete task",
+          "de": "Aufgabenaktion: Aufgabe erledigen"
+        },
+        "text": {
+          "en": "Complete task",
+          "de": "Aufgabe erledigen"
+        }
+      },
+      "confirmTask": {
+        "label": {
+          "en": "Task action: confirm task",
+          "de": "Aufgabenaktion: Aufgabe bestätigen"
+        },
+        "text": {
+          "en": "Complete task",
+          "de": "Aufgabe erledigen"
+        }
+      },
+      "discardTask": {
+        "label": {
+          "en": "Task action: discard task",
+          "de": "Aufgabenaktion: Aufgabe verwerfen"
+        },
+        "text": {
+          "en": "Discard task",
+          "de": "Aufgabe verwerfen"
+        }
+      },
+      "discardEvent": {
+        "label": {
+          "en": "Task action: discard event",
+          "de": "Aufgabenaktion: Ereignis verwerfen"
+        },
+        "text": {
+          "en": "Discard event",
+          "de": "Ereignis verwerfen"
+        }
+      },
+      "editTask": {
+        "label": {
+          "en": "Task action: edit task",
+          "de": "Aufgabenaktion: Aufgabe bearbeiten"
+        },
+        "text": {
+          "en": "Edit task",
+          "de": "Aufgabe bearbeiten"
+        }
+      },
+      "addFromContext": {
+        "label": {
+          "en": "Task action: add from current context",
+          "de": "Aufgabenaktion: Im aktüllen Kontext hinzufügen"
+        },
+        "text": {
+          "en": "Add task from current context",
+          "de": "Aufgabe im aktüllen Kontext hinzufügen"
+        }
+      },
+      "selectPatientToAdd": {
+        "label": {
+          "en": "Task action: select patient before add",
+          "de": "Aufgabenaktion: Patient vor Hinzufügen wählen"
+        },
+        "text": {
+          "en": "Select a patient to add a task",
+          "de": "Wählen Sie einen Patienten, um eine Aufgabe hinzuzufügen"
+        }
+      },
+      "add": {
+        "label": {
+          "en": "Task action button: add",
+          "de": "Aufgabenaktion Knopf: Hinzufügen"
+        },
+        "text": {
+          "en": "+ Add",
+          "de": "+ Hinzufügen"
+        }
+      },
+      "createTask": {
+        "label": {
+          "en": "Task action: create task",
+          "de": "Aufgabenaktion: Aufgabe erstellen"
+        },
+        "text": {
+          "en": "Create task",
+          "de": "Aufgabe erstellen"
+        }
+      },
+      "cancelTaskCreation": {
+        "label": {
+          "en": "Task action: cancel task creation",
+          "de": "Aufgabenaktion: Aufgabenerstellung abbrechen"
+        },
+        "text": {
+          "en": "Cancel task creation",
+          "de": "Aufgabenerstellung abbrechen"
+        }
+      },
+      "confirmationPrompt": {
+        "label": {
+          "en": "Task action confirmation prompt",
+          "de": "Aufgabenaktion Bestätigungsabfrage"
+        },
+        "text": {
+          "en": "Please confirm this task with \"Yes\".",
+          "de": "Bitte bestätigen Sie diese Aufgabe mit \"Ja\"."
+        }
+      },
+      "saveEdit": {
+        "label": {
+          "en": "Task action: save edit",
+          "de": "Aufgabenaktion: Bearbeitung speichern"
+        },
+        "text": {
+          "en": "Save edit",
+          "de": "Bearbeitung speichern"
+        }
+      },
+      "cancelEdit": {
+        "label": {
+          "en": "Task action: cancel edit",
+          "de": "Aufgabenaktion: Bearbeitung abbrechen"
+        },
+        "text": {
+          "en": "Cancel edit",
+          "de": "Bearbeitung abbrechen"
+        }
+      }
+    }
+  },
+  "patients": {
+    "title": {
+      "label": {
+        "en": "Patients page title",
+        "de": "Patienten Seitentitel"
+      },
+      "text": {
+        "en": "Patients",
+        "de": "Patienten"
+      }
+    },
+    "emptyFiltered": {
+      "label": {
+        "en": "Patients list empty by filter",
+        "de": "Patientenliste leer durch Filter"
+      },
+      "text": {
+        "en": "No patients match the filter.",
+        "de": "Keine Patienten entsprechen dem Filter."
+      }
+    },
+    "actions": {
+      "addPatient": {
+        "label": {
+          "en": "Patients action: add patient",
+          "de": "Patienten Aktion: Patient hinzufügen"
+        },
+        "text": {
+          "en": "+ Add Patient",
+          "de": "+ Patient hinzufügen"
+        }
+      },
+      "openPatient": {
+        "label": {
+          "en": "Patients action: open patient",
+          "de": "Patienten Aktion: Patient öffnen"
+        },
+        "text": {
+          "en": "Open patient",
+          "de": "Patient öffnen"
+        }
+      }
+    },
+    "tasks": {
+      "filteredToPatient": {
+        "label": {
+          "en": "Patients task board: filtered to patient",
+          "de": "Patienten Aufgabenboard: gefiltert auf Patient"
+        },
+        "text": {
+          "en": "filtered to patient",
+          "de": "gefiltert auf Patient"
+        }
+      },
+      "showingAll": {
+        "label": {
+          "en": "Patients task board: showing all",
+          "de": "Patienten Aufgabenboard: alle angezeigt"
+        },
+        "text": {
+          "en": "showing tasks for all patients",
+          "de": "Aufgaben für alle Patienten anzeigen"
+        }
+      },
+      "clearSelection": {
+        "label": {
+          "en": "Patients task board: clear patient selection",
+          "de": "Patienten Aufgabenboard: Patientenauswahl löschen"
+        },
+        "text": {
+          "en": "Clear patient selection",
+          "de": "Patientenauswahl löschen"
+        }
+      }
+    },
+    "filters": {
+      "wildcard": {
+        "label": {
+          "en": "Patients filter wildcard placeholder",
+          "de": "Patienten Filter Wildcard Platzhalter"
+        },
+        "text": {
+          "en": "Wildcard search (* allowed, across patient + episodes)",
+          "de": "Wildcard-Suche (* erlaubt, über Patient + Episoden)"
+        }
+      },
+      "pid": {
+        "label": {
+          "en": "Patients filter PID placeholder",
+          "de": "Patienten Filter PID Platzhalter"
+        },
+        "text": {
+          "en": "PID",
+          "de": "PID"
+        }
+      },
+      "name": {
+        "label": {
+          "en": "Patients filter name placeholder",
+          "de": "Patienten Filter Name Platzhalter"
+        },
+        "text": {
+          "en": "Name",
+          "de": "Name"
+        }
+      },
+      "firstName": {
+        "label": {
+          "en": "Patients filter first name placeholder",
+          "de": "Patienten Filter Vorname Platzhalter"
+        },
+        "text": {
+          "en": "First name",
+          "de": "Vorname"
+        }
+      },
+      "dateOfBirth": {
+        "label": {
+          "en": "Patients filter date of birth placeholder",
+          "de": "Patienten Filter Geburtsdatum Platzhalter"
+        },
+        "text": {
+          "en": "Date of birth",
+          "de": "Geburtsdatum"
+        }
+      },
+      "organ": {
+        "label": {
+          "en": "Patients filter organ option",
+          "de": "Patienten Filter Organ Option"
+        },
+        "text": {
+          "en": "Organ...",
+          "de": "Organ..."
+        }
+      },
+      "allEpisodes": {
+        "label": {
+          "en": "Patients filter all episodes option",
+          "de": "Patienten Filter Alle Episoden Option"
+        },
+        "text": {
+          "en": "All episodes",
+          "de": "Alle Episoden"
+        }
+      },
+      "openOnly": {
+        "label": {
+          "en": "Patients filter open only option",
+          "de": "Patienten Filter Nur offene Option"
+        },
+        "text": {
+          "en": "Open only",
+          "de": "Nur offen"
+        }
+      }
+    },
+    "table": {
+      "pid": {
+        "label": {
+          "en": "Patients table header PID",
+          "de": "Patienten Tabelle Kopf PID"
+        },
+        "text": {
+          "en": "PID",
+          "de": "PID"
+        }
+      },
+      "name": {
+        "label": {
+          "en": "Patients table header name",
+          "de": "Patienten Tabelle Kopf Name"
+        },
+        "text": {
+          "en": "Name",
+          "de": "Name"
+        }
+      },
+      "firstName": {
+        "label": {
+          "en": "Patients table header first name",
+          "de": "Patienten Tabelle Kopf Vorname"
+        },
+        "text": {
+          "en": "First Name",
+          "de": "Vorname"
+        }
+      },
+      "dateOfBirth": {
+        "label": {
+          "en": "Patients table header date of birth",
+          "de": "Patienten Tabelle Kopf Geburtsdatum"
+        },
+        "text": {
+          "en": "Date of Birth",
+          "de": "Geburtsdatum"
+        }
+      },
+      "ahvNr": {
+        "label": {
+          "en": "Patients table header AHV number",
+          "de": "Patienten Tabelle Kopf AHV Nummer"
+        },
+        "text": {
+          "en": "AHV Nr.",
+          "de": "AHV Nr."
+        }
+      },
+      "medical": {
+        "label": {
+          "en": "Patients table header medical",
+          "de": "Patienten Tabelle Kopf Medizinisch"
+        },
+        "text": {
+          "en": "Medical",
+          "de": "Medizinisch"
+        }
+      },
+      "episodes": {
+        "label": {
+          "en": "Patients table header episodes",
+          "de": "Patienten Tabelle Kopf Episoden"
+        },
+        "text": {
+          "en": "Episodes",
+          "de": "Episoden"
+        }
+      },
+      "respCoord": {
+        "label": {
+          "en": "Patients table header responsible coordinator",
+          "de": "Patienten Tabelle Kopf Verantwortliche Koordination"
+        },
+        "text": {
+          "en": "Resp. Coord.",
+          "de": "Verantw. Koord."
+        }
+      },
+      "contacts": {
+        "label": {
+          "en": "Patients table header contacts",
+          "de": "Patienten Tabelle Kopf Kontakte"
+        },
+        "text": {
+          "en": "Contacts",
+          "de": "Kontakte"
+        }
+      },
+      "language": {
+        "label": {
+          "en": "Patients table header language",
+          "de": "Patienten Tabelle Kopf Sprache"
+        },
+        "text": {
+          "en": "Lang",
+          "de": "Sprache"
+        }
+      },
+      "translate": {
+        "label": {
+          "en": "Patients table header translate",
+          "de": "Patienten Tabelle Kopf Uebersetzen"
+        },
+        "text": {
+          "en": "Translate",
+          "de": "Uebersetzen"
+        }
+      }
+    },
+    "contact": {
+      "loading": {
+        "label": {
+          "en": "Patients contacts loading",
+          "de": "Patienten Kontakte laden"
+        },
+        "text": {
+          "en": "Loading contact information...",
+          "de": "Kontaktinformationen werden geladen..."
+        }
+      },
+      "main": {
+        "label": {
+          "en": "Patients contact main badge",
+          "de": "Patienten Kontakt Haupt-Badge"
+        },
+        "text": {
+          "en": "Main",
+          "de": "Haupt"
+        }
+      },
+      "empty": {
+        "label": {
+          "en": "Patients contacts empty state",
+          "de": "Patienten Kontakte leer"
+        },
+        "text": {
+          "en": "No contact information.",
+          "de": "Keine Kontaktinformationen."
+        }
+      }
+    },
+    "medicalTable": {
+      "name": {
+        "label": {
+          "en": "Patients medical table header name",
+          "de": "Patienten Medizin Tabelle Kopf Name"
+        },
+        "text": {
+          "en": "Name",
+          "de": "Name"
+        }
+      },
+      "value": {
+        "label": {
+          "en": "Patients medical table header value",
+          "de": "Patienten Medizin Tabelle Kopf Wert"
+        },
+        "text": {
+          "en": "Value",
+          "de": "Wert"
+        }
+      },
+      "empty": {
+        "label": {
+          "en": "Patients medical empty state",
+          "de": "Patienten Medizin leer"
+        },
+        "text": {
+          "en": "No medical values.",
+          "de": "Keine medizinischen Werte."
+        }
+      }
+    },
+    "episodes": {
+      "loading": {
+        "label": {
+          "en": "Patients episodes loading",
+          "de": "Patienten Episoden laden"
+        },
+        "text": {
+          "en": "Loading episodes...",
+          "de": "Episoden werden geladen..."
+        }
+      },
+      "organ": {
+        "label": {
+          "en": "Patients episodes header organ",
+          "de": "Patienten Episoden Kopf Organ"
+        },
+        "text": {
+          "en": "Organ",
+          "de": "Organ"
+        }
+      },
+      "status": {
+        "label": {
+          "en": "Patients episodes header status",
+          "de": "Patienten Episoden Kopf Status"
+        },
+        "text": {
+          "en": "Status",
+          "de": "Status"
+        }
+      },
+      "start": {
+        "label": {
+          "en": "Patients episodes header start",
+          "de": "Patienten Episoden Kopf Start"
+        },
+        "text": {
+          "en": "Start",
+          "de": "Start"
+        }
+      },
+      "end": {
+        "label": {
+          "en": "Patients episodes header end",
+          "de": "Patienten Episoden Kopf Ende"
+        },
+        "text": {
+          "en": "End",
+          "de": "Ende"
+        }
+      },
+      "fallNr": {
+        "label": {
+          "en": "Patients episodes header case number",
+          "de": "Patienten Episoden Kopf Fallnummer"
+        },
+        "text": {
+          "en": "Fall Nr",
+          "de": "Fall Nr"
+        }
+      },
+      "closed": {
+        "label": {
+          "en": "Patients episodes header closed",
+          "de": "Patienten Episoden Kopf Geschlossen"
+        },
+        "text": {
+          "en": "Closed",
+          "de": "Geschlossen"
+        }
+      },
+      "empty": {
+        "label": {
+          "en": "Patients episodes empty state",
+          "de": "Patienten Episoden leer"
+        },
+        "text": {
+          "en": "No episodes.",
+          "de": "Keine Episoden."
+        }
+      }
+    },
+    "addForm": {
+      "pidRequired": {
+        "label": {
+          "en": "Patients add form PID required placeholder",
+          "de": "Patienten Hinzufügen Formular PID erforderlich Platzhalter"
+        },
+        "text": {
+          "en": "PID *",
+          "de": "PID *"
+        }
+      },
+      "firstNameRequired": {
+        "label": {
+          "en": "Patients add form first name required placeholder",
+          "de": "Patienten Hinzufügen Formular Vorname erforderlich Platzhalter"
+        },
+        "text": {
+          "en": "First name *",
+          "de": "Vorname *"
+        }
+      },
+      "lastNameRequired": {
+        "label": {
+          "en": "Patients add form last name required placeholder",
+          "de": "Patienten Hinzufügen Formular Name erforderlich Platzhalter"
+        },
+        "text": {
+          "en": "Name *",
+          "de": "Name *"
+        }
+      }
+    }
+  },
+  "coordinations": {
+    "title": {
+      "label": {
+        "en": "Coordinations page title",
+        "de": "Koordinationen Seitentitel"
+      },
+      "text": {
+        "en": "Coordinations",
+        "de": "Koordinationen"
+      }
+    },
+    "empty": {
+      "label": {
+        "en": "Coordinations list empty state",
+        "de": "Koordinationenliste leer"
+      },
+      "text": {
+        "en": "No coordinations found.",
+        "de": "Keine Koordinationen gefunden."
+      }
+    },
+    "entity": {
+      "label": {
+        "en": "Coordination entity label",
+        "de": "Koordination Entitätslabel"
+      },
+      "text": {
+        "en": "Coordination",
+        "de": "Koordination"
+      }
+    },
+    "unknownDonor": {
+      "label": {
+        "en": "Fallback donor name in coordination title",
+        "de": "Ersatz Spendername im Koordinationstitel"
+      },
+      "text": {
+        "en": "Unknown donor",
+        "de": "Unbekannter Spender"
+      }
+    },
+    "notFound": {
+      "label": {
+        "en": "Coordination detail not found",
+        "de": "Koordination Detail nicht gefunden"
+      },
+      "text": {
+        "en": "Coordination not found.",
+        "de": "Koordination nicht gefunden."
+      }
+    },
+    "actions": {
+      "add": {
+        "label": {
+          "en": "Coordinations action: add",
+          "de": "Koordinationen Aktion: Hinzufügen"
+        },
+        "text": {
+          "en": "+ Add",
+          "de": "+ Hinzufügen"
+        }
+      },
+      "openCoordination": {
+        "label": {
+          "en": "Coordinations action: open coordination",
+          "de": "Koordinationen Aktion: Koordination öffnen"
+        },
+        "text": {
+          "en": "Open coordination",
+          "de": "Koordination öffnen"
+        }
+      },
+      "openDetachedProtocol": {
+        "label": {
+          "en": "Coordinations action: open detached protocol",
+          "de": "Koordinationen Aktion: Losgelöstes Protokoll öffnen"
+        },
+        "text": {
+          "en": "Open detached protocol",
+          "de": "Losgelöstes Protokoll öffnen"
+        }
+      }
+    },
+    "favorites": {
+      "add": {
+        "label": {
+          "en": "Coordination favorites action: add",
+          "de": "Koordination Favoriten Aktion: Hinzufügen"
+        },
+        "text": {
+          "en": "Add coordination to favorites",
+          "de": "Koordination zu Favoriten hinzufügen"
+        }
+      },
+      "remove": {
+        "label": {
+          "en": "Coordination favorites action: remove",
+          "de": "Koordination Favoriten Aktion: Entfernen"
+        },
+        "text": {
+          "en": "Remove coordination from favorites",
+          "de": "Koordination aus Favoriten entfernen"
+        }
+      }
+    },
+    "table": {
+      "status": {
+        "label": {
+          "en": "Coordinations table header status",
+          "de": "Koordinationen Tabelle Kopf Status"
+        },
+        "text": {
+          "en": "Status",
+          "de": "Status"
+        }
+      },
+      "start": {
+        "label": {
+          "en": "Coordinations table header start",
+          "de": "Koordinationen Tabelle Kopf Start"
+        },
+        "text": {
+          "en": "Start",
+          "de": "Start"
+        }
+      },
+      "end": {
+        "label": {
+          "en": "Coordinations table header end",
+          "de": "Koordinationen Tabelle Kopf Ende"
+        },
+        "text": {
+          "en": "End",
+          "de": "Ende"
+        }
+      },
+      "donorName": {
+        "label": {
+          "en": "Coordinations table header donor name",
+          "de": "Koordinationen Tabelle Kopf Spendername"
+        },
+        "text": {
+          "en": "Donor Name",
+          "de": "Spendername"
+        }
+      },
+      "dateOfBirth": {
+        "label": {
+          "en": "Coordinations table header date of birth",
+          "de": "Koordinationen Tabelle Kopf Geburtsdatum"
+        },
+        "text": {
+          "en": "Date of Birth",
+          "de": "Geburtsdatum"
+        }
+      },
+      "reasonOfDeath": {
+        "label": {
+          "en": "Coordinations table header reason of death",
+          "de": "Koordinationen Tabelle Kopf Todesursache"
+        },
+        "text": {
+          "en": "Reason of Death",
+          "de": "Todesursache"
+        }
+      },
+      "swtplNr": {
+        "label": {
+          "en": "Coordinations table header SWTPL number",
+          "de": "Koordinationen Tabelle Kopf SWTPL Nummer"
+        },
+        "text": {
+          "en": "SWTPL Nr",
+          "de": "SWTPL Nr"
+        }
+      },
+      "organ": {
+        "label": {
+          "en": "Coordinations table header organ",
+          "de": "Koordinationen Tabelle Kopf Organ"
+        },
+        "text": {
+          "en": "Organ",
+          "de": "Organ"
+        }
+      }
+    },
+    "form": {
+      "donorNameRequired": {
+        "label": {
+          "en": "Coordinations form placeholder donor name required",
+          "de": "Koordinationen Formular Platzhalter Spendername erforderlich"
+        },
+        "text": {
+          "en": "Donor name *",
+          "de": "Spendername *"
+        }
+      },
+      "donorNr": {
+        "label": {
+          "en": "Coordinations form placeholder donor number",
+          "de": "Koordinationen Formular Platzhalter Spendernummer"
+        },
+        "text": {
+          "en": "Donor Nr",
+          "de": "Spender Nr"
+        }
+      },
+      "reasonOfDeath": {
+        "label": {
+          "en": "Coordinations form reason of death option",
+          "de": "Koordinationen Formular Todesursache Option"
+        },
+        "text": {
+          "en": "Reason of death...",
+          "de": "Todesursache..."
+        }
+      },
+      "swtplNr": {
+        "label": {
+          "en": "Coordinations form placeholder SWTPL number",
+          "de": "Koordinationen Formular Platzhalter SWTPL Nummer"
+        },
+        "text": {
+          "en": "SWTPL Nr",
+          "de": "SWTPL Nr"
+        }
+      },
+      "nationalCoordinator": {
+        "label": {
+          "en": "Coordinations form placeholder national coordinator",
+          "de": "Koordinationen Formular Platzhalter Nationale Koordination"
+        },
+        "text": {
+          "en": "National coordinator",
+          "de": "Nationale Koordination"
+        }
+      },
+      "comment": {
+        "label": {
+          "en": "Coordinations form placeholder comment",
+          "de": "Koordinationen Formular Platzhalter Kommentar"
+        },
+        "text": {
+          "en": "Comment",
+          "de": "Kommentar"
+        }
+      },
+      "saving": {
+        "label": {
+          "en": "Coordinations form saving button text",
+          "de": "Koordinationen Formular Speichern läuft Text"
+        },
+        "text": {
+          "en": "Saving...",
+          "de": "Speichern..."
+        }
+      }
+    },
+    "basicData": {
+      "title": {
+        "label": {
+          "en": "Coordinations basic data section title",
+          "de": "Koordinationen Basisdaten Abschnittstitel"
+        },
+        "text": {
+          "en": "Basic data",
+          "de": "Basisdaten"
+        }
+      },
+      "status": {
+        "label": {
+          "en": "Coordinations basic data status label",
+          "de": "Koordinationen Basisdaten Status Label"
+        },
+        "text": {
+          "en": "Status",
+          "de": "Status"
+        }
+      },
+      "start": {
+        "label": {
+          "en": "Coordinations basic data start label",
+          "de": "Koordinationen Basisdaten Start Label"
+        },
+        "text": {
+          "en": "Start",
+          "de": "Start"
+        }
+      },
+      "end": {
+        "label": {
+          "en": "Coordinations basic data end label",
+          "de": "Koordinationen Basisdaten Ende Label"
+        },
+        "text": {
+          "en": "End",
+          "de": "Ende"
+        }
+      },
+      "swtplNr": {
+        "label": {
+          "en": "Coordinations basic data SWTPL label",
+          "de": "Koordinationen Basisdaten SWTPL Label"
+        },
+        "text": {
+          "en": "SWTPL Nr",
+          "de": "SWTPL Nr"
+        }
+      },
+      "nationalCoordinator": {
+        "label": {
+          "en": "Coordinations basic data national coordinator label",
+          "de": "Koordinationen Basisdaten Nationale Koordination Label"
+        },
+        "text": {
+          "en": "National coordinator",
+          "de": "Nationale Koordination"
+        }
+      }
+    },
+    "donorData": {
+      "title": {
+        "label": {
+          "en": "Coordinations donor data section title",
+          "de": "Koordinationen Spenderdaten Abschnittstitel"
+        },
+        "text": {
+          "en": "Donor data",
+          "de": "Spenderdaten"
+        }
+      },
+      "fullName": {
+        "label": {
+          "en": "Coordinations donor full name label",
+          "de": "Koordinationen Spender Vollname Label"
+        },
+        "text": {
+          "en": "Full name",
+          "de": "Vollständiger Name"
+        }
+      },
+      "sex": {
+        "label": {
+          "en": "Coordinations donor sex label",
+          "de": "Koordinationen Spender Geschlecht Label"
+        },
+        "text": {
+          "en": "Sex",
+          "de": "Geschlecht"
+        }
+      },
+      "bloodType": {
+        "label": {
+          "en": "Coordinations donor blood type label",
+          "de": "Koordinationen Spender Blutgruppe Label"
+        },
+        "text": {
+          "en": "Blood type",
+          "de": "Blutgruppe"
+        }
+      },
+      "heightCm": {
+        "label": {
+          "en": "Coordinations donor height label",
+          "de": "Koordinationen Spender Grösse Label"
+        },
+        "text": {
+          "en": "Height (cm)",
+          "de": "Grösse (cm)"
+        }
+      },
+      "weightKg": {
+        "label": {
+          "en": "Coordinations donor weight label",
+          "de": "Koordinationen Spender Gewicht Label"
+        },
+        "text": {
+          "en": "Weight (kg)",
+          "de": "Gewicht (kg)"
+        }
+      },
+      "organFo": {
+        "label": {
+          "en": "Coordinations donor organ FO label",
+          "de": "Koordinationen Spender Organ FO Label"
+        },
+        "text": {
+          "en": "Organ FO",
+          "de": "Organ FO"
+        }
+      },
+      "diagnosis": {
+        "label": {
+          "en": "Coordinations donor diagnosis label",
+          "de": "Koordinationen Spender Diagnose Label"
+        },
+        "text": {
+          "en": "Diagnosis",
+          "de": "Diagnose"
+        }
+      }
+    },
+    "hospitals": {
+      "title": {
+        "label": {
+          "en": "Coordinations hospitals section title",
+          "de": "Koordinationen Spitäler Abschnittstitel"
+        },
+        "text": {
+          "en": "Hospitals",
+          "de": "Spitäler"
+        }
+      },
+      "detection": {
+        "label": {
+          "en": "Coordinations detection hospital label",
+          "de": "Koordinationen Erkennungsspital Label"
+        },
+        "text": {
+          "en": "Detection hospital",
+          "de": "Erkennungsspital"
+        }
+      },
+      "procurement": {
+        "label": {
+          "en": "Coordinations procurement hospital label",
+          "de": "Koordinationen Entnahmespital Label"
+        },
+        "text": {
+          "en": "Procurement hospital",
+          "de": "Entnahmespital"
+        }
+      }
+    },
+    "protocolOverview": {
+      "title": {
+        "label": {
+          "en": "Coordinations protocol overview title",
+          "de": "Koordinationen Protokollübersicht Titel"
+        },
+        "text": {
+          "en": "Protocol Overview",
+          "de": "Protokollübersicht"
+        }
+      },
+      "noOrgans": {
+        "label": {
+          "en": "Coordinations protocol overview no organs text",
+          "de": "Koordinationen Protokollübersicht Keine Organe Text"
+        },
+        "text": {
+          "en": "No organs found.",
+          "de": "Keine Organe gefunden."
+        }
+      },
+      "noDataForOrgan": {
+        "label": {
+          "en": "Coordinations protocol overview no data for organ text",
+          "de": "Koordinationen Protokollübersicht Keine Daten pro Organ Text"
+        },
+        "text": {
+          "en": "No protocol data for this organ.",
+          "de": "Keine Protokolldaten für dieses Organ."
+        }
+      },
+      "organByKey": {
+        "KIDNEY": {
+          "label": {
+            "en": "Coordinations protocol overview organ kidney",
+            "de": "Koordinationen Protokollübersicht Organ Niere"
+          },
+          "text": {
+            "en": "Kidney",
+            "de": "Niere"
+          }
+        },
+        "PANCREAS": {
+          "label": {
+            "en": "Coordinations protocol overview organ pancreas",
+            "de": "Koordinationen Protokollübersicht Organ Pankreas"
+          },
+          "text": {
+            "en": "Pancreas",
+            "de": "Pankreas"
+          }
+        },
+        "LIVER": {
+          "label": {
+            "en": "Coordinations protocol overview organ liver",
+            "de": "Koordinationen Protokollübersicht Organ Leber"
+          },
+          "text": {
+            "en": "Liver",
+            "de": "Leber"
+          }
+        },
+        "HEART": {
+          "label": {
+            "en": "Coordinations protocol overview organ heart",
+            "de": "Koordinationen Protokollübersicht Organ Herz"
+          },
+          "text": {
+            "en": "Heart",
+            "de": "Herz"
+          }
+        },
+        "HEART_VALVE": {
+          "label": {
+            "en": "Coordinations protocol overview organ heart valve",
+            "de": "Koordinationen Protokollübersicht Organ Herzklappe"
+          },
+          "text": {
+            "en": "Heart valve",
+            "de": "Herzklappe"
+          }
+        },
+        "LUNG": {
+          "label": {
+            "en": "Coordinations protocol overview organ lung",
+            "de": "Koordinationen Protokollübersicht Organ Lunge"
+          },
+          "text": {
+            "en": "Lung",
+            "de": "Lunge"
+          }
+        },
+        "ISLET": {
+          "label": {
+            "en": "Coordinations protocol overview organ islet",
+            "de": "Koordinationen Protokollübersicht Organ Inselzellen"
+          },
+          "text": {
+            "en": "Islet cells",
+            "de": "Inselzellen"
+          }
+        },
+        "VESSELS": {
+          "label": {
+            "en": "Coordinations protocol overview organ vessels",
+            "de": "Koordinationen Protokollübersicht Organ Gefässe"
+          },
+          "text": {
+            "en": "Vessels",
+            "de": "Gefässe"
+          }
+        },
+        "INTESTINE": {
+          "label": {
+            "en": "Coordinations protocol overview organ intestine",
+            "de": "Koordinationen Protokollübersicht Organ Dünndarm"
+          },
+          "text": {
+            "en": "Intestine",
+            "de": "Dünndarm"
+          }
+        }
+      },
+      "openLinkedEpisode": {
+        "label": {
+          "en": "Coordinations protocol overview open linked episode title",
+          "de": "Koordinationen Protokollübersicht Verknüpfte Episode öffnen Titel"
+        },
+        "text": {
+          "en": "Open linked episode",
+          "de": "Verknüpfte Episode öffnen"
+        }
+      },
+      "open": {
+        "label": {
+          "en": "Coordinations protocol overview open action",
+          "de": "Koordinationen Protokollübersicht Oeffnen Aktion"
+        },
+        "text": {
+          "en": "Open",
+          "de": "Oeffnen"
+        }
+      },
+      "recipientFullName": {
+        "label": {
+          "en": "Coordinations protocol overview recipient full name label",
+          "de": "Koordinationen Protokollübersicht Empfänger Vollname Label"
+        },
+        "text": {
+          "en": "Recipient full name",
+          "de": "Empfänger Vollname"
+        }
+      },
+      "fallNumber": {
+        "label": {
+          "en": "Coordinations protocol overview case number label",
+          "de": "Koordinationen Protokollübersicht Fallnummer Label"
+        },
+        "text": {
+          "en": "Fallnummer",
+          "de": "Fallnummer"
+        }
+      },
+      "mainDiagnosis": {
+        "label": {
+          "en": "Coordinations protocol overview main diagnosis label",
+          "de": "Koordinationen Protokollübersicht Hauptdiagnose Label"
+        },
+        "text": {
+          "en": "Diagnosis (main)",
+          "de": "Diagnose (Haupt)"
+        }
+      },
+      "rsNumber": {
+        "label": {
+          "en": "Coordinations protocol overview RS number label",
+          "de": "Koordinationen Protokollübersicht RS-Nummer Label"
+        },
+        "text": {
+          "en": "RS-nr",
+          "de": "RS-Nr"
+        }
+      },
+      "tplDate": {
+        "label": {
+          "en": "Coordinations protocol overview TPL date label",
+          "de": "Koordinationen Protokollübersicht TPL-Datum Label"
+        },
+        "text": {
+          "en": "TPL date",
+          "de": "TPL-Datum"
+        }
+      },
+      "procurementTeam": {
+        "label": {
+          "en": "Coordinations protocol overview procurement team label",
+          "de": "Koordinationen Protokollübersicht Entnahmeteam Label"
+        },
+        "text": {
+          "en": "Procurement team",
+          "de": "Entnahmeteam"
+        }
+      },
+      "perfusionApplied": {
+        "label": {
+          "en": "Coordinations protocol overview perfusion applied label",
+          "de": "Koordinationen Protokollübersicht Perfusion angewendet Label"
+        },
+        "text": {
+          "en": "Perfusion applied",
+          "de": "Perfusion angewendet"
+        }
+      },
+      "perfusion": {
+        "label": {
+          "en": "Coordinations protocol overview perfusion badge",
+          "de": "Koordinationen Protokollübersicht Perfusion Badge"
+        },
+        "text": {
+          "en": "Perfusion",
+          "de": "Perfusion"
+        }
+      }
+    },
+    "timeLog": {
+      "title": {
+        "label": {
+          "en": "Coordinations time log section title",
+          "de": "Koordinationen Zeitprotokoll Abschnittstitel"
+        },
+        "text": {
+          "en": "Time log",
+          "de": "Zeitprotokoll"
+        }
+      },
+      "totalPerUser": {
+        "label": {
+          "en": "Coordinations time log total per user label",
+          "de": "Koordinationen Zeitprotokoll Total pro Benutzer Label"
+        },
+        "text": {
+          "en": "Total time per user",
+          "de": "Gesamtzeit pro Benutzer"
+        }
+      },
+      "noCompletedIntervals": {
+        "label": {
+          "en": "Coordinations time log no completed intervals text",
+          "de": "Koordinationen Zeitprotokoll Keine abgeschlossenen Intervalle Text"
+        },
+        "text": {
+          "en": "No completed time intervals yet.",
+          "de": "Noch keine abgeschlossenen Zeitintervalle."
+        }
+      },
+      "user": {
+        "label": {
+          "en": "Coordinations time log user column",
+          "de": "Koordinationen Zeitprotokoll Benutzer Spalte"
+        },
+        "text": {
+          "en": "User",
+          "de": "Benutzer"
+        }
+      },
+      "selectUser": {
+        "label": {
+          "en": "Coordinations time log select user option",
+          "de": "Koordinationen Zeitprotokoll Benutzer wählen Option"
+        },
+        "text": {
+          "en": "Select user",
+          "de": "Benutzer wählen"
+        }
+      },
+      "empty": {
+        "label": {
+          "en": "Coordinations time log empty state",
+          "de": "Koordinationen Zeitprotokoll leer"
+        },
+        "text": {
+          "en": "No time logs found.",
+          "de": "Keine Zeiteinträge gefunden."
+        }
+      },
+      "startAction": {
+        "label": {
+          "en": "Coordinations time log start action",
+          "de": "Koordinationen Zeitprotokoll Start Aktion"
+        },
+        "text": {
+          "en": "Start",
+          "de": "Start"
+        }
+      },
+      "stopAction": {
+        "label": {
+          "en": "Coordinations time log stop action",
+          "de": "Koordinationen Zeitprotokoll Stop Aktion"
+        },
+        "text": {
+          "en": "Stop",
+          "de": "Stop"
+        }
+      },
+      "saveTimeLog": {
+        "label": {
+          "en": "Coordinations time log save action",
+          "de": "Koordinationen Zeitprotokoll Speichern Aktion"
+        },
+        "text": {
+          "en": "Save Time Log",
+          "de": "Zeitprotokoll speichern"
+        }
+      }
+    },
+    "protocolColor": {
+      "title": {
+        "label": {
+          "en": "Coordinations protocol color section title",
+          "de": "Koordinationen Protokollfarbe Abschnittstitel"
+        },
+        "text": {
+          "en": "Protocol color",
+          "de": "Protokollfarbe"
+        }
+      },
+      "setNormalBackground": {
+        "label": {
+          "en": "Coordinations protocol color set normal background action",
+          "de": "Koordinationen Protokollfarbe Normalen Hintergrund setzen Aktion"
+        },
+        "text": {
+          "en": "Set normal background",
+          "de": "Normalen Hintergrund setzen"
+        }
+      },
+      "setProtocolBackground": {
+        "label": {
+          "en": "Coordinations protocol color set protocol background action",
+          "de": "Koordinationen Protokollfarbe Protokollhintergrund setzen Aktion"
+        },
+        "text": {
+          "en": "Set protocol background",
+          "de": "Protokollhintergrund setzen"
+        }
+      }
+    },
+    "protocolData": {
+      "groups": {
+        "other": {
+          "label": {
+            "en": "Coordinations protocol data fallback group name",
+            "de": "Koordinationen Protokolldaten Ersatz Gruppenname"
+          },
+          "text": {
+            "en": "Other",
+            "de": "Andere"
+          }
+        }
+      },
+      "groupsByKey": {
+        "PHYSICIANS": {
+          "label": {
+            "en": "Coordination protocol group PHYSICIANS",
+            "de": "Koordinationsprotokoll Gruppe PHYSICIANS"
+          },
+          "text": {
+            "en": "Physicians",
+            "de": "Aerzte"
+          }
+        },
+        "RECIPIENT": {
+          "label": {
+            "en": "Coordination protocol group RECIPIENT",
+            "de": "Koordinationsprotokoll Gruppe RECIPIENT"
+          },
+          "text": {
+            "en": "Recipient",
+            "de": "Empfänger"
+          }
+        },
+        "TRANSPORT": {
+          "label": {
+            "en": "Coordination protocol group TRANSPORT",
+            "de": "Koordinationsprotokoll Gruppe TRANSPORT"
+          },
+          "text": {
+            "en": "Ambulance",
+            "de": "Ambulanz"
+          }
+        },
+        "PROCUREMENT_TEAM": {
+          "label": {
+            "en": "Coordination protocol group PROCUREMENT_TEAM",
+            "de": "Koordinationsprotokoll Gruppe PROCUREMENT_TEAM"
+          },
+          "text": {
+            "en": "Procurement Team",
+            "de": "Entnahmeteam"
+          }
+        },
+        "IMPLANT_TEAM": {
+          "label": {
+            "en": "Coordination protocol group IMPLANT_TEAM",
+            "de": "Koordinationsprotokoll Gruppe IMPLANT_TEAM"
+          },
+          "text": {
+            "en": "Implant Team",
+            "de": "Implantationsteam"
+          }
+        },
+        "TRANSPLANTATION": {
+          "label": {
+            "en": "Coordination protocol group TRANSPLANTATION",
+            "de": "Koordinationsprotokoll Gruppe TRANSPLANTATION"
+          },
+          "text": {
+            "en": "Transplantation",
+            "de": "Transplantation"
+          }
+        },
+        "PERFUSION": {
+          "label": {
+            "en": "Coordination protocol group PERFUSION",
+            "de": "Koordinationsprotokoll Gruppe PERFUSION"
+          },
+          "text": {
+            "en": "Perfusion",
+            "de": "Perfusion"
+          }
+        },
+        "EXPLANTATION": {
+          "label": {
+            "en": "Coordination protocol group EXPLANTATION",
+            "de": "Koordinationsprotokoll Gruppe EXPLANTATION"
+          },
+          "text": {
+            "en": "Explantation",
+            "de": "Explantation"
+          }
+        },
+        "LOGISTICS": {
+          "label": {
+            "en": "Coordination protocol group LOGISTICS",
+            "de": "Koordinationsprotokoll Gruppe LOGISTICS"
+          },
+          "text": {
+            "en": "Logistics",
+            "de": "Logistik"
+          }
+        }
+      },
+      "fieldsByKey": {
+        "ARZT_RESPONSIBLE": {
+          "label": {
+            "en": "Coordination protocol field ARZT_RESPONSIBLE",
+            "de": "Koordinationsprotokoll Feld ARZT_RESPONSIBLE"
+          },
+          "text": {
+            "en": "Responsible Physician",
+            "de": "Verantwortlicher Arzt"
+          }
+        },
+        "AMBULANCE_ARRIVAL_TIME": {
+          "label": {
+            "en": "Coordination protocol field AMBULANCE_ARRIVAL_TIME",
+            "de": "Koordinationsprotokoll Feld AMBULANCE_ARRIVAL_TIME"
+          },
+          "text": {
+            "en": "Ambulance Arrival Time",
+            "de": "Ankunftszeit Ambulanz"
+          }
+        },
+        "IMPLANT_TEAM": {
+          "label": {
+            "en": "Coordination protocol field IMPLANT_TEAM",
+            "de": "Koordinationsprotokoll Feld IMPLANT_TEAM"
+          },
+          "text": {
+            "en": "Implant Team",
+            "de": "Implantationsteam"
+          }
+        },
+        "COLD_PERFUSION": {
+          "label": {
+            "en": "Coordination protocol field COLD_PERFUSION",
+            "de": "Koordinationsprotokoll Feld COLD_PERFUSION"
+          },
+          "text": {
+            "en": "Cold Perfusion",
+            "de": "Kalte Perfusion"
+          }
+        },
+        "EHB_BOX_NR": {
+          "label": {
+            "en": "Coordination protocol field EHB_BOX_NR",
+            "de": "Koordinationsprotokoll Feld EHB_BOX_NR"
+          },
+          "text": {
+            "en": "EHB Box Nr",
+            "de": "EHB-Box Nr."
+          }
+        },
+        "ON_SITE_COORDINATORS": {
+          "label": {
+            "en": "Coordination protocol field ON_SITE_COORDINATORS",
+            "de": "Koordinationsprotokoll Feld ON_SITE_COORDINATORS"
+          },
+          "text": {
+            "en": "On-site Coordinators",
+            "de": "Koordinatoren vor Ort"
+          }
+        },
+        "RECIPIENT": {
+          "label": {
+            "en": "Coordination protocol field RECIPIENT",
+            "de": "Koordinationsprotokoll Feld RECIPIENT"
+          },
+          "text": {
+            "en": "Recipient",
+            "de": "Empfänger"
+          }
+        },
+        "INFORMED_TIME": {
+          "label": {
+            "en": "Coordination protocol field INFORMED_TIME",
+            "de": "Koordinationsprotokoll Feld INFORMED_TIME"
+          },
+          "text": {
+            "en": "Informed at",
+            "de": "Informiert um"
+          }
+        },
+        "INCISION_TIME": {
+          "label": {
+            "en": "Coordination protocol field INCISION_TIME",
+            "de": "Koordinationsprotokoll Feld INCISION_TIME"
+          },
+          "text": {
+            "en": "Incision time",
+            "de": "Inzisionszeit"
+          }
+        },
+        "CARDIAC_ARREST_TIME": {
+          "label": {
+            "en": "Coordination protocol field CARDIAC_ARREST_TIME",
+            "de": "Koordinationsprotokoll Feld CARDIAC_ARREST_TIME"
+          },
+          "text": {
+            "en": "Time of Cardiac Arrest",
+            "de": "Zeitpunkt des Herzstillstands"
+          }
+        },
+        "PROCURMENT_TEAM": {
+          "label": {
+            "en": "Coordination protocol field PROCURMENT_TEAM",
+            "de": "Koordinationsprotokoll Feld PROCURMENT_TEAM"
+          },
+          "text": {
+            "en": "External Procurement Team",
+            "de": "Externes Entnahmeteam"
+          }
+        },
+        "CHIRURG_RESPONSIBLE": {
+          "label": {
+            "en": "Coordination protocol field CHIRURG_RESPONSIBLE",
+            "de": "Koordinationsprotokoll Feld CHIRURG_RESPONSIBLE"
+          },
+          "text": {
+            "en": "Responsible Surgeon",
+            "de": "Verantwortlicher Chirurg"
+          }
+        },
+        "COLD_PERFUSION_ABDOMINAL": {
+          "label": {
+            "en": "Coordination protocol field COLD_PERFUSION_ABDOMINAL",
+            "de": "Koordinationsprotokoll Feld COLD_PERFUSION_ABDOMINAL"
+          },
+          "text": {
+            "en": "Cold Perfusion Abdominal",
+            "de": "Kalte Perfusion abdominal"
+          }
+        },
+        "EHB_NR": {
+          "label": {
+            "en": "Coordination protocol field EHB_NR",
+            "de": "Koordinationsprotokoll Feld EHB_NR"
+          },
+          "text": {
+            "en": "EHB Nr",
+            "de": "EHB Nr."
+          }
+        },
+        "REACHED_TIME": {
+          "label": {
+            "en": "Coordination protocol field REACHED_TIME",
+            "de": "Koordinationsprotokoll Feld REACHED_TIME"
+          },
+          "text": {
+            "en": "Reached Time",
+            "de": "Eintreffzeit"
+          }
+        },
+        "INFORMED_IMPLANTTEAM_TIME": {
+          "label": {
+            "en": "Coordination protocol field INFORMED_IMPLANTTEAM_TIME",
+            "de": "Koordinationsprotokoll Feld INFORMED_IMPLANTTEAM_TIME"
+          },
+          "text": {
+            "en": "Informed Implantteam at",
+            "de": "Implantationsteam informiert um"
+          }
+        },
+        "INCISION_DONOR_TIME": {
+          "label": {
+            "en": "Coordination protocol field INCISION_DONOR_TIME",
+            "de": "Koordinationsprotokoll Feld INCISION_DONOR_TIME"
+          },
+          "text": {
+            "en": "Incision Donor Time",
+            "de": "Inzision Spender"
+          }
+        },
+        "PROCUREMENT_TEAM_INT": {
+          "label": {
+            "en": "Coordination protocol field PROCUREMENT_TEAM_INT",
+            "de": "Koordinationsprotokoll Feld PROCUREMENT_TEAM_INT"
+          },
+          "text": {
+            "en": "Procurement Team",
+            "de": "Entnahmeteam"
+          }
+        },
+        "NMP_USED": {
+          "label": {
+            "en": "Coordination protocol field NMP_USED",
+            "de": "Koordinationsprotokoll Feld NMP_USED"
+          },
+          "text": {
+            "en": "NMP Used",
+            "de": "NMP verwendet"
+          }
+        },
+        "CROSS_CLAMP_TIME": {
+          "label": {
+            "en": "Coordination protocol field CROSS_CLAMP_TIME",
+            "de": "Koordinationsprotokoll Feld CROSS_CLAMP_TIME"
+          },
+          "text": {
+            "en": "Cross Clamp Time",
+            "de": "Abklemmzeit"
+          }
+        },
+        "PROCUREMENT_TEAM_DEPARTURE_TIME": {
+          "label": {
+            "en": "Coordination protocol field PROCUREMENT_TEAM_DEPARTURE_TIME",
+            "de": "Koordinationsprotokoll Feld PROCUREMENT_TEAM_DEPARTURE_TIME"
+          },
+          "text": {
+            "en": "Departure Time",
+            "de": "Abfahrtszeit"
+          }
+        },
+        "EVLP_USED": {
+          "label": {
+            "en": "Coordination protocol field EVLP_USED",
+            "de": "Koordinationsprotokoll Feld EVLP_USED"
+          },
+          "text": {
+            "en": "EVLP Used",
+            "de": "EVLP verwendet"
+          }
+        },
+        "DEPARTURE_DONOR_TIME": {
+          "label": {
+            "en": "Coordination protocol field DEPARTURE_DONOR_TIME",
+            "de": "Koordinationsprotokoll Feld DEPARTURE_DONOR_TIME"
+          },
+          "text": {
+            "en": "Departure Donor Hospital",
+            "de": "Abfahrt Spenderkrankenhaus"
+          }
+        },
+        "HOPE_USED": {
+          "label": {
+            "en": "Coordination protocol field HOPE_USED",
+            "de": "Koordinationsprotokoll Feld HOPE_USED"
+          },
+          "text": {
+            "en": "HOPE Used",
+            "de": "HOPE verwendet"
+          }
+        },
+        "ARRIVAL_TIME": {
+          "label": {
+            "en": "Coordination protocol field ARRIVAL_TIME",
+            "de": "Koordinationsprotokoll Feld ARRIVAL_TIME"
+          },
+          "text": {
+            "en": "Arrival at Hopsital",
+            "de": "Ankunft im Krankenhaus"
+          }
+        },
+        "LIFEPORT_USED": {
+          "label": {
+            "en": "Coordination protocol field LIFEPORT_USED",
+            "de": "Koordinationsprotokoll Feld LIFEPORT_USED"
+          },
+          "text": {
+            "en": "LifePort Used",
+            "de": "LifePort verwendet"
+          }
+        }
+      },
+      "team": {
+        "addTeam": {
+          "label": {
+            "en": "Coordinations protocol data add team option",
+            "de": "Koordinationen Protokolldaten Team hinzufügen Option"
+          },
+          "text": {
+            "en": "Add team...",
+            "de": "Team hinzufügen..."
+          }
+        },
+        "selectTeam": {
+          "label": {
+            "en": "Coordinations protocol data select team option",
+            "de": "Koordinationen Protokolldaten Team wählen Option"
+          },
+          "text": {
+            "en": "Select team...",
+            "de": "Team wählen..."
+          }
+        }
+      },
+      "episode": {
+        "selectRecipientEpisode": {
+          "label": {
+            "en": "Coordinations protocol data select recipient episode option",
+            "de": "Koordinationen Protokolldaten Empfängerepisode wählen Option"
+          },
+          "text": {
+            "en": "Select recipient episode...",
+            "de": "Empfängerepisode wählen..."
+          }
+        }
+      },
+      "errors": {
+        "load": {
+          "label": {
+            "en": "Coordinations protocol data load error",
+            "de": "Koordinationen Protokolldaten Laden Fehler"
+          },
+          "text": {
+            "en": "Failed to load grouped procurement values.",
+            "de": "Gruppierte Entnahmewerte konnten nicht geladen werden."
+          }
+        },
+        "save": {
+          "label": {
+            "en": "Coordinations protocol data save error",
+            "de": "Koordinationen Protokolldaten Speichern Fehler"
+          },
+          "text": {
+            "en": "Failed to save procurement value.",
+            "de": "Entnahmewert konnte nicht gespeichert werden."
+          }
+        }
+      }
+    },
+    "protocolEventLog": {
+      "title": {
+        "label": {
+          "en": "Coordinations protocol event log panel title",
+          "de": "Koordinationen Protokollereignislog Panel Titel"
+        },
+        "text": {
+          "en": "Protocol Log",
+          "de": "Protokolllog"
+        }
+      },
+      "placeholder": {
+        "label": {
+          "en": "Coordinations protocol event log input placeholder",
+          "de": "Koordinationen Protokollereignislog Eingabe Platzhalter"
+        },
+        "text": {
+          "en": "Type event...",
+          "de": "Ereignis eingeben..."
+        }
+      },
+      "empty": {
+        "label": {
+          "en": "Coordinations protocol event log empty state",
+          "de": "Koordinationen Protokollereignislog leer"
+        },
+        "text": {
+          "en": "No event log entries for this organ.",
+          "de": "Keine Ereignislogeinträge für dieses Organ."
+        }
+      },
+      "errors": {
+        "load": {
+          "label": {
+            "en": "Coordinations protocol event log load error",
+            "de": "Koordinationen Protokollereignislog Laden Fehler"
+          },
+          "text": {
+            "en": "Failed to load protocol event log.",
+            "de": "Protokollereignislog konnte nicht geladen werden."
+          }
+        },
+        "save": {
+          "label": {
+            "en": "Coordinations protocol event save error",
+            "de": "Koordinationen Protokollereignis Speichern Fehler"
+          },
+          "text": {
+            "en": "Failed to save protocol event.",
+            "de": "Protokollereignis konnte nicht gespeichert werden."
+          }
+        }
+      },
+      "dialog": {
+        "title": {
+          "label": {
+            "en": "Coordinations protocol event log dialog title",
+            "de": "Koordinationen Protokollereignislog Dialog Titel"
+          },
+          "text": {
+            "en": "Protocol Event Log",
+            "de": "Protokollereignislog"
+          }
+        },
+        "open": {
+          "label": {
+            "en": "Coordinations protocol event log open dialog action",
+            "de": "Koordinationen Protokollereignislog Dialog öffnen Aktion"
+          },
+          "text": {
+            "en": "Open log dialog",
+            "de": "Log-Dialog öffnen"
+          }
+        },
+        "exportPdf": {
+          "label": {
+            "en": "Coordinations protocol event log export pdf action",
+            "de": "Koordinationen Protokollereignislog Export PDF Aktion"
+          },
+          "text": {
+            "en": "Export PDF",
+            "de": "PDF exportieren"
+          }
+        },
+        "exportCsv": {
+          "label": {
+            "en": "Coordinations protocol event log export csv action",
+            "de": "Koordinationen Protokollereignislog Export CSV Aktion"
+          },
+          "text": {
+            "en": "Export CSV",
+            "de": "CSV exportieren"
+          }
+        },
+        "close": {
+          "label": {
+            "en": "Coordinations protocol event log close dialog action",
+            "de": "Koordinationen Protokollereignislog Dialog schließen Aktion"
+          },
+          "text": {
+            "en": "Close",
+            "de": "Schließen"
+          }
+        },
+        "columns": {
+          "time": {
+            "label": {
+              "en": "Coordinations protocol event log column time",
+              "de": "Koordinationen Protokollereignislog Spalte Zeit"
+            },
+            "text": {
+              "en": "Time",
+              "de": "Zeit"
+            }
+          },
+          "event": {
+            "label": {
+              "en": "Coordinations protocol event log column event",
+              "de": "Koordinationen Protokollereignislog Spalte Ereignis"
+            },
+            "text": {
+              "en": "Event",
+              "de": "Ereignis"
+            }
+          },
+          "task": {
+            "label": {
+              "en": "Coordinations protocol event log column task",
+              "de": "Koordinationen Protokollereignislog Spalte Aufgabe"
+            },
+            "text": {
+              "en": "Task",
+              "de": "Aufgabe"
+            }
+          },
+          "comment": {
+            "label": {
+              "en": "Coordinations protocol event log column comment",
+              "de": "Koordinationen Protokollereignislog Spalte Kommentar"
+            },
+            "text": {
+              "en": "Comment",
+              "de": "Kommentar"
+            }
+          },
+          "user": {
+            "label": {
+              "en": "Coordinations protocol event log column user",
+              "de": "Koordinationen Protokollereignislog Spalte Benutzer"
+            },
+            "text": {
+              "en": "User",
+              "de": "Benutzer"
+            }
+          }
+        }
+      }
+    },
+    "protocolTasks": {
+      "title": {
+        "label": {
+          "en": "Coordinations protocol tasks panel title",
+          "de": "Koordinationen Protokollaufgaben Panel Titel"
+        },
+        "text": {
+          "en": "Protocol Tasks",
+          "de": "Protokollaufgaben"
+        }
+      },
+      "fetch": {
+        "button": {
+          "label": {
+            "en": "Coordinations protocol tasks fetch button",
+            "de": "Koordinationen Protokollaufgaben laden Button"
+          },
+          "text": {
+            "en": "Fetch all tasks",
+            "de": "Alle Aufgaben laden"
+          }
+        },
+        "loading": {
+          "label": {
+            "en": "Coordinations protocol tasks fetch loading",
+            "de": "Koordinationen Protokollaufgaben laden läuft"
+          },
+          "text": {
+            "en": "Fetching...",
+            "de": "Lädt..."
+          }
+        },
+        "done": {
+          "label": {
+            "en": "Coordinations protocol tasks fetch done",
+            "de": "Koordinationen Protokollaufgaben laden erledigt"
+          },
+          "text": {
+            "en": "Fetched",
+            "de": "Geladen"
+          }
+        },
+        "alreadyFetched": {
+          "label": {
+            "en": "Coordinations protocol tasks fetch already fetched",
+            "de": "Koordinationen Protokollaufgaben bereits geladen"
+          },
+          "text": {
+            "en": "Already fetched",
+            "de": "Bereits geladen"
+          }
+        },
+        "successCreated": {
+          "label": {
+            "en": "Coordinations protocol tasks fetch success created",
+            "de": "Koordinationen Protokollaufgaben laden Erfolg erstellt"
+          },
+          "text": {
+            "en": "Fetched protocol tasks.",
+            "de": "Protokollaufgaben geladen."
+          }
+        },
+        "successNoChanges": {
+          "label": {
+            "en": "Coordinations protocol tasks fetch success unchanged",
+            "de": "Koordinationen Protokollaufgaben laden Erfolg unverändert"
+          },
+          "text": {
+            "en": "Protocol tasks already fetched.",
+            "de": "Protokollaufgaben sind bereits geladen."
+          }
+        },
+        "error": {
+          "label": {
+            "en": "Coordinations protocol tasks fetch error",
+            "de": "Koordinationen Protokollaufgaben laden Fehler"
+          },
+          "text": {
+            "en": "Could not fetch protocol tasks.",
+            "de": "Protokollaufgaben konnten nicht geladen werden."
+          }
+        }
+      },
+      "clear": {
+        "button": {
+          "label": {
+            "en": "Coordinations protocol tasks clear button",
+            "de": "Koordinationen Protokollaufgaben entfernen Button"
+          },
+          "text": {
+            "en": "Remove all tasks",
+            "de": "Alle Aufgaben entfernen"
+          }
+        },
+        "loading": {
+          "label": {
+            "en": "Coordinations protocol tasks clear loading",
+            "de": "Koordinationen Protokollaufgaben entfernen läuft"
+          },
+          "text": {
+            "en": "Removing...",
+            "de": "Entfernt..."
+          }
+        },
+        "success": {
+          "label": {
+            "en": "Coordinations protocol tasks clear success",
+            "de": "Koordinationen Protokollaufgaben entfernen Erfolg"
+          },
+          "text": {
+            "en": "All protocol tasks removed. You can fetch again.",
+            "de": "Alle Protokollaufgaben wurden entfernt. Sie können erneut laden."
+          }
+        },
+        "error": {
+          "label": {
+            "en": "Coordinations protocol tasks clear error",
+            "de": "Koordinationen Protokollaufgaben entfernen Fehler"
+          },
+          "text": {
+            "en": "Could not remove protocol tasks.",
+            "de": "Protokollaufgaben konnten nicht entfernt werden."
+          }
+        }
+      }
+    },
+    "errors": {
+      "saveBasicData": {
+        "label": {
+          "en": "Coordinations save basic data error",
+          "de": "Koordinationen Basisdaten speichern Fehler"
+        },
+        "text": {
+          "en": "Failed to save basic data",
+          "de": "Basisdaten konnten nicht gespeichert werden"
+        }
+      },
+      "saveDonorData": {
+        "label": {
+          "en": "Coordinations save donor data error",
+          "de": "Koordinationen Spenderdaten speichern Fehler"
+        },
+        "text": {
+          "en": "Failed to save donor data",
+          "de": "Spenderdaten konnten nicht gespeichert werden"
+        }
+      },
+      "saveHospitals": {
+        "label": {
+          "en": "Coordinations save hospitals error",
+          "de": "Koordinationen Spitäler speichern Fehler"
+        },
+        "text": {
+          "en": "Failed to save hospitals",
+          "de": "Spitäler konnten nicht gespeichert werden"
+        }
+      }
+    }
+  },
+  "reports": {
+    "title": {
+      "label": {
+        "en": "Reports page title",
+        "de": "Berichte Seitentitel"
+      },
+      "text": {
+        "en": "Reports",
+        "de": "Berichte"
+      }
+    },
+    "loadingMetadata": {
+      "label": {
+        "en": "Reports loading metadata text",
+        "de": "Berichte Ladehinweis Metadaten"
+      },
+      "text": {
+        "en": "Loading report metadata...",
+        "de": "Berichtsmetadaten werden geladen..."
+      }
+    },
+    "builder": {
+      "query": {
+        "title": {
+          "label": {
+            "en": "Reports builder query section title",
+            "de": "Berichte Builder Abfrage Abschnittstitel"
+          },
+          "text": {
+            "en": "Query Builder",
+            "de": "Abfrage-Builder"
+          }
+        },
+        "source": {
+          "label": {
+            "en": "Reports builder source field label",
+            "de": "Berichte Builder Qülle Feldlabel"
+          },
+          "text": {
+            "en": "Source",
+            "de": "Qülle"
+          }
+        },
+        "limit": {
+          "label": {
+            "en": "Reports builder limit field label",
+            "de": "Berichte Builder Limit Feldlabel"
+          },
+          "text": {
+            "en": "Limit",
+            "de": "Limit"
+          }
+        },
+        "joins": {
+          "label": {
+            "en": "Reports builder joins section label",
+            "de": "Berichte Builder Joins Abschnittslabel"
+          },
+          "text": {
+            "en": "Joins",
+            "de": "Joins"
+          }
+        },
+        "columns": {
+          "label": {
+            "en": "Reports builder columns section title",
+            "de": "Berichte Builder Spalten Abschnittstitel"
+          },
+          "text": {
+            "en": "Columns",
+            "de": "Spalten"
+          }
+        },
+        "selectAll": {
+          "label": {
+            "en": "Reports builder select all columns action",
+            "de": "Berichte Builder Alle Spalten auswählen Aktion"
+          },
+          "text": {
+            "en": "Select all",
+            "de": "Alle auswählen"
+          }
+        },
+        "deselectAll": {
+          "label": {
+            "en": "Reports builder deselect all columns action",
+            "de": "Berichte Builder Alle Spalten abwählen Aktion"
+          },
+          "text": {
+            "en": "Deselect all",
+            "de": "Alle abwählen"
+          }
+        },
+        "filters": {
+          "label": {
+            "en": "Reports builder filters section title",
+            "de": "Berichte Builder Filter Abschnittstitel"
+          },
+          "text": {
+            "en": "Filters",
+            "de": "Filter"
+          }
+        },
+        "addFilter": {
+          "label": {
+            "en": "Reports builder add filter action",
+            "de": "Berichte Builder Filter hinzufügen Aktion"
+          },
+          "text": {
+            "en": "+ Add filter",
+            "de": "+ Filter hinzufügen"
+          }
+        },
+        "noFilters": {
+          "label": {
+            "en": "Reports builder no filters hint",
+            "de": "Berichte Builder Keine Filter Hinweis"
+          },
+          "text": {
+            "en": "No filters. Report will use all rows for this source.",
+            "de": "Keine Filter. Der Bericht verwendet alle Zeilen dieser Qülle."
+          }
+        },
+        "valuePlaceholder": {
+          "label": {
+            "en": "Reports builder filter value placeholder",
+            "de": "Berichte Builder Filterwert Platzhalter"
+          },
+          "text": {
+            "en": "value",
+            "de": "Wert"
+          }
+        },
+        "deleteFilter": {
+          "label": {
+            "en": "Reports builder delete filter action",
+            "de": "Berichte Builder Filter löschen Aktion"
+          },
+          "text": {
+            "en": "Delete filter",
+            "de": "Filter löschen"
+          }
+        }
+      },
+      "result": {
+        "title": {
+          "label": {
+            "en": "Reports builder result section title",
+            "de": "Berichte Builder Ergebnis Abschnittstitel"
+          },
+          "text": {
+            "en": "Results",
+            "de": "Ergebnisse"
+          }
+        },
+        "runToSee": {
+          "label": {
+            "en": "Reports builder result run to see hint",
+            "de": "Berichte Builder Ergebnis Ausführen zum Anzeigen Hinweis"
+          },
+          "text": {
+            "en": "Run a report to see results.",
+            "de": "Führen Sie einen Bericht aus, um Ergebnisse zu sehen."
+          }
+        },
+        "emptyForCriteria": {
+          "label": {
+            "en": "Reports builder result empty for criteria",
+            "de": "Berichte Builder Ergebnis leer für Kriterien"
+          },
+          "text": {
+            "en": "No rows found for current criteria.",
+            "de": "Keine Zeilen für die aktüllen Kriterien gefunden."
+          }
+        },
+        "rows": {
+          "label": {
+            "en": "Reports builder rows count suffix",
+            "de": "Berichte Builder Zeilenanzahl Suffix"
+          },
+          "text": {
+            "en": "row(s)",
+            "de": "Zeile(n)"
+          }
+        },
+        "noRunYet": {
+          "label": {
+            "en": "Reports builder no run yet state",
+            "de": "Berichte Builder Noch nicht ausgeführt Status"
+          },
+          "text": {
+            "en": "No run yet",
+            "de": "Noch nicht ausgeführt"
+          }
+        },
+        "exportCsv": {
+          "label": {
+            "en": "Reports builder export CSV action",
+            "de": "Berichte Builder CSV exportieren Aktion"
+          },
+          "text": {
+            "en": "Export CSV",
+            "de": "CSV exportieren"
+          }
+        },
+        "running": {
+          "label": {
+            "en": "Reports builder running state",
+            "de": "Berichte Builder Läuft Status"
+          },
+          "text": {
+            "en": "Running...",
+            "de": "Läuft..."
+          }
+        },
+        "runReport": {
+          "label": {
+            "en": "Reports builder run report action",
+            "de": "Berichte Builder Bericht ausführen Aktion"
+          },
+          "text": {
+            "en": "Run report",
+            "de": "Bericht ausführen"
+          }
+        }
+      }
+    }
+  },
+  "colloquiums": {
+    "title": {
+      "label": {
+        "en": "Colloquiums page title",
+        "de": "Kolloquien Seitentitel"
+      },
+      "text": {
+        "en": "Colloquiums",
+        "de": "Kolloquien"
+      }
+    },
+    "actions": {
+      "add": {
+        "label": {
+          "en": "Colloquiums action: add",
+          "de": "Kolloquien Aktion: Hinzufügen"
+        },
+        "text": {
+          "en": "+ Add",
+          "de": "+ Hinzufügen"
+        }
+      },
+      "open": {
+        "label": {
+          "en": "Colloquiums action: open colloquium",
+          "de": "Kolloquien Aktion: Kolloquium öffnen"
+        },
+        "text": {
+          "en": "Open colloquium",
+          "de": "Kolloquium öffnen"
+        }
+      },
+      "openDetachedProtocol": {
+        "label": {
+          "en": "Colloquiums action: open detached protocol",
+          "de": "Kolloquien Aktion: Losgelöstes Protokoll öffnen"
+        },
+        "text": {
+          "en": "Open detached protocol",
+          "de": "Losgelöstes Protokoll öffnen"
+        }
+      },
+      "openEpisode": {
+        "label": {
+          "en": "Colloquiums action: open episode",
+          "de": "Kolloquien Aktion: Episode öffnen"
+        },
+        "text": {
+          "en": "Open episode",
+          "de": "Episode öffnen"
+        }
+      }
+    },
+    "filters": {
+      "type": {
+        "label": {
+          "en": "Colloquiums filter type",
+          "de": "Kolloquien Filter Typ"
+        },
+        "text": {
+          "en": "Type",
+          "de": "Typ"
+        }
+      },
+      "anchorDate": {
+        "label": {
+          "en": "Colloquiums filter anchor date",
+          "de": "Kolloquien Filter Ankerdatum"
+        },
+        "text": {
+          "en": "Anchor Date",
+          "de": "Ankerdatum"
+        }
+      },
+      "rangeDays": {
+        "label": {
+          "en": "Colloquiums filter range days",
+          "de": "Kolloquien Filter Bereich Tage"
+        },
+        "text": {
+          "en": "Range (days)",
+          "de": "Bereich (Tage)"
+        }
+      }
+    },
+    "table": {
+      "type": {
+        "label": {
+          "en": "Colloquiums table type header",
+          "de": "Kolloquien Tabelle Typ Kopf"
+        },
+        "text": {
+          "en": "Type",
+          "de": "Typ"
+        }
+      },
+      "name": {
+        "label": {
+          "en": "Colloquiums table name header",
+          "de": "Kolloquien Tabelle Name Kopf"
+        },
+        "text": {
+          "en": "Name",
+          "de": "Name"
+        }
+      },
+      "date": {
+        "label": {
+          "en": "Colloquiums table date header",
+          "de": "Kolloquien Tabelle Datum Kopf"
+        },
+        "text": {
+          "en": "Date",
+          "de": "Datum"
+        }
+      },
+      "agenda": {
+        "label": {
+          "en": "Colloquiums table agenda header",
+          "de": "Kolloquien Tabelle Agenda Kopf"
+        },
+        "text": {
+          "en": "Agenda",
+          "de": "Agenda"
+        }
+      }
+    },
+    "agenda": {
+      "loading": {
+        "label": {
+          "en": "Colloquiums agenda loading",
+          "de": "Kolloquien Agenda laden"
+        },
+        "text": {
+          "en": "Loading agenda...",
+          "de": "Agenda wird geladen..."
+        }
+      },
+      "empty": {
+        "label": {
+          "en": "Colloquiums agenda empty",
+          "de": "Kolloquien Agenda leer"
+        },
+        "text": {
+          "en": "No agenda entries.",
+          "de": "Keine Agenda-Einträge."
+        }
+      }
+    },
+    "emptyFiltered": {
+      "label": {
+        "en": "Colloquiums list empty by filter",
+        "de": "Kolloquienliste leer durch Filter"
+      },
+      "text": {
+        "en": "No colloquiums match the filter.",
+        "de": "Keine Kolloquien entsprechen dem Filter."
+      }
+    },
+    "loading": {
+      "label": {
+        "en": "Colloquium detail loading state",
+        "de": "Kolloquium Detail Laden Status"
+      },
+      "text": {
+        "en": "Loading...",
+        "de": "Laden..."
+      }
+    },
+    "notFound": {
+      "label": {
+        "en": "Colloquium detail not found state",
+        "de": "Kolloquium Detail nicht gefunden Status"
+      },
+      "text": {
+        "en": "Colloquium not found.",
+        "de": "Kolloquium nicht gefunden."
+      }
+    },
+    "detail": {
+      "title": {
+        "label": {
+          "en": "Colloquium details section title",
+          "de": "Kolloquium Details Abschnittstitel"
+        },
+        "text": {
+          "en": "Colloquium Details",
+          "de": "Kolloquium Details"
+        }
+      },
+      "participants": {
+        "label": {
+          "en": "Colloquium details participants label",
+          "de": "Kolloquium Details Teilnehmer Label"
+        },
+        "text": {
+          "en": "Participants",
+          "de": "Teilnehmer"
+        }
+      },
+      "unknownOrgan": {
+        "label": {
+          "en": "Colloquium details unknown organ fallback",
+          "de": "Kolloquium Details Unbekanntes Organ Ersatz"
+        },
+        "text": {
+          "en": "Unknown organ",
+          "de": "Unbekanntes Organ"
+        }
+      }
+    },
+    "protocol": {
+      "pdf": {
+        "label": {
+          "en": "Colloquium protocol export PDF action",
+          "de": "Kolloquium Protokoll PDF Export Aktion"
+        },
+        "text": {
+          "en": "PDF",
+          "de": "PDF"
+        }
+      },
+      "creatingPdf": {
+        "label": {
+          "en": "Colloquium protocol creating PDF state",
+          "de": "Kolloquium Protokoll PDF wird erstellt Status"
+        },
+        "text": {
+          "en": "Creating PDF...",
+          "de": "PDF wird erstellt..."
+        }
+      },
+      "unknownPatient": {
+        "label": {
+          "en": "Colloquium protocol unknown patient fallback",
+          "de": "Kolloquium Protokoll Unbekannter Patient Ersatz"
+        },
+        "text": {
+          "en": "Unknown patient",
+          "de": "Unbekannter Patient"
+        }
+      },
+      "phase": {
+        "label": {
+          "en": "Colloquium protocol phase label",
+          "de": "Kolloquium Protokoll Phase Label"
+        },
+        "text": {
+          "en": "Phase",
+          "de": "Phase"
+        }
+      },
+      "presentedBy": {
+        "label": {
+          "en": "Colloquium protocol presented by label",
+          "de": "Kolloquium Protokoll Vorgestellt von Label"
+        },
+        "text": {
+          "en": "Presented By",
+          "de": "Vorgestellt von"
+        }
+      },
+      "decision": {
+        "label": {
+          "en": "Colloquium protocol decision label",
+          "de": "Kolloquium Protokoll Entscheid Label"
+        },
+        "text": {
+          "en": "Decision",
+          "de": "Entscheid"
+        }
+      },
+      "showTasks": {
+        "label": {
+          "en": "Colloquium protocol show tasks action",
+          "de": "Kolloquium Protokoll Aufgaben anzeigen Aktion"
+        },
+        "text": {
+          "en": "Show tasks",
+          "de": "Aufgaben anzeigen"
+        }
+      },
+      "addTask": {
+        "label": {
+          "en": "Colloquium protocol add task action",
+          "de": "Kolloquium Protokoll Aufgabe hinzufügen Aktion"
+        },
+        "text": {
+          "en": "+ Add task",
+          "de": "+ Aufgabe hinzufügen"
+        }
+      },
+      "hideTasks": {
+        "label": {
+          "en": "Colloquium protocol hide tasks action",
+          "de": "Kolloquium Protokoll Aufgaben ausblenden Aktion"
+        },
+        "text": {
+          "en": "Hide tasks",
+          "de": "Aufgaben ausblenden"
+        }
+      },
+      "taskList": {
+        "label": {
+          "en": "Colloquium protocol task list title",
+          "de": "Kolloquium Protokoll Aufgabenliste Titel"
+        },
+        "text": {
+          "en": "Task list",
+          "de": "Aufgabenliste"
+        }
+      },
+      "multiple": {
+        "label": {
+          "en": "Colloquium protocol multiple selection fallback",
+          "de": "Kolloquium Protokoll Mehrfachauswahl Ersatz"
+        },
+        "text": {
+          "en": "Multiple",
+          "de": "Mehrere"
+        }
+      },
+      "selectedEpisodes": {
+        "label": {
+          "en": "Colloquium protocol selected episodes label",
+          "de": "Kolloquium Protokoll Ausgewählte Episoden Label"
+        },
+        "text": {
+          "en": "Selected episodes:",
+          "de": "Ausgewählte Episoden:"
+        }
+      },
+      "phaseLabels": {
+        "unknown": {
+          "label": {
+            "en": "Colloquium protocol phase label unknown",
+            "de": "Kolloquium Protokoll Phasenlabel unbekannt"
+          },
+          "text": {
+            "en": "Unknown",
+            "de": "Unbekannt"
+          }
+        },
+        "closed": {
+          "label": {
+            "en": "Colloquium protocol phase label closed",
+            "de": "Kolloquium Protokoll Phasenlabel geschlossen"
+          },
+          "text": {
+            "en": "Closed",
+            "de": "Abgeschlossen"
+          }
+        },
+        "followUp": {
+          "label": {
+            "en": "Colloquium protocol phase label follow-up",
+            "de": "Kolloquium Protokoll Phasenlabel Nachsorge"
+          },
+          "text": {
+            "en": "Follow-Up",
+            "de": "Nachsorge"
+          }
+        },
+        "transplantation": {
+          "label": {
+            "en": "Colloquium protocol phase label transplantation",
+            "de": "Kolloquium Protokoll Phasenlabel Transplantation"
+          },
+          "text": {
+            "en": "Transplantation",
+            "de": "Transplantation"
+          }
+        },
+        "listing": {
+          "label": {
+            "en": "Colloquium protocol phase label listing",
+            "de": "Kolloquium Protokoll Phasenlabel Listung"
+          },
+          "text": {
+            "en": "Listing",
+            "de": "Listung"
+          }
+        },
+        "evaluation": {
+          "label": {
+            "en": "Colloquium protocol phase label evaluation",
+            "de": "Kolloquium Protokoll Phasenlabel Evaluation"
+          },
+          "text": {
+            "en": "Evaluation",
+            "de": "Evaluation"
+          }
+        }
+      }
+    }
+  },
+  "episode": {
+    "list": {
+      "title": {
+        "label": {
+          "en": "Episode list section title",
+          "de": "Episodenliste Abschnittstitel"
+        },
+        "text": {
+          "en": "Episodes",
+          "de": "Episoden"
+        }
+      }
+    },
+    "tabs": {
+      "evaluation": {
+        "label": {
+          "en": "Episode tab label evaluation",
+          "de": "Episode Tab Label Evaluation"
+        },
+        "text": {
+          "en": "Evaluation",
+          "de": "Evaluation"
+        }
+      },
+      "listing": {
+        "label": {
+          "en": "Episode tab label listing",
+          "de": "Episode Tab Label Listung"
+        },
+        "text": {
+          "en": "Listing",
+          "de": "Listung"
+        }
+      },
+      "transplantation": {
+        "label": {
+          "en": "Episode tab label transplantation",
+          "de": "Episode Tab Label Transplantation"
+        },
+        "text": {
+          "en": "Transplantation",
+          "de": "Transplantation"
+        }
+      },
+      "followUp": {
+        "label": {
+          "en": "Episode tab label follow-up",
+          "de": "Episode Tab Label Nachsorge"
+        },
+        "text": {
+          "en": "Follow-Up",
+          "de": "Nachsorge"
+        }
+      },
+      "closed": {
+        "label": {
+          "en": "Episode tab label closed",
+          "de": "Episode Tab Label Geschlossen"
+        },
+        "text": {
+          "en": "Closed",
+          "de": "Geschlossen"
+        }
+      }
+    },
+    "processTabs": {
+      "ariaLabel": {
+        "label": {
+          "en": "Episode process tabs aria label",
+          "de": "Episode Prozess-Tabs Aria-Label"
+        },
+        "text": {
+          "en": "Episode process tabs",
+          "de": "Episode Prozess-Tabs"
+        }
+      }
+    },
+    "favorites": {
+      "add": {
+        "label": {
+          "en": "Episode favorite add action title",
+          "de": "Episode Favorit Hinzufügen Aktionstitel"
+        },
+        "text": {
+          "en": "Add episode to favorites",
+          "de": "Episode zu Favoriten hinzufügen"
+        }
+      },
+      "remove": {
+        "label": {
+          "en": "Episode favorite remove action title",
+          "de": "Episode Favorit Entfernen Aktionstitel"
+        },
+        "text": {
+          "en": "Remove episode from favorites",
+          "de": "Episode aus Favoriten entfernen"
+        }
+      }
+    },
+    "colloquium": {
+      "loading": {
+        "label": {
+          "en": "Episode colloquium section loading text",
+          "de": "Episode Kolloquium Abschnitt Laden Text"
+        },
+        "text": {
+          "en": "Loading colloquiums...",
+          "de": "Kolloquien werden geladen..."
+        }
+      },
+      "empty": {
+        "label": {
+          "en": "Episode colloquium section empty state",
+          "de": "Episode Kolloquium Abschnitt leer"
+        },
+        "text": {
+          "en": "Episode is not assigned to any colloquium.",
+          "de": "Episode ist keinem Kolloquium zugewiesen."
+        }
+      },
+      "assignDialog": {
+        "ariaLabel": {
+          "label": {
+            "en": "Episode assign colloquium dialog aria label",
+            "de": "Episode Kolloquium zuweisen Dialog Aria-Label"
+          },
+          "text": {
+            "en": "Assign episode to colloquium",
+            "de": "Episode einem Kolloquium zuweisen"
+          }
+        },
+        "title": {
+          "label": {
+            "en": "Episode assign colloquium dialog title",
+            "de": "Episode Kolloquium zuweisen Dialog Titel"
+          },
+          "text": {
+            "en": "Assign episode to colloquium",
+            "de": "Episode einem Kolloquium zuweisen"
+          }
+        },
+        "type": {
+          "label": {
+            "en": "Episode assign colloquium type label",
+            "de": "Episode Kolloquium zuweisen Typ Label"
+          },
+          "text": {
+            "en": "Colloquium type",
+            "de": "Kolloquiumstyp"
+          }
+        },
+        "selectType": {
+          "label": {
+            "en": "Episode assign colloquium select type option",
+            "de": "Episode Kolloquium zuweisen Typ wählen Option"
+          },
+          "text": {
+            "en": "Select type...",
+            "de": "Typ wählen..."
+          }
+        },
+        "assigning": {
+          "label": {
+            "en": "Episode assign colloquium assigning state",
+            "de": "Episode Kolloquium zuweisen läuft Status"
+          },
+          "text": {
+            "en": "Assigning...",
+            "de": "Zuweisen..."
+          }
+        },
+        "assign": {
+          "label": {
+            "en": "Episode assign colloquium assign action",
+            "de": "Episode Kolloquium zuweisen Aktion"
+          },
+          "text": {
+            "en": "Assign",
+            "de": "Zuweisen"
+          }
+        },
+        "assignError": {
+          "label": {
+            "en": "Episode assign colloquium error",
+            "de": "Episode Kolloquium zuweisen Fehler"
+          },
+          "text": {
+            "en": "Could not assign episode to colloquium.",
+            "de": "Episode konnte keinem Kolloquium zugewiesen werden."
+          }
+        }
+      }
+    },
+    "meta": {
+      "addOrgan": {
+        "label": {
+          "en": "Episode meta add organ action",
+          "de": "Episode Meta Organ hinzufügen Aktion"
+        },
+        "text": {
+          "en": "+ Add organ",
+          "de": "+ Organ hinzufügen"
+        }
+      },
+      "dateAdded": {
+        "label": {
+          "en": "Episode meta date added column",
+          "de": "Episode Meta Datum hinzugefügt Spalte"
+        },
+        "text": {
+          "en": "Date added",
+          "de": "Datum hinzugefügt"
+        }
+      },
+      "active": {
+        "label": {
+          "en": "Episode meta active column",
+          "de": "Episode Meta Aktiv Spalte"
+        },
+        "text": {
+          "en": "Active",
+          "de": "Aktiv"
+        }
+      },
+      "dateInactivated": {
+        "label": {
+          "en": "Episode meta date inactivated column",
+          "de": "Episode Meta Datum inaktiviert Spalte"
+        },
+        "text": {
+          "en": "Date inactivated",
+          "de": "Datum inaktiviert"
+        }
+      },
+      "reason": {
+        "label": {
+          "en": "Episode meta reason column",
+          "de": "Episode Meta Grund Spalte"
+        },
+        "text": {
+          "en": "Reason",
+          "de": "Grund"
+        }
+      },
+      "emptyOrgans": {
+        "label": {
+          "en": "Episode meta empty organs text",
+          "de": "Episode Meta Keine Organe Text"
+        },
+        "text": {
+          "en": "No organs linked to this episode.",
+          "de": "Keine Organe mit dieser Episode verknüpft."
+        }
+      },
+      "deactivate": {
+        "label": {
+          "en": "Episode meta deactivate action title",
+          "de": "Episode Meta Deaktivieren Aktionstitel"
+        },
+        "text": {
+          "en": "Deactivate",
+          "de": "Deaktivieren"
+        }
+      },
+      "reactivate": {
+        "label": {
+          "en": "Episode meta reactivate action title",
+          "de": "Episode Meta Reaktivieren Aktionstitel"
+        },
+        "text": {
+          "en": "Reactivate",
+          "de": "Reaktivieren"
+        }
+      },
+      "selectOrgan": {
+        "label": {
+          "en": "Episode meta select organ option",
+          "de": "Episode Meta Organ wählen Option"
+        },
+        "text": {
+          "en": "Select organ...",
+          "de": "Organ wählen..."
+        }
+      },
+      "existing": {
+        "label": {
+          "en": "Episode meta existing organ marker",
+          "de": "Episode Meta Bereits vorhanden Marker"
+        },
+        "text": {
+          "en": "existing",
+          "de": "bereits vorhanden"
+        }
+      },
+      "episodeData": {
+        "label": {
+          "en": "Episode meta section title episode data",
+          "de": "Episode Meta Abschnittstitel Episodendaten"
+        },
+        "text": {
+          "en": "Episode Data",
+          "de": "Episodendaten"
+        }
+      },
+      "fallNr": {
+        "label": {
+          "en": "Episode meta fall number label",
+          "de": "Episode Meta Fallnummer Label"
+        },
+        "text": {
+          "en": "Fall-Nr.",
+          "de": "Fall-Nr."
+        }
+      },
+      "cave": {
+        "label": {
+          "en": "Episode meta cave label",
+          "de": "Episode Meta Cave Label"
+        },
+        "text": {
+          "en": "Cave",
+          "de": "Cave"
+        }
+      }
+    },
+    "errors": {
+      "saveDetails": {
+        "label": {
+          "en": "Episode save details error",
+          "de": "Episode Details speichern Fehler"
+        },
+        "text": {
+          "en": "Could not save episode details.",
+          "de": "Episodendetails konnten nicht gespeichert werden."
+        }
+      },
+      "addOrReactivateOrgan": {
+        "label": {
+          "en": "Episode add or reactivate organ error",
+          "de": "Episode Organ hinzufügen oder reaktivieren Fehler"
+        },
+        "text": {
+          "en": "Could not add or reactivate organ.",
+          "de": "Organ konnte nicht hinzugefügt oder reaktiviert werden."
+        }
+      },
+      "updateOrgan": {
+        "label": {
+          "en": "Episode update organ error",
+          "de": "Episode Organ aktualisieren Fehler"
+        },
+        "text": {
+          "en": "Could not update episode organ.",
+          "de": "Episode-Organ konnte nicht aktualisiert werden."
+        }
+      }
+    },
+    "table": {
+      "tplDate": {
+        "label": {
+          "en": "Episode table header TPL date",
+          "de": "Episodentabelle Kopf TPL Datum"
+        },
+        "text": {
+          "en": "TPL Date",
+          "de": "TPL-Datum"
+        }
+      },
+      "recCard": {
+        "label": {
+          "en": "Episode table header recipient card",
+          "de": "Episodentabelle Kopf Empfängerkarte"
+        },
+        "text": {
+          "en": "Rec. Card",
+          "de": "Empf.-Karte"
+        }
+      }
+    },
+    "add": {
+      "statusPlaceholder": {
+        "label": {
+          "en": "Episode add status placeholder",
+          "de": "Episode Hinzufügen Status Platzhalter"
+        },
+        "text": {
+          "en": "Status...",
+          "de": "Status..."
+        }
+      }
+    }
+  },
+  "episodePicker": {
+    "selectEpisode": {
+      "label": {
+        "en": "Episode picker select episode text",
+        "de": "Episode Picker Episode wählen Text"
+      },
+      "text": {
+        "en": "Select episode",
+        "de": "Episode wählen"
+      }
+    },
+    "close": {
+      "label": {
+        "en": "Episode picker close action",
+        "de": "Episode Picker Schliessen Aktion"
+      },
+      "text": {
+        "en": "Close",
+        "de": "Schliessen"
+      }
+    },
+    "searchPlaceholder": {
+      "label": {
+        "en": "Episode picker search placeholder",
+        "de": "Episode Picker Suche Platzhalter"
+      },
+      "text": {
+        "en": "Search by name, PID, or date of birth",
+        "de": "Suche nach Name, PID oder Geburtsdatum"
+      }
+    },
+    "loading": {
+      "label": {
+        "en": "Episode picker loading",
+        "de": "Episode Picker laden"
+      },
+      "text": {
+        "en": "Loading matching patients...",
+        "de": "Passende Patienten werden geladen..."
+      }
+    },
+    "empty": {
+      "label": {
+        "en": "Episode picker empty state",
+        "de": "Episode Picker leer"
+      },
+      "text": {
+        "en": "No patients with a current matching episode.",
+        "de": "Keine Patienten mit einer aktüll passenden Episode."
+      }
+    },
+    "episode": {
+      "label": {
+        "en": "Episode picker table header episode",
+        "de": "Episode Picker Tabelle Kopf Episode"
+      },
+      "text": {
+        "en": "Episode",
+        "de": "Episode"
+      }
+    }
+  },
+  "e2e": {
+    "loadingRunners": {
+      "label": {
+        "en": "E2E tests loading runners",
+        "de": "E2E-Tests Runner laden"
+      },
+      "text": {
+        "en": "Loading E2E test runners...",
+        "de": "E2E-Test-Runner werden geladen..."
+      }
+    },
+    "run": {
+      "configurationTitle": {
+        "label": {
+          "en": "E2E run tab configuration title",
+          "de": "E2E Lauf Tab Konfiguration Titel"
+        },
+        "text": {
+          "en": "Configuration & Start",
+          "de": "Konfiguration & Start"
+        }
+      },
+      "running": {
+        "label": {
+          "en": "E2E run running state",
+          "de": "E2E Lauf Läuft Status"
+        },
+        "text": {
+          "en": "Running...",
+          "de": "Läuft..."
+        }
+      },
+      "runTests": {
+        "label": {
+          "en": "E2E run tests action",
+          "de": "E2E Lauf Tests starten Aktion"
+        },
+        "text": {
+          "en": "Run E2E Tests",
+          "de": "E2E-Tests starten"
+        }
+      },
+      "runner": {
+        "label": {
+          "en": "E2E run runner field label",
+          "de": "E2E Lauf Runner Feldlabel"
+        },
+        "text": {
+          "en": "Runner",
+          "de": "Runner"
+        }
+      },
+      "outputTailLines": {
+        "label": {
+          "en": "E2E run output tail lines field label",
+          "de": "E2E Lauf Ausgabe-Endzeilen Feldlabel"
+        },
+        "text": {
+          "en": "Output tail lines",
+          "de": "Ausgabe-Endzeilen"
+        }
+      },
+      "selectRunnerHint": {
+        "label": {
+          "en": "E2E run select runner hint",
+          "de": "E2E Lauf Runner wählen Hinweis"
+        },
+        "text": {
+          "en": "Select a runner and start.",
+          "de": "Wählen Sie einen Runner und starten Sie."
+        }
+      },
+      "clearShownResult": {
+        "label": {
+          "en": "E2E run clear shown result title",
+          "de": "E2E Lauf Angezeigtes Ergebnis löschen Titel"
+        },
+        "text": {
+          "en": "Clear shown result",
+          "de": "Angezeigtes Ergebnis löschen"
+        }
+      },
+      "clearRunResult": {
+        "label": {
+          "en": "E2E run clear result action",
+          "de": "E2E Lauf Ergebnis löschen Aktion"
+        },
+        "text": {
+          "en": "Clear run result",
+          "de": "Laufergebnis löschen"
+        }
+      }
+    }
+  },
+  "donors": {
+    "title": {
+      "label": {
+        "en": "Donors view title",
+        "de": "Spenderansicht Titel"
+      },
+      "text": {
+        "en": "Donors",
+        "de": "Spender"
+      }
+    },
+    "notImplemented": {
+      "label": {
+        "en": "Donors view not implemented text",
+        "de": "Spenderansicht nicht implementiert Text"
+      },
+      "text": {
+        "en": "This view is not implemented yet.",
+        "de": "Diese Ansicht ist noch nicht implementiert."
+      }
+    }
+  },
+  "information": {
+    "title": {
+      "label": {
+        "en": "Information view title",
+        "de": "Informationsansicht Titel"
+      },
+      "text": {
+        "en": "Information",
+        "de": "Information"
+      }
+    },
+    "actions": {
+      "add": {
+        "label": {
+          "en": "Information action add",
+          "de": "Information Aktion Hinzufügen"
+        },
+        "text": {
+          "en": "+ Add",
+          "de": "+ Hinzufügen"
+        }
+      },
+      "withdraw": {
+        "label": {
+          "en": "Information action withdraw",
+          "de": "Information Aktion Zurückziehen"
+        },
+        "text": {
+          "en": "Withdraw",
+          "de": "Zurückziehen"
+        }
+      }
+    },
+    "showUnreadOnly": {
+      "label": {
+        "en": "Information filter show unread only",
+        "de": "Information Filter Nur ungelesene anzeigen"
+      },
+      "text": {
+        "en": "Show unread only",
+        "de": "Nur ungelesene anzeigen"
+      }
+    },
+    "help": {
+      "markRead": {
+        "label": {
+          "en": "Information help mark as read",
+          "de": "Information Hilfe Als gelesen markieren"
+        },
+        "text": {
+          "en": "Click a badge in the first column to mark information as read.",
+          "de": "Klicken Sie auf ein Badge in der ersten Spalte, um Informationen als gelesen zu markieren."
+        }
+      },
+      "withdrawRead": {
+        "label": {
+          "en": "Information help withdraw after read",
+          "de": "Information Hilfe Zurückziehen nach Lesen"
+        },
+        "text": {
+          "en": "This information was already read. You can edit the text and then click Withdraw.",
+          "de": "Diese Information wurde bereits gelesen. Sie können den Text bearbeiten und danach Zurückziehen klicken."
+        }
+      }
+    },
+    "table": {
+      "read": {
+        "label": {
+          "en": "Information table header read",
+          "de": "Information Tabelle Kopf Gelesen"
+        },
+        "text": {
+          "en": "Read",
+          "de": "Gelesen"
+        }
+      },
+      "text": {
+        "label": {
+          "en": "Information table header text",
+          "de": "Information Tabelle Kopf Text"
+        },
+        "text": {
+          "en": "Text",
+          "de": "Text"
+        }
+      },
+      "validFrom": {
+        "label": {
+          "en": "Information table header valid from",
+          "de": "Information Tabelle Kopf Gültig ab"
+        },
+        "text": {
+          "en": "Valid from",
+          "de": "Gültig ab"
+        }
+      },
+      "author": {
+        "label": {
+          "en": "Information table header author",
+          "de": "Information Tabelle Kopf Autor"
+        },
+        "text": {
+          "en": "Author",
+          "de": "Autor"
+        }
+      },
+      "context": {
+        "label": {
+          "en": "Information table header context",
+          "de": "Information Tabelle Kopf Kontext"
+        },
+        "text": {
+          "en": "Context",
+          "de": "Kontext"
+        }
+      }
+    },
+    "context": {
+      "general": {
+        "label": {
+          "en": "Information context general",
+          "de": "Information Kontext Allgemein"
+        },
+        "text": {
+          "en": "General",
+          "de": "Allgemein"
+        }
+      }
+    },
+    "badge": {
+      "read": {
+        "label": {
+          "en": "Information badge read",
+          "de": "Information Badge gelesen"
+        },
+        "text": {
+          "en": "Read",
+          "de": "Gelesen"
+        }
+      },
+      "withdrawnRead": {
+        "label": {
+          "en": "Information badge withdrawn read",
+          "de": "Information Badge zurückgezogen gelesen"
+        },
+        "text": {
+          "en": "Withdrawn (read)",
+          "de": "Zurückgezogen (gelesen)"
+        }
+      },
+      "unreadValid": {
+        "label": {
+          "en": "Information badge unread valid",
+          "de": "Information Badge ungelesen gültig"
+        },
+        "text": {
+          "en": "Unread and valid",
+          "de": "Ungelesen und gültig"
+        }
+      },
+      "unreadNotYetValid": {
+        "label": {
+          "en": "Information badge unread not yet valid",
+          "de": "Information Badge ungelesen noch nicht gültig"
+        },
+        "text": {
+          "en": "Unread and not yet valid",
+          "de": "Ungelesen und noch nicht gültig"
+        }
+      },
+      "clickToConfirm": {
+        "label": {
+          "en": "Information badge click to confirm",
+          "de": "Information Badge Klicken zum Bestätigen"
+        },
+        "text": {
+          "en": "click to confirm",
+          "de": "Klicken zum Bestätigen"
+        }
+      }
+    },
+    "editor": {
+      "bold": {
+        "label": {
+          "en": "Information editor bold tool",
+          "de": "Information Editor Fett Werkzeug"
+        },
+        "text": {
+          "en": "Bold",
+          "de": "Fett"
+        }
+      },
+      "italic": {
+        "label": {
+          "en": "Information editor italic tool",
+          "de": "Information Editor Kursiv Werkzeug"
+        },
+        "text": {
+          "en": "Italic",
+          "de": "Kursiv"
+        }
+      },
+      "underline": {
+        "label": {
+          "en": "Information editor underline tool",
+          "de": "Information Editor Unterstreichen Werkzeug"
+        },
+        "text": {
+          "en": "Underline",
+          "de": "Unterstreichen"
+        }
+      }
+    },
+    "empty": {
+      "label": {
+        "en": "Information rows empty state",
+        "de": "Information Zeilen leer"
+      },
+      "text": {
+        "en": "No information rows yet.",
+        "de": "Noch keine Informationszeilen."
+      }
+    }
+  },
+  "admin": {
+    "translations": {
+      "language": {
+        "label": {
+          "en": "Admin translations language label",
+          "de": "Admin Uebersetzungen Sprachlabel"
+        },
+        "text": {
+          "en": "Language",
+          "de": "Sprache"
+        }
+      },
+      "locale": {
+        "de": {
+          "label": {
+            "en": "Admin translations locale option de",
+            "de": "Admin Uebersetzungen Sprachoption de"
+          },
+          "text": {
+            "en": "Deutsch (de)",
+            "de": "Deutsch (de)"
+          }
+        },
+        "en": {
+          "label": {
+            "en": "Admin translations locale option en",
+            "de": "Admin Uebersetzungen Sprachoption en"
+          },
+          "text": {
+            "en": "English (en)",
+            "de": "Englisch (en)"
+          }
+        }
+      },
+      "saving": {
+        "label": {
+          "en": "Admin translations saving action",
+          "de": "Admin Uebersetzungen Speichern läuft"
+        },
+        "text": {
+          "en": "Saving...",
+          "de": "Speichern..."
+        }
+      },
+      "save": {
+        "label": {
+          "en": "Admin translations save action",
+          "de": "Admin Uebersetzungen Speichern"
+        },
+        "text": {
+          "en": "Save translations",
+          "de": "Uebersetzungen speichern"
+        }
+      },
+      "helpPrefix": {
+        "label": {
+          "en": "Admin translations helper text prefix",
+          "de": "Admin Uebersetzungen Hilfetext Prefix"
+        },
+        "text": {
+          "en": "Tree keys are fixed by the translation file. Admins can edit text values only. Items:",
+          "de": "Baumschlüssel sind durch die Uebersetzungsdatei festgelegt. Admins können nur Textwerte bearbeiten. Einträge:"
+        }
+      },
+      "loading": {
+        "label": {
+          "en": "Admin translations loading",
+          "de": "Admin Uebersetzungen laden"
+        },
+        "text": {
+          "en": "Loading translations...",
+          "de": "Uebersetzungen werden geladen..."
+        }
+      },
+      "filter": {
+        "mode": {
+          "label": {
+            "en": "Admin translations filter mode label",
+            "de": "Admin Uebersetzungen Filtermodus Label"
+          },
+          "text": {
+            "en": "Filter mode",
+            "de": "Filtermodus"
+          }
+        },
+        "keyContains": {
+          "label": {
+            "en": "Admin translations filter mode key contains",
+            "de": "Admin Uebersetzungen Filtermodus Schluessel enthaelt"
+          },
+          "text": {
+            "en": "Key contains",
+            "de": "Schluessel enthaelt"
+          }
+        },
+        "keyPrefix": {
+          "label": {
+            "en": "Admin translations filter mode key prefix",
+            "de": "Admin Uebersetzungen Filtermodus Schluessel Praefix"
+          },
+          "text": {
+            "en": "Key prefix",
+            "de": "Schluessel Praefix"
+          }
+        },
+        "displayTextContains": {
+          "label": {
+            "en": "Admin translations filter mode display text contains",
+            "de": "Admin Uebersetzungen Filtermodus Anzeigetext enthaelt"
+          },
+          "text": {
+            "en": "Display text contains",
+            "de": "Anzeigetext enthaelt"
+          }
+        },
+        "placeholder": {
+          "label": {
+            "en": "Admin translations filter input placeholder",
+            "de": "Admin Uebersetzungen Filtereingabe Platzhalter"
+          },
+          "text": {
+            "en": "Filter keys or text...",
+            "de": "Schluessel oder Text filtern..."
+          }
+        },
+        "noMatches": {
+          "label": {
+            "en": "Admin translations filter no matches message",
+            "de": "Admin Uebersetzungen Filter keine Treffer Meldung"
+          },
+          "text": {
+            "en": "No matching translation entries.",
+            "de": "Keine passenden Uebersetzungseintraege."
+          }
+        }
+      },
+      "source": {
+        "file": {
+          "label": {
+            "en": "Admin translations source badge file",
+            "de": "Admin Uebersetzungen Qülle Badge Datei"
+          },
+          "text": {
+            "en": "FILE",
+            "de": "DATEI"
+          }
+        },
+        "code": {
+          "label": {
+            "en": "Admin translations source badge code",
+            "de": "Admin Uebersetzungen Qülle Badge Code"
+          },
+          "text": {
+            "en": "CODE",
+            "de": "CODE"
+          }
+        }
+      },
+      "tree": {
+        "collapseAll": {
+          "label": {
+            "en": "Admin translations tree collapse all action",
+            "de": "Admin Uebersetzungen Baum Alle einklappen Aktion"
+          },
+          "text": {
+            "en": "Collapse all",
+            "de": "Alle einklappen"
+          }
+        },
+        "expandAll": {
+          "label": {
+            "en": "Admin translations tree expand all action",
+            "de": "Admin Uebersetzungen Baum Alle ausklappen Aktion"
+          },
+          "text": {
+            "en": "Expand all",
+            "de": "Alle ausklappen"
+          }
+        },
+        "collapseBranch": {
+          "label": {
+            "en": "Admin translations tree collapse branch action",
+            "de": "Admin Uebersetzungen Baum Zweig einklappen Aktion"
+          },
+          "text": {
+            "en": "Collapse branch",
+            "de": "Zweig einklappen"
+          }
+        },
+        "expandBranch": {
+          "label": {
+            "en": "Admin translations tree expand branch action",
+            "de": "Admin Uebersetzungen Baum Zweig ausklappen Aktion"
+          },
+          "text": {
+            "en": "Expand branch",
+            "de": "Zweig ausklappen"
+          }
+        },
+        "close": {
+          "label": {
+            "en": "Admin translations tree close branch button text",
+            "de": "Admin Uebersetzungen Baum Zweig schliessen Buttontext"
+          },
+          "text": {
+            "en": "Close",
+            "de": "Schliessen"
+          }
+        },
+        "open": {
+          "label": {
+            "en": "Admin translations tree open branch button text",
+            "de": "Admin Uebersetzungen Baum Zweig öffnen Buttontext"
+          },
+          "text": {
+            "en": "Open",
+            "de": "Oeffnen"
+          }
+        }
+      }
+    },
+    "procurement": {
+      "loading": {
+        "label": {
+          "en": "Admin procurement config loading",
+          "de": "Admin Beschaffungskonfiguration laden"
+        },
+        "text": {
+          "en": "Loading procurement configuration...",
+          "de": "Beschaffungskonfiguration wird geladen..."
+        }
+      }
+    },
+    "procurementConfig": {
+      "groups": {
+        "title": {
+          "label": {
+            "en": "Admin procurement configured groups title",
+            "de": "Admin Beschaffung Konfigurierte Gruppen Titel"
+          },
+          "text": {
+            "en": "Groups",
+            "de": "Gruppen"
+          }
+        },
+        "definitionArea": {
+          "label": {
+            "en": "Admin procurement configured groups definition area title",
+            "de": "Admin Beschaffung Konfigurierte Gruppen Definitionsbereich Titel"
+          },
+          "text": {
+            "en": "Definition Area",
+            "de": "Definitionsbereich"
+          }
+        },
+        "createGroup": {
+          "label": {
+            "en": "Admin procurement configured groups create action",
+            "de": "Admin Beschaffung Konfigurierte Gruppen Erstellen Aktion"
+          },
+          "text": {
+            "en": "Create Group",
+            "de": "Gruppe erstellen"
+          }
+        },
+        "fixedModelHint": {
+          "label": {
+            "en": "Admin procurement configured groups fixed model hint",
+            "de": "Admin Beschaffung Konfigurierte Gruppen Festes Modell Hinweis"
+          },
+          "text": {
+            "en": "Group templates are fixed and cannot be created here.",
+            "de": "Gruppenvorlagen sind fest vorgegeben und können hier nicht erstellt werden."
+          }
+        },
+        "noGroups": {
+          "label": {
+            "en": "Admin procurement configured groups empty state",
+            "de": "Admin Beschaffung Konfigurierte Gruppen Leerzustand"
+          },
+          "text": {
+            "en": "No groups configured.",
+            "de": "Keine Gruppen konfiguriert."
+          }
+        },
+        "deleteConfirm": {
+          "label": {
+            "en": "Admin procurement configured groups delete confirmation",
+            "de": "Admin Beschaffung Konfigurierte Gruppen Löschbestätigung"
+          },
+          "text": {
+            "en": "Deleting this group will unassign fields from the group. Do you want to continue?",
+            "de": "Beim Löschen dieser Gruppe wird die Zuordnung der Felder zur Gruppe aufgehoben. Möchten Sie fortfahren?"
+          }
+        }
+      },
+      "protocolTaskGroups": {
+        "title": {
+          "label": {
+            "en": "Admin procurement protocol task groups title",
+            "de": "Admin Beschaffung Protokoll-Aufgabengruppen Titel"
+          },
+          "text": {
+            "en": "Protocol Task Groups",
+            "de": "Protokoll-Aufgabengruppen"
+          }
+        },
+        "subtitle": {
+          "label": {
+            "en": "Admin procurement protocol task groups subtitle",
+            "de": "Admin Beschaffung Protokoll-Aufgabengruppen Untertitel"
+          },
+          "text": {
+            "en": "Choose which task groups are shown in protocol tasks, and define their order.",
+            "de": "Wählen Sie, welche Aufgabengruppen in den Protokollaufgaben angezeigt werden, und legen Sie deren Reihenfolge fest."
+          }
+        },
+        "groupTemplate": {
+          "label": {
+            "en": "Admin procurement protocol task groups group template label",
+            "de": "Admin Beschaffung Protokoll-Aufgabengruppen Gruppenvorlage Label"
+          },
+          "text": {
+            "en": "Task Group Template",
+            "de": "Aufgabengruppenvorlage"
+          }
+        },
+        "selectGroupTemplate": {
+          "label": {
+            "en": "Admin procurement protocol task groups select template placeholder",
+            "de": "Admin Beschaffung Protokoll-Aufgabengruppen Vorlage auswählen Platzhalter"
+          },
+          "text": {
+            "en": "Select task group template",
+            "de": "Aufgabengruppenvorlage auswählen"
+          }
+        },
+        "addSelection": {
+          "label": {
+            "en": "Admin procurement protocol task groups add selection action",
+            "de": "Admin Beschaffung Protokoll-Aufgabengruppen Auswahl hinzufügen Aktion"
+          },
+          "text": {
+            "en": "Add Selection",
+            "de": "Auswahl hinzufügen"
+          }
+        },
+        "empty": {
+          "label": {
+            "en": "Admin procurement protocol task groups empty state",
+            "de": "Admin Beschaffung Protokoll-Aufgabengruppen Leerzustand"
+          },
+          "text": {
+            "en": "No protocol task groups selected.",
+            "de": "Keine Protokoll-Aufgabengruppen ausgewählt."
+          }
+        }
+      },
+      "fields": {
+        "title": {
+          "label": {
+            "en": "Admin procurement configured fields title",
+            "de": "Admin Beschaffung Konfigurierte Felder Titel"
+          },
+          "text": {
+            "en": "Fields",
+            "de": "Felder"
+          }
+        },
+        "subtitle": {
+          "label": {
+            "en": "Admin procurement configured fields subtitle",
+            "de": "Admin Beschaffung Konfigurierte Felder Untertitel"
+          },
+          "text": {
+            "en": "Define field templates and manage assigned scopes as runtime configuration data.",
+            "de": "Feldvorlagen definieren und zugewiesene Scopes als Laufzeit-Konfigurationsdaten verwalten."
+          }
+        },
+        "definitionArea": {
+          "label": {
+            "en": "Admin procurement configured fields definition area title",
+            "de": "Admin Beschaffung Konfigurierte Felder Definitionsbereich Titel"
+          },
+          "text": {
+            "en": "Definition Area",
+            "de": "Definitionsbereich"
+          }
+        },
+        "key": {
+          "label": {
+            "en": "Admin procurement configured fields key label",
+            "de": "Admin Beschaffung Konfigurierte Felder Schlüssel Label"
+          },
+          "text": {
+            "en": "Key",
+            "de": "Schlüssel"
+          }
+        },
+        "group": {
+          "label": {
+            "en": "Admin procurement configured fields group label",
+            "de": "Admin Beschaffung Konfigurierte Felder Gruppe Label"
+          },
+          "text": {
+            "en": "Group",
+            "de": "Gruppe"
+          }
+        },
+        "noGroup": {
+          "label": {
+            "en": "Admin procurement configured fields no group option",
+            "de": "Admin Beschaffung Konfigurierte Felder Keine Gruppe Option"
+          },
+          "text": {
+            "en": "No group",
+            "de": "Keine Gruppe"
+          }
+        },
+        "field": {
+          "label": {
+            "en": "Admin procurement configured fields field label",
+            "de": "Admin Beschaffung Konfigurierte Felder Feld Label"
+          },
+          "text": {
+            "en": "Field",
+            "de": "Feld"
+          }
+        },
+        "datatype": {
+          "label": {
+            "en": "Admin procurement configured fields datatype label",
+            "de": "Admin Beschaffung Konfigurierte Felder Datentyp Label"
+          },
+          "text": {
+            "en": "Datatype",
+            "de": "Datentyp"
+          }
+        },
+        "selectDatatype": {
+          "label": {
+            "en": "Admin procurement configured fields select datatype option",
+            "de": "Admin Beschaffung Konfigurierte Felder Datentyp wählen Option"
+          },
+          "text": {
+            "en": "Select datatype",
+            "de": "Datentyp wählen"
+          }
+        },
+        "automaticDatatype": {
+          "label": {
+            "en": "Admin procurement configured fields automatic datatype hint",
+            "de": "Admin Beschaffung Konfigurierte Felder Automatischer Datentyp Hinweis"
+          },
+          "text": {
+            "en": "Automatic (Managed by value mode)",
+            "de": "Automatisch (durch Wertmodus gesteürt)"
+          }
+        },
+        "valueMode": {
+          "label": {
+            "en": "Admin procurement configured fields value mode label",
+            "de": "Admin Beschaffung Konfigurierte Felder Wertmodus Label"
+          },
+          "text": {
+            "en": "Value Mode",
+            "de": "Wertmodus"
+          }
+        },
+        "mode": {
+          "label": {
+            "en": "Admin procurement configured fields mode column",
+            "de": "Admin Beschaffung Konfigurierte Felder Modus Spalte"
+          },
+          "text": {
+            "en": "Mode",
+            "de": "Modus"
+          }
+        },
+        "scopes": {
+          "label": {
+            "en": "Admin procurement configured fields scopes column",
+            "de": "Admin Beschaffung Konfigurierte Felder Scopes Spalte"
+          },
+          "text": {
+            "en": "Scopes",
+            "de": "Scopes"
+          }
+        },
+        "all": {
+          "label": {
+            "en": "Admin procurement configured fields all fallback",
+            "de": "Admin Beschaffung Konfigurierte Felder Alle Ersatz"
+          },
+          "text": {
+            "en": "All",
+            "de": "Alle"
+          }
+        },
+        "removeScope": {
+          "label": {
+            "en": "Admin procurement configured fields remove scope action",
+            "de": "Admin Beschaffung Konfigurierte Felder Scope entfernen Aktion"
+          },
+          "text": {
+            "en": "Remove scope",
+            "de": "Scope entfernen"
+          }
+        },
+        "selectOrgan": {
+          "label": {
+            "en": "Admin procurement configured fields select organ option",
+            "de": "Admin Beschaffung Konfigurierte Felder Organ wählen Option"
+          },
+          "text": {
+            "en": "Select organ",
+            "de": "Organ wählen"
+          }
+        },
+        "addScope": {
+          "label": {
+            "en": "Admin procurement configured fields add scope action",
+            "de": "Admin Beschaffung Konfigurierte Felder Scope hinzufügen Aktion"
+          },
+          "text": {
+            "en": "Add Scope",
+            "de": "Scope hinzufügen"
+          }
+        },
+        "showScopes": {
+          "label": {
+            "en": "Admin procurement configured fields show scopes action",
+            "de": "Admin Beschaffung Konfigurierte Felder Scopes anzeigen Aktion"
+          },
+          "text": {
+            "en": "Show scopes",
+            "de": "Scopes anzeigen"
+          }
+        },
+        "hideScopes": {
+          "label": {
+            "en": "Admin procurement configured fields hide scopes action",
+            "de": "Admin Beschaffung Konfigurierte Felder Scopes ausblenden Aktion"
+          },
+          "text": {
+            "en": "Hide scopes",
+            "de": "Scopes ausblenden"
+          }
+        },
+        "noScopes": {
+          "label": {
+            "en": "Admin procurement configured fields no scopes state",
+            "de": "Admin Beschaffung Konfigurierte Felder Keine Scopes Zustand"
+          },
+          "text": {
+            "en": "No scopes configured.",
+            "de": "Keine Scopes konfiguriert."
+          }
+        },
+        "createField": {
+          "label": {
+            "en": "Admin procurement configured fields create field action",
+            "de": "Admin Beschaffung Konfigurierte Felder Feld erstellen Aktion"
+          },
+          "text": {
+            "en": "Create Field",
+            "de": "Feld erstellen"
+          }
+        },
+        "fixedModelHint": {
+          "label": {
+            "en": "Admin procurement configured fields fixed model hint",
+            "de": "Admin Beschaffung Konfigurierte Felder Festes Modell Hinweis"
+          },
+          "text": {
+            "en": "Field templates are fixed and cannot be created here.",
+            "de": "Feldvorlagen sind fest vorgegeben und können hier nicht erstellt werden."
+          }
+        },
+        "configuredData": {
+          "label": {
+            "en": "Admin procurement configured fields configured data title",
+            "de": "Admin Beschaffung Konfigurierte Felder Konfigurierte Daten Titel"
+          },
+          "text": {
+            "en": "Configured Data",
+            "de": "Konfigurierte Daten"
+          }
+        }
+      },
+      "valueMode": {
+        "scalar": {
+          "label": {
+            "en": "Admin procurement value mode scalar",
+            "de": "Admin Beschaffung Wertmodus Skalar"
+          },
+          "text": {
+            "en": "Scalar",
+            "de": "Skalar"
+          }
+        },
+        "personSingle": {
+          "label": {
+            "en": "Admin procurement value mode person single",
+            "de": "Admin Beschaffung Wertmodus Einzelperson"
+          },
+          "text": {
+            "en": "Single Person",
+            "de": "Einzelperson"
+          }
+        },
+        "personList": {
+          "label": {
+            "en": "Admin procurement value mode person list",
+            "de": "Admin Beschaffung Wertmodus Personenliste"
+          },
+          "text": {
+            "en": "Person List",
+            "de": "Personenliste"
+          }
+        },
+        "teamSingle": {
+          "label": {
+            "en": "Admin procurement value mode team single",
+            "de": "Admin Beschaffung Wertmodus Einzelteam"
+          },
+          "text": {
+            "en": "Single Team",
+            "de": "Einzelteam"
+          }
+        },
+        "teamList": {
+          "label": {
+            "en": "Admin procurement value mode team list",
+            "de": "Admin Beschaffung Wertmodus Teamliste"
+          },
+          "text": {
+            "en": "Team List",
+            "de": "Teamliste"
+          }
+        }
+      },
+      "slot": {
+        "main": {
+          "label": {
+            "en": "Admin procurement slot option MAIN",
+            "de": "Admin Beschaffung Slot Option MAIN"
+          },
+          "text": {
+            "en": "MAIN",
+            "de": "HAUPT"
+          }
+        },
+        "left": {
+          "label": {
+            "en": "Admin procurement slot option LEFT",
+            "de": "Admin Beschaffung Slot Option LEFT"
+          },
+          "text": {
+            "en": "LEFT",
+            "de": "LINKS"
+          }
+        },
+        "right": {
+          "label": {
+            "en": "Admin procurement slot option RIGHT",
+            "de": "Admin Beschaffung Slot Option RIGHT"
+          },
+          "text": {
+            "en": "RIGHT",
+            "de": "RECHTS"
+          }
+        }
+      }
+    },
+    "taskTemplates": {
+      "title": {
+        "label": {
+          "en": "Admin task templates title",
+          "de": "Admin Aufgabenvorlagen Titel"
+        },
+        "text": {
+          "en": "Task Templates",
+          "de": "Aufgabenvorlagen"
+        }
+      },
+      "groupsSection": {
+        "label": {
+          "en": "Admin task templates groups section title",
+          "de": "Admin Aufgabenvorlagen Gruppen Abschnittstitel"
+        },
+        "text": {
+          "en": "Groups",
+          "de": "Gruppen"
+        }
+      },
+      "templatesSection": {
+        "label": {
+          "en": "Admin task templates templates section title",
+          "de": "Admin Aufgabenvorlagen Vorlagen Abschnittstitel"
+        },
+        "text": {
+          "en": "Tasks",
+          "de": "Aufgaben"
+        }
+      },
+      "activeGroup": {
+        "label": {
+          "en": "Admin task templates active group dropdown label",
+          "de": "Admin Aufgabenvorlagen Aktive Gruppe Dropdown Label"
+        },
+        "text": {
+          "en": "Active Group",
+          "de": "Aktive Gruppe"
+        }
+      },
+      "loading": {
+        "label": {
+          "en": "Admin task templates loading",
+          "de": "Admin Aufgabenvorlagen laden"
+        },
+        "text": {
+          "en": "Loading task templates...",
+          "de": "Aufgabenvorlagen werden geladen..."
+        }
+      },
+      "groupKey": {
+        "label": {
+          "en": "Admin task templates group key label",
+          "de": "Admin Aufgabenvorlagen Gruppenschlüssel Label"
+        },
+        "text": {
+          "en": "Group Key",
+          "de": "Gruppenschlüssel"
+        }
+      },
+      "groupKeyPlaceholder": {
+        "label": {
+          "en": "Admin task templates group key placeholder",
+          "de": "Admin Aufgabenvorlagen Gruppenschlüssel Platzhalter"
+        },
+        "text": {
+          "en": "COORD_PROTOCOL_COMMON",
+          "de": "COORD_PROTOCOL_COMMON"
+        }
+      },
+      "groupName": {
+        "label": {
+          "en": "Admin task templates group name label",
+          "de": "Admin Aufgabenvorlagen Gruppenname Label"
+        },
+        "text": {
+          "en": "Group Name",
+          "de": "Gruppenname"
+        }
+      },
+      "groupNamePlaceholder": {
+        "label": {
+          "en": "Admin task templates group name placeholder",
+          "de": "Admin Aufgabenvorlagen Gruppenname Platzhalter"
+        },
+        "text": {
+          "en": "Protocol - Common",
+          "de": "Protokoll - Allgemein"
+        }
+      },
+      "allOrgans": {
+        "label": {
+          "en": "Admin task templates all organs option",
+          "de": "Admin Aufgabenvorlagen Alle Organe Option"
+        },
+        "text": {
+          "en": "All organs",
+          "de": "Alle Organe"
+        }
+      },
+      "active": {
+        "label": {
+          "en": "Admin task templates active label",
+          "de": "Admin Aufgabenvorlagen Aktiv Label"
+        },
+        "text": {
+          "en": "Active",
+          "de": "Aktiv"
+        }
+      },
+      "position": {
+        "label": {
+          "en": "Admin task templates position label",
+          "de": "Admin Aufgabenvorlagen Position Label"
+        },
+        "text": {
+          "en": "Pos",
+          "de": "Pos"
+        }
+      },
+      "addGroupTemplate": {
+        "label": {
+          "en": "Admin task templates add group template action",
+          "de": "Admin Aufgabenvorlagen Gruppenvorlage hinzufügen Aktion"
+        },
+        "text": {
+          "en": "+ Add Group Template",
+          "de": "+ Gruppenvorlage hinzufügen"
+        }
+      },
+      "emptyGroupTemplates": {
+        "label": {
+          "en": "Admin task templates empty group templates state",
+          "de": "Admin Aufgabenvorlagen Leerer Zustand Gruppenvorlagen"
+        },
+        "text": {
+          "en": "No coordination protocol group templates available.",
+          "de": "Keine Koordinationsprotokoll-Gruppenvorlagen verfügbar."
+        }
+      },
+      "groupTemplate": {
+        "label": {
+          "en": "Admin task templates group template field label",
+          "de": "Admin Aufgabenvorlagen Gruppenvorlage Feldlabel"
+        },
+        "text": {
+          "en": "Group Template",
+          "de": "Gruppenvorlage"
+        }
+      },
+      "commentHint": {
+        "label": {
+          "en": "Admin task templates comment hint label",
+          "de": "Admin Aufgabenvorlagen Kommentarhinweis Label"
+        },
+        "text": {
+          "en": "Comment Hint",
+          "de": "Kommentarhinweis"
+        }
+      },
+      "commentHintPlaceholder": {
+        "label": {
+          "en": "Admin task templates comment hint placeholder",
+          "de": "Admin Aufgabenvorlagen Kommentarhinweis Platzhalter"
+        },
+        "text": {
+          "en": "e.g. Document who confirmed and at what time",
+          "de": "z.B. dokumentieren, wer bestätigt hat und um welche Uhrzeit"
+        }
+      },
+      "defaultPriority": {
+        "label": {
+          "en": "Admin task templates default priority option",
+          "de": "Admin Aufgabenvorlagen Standardpriorität Option"
+        },
+        "text": {
+          "en": "(default)",
+          "de": "(Standard)"
+        }
+      },
+      "offsetDays": {
+        "label": {
+          "en": "Admin task templates offset days label",
+          "de": "Admin Aufgabenvorlagen Offset Tage Label"
+        },
+        "text": {
+          "en": "Offset Days",
+          "de": "Offset Tage"
+        }
+      },
+      "offsetHours": {
+        "label": {
+          "en": "Admin task templates offset hours label",
+          "de": "Admin Aufgabenvorlagen Offset Stunden Label"
+        },
+        "text": {
+          "en": "Offset Hours",
+          "de": "Offset Stunden"
+        }
+      },
+      "offsetMinutes": {
+        "label": {
+          "en": "Admin task templates offset minutes label",
+          "de": "Admin Aufgabenvorlagen Offset Minuten Label"
+        },
+        "text": {
+          "en": "Offset Minutes",
+          "de": "Offset Minuten"
+        }
+      },
+      "addTemplate": {
+        "label": {
+          "en": "Admin task templates add template action",
+          "de": "Admin Aufgabenvorlagen Vorlage hinzufügen Aktion"
+        },
+        "text": {
+          "en": "+ Add Template",
+          "de": "+ Vorlage hinzufügen"
+        }
+      },
+      "emptyTemplates": {
+        "label": {
+          "en": "Admin task templates empty templates state",
+          "de": "Admin Aufgabenvorlagen Leerer Zustand Vorlagen"
+        },
+        "text": {
+          "en": "No task templates available.",
+          "de": "Keine Aufgabenvorlagen verfügbar."
+        }
+      },
+      "table": {
+        "key": {
+          "label": {
+            "en": "Admin task templates table key header",
+            "de": "Admin Aufgabenvorlagen Tabelle Schlüssel Kopf"
+          },
+          "text": {
+            "en": "Key",
+            "de": "Schlüssel"
+          }
+        },
+        "name": {
+          "label": {
+            "en": "Admin task templates table name header",
+            "de": "Admin Aufgabenvorlagen Tabelle Name Kopf"
+          },
+          "text": {
+            "en": "Name",
+            "de": "Name"
+          }
+        },
+        "group": {
+          "label": {
+            "en": "Admin task templates table group header",
+            "de": "Admin Aufgabenvorlagen Tabelle Gruppe Kopf"
+          },
+          "text": {
+            "en": "Group",
+            "de": "Gruppe"
+          }
+        },
+        "days": {
+          "label": {
+            "en": "Admin task templates table days header",
+            "de": "Admin Aufgabenvorlagen Tabelle Tage Kopf"
+          },
+          "text": {
+            "en": "Days",
+            "de": "Tage"
+          }
+        },
+        "hours": {
+          "label": {
+            "en": "Admin task templates table hours header",
+            "de": "Admin Aufgabenvorlagen Tabelle Stunden Kopf"
+          },
+          "text": {
+            "en": "Hours",
+            "de": "Stunden"
+          }
+        },
+        "minutes": {
+          "label": {
+            "en": "Admin task templates table minutes header",
+            "de": "Admin Aufgabenvorlagen Tabelle Minuten Kopf"
+          },
+          "text": {
+            "en": "Minutes",
+            "de": "Minuten"
+          }
+        }
+      }
+    },
+    "peopleTeams": {
+      "loading": {
+        "label": {
+          "en": "Admin people and teams loading",
+          "de": "Admin Personen und Teams laden"
+        },
+        "text": {
+          "en": "Loading people and teams...",
+          "de": "Personen und Teams werden geladen..."
+        }
+      },
+      "persons": {
+        "title": {
+          "label": {
+            "en": "Admin people teams persons section title",
+            "de": "Admin Personen Teams Personen Abschnittstitel"
+          },
+          "text": {
+            "en": "Persons",
+            "de": "Personen"
+          }
+        }
+      },
+      "teams": {
+        "title": {
+          "label": {
+            "en": "Admin people teams teams section title",
+            "de": "Admin Personen Teams Teams Abschnittstitel"
+          },
+          "text": {
+            "en": "Teams",
+            "de": "Teams"
+          }
+        }
+      },
+      "surname": {
+        "label": {
+          "en": "Admin people teams surname label",
+          "de": "Admin Personen Teams Nachname Label"
+        },
+        "text": {
+          "en": "Surname",
+          "de": "Nachname"
+        }
+      },
+      "userId": {
+        "label": {
+          "en": "Admin people teams user ID label",
+          "de": "Admin Personen Teams Benutzer-ID Label"
+        },
+        "text": {
+          "en": "User ID",
+          "de": "Benutzer-ID"
+        }
+      },
+      "userIdOptional": {
+        "label": {
+          "en": "Admin people teams optional user ID placeholder",
+          "de": "Admin Personen Teams Optionale Benutzer-ID Platzhalter"
+        },
+        "text": {
+          "en": "Optional user ID (max 12)",
+          "de": "Optionale Benutzer-ID (max 12)"
+        }
+      },
+      "members": {
+        "label": {
+          "en": "Admin people teams members label",
+          "de": "Admin Personen Teams Mitglieder Label"
+        },
+        "text": {
+          "en": "Members",
+          "de": "Mitglieder"
+        }
+      },
+      "teamName": {
+        "label": {
+          "en": "Admin people teams team name placeholder",
+          "de": "Admin Personen Teams Teamname Platzhalter"
+        },
+        "text": {
+          "en": "Team name",
+          "de": "Teamname"
+        }
+      },
+      "toggleMembers": {
+        "label": {
+          "en": "Admin people teams toggle team members title",
+          "de": "Admin Personen Teams Teammitglieder umschalten Titel"
+        },
+        "text": {
+          "en": "Toggle team members",
+          "de": "Teammitglieder umschalten"
+        }
+      },
+      "loadingMembers": {
+        "label": {
+          "en": "Admin people teams loading members",
+          "de": "Admin Personen Teams Mitglieder laden"
+        },
+        "text": {
+          "en": "Loading team members...",
+          "de": "Teammitglieder werden geladen..."
+        }
+      }
+    },
+    "accessRules": {
+      "loading": {
+        "label": {
+          "en": "Admin access rules loading",
+          "de": "Admin Zugriffsregeln laden"
+        },
+        "text": {
+          "en": "Loading access matrix...",
+          "de": "Zugriffsmatrix wird geladen..."
+        }
+      },
+      "role": {
+        "label": {
+          "en": "Admin access rules role field",
+          "de": "Admin Zugriffsregeln Rollenfeld"
+        },
+        "text": {
+          "en": "Role",
+          "de": "Rolle"
+        }
+      },
+      "saving": {
+        "label": {
+          "en": "Admin access rules saving action",
+          "de": "Admin Zugriffsregeln Speichern läuft"
+        },
+        "text": {
+          "en": "Saving...",
+          "de": "Speichern..."
+        }
+      },
+      "permission": {
+        "label": {
+          "en": "Admin access rules column permission",
+          "de": "Admin Zugriffsregeln Spalte Berechtigung"
+        },
+        "text": {
+          "en": "Permission",
+          "de": "Berechtigung"
+        }
+      },
+      "allowed": {
+        "label": {
+          "en": "Admin access rules column allowed",
+          "de": "Admin Zugriffsregeln Spalte Erlaubt"
+        },
+        "text": {
+          "en": "Allowed",
+          "de": "Erlaubt"
+        }
+      },
+      "toggle": {
+        "label": {
+          "en": "Admin access rules toggle action prefix",
+          "de": "Admin Zugriffsregeln Umschalten Präfix"
+        },
+        "text": {
+          "en": "Toggle",
+          "de": "Umschalten"
+        }
+      }
+    }
+  },
+  "patient": {
+    "absences": {
+      "title": {
+        "label": {
+          "en": "Patient absences section title",
+          "de": "Patient Abwesenheiten Abschnittstitel"
+        },
+        "text": {
+          "en": "Absences",
+          "de": "Abwesenheiten"
+        }
+      },
+      "empty": {
+        "label": {
+          "en": "Patient absences empty state",
+          "de": "Patient Abwesenheiten leer"
+        },
+        "text": {
+          "en": "No absences.",
+          "de": "Keine Abwesenheiten."
+        }
+      }
+    },
+    "contacts": {
+      "title": {
+        "label": {
+          "en": "Patient contact information section title",
+          "de": "Patient Kontaktinformationen Abschnittstitel"
+        },
+        "text": {
+          "en": "Contact Information",
+          "de": "Kontaktinformationen"
+        }
+      },
+      "data": {
+        "label": {
+          "en": "Patient contact data field placeholder",
+          "de": "Patient Kontaktdaten Feld Platzhalter"
+        },
+        "text": {
+          "en": "Data",
+          "de": "Daten"
+        }
+      }
+    },
+    "basicData": {
+      "dateOfDeath": {
+        "label": {
+          "en": "Patient basic data date of death label",
+          "de": "Patient Basisdaten Sterbedatum Label"
+        },
+        "text": {
+          "en": "Date of Death",
+          "de": "Sterbedatum"
+        }
+      },
+      "enterLanguage": {
+        "label": {
+          "en": "Patient basic data enter language placeholder",
+          "de": "Patient Basisdaten Sprache eingeben Platzhalter"
+        },
+        "text": {
+          "en": "Enter language...",
+          "de": "Sprache eingeben..."
+        }
+      },
+      "pickFromList": {
+        "label": {
+          "en": "Patient basic data pick language from list title",
+          "de": "Patient Basisdaten Sprache aus Liste wählen Titel"
+        },
+        "text": {
+          "en": "Pick from list",
+          "de": "Aus Liste wählen"
+        }
+      },
+      "other": {
+        "label": {
+          "en": "Patient basic data other language option",
+          "de": "Patient Basisdaten Andere Sprache Option"
+        },
+        "text": {
+          "en": "Other...",
+          "de": "Andere..."
+        }
+      },
+      "responsibleCoordinator": {
+        "label": {
+          "en": "Patient basic data responsible coordinator label",
+          "de": "Patient Basisdaten Verantwortliche Koordination Label"
+        },
+        "text": {
+          "en": "Responsible Coordinator",
+          "de": "Verantwortliche Koordination"
+        }
+      },
+      "translate": {
+        "label": {
+          "en": "Patient basic data translate label",
+          "de": "Patient Basisdaten Uebersetzen Label"
+        },
+        "text": {
+          "en": "Translate",
+          "de": "Uebersetzen"
+        }
+      }
+    }
+  },
+  "patientDetail": {
+    "notFound": {
+      "label": {
+        "en": "Patient detail not found",
+        "de": "Patientendetail nicht gefunden"
+      },
+      "text": {
+        "en": "Patient not found.",
+        "de": "Patient nicht gefunden."
+      }
+    },
+    "favorites": {
+      "addPatient": {
+        "label": {
+          "en": "Patient favorites action: add",
+          "de": "Patient Favoriten Aktion: Hinzufügen"
+        },
+        "text": {
+          "en": "Add patient to favorites",
+          "de": "Patient zu Favoriten hinzufügen"
+        }
+      },
+      "removePatient": {
+        "label": {
+          "en": "Patient favorites action: remove",
+          "de": "Patient Favoriten Aktion: Entfernen"
+        },
+        "text": {
+          "en": "Remove patient from favorites",
+          "de": "Patient aus Favoriten entfernen"
         }
       }
     }
@@ -274,125 +6191,269 @@
   "server": {
     "entities": {
       "patient": {
-        "label": { "en": "Server-side entity name: Patient", "de": "Server Entitaet: Patient" },
-        "text": { "de": "Patient" }
+        "label": {
+          "en": "Server-side entity name: Patient",
+          "de": "Server Entität: Patient"
+        },
+        "text": {
+          "en": "Patient",
+          "de": "Patient"
+        }
       },
       "episode": {
-        "label": { "en": "Server-side entity name: Episode", "de": "Server Entitaet: Episode" },
-        "text": { "de": "Episode" }
+        "label": {
+          "en": "Server-side entity name: Episode",
+          "de": "Server Entität: Episode"
+        },
+        "text": {
+          "en": "Episode",
+          "de": "Episode"
+        }
       },
       "coordination": {
-        "label": { "en": "Server-side entity name: Coordination", "de": "Server Entitaet: Koordination" },
-        "text": { "de": "Koordination" }
+        "label": {
+          "en": "Server-side entity name: Coordination",
+          "de": "Server Entität: Koordination"
+        },
+        "text": {
+          "en": "Coordination",
+          "de": "Koordination"
+        }
       },
       "colloquium": {
-        "label": { "en": "Server-side entity name: Colloquium", "de": "Server Entitaet: Kolloquium" },
-        "text": { "de": "Kolloquium" }
+        "label": {
+          "en": "Server-side entity name: Colloquium",
+          "de": "Server Entität: Kolloquium"
+        },
+        "text": {
+          "en": "Colloquium",
+          "de": "Kolloquium"
+        }
       },
       "taskGroupTemplate": {
-        "label": { "en": "Server-side entity name: Task Group Template", "de": "Server Entitaet: Aufgaben-Gruppenvorlage" },
-        "text": { "de": "Aufgaben-Gruppenvorlage" }
+        "label": {
+          "en": "Server-side entity name: Task Group Template",
+          "de": "Server Entität: Aufgaben-Gruppenvorlage"
+        },
+        "text": {
+          "de": "Aufgaben-Gruppenvorlage"
+        }
       },
       "taskTemplate": {
-        "label": { "en": "Server-side entity name: Task Template", "de": "Server Entitaet: Aufgabenvorlage" },
-        "text": { "de": "Aufgabenvorlage" }
+        "label": {
+          "en": "Server-side entity name: Task Template",
+          "de": "Server Entität: Aufgabenvorlage"
+        },
+        "text": {
+          "de": "Aufgabenvorlage"
+        }
       },
       "taskGroup": {
-        "label": { "en": "Server-side entity name: Task Group", "de": "Server Entitaet: Aufgabengruppe" },
-        "text": { "de": "Aufgabengruppe" }
+        "label": {
+          "en": "Server-side entity name: Task Group",
+          "de": "Server Entität: Aufgabengruppe"
+        },
+        "text": {
+          "de": "Aufgabengruppe"
+        }
       },
       "task": {
-        "label": { "en": "Server-side entity name: Task", "de": "Server Entitaet: Aufgabe" },
-        "text": { "de": "Aufgabe" }
+        "label": {
+          "en": "Server-side entity name: Task",
+          "de": "Server Entität: Aufgabe"
+        },
+        "text": {
+          "de": "Aufgabe"
+        }
       },
       "code": {
-        "label": { "en": "Server-side entity name: Code", "de": "Server Entitaet: Code" },
-        "text": { "de": "Code" }
+        "label": {
+          "en": "Server-side entity name: Code",
+          "de": "Server Entität: Code"
+        },
+        "text": {
+          "de": "Code"
+        }
       },
       "catalogue": {
-        "label": { "en": "Server-side entity name: Catalogue", "de": "Server Entitaet: Katalog" },
-        "text": { "de": "Katalog" }
+        "label": {
+          "en": "Server-side entity name: Catalogue",
+          "de": "Server Entität: Katalog"
+        },
+        "text": {
+          "de": "Katalog"
+        }
       },
       "user": {
-        "label": { "en": "Server-side entity name: User", "de": "Server Entitaet: Benutzer" },
-        "text": { "de": "Benutzer" }
+        "label": {
+          "en": "Server-side entity name: User",
+          "de": "Server Entität: Benutzer"
+        },
+        "text": {
+          "de": "Benutzer"
+        }
       },
       "person": {
-        "label": { "en": "Server-side entity name: Person", "de": "Server Entitaet: Person" },
-        "text": { "de": "Person" }
+        "label": {
+          "en": "Server-side entity name: Person",
+          "de": "Server Entität: Person"
+        },
+        "text": {
+          "de": "Person"
+        }
       }
     },
     "codeTypeNames": {
       "coordinationStatus": {
-        "label": { "en": "Server code type name: COORDINATION_STATUS", "de": "Server Codetyp: KOORDINATIONSSTATUS" },
-        "text": { "de": "Koordinationsstatus" }
+        "label": {
+          "en": "Server code type name: COORDINATION_STATUS",
+          "de": "Server Codetyp: KOORDINATIONSSTATUS"
+        },
+        "text": {
+          "de": "Koordinationsstatus"
+        }
       },
       "taskStatus": {
-        "label": { "en": "Server code type name: TASK_STATUS", "de": "Server Codetyp: AUFGABENSTATUS" },
-        "text": { "de": "Aufgabenstatus" }
+        "label": {
+          "en": "Server code type name: TASK_STATUS",
+          "de": "Server Codetyp: AUFGABENSTATUS"
+        },
+        "text": {
+          "de": "Aufgabenstatus"
+        }
       },
       "taskScope": {
-        "label": { "en": "Server code type name: TASK_SCOPE", "de": "Server Codetyp: AUFGABENKONTEXT" },
-        "text": { "de": "Aufgabenkontext" }
+        "label": {
+          "en": "Server code type name: TASK_SCOPE",
+          "de": "Server Codetyp: AUFGABENKONTEXT"
+        },
+        "text": {
+          "de": "Aufgabenkontext"
+        }
       },
       "priority": {
-        "label": { "en": "Server code type name: PRIORITY", "de": "Server Codetyp: PRIORITAET" },
-        "text": { "de": "Prioritaet" }
+        "label": {
+          "en": "Server code type name: PRIORITY",
+          "de": "Server Codetyp: PRIORITAET"
+        },
+        "text": {
+          "de": "Priorität"
+        }
       },
       "organ": {
-        "label": { "en": "Server code type name: ORGAN", "de": "Server Codetyp: ORGAN" },
-        "text": { "de": "Organ" }
+        "label": {
+          "en": "Server code type name: ORGAN",
+          "de": "Server Codetyp: ORGAN"
+        },
+        "text": {
+          "de": "Organ"
+        }
       },
       "role": {
-        "label": { "en": "Server code type name: ROLE", "de": "Server Codetyp: ROLLE" },
-        "text": { "de": "Rolle" }
+        "label": {
+          "en": "Server code type name: ROLE",
+          "de": "Server Codetyp: ROLLE"
+        },
+        "text": {
+          "de": "Rolle"
+        }
       }
     },
     "codeValueNames": {
       "taskStatus": {
         "pending": {
-          "label": { "en": "Server code value TASK_STATUS.PENDING", "de": "Server Codewert TASK_STATUS.PENDING" },
-          "text": { "de": "Ausstehend" }
+          "label": {
+            "en": "Server code value TASK_STATUS.PENDING",
+            "de": "Server Codewert TASK_STATUS.PENDING"
+          },
+          "text": {
+            "de": "Ausstehend"
+          }
         },
         "completed": {
-          "label": { "en": "Server code value TASK_STATUS.COMPLETED", "de": "Server Codewert TASK_STATUS.COMPLETED" },
-          "text": { "de": "Abgeschlossen" }
+          "label": {
+            "en": "Server code value TASK_STATUS.COMPLETED",
+            "de": "Server Codewert TASK_STATUS.COMPLETED"
+          },
+          "text": {
+            "de": "Abgeschlossen"
+          }
         },
         "cancelled": {
-          "label": { "en": "Server code value TASK_STATUS.CANCELLED", "de": "Server Codewert TASK_STATUS.CANCELLED" },
-          "text": { "de": "Abgebrochen" }
+          "label": {
+            "en": "Server code value TASK_STATUS.CANCELLED",
+            "de": "Server Codewert TASK_STATUS.CANCELLED"
+          },
+          "text": {
+            "de": "Abgebrochen"
+          }
         }
       },
       "taskScope": {
         "all": {
-          "label": { "en": "Server code value TASK_SCOPE.ALL", "de": "Server Codewert TASK_SCOPE.ALL" },
-          "text": { "de": "Alle" }
+          "label": {
+            "en": "Server code value TASK_SCOPE.ALL",
+            "de": "Server Codewert TASK_SCOPE.ALL"
+          },
+          "text": {
+            "de": "Alle"
+          }
         },
         "patient": {
-          "label": { "en": "Server code value TASK_SCOPE.PATIENT", "de": "Server Codewert TASK_SCOPE.PATIENT" },
-          "text": { "de": "Patient" }
+          "label": {
+            "en": "Server code value TASK_SCOPE.PATIENT",
+            "de": "Server Codewert TASK_SCOPE.PATIENT"
+          },
+          "text": {
+            "de": "Patient"
+          }
         },
         "episode": {
-          "label": { "en": "Server code value TASK_SCOPE.EPISODE", "de": "Server Codewert TASK_SCOPE.EPISODE" },
-          "text": { "de": "Episode" }
+          "label": {
+            "en": "Server code value TASK_SCOPE.EPISODE",
+            "de": "Server Codewert TASK_SCOPE.EPISODE"
+          },
+          "text": {
+            "de": "Episode"
+          }
         },
         "coordinationProtocol": {
-          "label": { "en": "Server code value TASK_SCOPE.COORDINATION_PROTOCOL", "de": "Server Codewert TASK_SCOPE.COORDINATION_PROTOCOL" },
-          "text": { "de": "Koordinationsprotokoll" }
+          "label": {
+            "en": "Server code value TASK_SCOPE.COORDINATION_PROTOCOL",
+            "de": "Server Codewert TASK_SCOPE.COORDINATION_PROTOCOL"
+          },
+          "text": {
+            "de": "Koordinationsprotokoll"
+          }
         }
       },
       "priority": {
         "low": {
-          "label": { "en": "Server code value PRIORITY.LOW", "de": "Server Codewert PRIORITY.LOW" },
-          "text": { "de": "Niedrig" }
+          "label": {
+            "en": "Server code value PRIORITY.LOW",
+            "de": "Server Codewert PRIORITY.LOW"
+          },
+          "text": {
+            "de": "Niedrig"
+          }
         },
         "normal": {
-          "label": { "en": "Server code value PRIORITY.NORMAL", "de": "Server Codewert PRIORITY.NORMAL" },
-          "text": { "de": "Normal" }
+          "label": {
+            "en": "Server code value PRIORITY.NORMAL",
+            "de": "Server Codewert PRIORITY.NORMAL"
+          },
+          "text": {
+            "de": "Normal"
+          }
         },
         "high": {
-          "label": { "en": "Server code value PRIORITY.HIGH", "de": "Server Codewert PRIORITY.HIGH" },
-          "text": { "de": "Hoch" }
+          "label": {
+            "en": "Server code value PRIORITY.HIGH",
+            "de": "Server Codewert PRIORITY.HIGH"
+          },
+          "text": {
+            "de": "Hoch"
+          }
         }
       }
     }

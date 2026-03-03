@@ -50,7 +50,7 @@ const defaultReferenceRenderers: TaskReferenceRenderer[] = [
       if (!group.tpl_phase) return null;
       return {
         key: `phase-${group.tpl_phase.id}`,
-        label: `Phase: ${group.tpl_phase.name_default}`,
+        label: group.tpl_phase.name_default,
         kind: 'phase',
       };
     },
@@ -172,9 +172,11 @@ export function boardStateSymbol(rows: TaskBoardRow[]): string {
 }
 
 export function taskKindIcon(task: Task): string {
-  return task.kind_key === 'EVENT' ? '🗓' : '☑';
+  if (task.kind_key === 'EVENT') return '🗓';
+  return '☑';
 }
 
 export function taskKindLabel(task: Task): string {
-  return task.kind_key === 'EVENT' ? 'Event' : 'Task';
+  if (task.kind_key === 'EVENT') return 'Event';
+  return 'Task';
 }

@@ -29,7 +29,7 @@ def _to_response(item: CoordinationOrigin, db: Session) -> CoordinationOriginRes
 def get_coordination_origin(
     coordination_id: int,
     db: Session = Depends(get_db),
-    _: User = Depends(require_permission("view.donations")),
+    _: User = Depends(require_permission("view.donors")),
 ):
     item = get_coordination_origin_service(coordination_id=coordination_id, db=db)
     return _to_response(item, db)
@@ -40,7 +40,7 @@ def upsert_coordination_origin(
     coordination_id: int,
     payload: CoordinationOriginCreate,
     db: Session = Depends(get_db),
-    current_user: User = Depends(require_permission("edit.donations")),
+    current_user: User = Depends(require_permission("edit.donors")),
 ):
     refreshed = upsert_coordination_origin_service(
         coordination_id=coordination_id,
@@ -56,7 +56,7 @@ def update_coordination_origin(
     coordination_id: int,
     payload: CoordinationOriginUpdate,
     db: Session = Depends(get_db),
-    current_user: User = Depends(require_permission("edit.donations")),
+    current_user: User = Depends(require_permission("edit.donors")),
 ):
     refreshed = update_coordination_origin_service(
         coordination_id=coordination_id,
@@ -71,7 +71,7 @@ def update_coordination_origin(
 def delete_coordination_origin(
     coordination_id: int,
     db: Session = Depends(get_db),
-    current_user: User = Depends(require_permission("edit.donations")),
+    current_user: User = Depends(require_permission("edit.donors")),
 ):
     _ = current_user
     delete_coordination_origin_service(coordination_id=coordination_id, db=db)

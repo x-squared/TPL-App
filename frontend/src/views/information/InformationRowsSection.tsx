@@ -2,6 +2,7 @@ import { useEffect, useRef, useState } from 'react';
 import ErrorBanner from '../layout/ErrorBanner';
 import { formatDateDdMmYyyy } from '../layout/dateFormat';
 import InlineDeleteActions from '../layout/InlineDeleteActions';
+import { useI18n } from '../../i18n/i18n';
 import type { InformationSectionModel } from './types';
 
 interface InformationRowsSectionProps {
@@ -15,6 +16,7 @@ function TextEditor({
   value: string;
   onChange: (next: string) => void;
 }) {
+  const { t } = useI18n();
   const editorRef = useRef<HTMLDivElement | null>(null);
   useEffect(() => {
     const editor = editorRef.current;
@@ -31,13 +33,13 @@ function TextEditor({
   return (
     <div className="info-editor">
       <div className="info-editor-toolbar">
-        <button type="button" className="info-editor-btn" onClick={() => apply('bold')} title="Bold">
+        <button type="button" className="info-editor-btn" onClick={() => apply('bold')} title={t('information.editor.bold', 'Bold')}>
           B
         </button>
-        <button type="button" className="info-editor-btn" onClick={() => apply('italic')} title="Italic">
+        <button type="button" className="info-editor-btn" onClick={() => apply('italic')} title={t('information.editor.italic', 'Italic')}>
           I
         </button>
-        <button type="button" className="info-editor-btn" onClick={() => apply('underline')} title="Underline">
+        <button type="button" className="info-editor-btn" onClick={() => apply('underline')} title={t('information.editor.underline', 'Underline')}>
           U
         </button>
       </div>
@@ -54,6 +56,7 @@ function TextEditor({
 }
 
 export default function InformationRowsSection({ model }: InformationRowsSectionProps) {
+  const { t } = useI18n();
   const [confirmingDeleteId, setConfirmingDeleteId] = useState<number | null>(null);
   const [pendingWithdrawId, setPendingWithdrawId] = useState<number | null>(null);
   const today = new Date().toISOString().slice(0, 10);
@@ -67,10 +70,10 @@ export default function InformationRowsSection({ model }: InformationRowsSection
   return (
     <section className="detail-section ui-panel-section">
       <div className="detail-section-heading">
-        <h2>{`Information (${model.unreadCount})`}</h2>
+        <h2>{`${t('information.title', 'Information')} (${model.unreadCount})`}</h2>
         {!model.adding && model.editingId == null && (
           <button className="ci-add-btn" onClick={model.startAdd}>
-            + Add
+            {t('information.actions.add', '+ Add')}
           </button>
         )}
       </div>
@@ -80,22 +83,22 @@ export default function InformationRowsSection({ model }: InformationRowsSection
           checked={model.hideRead}
           onChange={(event) => model.setHideRead(event.target.checked)}
         />
-        Show unread only
+        {t('information.showUnreadOnly', 'Show unread only')}
       </label>
-      <p className="detail-help info-read-help">Click a badge in the first column to mark information as read.</p>
+      <p className="detail-help info-read-help">{t('information.help.markRead', 'Click a badge in the first column to mark information as read.')}</p>
       {pendingWithdrawId != null ? (
-        <p className="detail-help info-read-help">This information was already read. You can edit the text and then click Withdraw.</p>
+        <p className="detail-help info-read-help">{t('information.help.withdrawRead', 'This information was already read. You can edit the text and then click Withdraw.')}</p>
       ) : null}
       <ErrorBanner message={model.error} />
       <div className="patients-table-wrap ui-table-wrap">
         <table className="data-table">
           <thead>
             <tr>
-              <th className="info-read-col">Read</th>
-              <th className="info-text-col">Text</th>
-              <th className="info-valid-from-col">Valid from</th>
-              <th className="info-author-col">Author</th>
-              <th>Context</th>
+              <th className="info-read-col">{t('information.table.read', 'Read')}</th>
+              <th className="info-text-col">{t('information.table.text', 'Text')}</th>
+              <th className="info-valid-from-col">{t('information.table.validFrom', 'Valid from')}</th>
+              <th className="info-author-col">{t('information.table.author', 'Author')}</th>
+              <th>{t('information.table.context', 'Context')}</th>
               <th />
             </tr>
           </thead>
@@ -105,7 +108,9 @@ export default function InformationRowsSection({ model }: InformationRowsSection
                 <td>
                   <span
                     className={`info-read-badge ${model.draft.valid_from <= today ? 'info-read-badge-unread-valid' : 'info-read-badge-unread-future'}`}
-                    title={model.draft.valid_from <= today ? 'Unread and valid' : 'Unread and not yet valid'}
+                    title={model.draft.valid_from <= today
+                      ? t('information.badge.unreadValid', 'Unread and valid')
+                      : t('information.badge.unreadNotYetValid', 'Unread and not yet valid')}
                   />
                 </td>
                 <td>
@@ -134,7 +139,7 @@ export default function InformationRowsSection({ model }: InformationRowsSection
                         context_id: event.target.value ? Number(event.target.value) : null,
                       })}
                   >
-                    <option value="">General</option>
+                    <option value="">{t('information.context.general', 'General')}</option>
                     {model.organContexts.map((context) => (
                       <option key={context.id} value={context.id}>
                         {context.name_default}
@@ -149,8 +154,8 @@ export default function InformationRowsSection({ model }: InformationRowsSection
                       void model.saveDraft();
                     }}
                     disabled={model.saving || !model.canSaveDraft}
-                    title="Save"
-                    aria-label="Save"
+                    title={t('actions.save', 'Save')}
+                    aria-label={t('actions.save', 'Save')}
                   >
                     ✓
                   </button>
@@ -161,8 +166,8 @@ export default function InformationRowsSection({ model }: InformationRowsSection
                       model.cancelDraft();
                     }}
                     disabled={model.saving}
-                    title="Cancel"
-                    aria-label="Cancel"
+                    title={t('actions.cancel', 'Cancel')}
+                    aria-label={t('actions.cancel', 'Cancel')}
                   >
                     ✕
                   </button>
@@ -176,10 +181,10 @@ export default function InformationRowsSection({ model }: InformationRowsSection
                         void model.deleteRow(targetId);
                       }}
                       disabled={model.saving}
-                      title="Withdraw"
-                      aria-label="Withdraw"
+                      title={t('information.actions.withdraw', 'Withdraw')}
+                      aria-label={t('information.actions.withdraw', 'Withdraw')}
                     >
-                      Withdraw
+                      {t('information.actions.withdraw', 'Withdraw')}
                     </button>
                   ) : null}
                 </td>
@@ -187,7 +192,7 @@ export default function InformationRowsSection({ model }: InformationRowsSection
             )}
             {model.rows.length === 0 && !model.loading ? (
               <tr>
-                <td colSpan={6} className="status">No information rows yet.</td>
+                <td colSpan={6} className="status">{t('information.empty', 'No information rows yet.')}</td>
               </tr>
             ) : null}
             {model.rows.map((row) => (
@@ -196,12 +201,16 @@ export default function InformationRowsSection({ model }: InformationRowsSection
                   {row.current_user_read_at ? (
                     <span
                       className={`info-read-badge ${badgeClassForRow(row)}`}
-                      title={row.withdrawn ? 'Withdrawn (read)' : 'Read'}
+                      title={row.withdrawn ? t('information.badge.withdrawnRead', 'Withdrawn (read)') : t('information.badge.read', 'Read')}
                     />
                   ) : (
                     <button
                       className={`info-read-badge ${badgeClassForRow(row)}`}
-                      title={row.withdrawn ? 'click to conffirm' : (row.valid_from <= today ? 'Unread and valid' : 'Unread and not yet valid')}
+                      title={row.withdrawn
+                        ? t('information.badge.clickToConfirm', 'click to confirm')
+                        : (row.valid_from <= today
+                          ? t('information.badge.unreadValid', 'Unread and valid')
+                          : t('information.badge.unreadNotYetValid', 'Unread and not yet valid'))}
                       disabled={model.saving}
                       onClick={() => {
                         void model.markRowRead(row.id);
@@ -214,7 +223,7 @@ export default function InformationRowsSection({ model }: InformationRowsSection
                 </td>
                 <td className="info-valid-from-col">{formatDateDdMmYyyy(row.valid_from)}</td>
                 <td className="info-author-col">{row.author?.name ?? `#${row.author_id}`}</td>
-                <td>{row.context?.name_default ?? 'General'}</td>
+                <td>{row.context?.name_default ?? t('information.context.general', 'General')}</td>
                 <td className="detail-ci-actions">
                   {canManageRow(row) ? (
                     row.withdrawn ? (
@@ -224,7 +233,7 @@ export default function InformationRowsSection({ model }: InformationRowsSection
                           setConfirmingDeleteId(null);
                           model.startEdit(row);
                         }}
-                        title="Edit"
+                        title={t('actions.edit', 'Edit')}
                       >
                         ✎
                       </button>

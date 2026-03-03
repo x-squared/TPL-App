@@ -153,6 +153,14 @@ class TaskTemplate(Base):
         comment="Template description copied into concrete task descriptions.",
         info={"label": "Description"},
     )
+    comment_hint = Column(
+        "COMMENT_HINT",
+        String(512),
+        nullable=False,
+        default="",
+        comment="Optional guidance text shown as comment placeholder for this task template.",
+        info={"label": "Comment Hint"},
+    )
     priority_id = Column(
         "PRIORITY_ID",
         Integer,
@@ -433,6 +441,13 @@ class Task(Base):
         comment="Task kind (`TASK` or `EVENT`).",
         info={"label": "Task Kind"},
     )
+    event_time = Column(
+        "EVENT_TIME_TS",
+        DateTime(timezone=True),
+        nullable=True,
+        comment="Timestamp when an event task actually occurred (may differ from closure timestamp).",
+        info={"label": "Event Time"},
+    )
     status_id = Column(
         "STATUS",
         Integer,
@@ -475,6 +490,14 @@ class Task(Base):
         default="",
         comment="Free-text comment on task processing.",
         info={"label": "Comment"},
+    )
+    comment_hint = Column(
+        "COMMENT_HINT",
+        String(512),
+        nullable=False,
+        default="",
+        comment="Optional guidance text shown as comment placeholder for this task.",
+        info={"label": "Comment Hint"},
     )
     changed_by_id = Column(
         "CHANGED_BY",

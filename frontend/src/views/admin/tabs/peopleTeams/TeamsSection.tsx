@@ -1,5 +1,6 @@
 import { Fragment, useEffect, useState } from 'react';
 import type { Person, PersonTeam } from '../../../../api';
+import { useI18n } from '../../../../i18n/i18n';
 import InlineDeleteActions from '../../../layout/InlineDeleteActions';
 import PersonMultiSelect from '../../../layout/PersonMultiSelect';
 
@@ -24,6 +25,7 @@ export default function TeamsSection({
   onEnsureTeamMembersLoaded,
   onSetTeamMembers,
 }: TeamsSectionProps) {
+  const { t } = useI18n();
   const [addingTeam, setAddingTeam] = useState(false);
   const [newTeamName, setNewTeamName] = useState('');
   const [editingTeamId, setEditingTeamId] = useState<number | null>(null);
@@ -83,10 +85,10 @@ export default function TeamsSection({
   return (
     <div className="admin-people-card">
       <div className="detail-section-heading">
-        <h3>Teams</h3>
+        <h3>{t('admin.peopleTeams.teams.title', 'Teams')}</h3>
         {!addingTeam && (
           <button className="ci-add-btn" onClick={() => setAddingTeam(true)}>
-            + Add
+            {t('information.actions.add', '+ Add')}
           </button>
         )}
       </div>
@@ -95,8 +97,8 @@ export default function TeamsSection({
           <thead>
             <tr>
               <th className="open-col" />
-              <th>Name</th>
-              <th>Members</th>
+              <th>{t('patients.table.name', 'Name')}</th>
+              <th>{t('admin.peopleTeams.members', 'Members')}</th>
               <th />
             </tr>
           </thead>
@@ -109,7 +111,7 @@ export default function TeamsSection({
                     className="detail-input ci-inline-input"
                     value={newTeamName}
                     onChange={(event) => setNewTeamName(event.target.value)}
-                    placeholder="Team name"
+                    placeholder={t('admin.peopleTeams.teamName', 'Team name')}
                   />
                 </td>
                 <td>0</td>
@@ -177,7 +179,7 @@ export default function TeamsSection({
                         <button
                           className="open-btn"
                           onClick={() => { void toggleExpanded(team.id); }}
-                          title="Toggle team members"
+                          title={t('admin.peopleTeams.toggleMembers', 'Toggle team members')}
                         >
                           {expandedTeamId === team.id ? '▲' : '▼'}
                         </button>
@@ -205,10 +207,10 @@ export default function TeamsSection({
                       <td colSpan={4}>
                         <div className="contact-section">
                           {expandingTeamId === team.id && !teamMembersById[team.id] ? (
-                            <p className="contact-empty">Loading team members...</p>
+                            <p className="contact-empty">{t('admin.peopleTeams.loadingMembers', 'Loading team members...')}</p>
                           ) : (
                             <>
-                              <h4>Members</h4>
+                              <h4>{t('admin.peopleTeams.members', 'Members')}</h4>
                               <PersonMultiSelect
                                 selectedPeople={memberDraft}
                                 onChange={(next) => {
@@ -222,14 +224,14 @@ export default function TeamsSection({
                                   onClick={() => { void saveMembers(team.id); }}
                                   disabled={saving || !membersDirty}
                                 >
-                                  Save
+                                  {t('actions.save', 'Save')}
                                 </button>
                                 <button
                                   className="patients-cancel-btn"
                                   onClick={() => cancelMembers(team.id)}
                                   disabled={saving || !membersDirty}
                                 >
-                                  Cancel
+                                  {t('actions.cancel', 'Cancel')}
                                 </button>
                               </div>
                             </>

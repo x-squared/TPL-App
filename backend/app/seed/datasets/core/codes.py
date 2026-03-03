@@ -23,7 +23,7 @@ RECORDS = RECORDS + DATATYPE
 # --- ROLES ----
 ROLES = [
     {"type": "ROLE", "key": "KOORD", "pos": 1, "ext_sys": "", "ext_key": "", "name_default": "Koordinator"},
-    {"type": "ROLE", "key": "KOORD_DONATION", "pos": 2, "ext_sys": "", "ext_key": "", "name_default": "Koordinator (Donation Edit)"},
+    {"type": "ROLE", "key": "KOORD_DONOR", "pos": 2, "ext_sys": "", "ext_key": "", "name_default": "Koordinator (Donor Edit)"},
     {"type": "ROLE", "key": "ARZT", "pos": 3, "ext_sys": "", "ext_key": "", "name_default": "Arzt"},
     {"type": "ROLE", "key": "SYSTEM", "pos": 4, "ext_sys": "", "ext_key": "", "name_default": "System"},
     {"type": "ROLE", "key": "ADMIN", "pos": 5, "ext_sys": "", "ext_key": "", "name_default": "Admin"},

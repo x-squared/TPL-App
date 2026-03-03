@@ -1,4 +1,5 @@
 import type { PatientDetailTab } from './patient-detail/PatientDetailTabs';
+import { useI18n } from '../i18n/i18n';
 import PatientDetailTabs from './patient-detail/PatientDetailTabs';
 import { formatPatientFavoriteName } from './layout/episodeDisplay';
 import FavoriteButton from './layout/FavoriteButton';
@@ -24,6 +25,7 @@ export default function PatientDetailView({
   onOpenColloqium,
   onTabChange,
 }: Props) {
+  const { t } = useI18n();
   const model = usePatientDetailViewModel(patientId, initialTab, initialEpisodeId ?? null, onOpenColloqium);
   const patientFavorite = useFavoriteToggle(model.patient ? {
     favorite_type_key: 'PATIENT',
@@ -37,11 +39,11 @@ export default function PatientDetailView({
   } : null);
 
   if (model.loading) {
-    return <p className="status">Loading...</p>;
+    return <p className="status">{t('common.loading', 'Loading...')}</p>;
   }
 
   if (!model.patient || !model.tabsProps) {
-    return <p className="status">Patient not found.</p>;
+    return <p className="status">{t('patientDetail.notFound', 'Patient not found.')}</p>;
   }
 
   const tabsProps = {
@@ -55,14 +57,16 @@ export default function PatientDetailView({
   return (
     <div className="patient-detail">
       <div className="ui-detail-heading">
-        <button className="ui-back-btn" onClick={onBack} title="Back to list">&larr;</button>
+        <button className="ui-back-btn" onClick={onBack} title={t('common.backToList', 'Back to list')}>&larr;</button>
         <div className="ui-heading-title-with-favorite">
           <h1>{model.patient.first_name} {model.patient.name}</h1>
           <FavoriteButton
             active={patientFavorite.isFavorite}
             disabled={patientFavorite.loading || patientFavorite.saving}
             onClick={() => void patientFavorite.toggle()}
-            title={patientFavorite.isFavorite ? 'Remove patient from favorites' : 'Add patient to favorites'}
+            title={patientFavorite.isFavorite
+              ? t('patientDetail.favorites.removePatient', 'Remove patient from favorites')
+              : t('patientDetail.favorites.addPatient', 'Add patient to favorites')}
           />
         </div>
       </div>

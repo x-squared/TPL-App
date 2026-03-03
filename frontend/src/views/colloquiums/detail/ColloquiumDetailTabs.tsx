@@ -1,5 +1,6 @@
 import type React from 'react';
 import type { Colloqium, ColloqiumAgenda, PatientListItem, Person } from '../../../api';
+import { useI18n } from '../../../i18n/i18n';
 import type { AgendaDraft } from '../tabs/protocol/ColloquiumProtocolTab';
 import ColloquiumProtocolTab from '../tabs/protocol/ColloquiumProtocolTab';
 import ColloquiumDetailSection from '../tabs/colloquium/ColloquiumDetailSection';
@@ -134,20 +135,21 @@ export default function ColloquiumDetailTabs({
   setAgendaForm,
   setAgendaDrafts,
 }: Props) {
+  const { t } = useI18n();
   return (
     <>
       <header className="ui-detail-heading">
-        <button className="ui-back-btn" onClick={onBack} title="Back to list">
+        <button className="ui-back-btn" onClick={onBack} title={t('common.backToList', 'Back to list')}>
           &larr;
         </button>
         <div className="ui-heading-title-with-favorite">
-          <h1>Colloquium</h1>
+          <h1>{t('server.entities.colloquium', 'Colloquium')}</h1>
           {favoriteControl}
         </div>
         <div className="patients-add-actions">
           {!standalone && (
             <button className="patients-cancel-btn" onClick={onOpenDetachedProtocol}>
-              Open detached protocol
+              {t('colloquiums.actions.openDetachedProtocol', 'Open detached protocol')}
             </button>
           )}
         </div>
@@ -158,20 +160,20 @@ export default function ColloquiumDetailTabs({
           className={`detail-tab ${tab === 'colloquium' ? 'active' : ''}`}
           onClick={() => setTab('colloquium')}
         >
-          Colloquium
+          {t('server.entities.colloquium', 'Colloquium')}
         </button>
         <button
           className={`detail-tab ${tab === 'protocol' ? 'active' : ''}`}
           onClick={() => setTab('protocol')}
         >
-          Protocol
+          {t('coordination.tabs.protocol', 'Protocol')}
         </button>
       </nav>
 
       {loading ? (
-        <p className="status">Loading...</p>
+        <p className="status">{t('colloquiums.loading', 'Loading...')}</p>
       ) : !colloqium ? (
-        <p className="status">Colloquium not found.</p>
+        <p className="status">{t('colloquiums.notFound', 'Colloquium not found.')}</p>
       ) : tab === 'colloquium' ? (
         <ColloquiumDetailSection
           colloqium={colloqium}
