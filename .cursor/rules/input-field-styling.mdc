@@ -6,9 +6,9 @@ alwaysApply: false
 
 # Input Field Styling
 
-All editable input fields (text, date, select, textarea) must use a consistent colour scheme across every view.
+All editable input fields (text, date, select, textarea) must use a consistent color scheme across views.
 
-- **Text colour**: `#222` (black)
+- **Text color**: `#222` (black)
 - **Background**: `#f5f5fa` (near-white with a subtle cool tint)
 - **Border**: `1px solid #222`
 - **Border radius**: `4px`
@@ -19,14 +19,5 @@ This applies to:
 - Detail view edit inputs
 - Any form inputs for data entry
 
-```css
-.some-input {
-  color: #222;
-  background: #f5f5fa;
-  border: 1px solid #222;
-  border-radius: 4px;
-  color-scheme: dark;
-}
-```
-
-Never use dark backgrounds or light text colours for input fields.
+Never use dark backgrounds or light text colors for input fields.
+For broader layout/style consistency, use `view-architecture-pattern.mdc`.

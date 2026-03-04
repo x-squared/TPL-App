@@ -21,6 +21,13 @@ export default function E2ERunTab({ model }: E2ERunTabProps) {
             >
               {model.running ? t('e2e.run.running', 'Running...') : t('e2e.run.runTests', 'Run E2E Tests')}
             </button>
+            <button
+              className="e2e-action-btn e2e-clear-btn"
+              onClick={model.clearResults}
+              title={t('e2e.run.clearShownResult', 'Clear shown result')}
+            >
+              {t('e2e.run.clearRunResult', 'Clear run result')}
+            </button>
           </div>
         </div>
 
@@ -54,25 +61,11 @@ export default function E2ERunTab({ model }: E2ERunTabProps) {
         <p className="status e2e-runner-help">
           {model.runners.find((entry) => entry.key === model.selectedRunner)?.description ?? t('e2e.run.selectRunnerHint', 'Select a runner and start.')}
         </p>
-        <button
-          className="e2e-action-btn e2e-clear-btn e2e-clear-inline"
-          onClick={model.clearResults}
-          title={t('e2e.run.clearShownResult', 'Clear shown result')}
-        >
-          {t('e2e.run.clearRunResult', 'Clear run result')}
-        </button>
       </section>
 
       <section className="detail-section ui-panel-section">
         <div className="detail-section-heading">
           <h2>{t('reports.builder.result.title', 'Results')}</h2>
-          <button
-            className="e2e-action-btn e2e-clear-btn"
-            onClick={model.clearResults}
-            title={t('e2e.run.clearShownResult', 'Clear shown result')}
-          >
-            {t('e2e.run.clearRunResult', 'Clear run result')}
-          </button>
         </div>
         <E2EResultSection model={model} />
       </section>

@@ -7,6 +7,7 @@ import {
   type CoordinationDonor,
   type CoordinationEpisode,
   type CoordinationOrigin,
+  type CoordinationProcurementFlex,
   type CoordinationTimeLog,
   type Patient,
 } from '../../../api';
@@ -47,6 +48,7 @@ export function useCoordinationDetailViewModel(
   const [origin, setOrigin] = useState<CoordinationOrigin | null>(null);
   const [timeLogs, setTimeLogs] = useState<CoordinationTimeLog[]>([]);
   const [coordinationEpisodes, setCoordinationEpisodes] = useState<CoordinationEpisode[]>([]);
+  const [procurementFlex, setProcurementFlex] = useState<CoordinationProcurementFlex | null>(null);
   const [patientsById, setPatientsById] = useState<Record<number, Patient>>({});
   const [currentUser, setCurrentUser] = useState<AppUser | null>(null);
   const [users, setUsers] = useState<AppUser[]>([]);
@@ -74,6 +76,30 @@ export function useCoordinationDetailViewModel(
   });
   const [logError, setLogError] = useState('');
 
+  const loadPatientsByEpisodes = useCallback(async (episodes: CoordinationEpisode[]) => {
+    const patientIds = [...new Set(
+      episodes
+        .map((item) => item.episode?.patient_id)
+        .filter((id): id is number => typeof id === 'number'),
+    )];
+    const patientEntries = await Promise.all(
+      patientIds.map(async (id) => {
+        try {
+          const patient = await api.getPatient(id);
+          return [id, patient] as const;
+        } catch {
+          return null;
+        }
+      }),
+    );
+    const byId: Record<number, Patient> = {};
+    for (const entry of patientEntries) {
+      if (!entry) continue;
+      byId[entry[0]] = entry[1];
+    }
+    setPatientsById(byId);
+  }, []);
+
   const loadAll = useCallback(async () => {
     setLoading(true);
     setError('');
@@ -89,6 +115,7 @@ export function useCoordinationDetailViewModel(
       const coordinationPromise = api.getCoordination(coordinationId);
       const timeLogsPromise = api.listCoordinationTimeLogs(coordinationId);
       const coordinationEpisodesPromise = api.listCoordinationEpisodes(coordinationId);
+      const procurementFlexPromise = api.getCoordinationProcurementFlex(coordinationId);
       const [
         me,
         userList,
@@ -101,6 +128,7 @@ export function useCoordinationDetailViewModel(
         coordinationData,
         logs,
         coordinationEpisodeItems,
+        loadedProcurementFlex,
       ] = await Promise.all([
         mePromise,
         usersPromise,
@@ -113,6 +141,7 @@ export function useCoordinationDetailViewModel(
         coordinationPromise,
         timeLogsPromise,
         coordinationEpisodesPromise,
+        procurementFlexPromise,
       ]);
       setCurrentUser(me);
       setUsers(userList);
@@ -125,27 +154,8 @@ export function useCoordinationDetailViewModel(
       setCoordination(coordinationData);
       setTimeLogs(logs);
       setCoordinationEpisodes(coordinationEpisodeItems);
-      const patientIds = [...new Set(
-        coordinationEpisodeItems
-          .map((item) => item.episode?.patient_id)
-          .filter((id): id is number => typeof id === 'number'),
-      )];
-      const patientEntries = await Promise.all(
-        patientIds.map(async (id) => {
-          try {
-            const patient = await api.getPatient(id);
-            return [id, patient] as const;
-          } catch {
-            return null;
-          }
-        }),
-      );
-      const byId: Record<number, Patient> = {};
-      for (const entry of patientEntries) {
-        if (!entry) continue;
-        byId[entry[0]] = entry[1];
-      }
-      setPatientsById(byId);
+      setProcurementFlex(loadedProcurementFlex);
+      await loadPatientsByEpisodes(coordinationEpisodeItems);
       try {
         setDonor(await api.getCoordinationDonor(coordinationId));
       } catch {
@@ -161,7 +171,21 @@ export function useCoordinationDetailViewModel(
     } finally {
       setLoading(false);
     }
-  }, [coordinationId]);
+  }, [coordinationId, loadPatientsByEpisodes]);
+
+  const refreshAssignments = useCallback(async () => {
+    try {
+      const [coordinationEpisodeItems, loadedProcurementFlex] = await Promise.all([
+        api.listCoordinationEpisodes(coordinationId),
+        api.getCoordinationProcurementFlex(coordinationId),
+      ]);
+      setCoordinationEpisodes(coordinationEpisodeItems);
+      setProcurementFlex(loadedProcurementFlex);
+      await loadPatientsByEpisodes(coordinationEpisodeItems);
+    } catch (err) {
+      setError(toUserErrorMessage(err, 'Failed to refresh coordination assignments'));
+    }
+  }, [coordinationId, loadPatientsByEpisodes]);
 
   useEffect(() => {
     void loadAll();
@@ -382,6 +406,7 @@ export function useCoordinationDetailViewModel(
     origin,
     setOrigin,
     coordinationEpisodes,
+    procurementFlex,
     patientsById,
     deathKinds,
     sexCodes,
@@ -415,5 +440,6 @@ export function useCoordinationDetailViewModel(
     saveDonor,
     saveOrigin,
     refresh: loadAll,
+    refreshAssignments,
   };
 }

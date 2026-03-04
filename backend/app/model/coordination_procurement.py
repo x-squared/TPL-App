@@ -112,6 +112,31 @@ class CoordinationProcurement(Base):
     changed_by_user = relationship("User")
 
 
+class CoordinationProcurementOrganRejection(Base):
+    """Per-organ rejection state for a coordination case."""
+
+    __tablename__ = "COORDINATION_PROCUREMENT_ORGAN_REJECTION"
+    __table_args__ = (
+        UniqueConstraint(
+            "COORDINATION_ID",
+            "ORGAN_ID",
+            name="uq_coordination_procurement_organ_rejection",
+        ),
+    )
+
+    id = Column("ID", Integer, primary_key=True, index=True)
+    coordination_id = Column("COORDINATION_ID", Integer, ForeignKey("COORDINATION.ID"), nullable=False, index=True)
+    organ_id = Column("ORGAN_ID", Integer, ForeignKey("CODE.ID"), nullable=False, index=True)
+    is_rejected = Column("IS_REJECTED", Boolean, nullable=False, default=False)
+    rejection_comment = Column("REJECTION_COMMENT", String(1024), nullable=False, default="")
+    changed_by_id = Column("CHANGED_BY", Integer, ForeignKey("USER.ID"), nullable=True)
+    created_at = Column("CREATED_AT", DateTime(timezone=True), server_default=func.now())
+    updated_at = Column("UPDATED_AT", DateTime(timezone=True), onupdate=func.now())
+
+    organ = relationship("Code", foreign_keys=[organ_id])
+    changed_by_user = relationship("User")
+
+
 class CoordinationProcurementFieldTemplate(Base):
     """Template definition of flexible procurement fields."""
 
@@ -320,16 +345,12 @@ class CoordinationProcurementTypedData(Base):
     )
 
     # Explicit typed procurement attributes (catalog-backed).
-    ambulance_arrival_time = Column("AMBULANCE_ARRIVAL_TIME", DateTime(timezone=True), nullable=True)
-    informed_time = Column("INFORMED_TIME", DateTime(timezone=True), nullable=True)
     incision_time = Column("INCISION_TIME", DateTime(timezone=True), nullable=True)
     cardiac_arrest_time = Column("CARDIAC_ARREST_TIME", DateTime(timezone=True), nullable=True)
-    cold_perfusion = Column("COLD_PERFUSION", Date, nullable=True)
-    cold_perfusion_abdominal = Column("COLD_PERFUSION_ABDOMINAL", Date, nullable=True)
+    cold_perfusion = Column("COLD_PERFUSION", DateTime(timezone=True), nullable=True)
+    cold_perfusion_abdominal = Column("COLD_PERFUSION_ABDOMINAL", DateTime(timezone=True), nullable=True)
     ehb_box_nr = Column("EHB_BOX_NR", String, nullable=False, default="")
     ehb_nr = Column("EHB_NR", String, nullable=False, default="")
-    reached_time = Column("REACHED_TIME", DateTime(timezone=True), nullable=True)
-    informed_implantteam_time = Column("INFORMED_IMPLANTTEAM_TIME", DateTime(timezone=True), nullable=True)
     incision_donor_time = Column("INCISION_DONOR_TIME", DateTime(timezone=True), nullable=True)
     nmp_used = Column("NMP_USED", Boolean, nullable=True, default=None)
     cross_clamp_time = Column("CROSS_CLAMP_TIME", DateTime(timezone=True), nullable=True)
@@ -443,6 +464,7 @@ class CoordinationProcurementFieldGroupTemplate(Base):
     name_default = Column("NAME_DEFAULT", String(128), nullable=False, default="")
     comment = Column("COMMENT", String(512), nullable=False, default="")
     is_active = Column("IS_ACTIVE", Boolean, nullable=False, default=True)
+    display_lane = Column("DISPLAY_LANE", String(16), nullable=False, default="PRIMARY")
     pos = Column("POS", Integer, nullable=False, default=0)
     changed_by_id = Column("CHANGED_BY", Integer, ForeignKey("USER.ID"), nullable=True)
     created_at = Column("CREATED_AT", DateTime(timezone=True), server_default=func.now())

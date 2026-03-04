@@ -6,7 +6,8 @@
   "scripts": {
     "dev": "vite",
     "build": "tsc -b && vite build",
-    "lint": "eslint .",
+    "lint": "eslint . && npm run lint:code-labels",
+    "lint:code-labels": "node scripts/check-code-label-translations.mjs",
     "preview": "vite preview",
     "test:spec-e2e": "playwright test -c playwright.spec.config.ts"
   },

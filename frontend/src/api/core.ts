@@ -235,6 +235,7 @@ export interface PersonTeam {
 
 export type ProcurementSlotKey = 'MAIN' | 'LEFT' | 'RIGHT';
 export type ProcurementValueMode = 'SCALAR' | 'PERSON_SINGLE' | 'PERSON_LIST' | 'TEAM_SINGLE' | 'TEAM_LIST' | 'EPISODE';
+export type ProcurementGroupDisplayLane = 'PRIMARY' | 'SECONDARY';
 
 export interface CoordinationProcurementFieldGroupTemplate {
   id: number;
@@ -242,6 +243,7 @@ export interface CoordinationProcurementFieldGroupTemplate {
   name_default: string;
   comment: string;
   is_active: boolean;
+  display_lane: ProcurementGroupDisplayLane;
   pos: number;
 }
 
@@ -408,14 +410,21 @@ export const adminPeopleApi = {
 export const adminProcurementConfigApi = {
   getProcurementAdminConfig: () =>
     request<ProcurementAdminConfig>('/admin/procurement-config/'),
-  createProcurementFieldGroupTemplate: (data: { key: string; name_default: string; comment: string; is_active?: boolean; pos: number }) =>
+  createProcurementFieldGroupTemplate: (data: { key: string; name_default: string; comment: string; is_active?: boolean; display_lane?: ProcurementGroupDisplayLane; pos: number }) =>
     request<CoordinationProcurementFieldGroupTemplate>('/admin/procurement-config/groups', {
       method: 'POST',
       body: JSON.stringify(data),
     }),
   updateProcurementFieldGroupTemplate: (
     id: number,
-    data: { pos?: number },
+    data: {
+      key?: string;
+      name_default?: string;
+      comment?: string;
+      is_active?: boolean;
+      pos?: number;
+      display_lane?: ProcurementGroupDisplayLane;
+    },
   ) =>
     request<CoordinationProcurementFieldGroupTemplate>(`/admin/procurement-config/groups/${id}`, {
       method: 'PATCH',

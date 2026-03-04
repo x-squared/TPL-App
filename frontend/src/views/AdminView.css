@@ -94,16 +94,22 @@
   margin-top: 1rem;
 }
 
-.admin-detail-tabs {
-  width: calc(100% + 4rem);
-  overflow: visible;
-  white-space: normal;
-  flex-wrap: wrap;
-  row-gap: 0.2rem;
+.admin-protocol-config-tab,
+.admin-translations-tab {
+  min-width: 0;
 }
 
-.admin-detail-tabs .detail-tab {
-  margin-bottom: 0;
+.admin-tab-content-guard {
+  min-width: 0;
+  overflow-x: hidden;
+}
+
+.admin-protocol-config-tab .admin-tab-content-guard {
+  overflow-x: auto;
+}
+
+.admin-translation-tree-wrap {
+  overflow-x: auto;
 }
 
 .admin-proc-action-cell {
@@ -152,6 +158,24 @@
 
 .admin-proc-data-pane {
   background: transparent;
+}
+
+.admin-proc-lane-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(20rem, 1fr));
+  gap: 0.75rem;
+}
+
+.admin-proc-lane-block {
+  border: 1px solid #c8cede;
+  border-radius: 8px;
+  padding: 0.45rem 0.55rem 0.55rem;
+  background: #f8f9fc;
+}
+
+.admin-proc-lane-drop-target {
+  border-color: #7c8aff;
+  box-shadow: 0 0 0 2px rgba(124, 138, 255, 0.25);
 }
 
 .admin-proc-field-form {

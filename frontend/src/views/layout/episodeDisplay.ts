@@ -32,11 +32,24 @@ export function formatEpisodeDisplayName(parts: EpisodeDisplayParts): string {
 }
 
 export function formatOrganNames(
-  organs: Array<{ name_default?: string | null }> | null | undefined,
+  organs: Array<{ key?: string | null }> | null | undefined,
   fallbackOrganName?: string | null,
+  resolveOrganLabel?: (organ: { key?: string | null }) => string,
 ): string {
+  const humanize = (key: string): string =>
+    key
+      .replace(/[_\s]+/g, ' ')
+      .trim()
+      .toLowerCase()
+      .replace(/\b\w/g, (char) => char.toUpperCase());
   const names = (organs ?? [])
-    .map((organ) => organ.name_default?.trim() ?? '')
+    .map((organ) => {
+      const resolved = resolveOrganLabel?.(organ);
+      if (resolved?.trim()) return resolved.trim();
+      const key = (organ.key ?? '').trim();
+      if (!key) return '';
+      return humanize(key);
+    })
     .filter((name) => name.length > 0);
   const unique = [...new Set(names)];
   if (unique.length > 0) return unique.join(' + ');
@@ -100,4 +113,24 @@ export function formatTaskEpisodeReference(parts: TaskEpisodeReferenceParts): st
     organName: parts.organName,
     startDate: parts.startDate,
   });
+}
+
+interface DefaultEpisodeReferenceParts {
+  episodeId: number | null | undefined;
+  episodeCaseNumber: string | null | undefined;
+  patientFullName?: string | null;
+  patientBirthDate?: string | null;
+  patientPid?: string | null;
+  emptySymbol?: string;
+}
+
+export function formatDefaultEpisodeReference(parts: DefaultEpisodeReferenceParts): string {
+  const empty = clean(parts.emptySymbol, '–');
+  const caseToken = clean(parts.episodeCaseNumber, '');
+  const patientName = (parts.patientFullName ?? '').trim();
+  if (!patientName) return caseToken || empty;
+  const birthDate = formatDateDdMmYyyy(parts.patientBirthDate);
+  const pid = clean(parts.patientPid, empty);
+  if (!caseToken) return `${patientName} (${birthDate}, ${pid})`;
+  return `${patientName} (${birthDate}, ${pid}) - ${caseToken}`;
 }

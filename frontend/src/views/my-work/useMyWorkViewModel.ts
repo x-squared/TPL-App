@@ -1,6 +1,8 @@
 import { useCallback, useEffect, useMemo, useState } from 'react';
 import { api, type Code, type Favorite, type Patient } from '../../api';
 import { toUserErrorMessage } from '../../api/error';
+import { translateCodeLabel } from '../../i18n/codeTranslations';
+import { useI18n } from '../../i18n/i18n';
 import { formatEpisodeFavoriteName, formatOrganNames } from '../layout/episodeDisplay';
 
 const fallbackTypeLabels: Record<string, string> = {
@@ -11,6 +13,7 @@ const fallbackTypeLabels: Record<string, string> = {
 };
 
 export function useMyWorkViewModel() {
+  const { t } = useI18n();
   const [loading, setLoading] = useState(true);
   const [favorites, setFavorites] = useState<Favorite[]>([]);
   const [favoriteTypes, setFavoriteTypes] = useState<Code[]>([]);
@@ -61,7 +64,11 @@ export function useMyWorkViewModel() {
             fullName: `${patient.first_name} ${patient.name}`.trim(),
             birthDate: patient.date_of_birth,
             pid: patient.pid,
-            organName: formatOrganNames(episode.organs, episode.organ?.name_default ?? null),
+            organName: formatOrganNames(
+              episode.organs,
+              translateCodeLabel(t, episode.organ),
+              (organ) => translateCodeLabel(t, { type: 'ORGAN', key: organ.key ?? '', name_default: '' }),
+            ),
             startDate: episode.start,
           });
         }
@@ -83,10 +90,10 @@ export function useMyWorkViewModel() {
   const typeLabels = useMemo(() => {
     const map: Record<string, string> = { ...fallbackTypeLabels };
     for (const code of favoriteTypes) {
-      map[code.key] = code.name_default;
+      map[code.key] = translateCodeLabel(t, code);
     }
     return map;
-  }, [favoriteTypes]);
+  }, [favoriteTypes, t]);
 
   const deleteFavorite = useCallback(async (id: number) => {
     setDeletingFavoriteId(id);

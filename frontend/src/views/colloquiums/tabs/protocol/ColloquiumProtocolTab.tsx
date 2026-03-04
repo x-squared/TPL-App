@@ -1,5 +1,6 @@
 import { useMemo, useState } from 'react';
 import { type ColloqiumAgenda, type PatientListItem, type Person } from '../../../../api';
+import { translateCodeLabel } from '../../../../i18n/codeTranslations';
 import { useI18n } from '../../../../i18n/i18n';
 import { exportColloquiumProtocolPdf } from './exportColloquiumProtocol';
 import TaskBoard from '../../../tasks/TaskBoard';
@@ -135,7 +136,7 @@ export default function ColloquiumProtocolTab({
                   </div>
                   <div className="colloquiums-protocol-episode-meta">
                     <span>{t('server.entities.episode', 'Episode')}: {agenda.episode?.fall_nr || `#${agenda.episode_id}`}</span>
-                    <span>{t('coordinations.table.status', 'Status')}: {agenda.episode?.status?.name_default ?? t('common.emptySymbol', '–')}</span>
+                    <span>{t('coordinations.table.status', 'Status')}: {translateCodeLabel(t, agenda.episode?.status)}</span>
                     <span>
                       {t('colloquiums.protocol.phase', 'Phase')}: {phase.label} ({formatDate(phase.from)} – {formatDate(phase.to)})
                     </span>

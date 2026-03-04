@@ -127,6 +127,31 @@ After model changes, keep existing data if possible:
 python -m app.db_schema --mode migrate --env DEV
 ```
 
+After conceptual model changes (or to verify no drift), run domain spec sync check:
+
+```{bash}
+cd /Users/stephan/Workspace/TPL-App/backend
+source .venv/bin/activate
+cd /Users/stephan/Workspace/TPL-App
+python -m qa.spec_tools.check_domain_sync
+```
+
+To run conceptual checks from `spec/testing/conceptual/*.md`, use:
+
+```{bash}
+cd /Users/stephan/Workspace/TPL-App
+python -m qa.spec_tools.run_conceptual_specs
+```
+
+To run standalone architecture dependency check, use:
+
+```{bash}
+cd /Users/stephan/Workspace/TPL-App/backend
+source .venv/bin/activate
+cd /Users/stephan/Workspace/TPL-App
+python -m qa.spec_tools.check_architecture_dependencies
+```
+
 Production-like schema check in CI:
 
 ```{bash}

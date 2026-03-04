@@ -1,6 +1,7 @@
 import { forwardRef, useCallback, useEffect, useImperativeHandle, useMemo, useRef, useState } from 'react';
 import { api, type Task, type TaskCreate, type TaskGroup, type TaskKindKey, type TaskUpdate } from '../../api';
 import { ApiError } from '../../api/error';
+import { translateCodeLabel } from '../../i18n/codeTranslations';
 import ErrorBanner from '../layout/ErrorBanner';
 import { useI18n } from '../../i18n/i18n';
 import '../layout/PanelLayout.css';
@@ -270,8 +271,8 @@ const TaskBoard = forwardRef<TaskBoardHandle, TaskBoardProps>(function TaskBoard
   }, [tasksByGroup, allUsers]);
 
   const organOptions = useMemo(
-    () => organCodes.map((organ) => ({ id: organ.id, name: organ.name_default })),
-    [organCodes],
+    () => organCodes.map((organ) => ({ id: organ.id, name: translateCodeLabel(t, organ) })),
+    [organCodes, t],
   );
 
   const allUserOptions = useMemo(
@@ -510,7 +511,9 @@ const TaskBoard = forwardRef<TaskBoardHandle, TaskBoardProps>(function TaskBoard
       });
       let createdTask: Task;
       try {
-        createdTask = await api.createTask(createPayload(taskGroup.id, buildDefaultTaskDescription(taskGroup)));
+        createdTask = await api.createTask(
+          createPayload(taskGroup.id, buildDefaultTaskDescription(taskGroup, translateCodeLabel(t, taskGroup.tpl_phase))),
+        );
       } catch (err) {
         const isClosedGroupError = apiErrorHasDetail(err, 'completed/discarded task group');
         if (!isClosedGroupError) throw err;
@@ -526,7 +529,12 @@ const TaskBoard = forwardRef<TaskBoardHandle, TaskBoardProps>(function TaskBoard
           replacementGroup = await tryCreateContextGroup(resolvedAgendaId);
         }
         setPreferredTopGroupId(replacementGroup.id);
-        createdTask = await api.createTask(createPayload(replacementGroup.id, buildDefaultTaskDescription(replacementGroup)));
+        createdTask = await api.createTask(
+          createPayload(
+            replacementGroup.id,
+            buildDefaultTaskDescription(replacementGroup, translateCodeLabel(t, replacementGroup.tpl_phase)),
+          ),
+        );
       }
       actionStateModel.setActionState(null);
       actionStateModel.setActionComment('');

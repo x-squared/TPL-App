@@ -6,11 +6,10 @@ alwaysApply: false
 
 # Admin Section Layout Consistency
 
-For Admin tab work, use the same section/panel styling pattern used in existing Admin views.
+For Admin tabs, follow `view-architecture-pattern.mdc` defaults first.
 
-- Use `detail-section` + `ui-panel-section` for top-level tab containers.
-- Use `admin-people-card` (or existing `admin-proc-block` where already established) for major subsections.
-- Use `detail-section-heading` with `h2` for tab title and `h3` for subsection titles.
-- Do not introduce one-off wrapper classes for subsection cards when an existing shared class already fits.
-- Reuse existing table/form wrappers (`ui-table-wrap`, `data-table`, `admin-people-form`) before adding new layout classes.
-- If a new layout class is absolutely necessary, document why shared classes were insufficient in change notes.
+Admin-specific additions:
+
+- Keep top-level tab containers on shared section shells (`detail-section` + `ui-panel-section`).
+- Prefer established Admin subsection cards/classes already used in the feature.
+- Reuse existing table/form wrappers before introducing new Admin-only layout classes.

@@ -161,7 +161,7 @@ def ensure_coordination_protocol_task_groups(
                         kind_key=task_template.kind_key or TaskKindKey.TASK.value,
                         priority_id=priority.id,
                         priority_key=priority.key,
-                        assigned_to_id=None,
+                        assigned_to_id=changed_by_id,
                         until=until,
                         event_time=None,
                         status_id=pending_status.id,

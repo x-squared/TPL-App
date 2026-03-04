@@ -1,69 +1,61 @@
 import type { Task } from '../../api';
+import { translateCodeLabel } from '../../i18n/codeTranslations';
 import { formatDateDdMmYyyy, formatDateTimeDdMmYyyy } from '../layout/dateFormat';
 import { formatTaskEpisodeReference, formatTaskPatientReference } from '../layout/episodeDisplay';
 import type {
   TaskBoardRow,
   TaskGroupState,
   TaskReferenceContext,
-  TaskReferenceRenderer,
   TaskReferenceSegment,
 } from './taskBoardTypes';
 
-const defaultReferenceRenderers: TaskReferenceRenderer[] = [
-  {
-    id: 'patient',
-    buildSegment: ({ group, patient }) => {
-      if (group.episode_id != null || group.patient_id == null || group.coordination_id != null) return null;
-      return {
-        key: `patient-${group.patient_id}`,
-        label: formatTaskPatientReference({
-          patientId: group.patient_id,
-          fullName: patient ? `${patient.first_name} ${patient.name}`.trim() : null,
-          birthDate: patient?.date_of_birth,
-          pid: patient?.pid,
-        }),
-        kind: 'patient',
-      };
-    },
-  },
-  {
-    id: 'episode',
-    buildSegment: ({ group, patient, episode }) => {
-      if (!group.episode_id) return null;
-      return {
-        key: `episode-${group.episode_id}`,
-        label: formatTaskEpisodeReference({
-          episodeId: group.episode_id,
-          fullName: patient ? `${patient.first_name} ${patient.name}`.trim() : null,
-          birthDate: patient?.date_of_birth,
-          pid: patient?.pid,
-          organName: episode?.organ?.name_default,
-          startDate: episode?.start,
-        }),
-        kind: 'episode',
-      };
-    },
-  },
-  {
-    id: 'phase',
-    buildSegment: ({ group }) => {
-      if (!group.tpl_phase) return null;
-      return {
-        key: `phase-${group.tpl_phase.id}`,
-        label: group.tpl_phase.name_default,
-        kind: 'phase',
-      };
-    },
-  },
-];
+type Translate = (key: string, englishDefault: string) => string;
+const passthroughTranslate: Translate = (_key, englishDefault) => englishDefault;
 
 export function buildTaskReferences(
   context: TaskReferenceContext,
-  renderers: TaskReferenceRenderer[] = defaultReferenceRenderers,
+  t: Translate = passthroughTranslate,
 ): TaskReferenceSegment[] {
-  return renderers
-    .map((renderer) => renderer.buildSegment(context))
-    .filter((segment): segment is TaskReferenceSegment => segment !== null);
+  const segments: TaskReferenceSegment[] = [];
+  const { group, patient, episode } = context;
+
+  if (group.episode_id == null && group.patient_id != null && group.coordination_id == null) {
+    segments.push({
+      key: `patient-${group.patient_id}`,
+      label: formatTaskPatientReference({
+        patientId: group.patient_id,
+        fullName: patient ? `${patient.first_name} ${patient.name}`.trim() : null,
+        birthDate: patient?.date_of_birth,
+        pid: patient?.pid,
+      }),
+      kind: 'patient',
+    });
+  }
+
+  if (group.episode_id != null) {
+    segments.push({
+      key: `episode-${group.episode_id}`,
+      label: formatTaskEpisodeReference({
+        episodeId: group.episode_id,
+        fullName: patient ? `${patient.first_name} ${patient.name}`.trim() : null,
+        birthDate: patient?.date_of_birth,
+        pid: patient?.pid,
+        organName: translateCodeLabel(t, episode?.organ),
+        startDate: episode?.start,
+      }),
+      kind: 'episode',
+    });
+  }
+
+  if (group.tpl_phase) {
+    segments.push({
+      key: `phase-${group.tpl_phase.id}`,
+      label: translateCodeLabel(t, group.tpl_phase),
+      kind: 'phase',
+    });
+  }
+
+  return segments;
 }
 
 export function isDoneTask(task: Task): boolean {

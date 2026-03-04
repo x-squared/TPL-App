@@ -20,16 +20,12 @@ class ProcurementTypedFieldSpec:
 
 # Fixed procurement attribute catalog: field-template key -> explicit typed model target.
 PROCUREMENT_TYPED_FIELD_CATALOG: tuple[ProcurementTypedFieldSpec, ...] = (
-    ProcurementTypedFieldSpec("AMBULANCE_ARRIVAL_TIME", "ambulance_arrival_time", "datetime"),
-    ProcurementTypedFieldSpec("INFORMED_TIME", "informed_time", "datetime"),
     ProcurementTypedFieldSpec("INCISION_TIME", "incision_time", "datetime"),
     ProcurementTypedFieldSpec("CARDIAC_ARREST_TIME", "cardiac_arrest_time", "datetime"),
-    ProcurementTypedFieldSpec("COLD_PERFUSION", "cold_perfusion", "date"),
-    ProcurementTypedFieldSpec("COLD_PERFUSION_ABDOMINAL", "cold_perfusion_abdominal", "date"),
+    ProcurementTypedFieldSpec("COLD_PERFUSION", "cold_perfusion", "datetime"),
+    ProcurementTypedFieldSpec("COLD_PERFUSION_ABDOMINAL", "cold_perfusion_abdominal", "datetime"),
     ProcurementTypedFieldSpec("EHB_BOX_NR", "ehb_box_nr", "string"),
     ProcurementTypedFieldSpec("EHB_NR", "ehb_nr", "string"),
-    ProcurementTypedFieldSpec("REACHED_TIME", "reached_time", "datetime"),
-    ProcurementTypedFieldSpec("INFORMED_IMPLANTTEAM_TIME", "informed_implantteam_time", "datetime"),
     ProcurementTypedFieldSpec("INCISION_DONOR_TIME", "incision_donor_time", "datetime"),
     ProcurementTypedFieldSpec("NMP_USED", "nmp_used", "boolean"),
     ProcurementTypedFieldSpec("CROSS_CLAMP_TIME", "cross_clamp_time", "datetime"),

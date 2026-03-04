@@ -15,7 +15,9 @@ For test execution, reports, and suggestion handling, see `doc/test-manual.qmd`.
 
 - Server-only test specs: `spec/testing/server/*.md`
 - Client-server-wide test specs: `spec/testing/client-server/*.md`
+- Conceptual consistency specs: `spec/testing/conceptual/*.md`
 - Business/domain requirement specifications: `spec/requirements/*.md`
+- Formal architecture specs: `spec/architecture/*`
 
 Test specs are plain Markdown documents with structured `spec-case` blocks.
 
@@ -39,6 +41,7 @@ These files describe business concepts and conceptual relationships independentl
 - `spec/domain/coordinations-domain.puml`: coordination and donor workflow concepts
 - `spec/domain/tasking-domain.puml`: task templates, groups, and runtime tasks
 - `spec/domain/communication-ux-domain.puml`: information and favorites concepts
+- `spec/domain/domain-sync-mapping.json`: alias/exception config for conceptual-vs-model checks
 
 ### How to work with these files
 
@@ -52,6 +55,24 @@ Render example:
 ```{bash}
 plantuml spec/domain/conceptual-domain-model.puml
 ```
+
+### Automated conceptual/model sync check
+
+Use the checker to verify that conceptual entities/relations still match SQLAlchemy model intent:
+
+```{bash}
+cd /Users/stephan/Workspace/TPL-App/backend
+source .venv/bin/activate
+cd /Users/stephan/Workspace/TPL-App
+python -m qa.spec_tools.check_domain_sync
+```
+
+Default check inputs:
+
+- diagram: `spec/domain/conceptual-domain-model.puml`
+- mapping config: `spec/domain/domain-sync-mapping.json`
+
+If the checker fails, update the conceptual diagrams and/or mapping config in the same change set as the model change.
 
 ### Update rules (required)
 
@@ -69,6 +90,30 @@ Usually no conceptual diagram update is required for implementation-only technic
 - identify impacted conceptual diagram(s)
 - update diagram(s) and path view if needed
 - mention impacted path IDs (`P1..P6`) in PR notes when behavior/journey changes
+
+## Architecture Specification
+
+TPL-App keeps formal architecture artifacts in:
+
+- `spec/architecture/context.puml`
+- `spec/architecture/container.puml`
+- `spec/architecture/backend-components.puml`
+- `spec/architecture/dependency-rules.json`
+
+These artifacts define architecture intent and machine-checkable dependency constraints.
+
+### Automated architecture dependency check
+
+Run:
+
+```{bash}
+cd /Users/stephan/Workspace/TPL-App/backend
+source .venv/bin/activate
+cd /Users/stephan/Workspace/TPL-App
+python -m qa.spec_tools.check_architecture_dependencies
+```
+
+The checker validates backend imports against `spec/architecture/dependency-rules.json`.
 
 ## Requirement Specification Standard
 
@@ -152,6 +197,7 @@ The parser reads fenced blocks with either:
 
 - ```` ```spec-case ```` for standard HTTP checks
 - ```` ```partner-case ```` for richer scenario checks
+- ```` ```conceptual-case ```` for conceptual/domain consistency checks
 
 Inside the fence, the content must be valid JSON (double quotes, no trailing commas).
 
@@ -188,10 +234,32 @@ Required fields:
 
 Tip: copy an existing partner case and adapt values incrementally.
 
+### `conceptual-case` shape
+
+`conceptual-case` is for conceptual architecture/domain consistency checks.
+
+```json
+{
+  "id": "domain-database-consistency",
+  "name": "Conceptual model and SQLAlchemy model stay aligned",
+  "checker": "domain_database_sync",
+  "diagram": "spec/domain/conceptual-domain-model.puml",
+  "mapping": "spec/domain/domain-sync-mapping.json"
+}
+```
+
+Required fields:
+
+- always required: `id`, `name`, `checker`
+- checker-specific:
+  - `domain_database_sync`: `diagram`, `mapping`
+  - `architecture_dependency_sync`: `rules`
+
 ### Important note on key stability vs flexibility
 
 - For `spec-case`, keys are effectively **stable** because they are parsed into generated tests (`id`, `scope`, `request`, `expect`, etc.).
 - For `partner-case`, keys like `open_recipients_view` and `database_contains_created_patient` are currently **conventions** (human-readable contract), not yet a strict machine-enforced schema.
+- For `conceptual-case`, keys are effectively **stable** because they are parsed by `qa.spec_tools.run_conceptual_specs`.
 
 So:
 
@@ -244,6 +312,12 @@ For partner scenarios:
 
 - `run_partner_specs.py` currently executes the Playwright scenario suite in `frontend/test/` and then performs DB verification.
 - This is an intentionally flexible partner-assisted setup: the `partner-case` text guides scenario intent, while executable scenario logic currently lives in maintained Playwright tests.
+
+For conceptual scenarios:
+
+- `run_conceptual_specs.py` parses `spec/testing/conceptual/*.md` for `conceptual-case` blocks.
+- The `domain_database_sync` checker compares conceptual domain spec (`spec/domain/*.puml`) against SQLAlchemy model graph and writes `qa/reports/latest-conceptual-report.md`.
+- The `architecture_dependency_sync` checker validates backend dependencies against `spec/architecture/dependency-rules.json` and also reports via `qa/reports/latest-conceptual-report.md`.
 
 ## About Playwright Code Generation
 

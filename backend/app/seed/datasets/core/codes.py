@@ -113,15 +113,15 @@ RECORDS = RECORDS + TPL_PHASE
 
 # ---- TPL_STATUS ----
 TPL_STATUS = [
-    {"type": "TPL_STATUS", "key": "ABKLAERUNG", "pos": 1, "ext_sys": "", "ext_key": "", "name_default": "Abklärung"},
-    {"type": "TPL_STATUS", "key": "TRANSPLANTABEL", "pos": 2, "ext_sys": "", "ext_key": "", "name_default": "Transplantabel"},
-    {"type": "TPL_STATUS", "key": "ALLOZIERT", "pos": 3, "ext_sys": "", "ext_key": "", "name_default": "Alloziert"},
-    {"type": "TPL_STATUS", "key": "TRANSPLANTIERT", "pos": 4, "ext_sys": "", "ext_key": "", "name_default": "Transplantiert"},
-    {"type": "TPL_STATUS", "key": "VERSTORBEN", "pos": 5, "ext_sys": "", "ext_key": "", "name_default": "Verstorben"},
-    {"type": "TPL_STATUS", "key": "ABGELEHNT", "pos": 6, "ext_sys": "", "ext_key": "", "name_default": "Abgelehnt"},
-    {"type": "TPL_STATUS", "key": "DELISTUNG_USZ", "pos": 7, "ext_sys": "", "ext_key": "", "name_default": "Delistung USZ"},
-    {"type": "TPL_STATUS", "key": "DELISTUNG_PATIENT", "pos": 8, "ext_sys": "", "ext_key": "", "name_default": "Delistung Patient"},
-    {"type": "TPL_STATUS", "key": "STORNIERT", "pos": 9, "ext_sys": "", "ext_key": "", "name_default": "Storniert"},
+    {"type": "TPL_STATUS", "key": "EVALUATION", "pos": 1, "ext_sys": "", "ext_key": "", "name_default": "Abklärung"},
+    {"type": "TPL_STATUS", "key": "TRANSPLANTABLE", "pos": 2, "ext_sys": "", "ext_key": "", "name_default": "Transplantabel"},
+    {"type": "TPL_STATUS", "key": "ALLOCATED", "pos": 3, "ext_sys": "", "ext_key": "", "name_default": "Alloziert"},
+    {"type": "TPL_STATUS", "key": "TRANSPLANTED", "pos": 4, "ext_sys": "", "ext_key": "", "name_default": "Transplantiert"},
+    {"type": "TPL_STATUS", "key": "DECEASED", "pos": 5, "ext_sys": "", "ext_key": "", "name_default": "Verstorben"},
+    {"type": "TPL_STATUS", "key": "REJECTED", "pos": 6, "ext_sys": "", "ext_key": "", "name_default": "Abgelehnt"},
+    {"type": "TPL_STATUS", "key": "DELISTED_USZ", "pos": 7, "ext_sys": "", "ext_key": "", "name_default": "Delistung USZ"},
+    {"type": "TPL_STATUS", "key": "DELISTED_PATIENT", "pos": 8, "ext_sys": "", "ext_key": "", "name_default": "Delistung Patient"},
+    {"type": "TPL_STATUS", "key": "CANCELLED", "pos": 9, "ext_sys": "", "ext_key": "", "name_default": "Storniert"},
 ]
 
 RECORDS = RECORDS + TPL_STATUS

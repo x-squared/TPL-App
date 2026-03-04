@@ -183,7 +183,7 @@
 
 /* ── Contact info ── */
 
-.contact-row td {
+.contact-row > td {
   padding: 0 !important;
   border-bottom: 2px solid #ccc;
 }

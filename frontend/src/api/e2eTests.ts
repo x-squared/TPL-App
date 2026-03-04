@@ -1,6 +1,6 @@
 import { request } from './core';
 
-export type E2ETestRunnerKey = 'spec' | 'partner';
+export type E2ETestRunnerKey = 'all' | 'specification' | 'client_server' | 'server';
 
 export interface E2ETestRunnerOption {
   key: E2ETestRunnerKey;

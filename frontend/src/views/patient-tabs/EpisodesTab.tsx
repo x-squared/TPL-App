@@ -1,6 +1,7 @@
 import { useEffect, useMemo, useState } from 'react';
 import { api, type ColloqiumAgenda, type ColloqiumType } from '../../api';
 import { toUserErrorMessage } from '../../api/error';
+import { translateCodeLabel } from '../../i18n/codeTranslations';
 import { useI18n } from '../../i18n/i18n';
 import ErrorBanner from '../layout/ErrorBanner';
 import { formatEpisodeFavoriteName, formatOrganNames } from '../layout/episodeDisplay';
@@ -67,7 +68,11 @@ export default function EpisodesTab(props: EpisodesTabProps) {
       fullName: `${patient.first_name} ${patient.name}`.trim(),
       birthDate: patient.date_of_birth,
       pid: patient.pid,
-      organName: formatOrganNames(selectedEpisode.organs, selectedEpisode.organ?.name_default ?? 'Episode'),
+      organName: formatOrganNames(
+        selectedEpisode.organs,
+        translateCodeLabel(t, selectedEpisode.organ),
+        (organ) => translateCodeLabel(t, { type: 'ORGAN', key: organ.key ?? '', name_default: '' }),
+      ),
       startDate: selectedEpisode.start,
     }),
   } : null);

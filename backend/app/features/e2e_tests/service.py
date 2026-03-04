@@ -18,17 +18,29 @@ from ...schemas import (
 PROJECT_ROOT = Path(__file__).resolve().parents[4]
 
 RUNNERS = {
-    "spec": {
-        "label": "Specification tests",
-        "description": "Generate and run server/client-server spec tests.",
-        "module": "qa.spec_tools.run_specs",
-        "report_path": PROJECT_ROOT / "qa" / "reports" / "latest-spec-report.md",
+    "all": {
+        "label": "All tests",
+        "description": "Run specification, client-server, and server test pipelines in sequence.",
+        "module": "qa.spec_tools.run_all_tests",
+        "report_path": PROJECT_ROOT / "qa" / "reports" / "latest-all-tests-report.md",
     },
-    "partner": {
-        "label": "Partner tests (UI + DB)",
-        "description": "Run Playwright partner scenarios and verify DB persistence.",
-        "module": "qa.spec_tools.run_partner_specs",
-        "report_path": PROJECT_ROOT / "qa" / "reports" / "latest-partner-report.md",
+    "specification": {
+        "label": "Specification tests (Domain + Architecture)",
+        "description": "Run conceptual consistency checks from spec/testing/conceptual.",
+        "module": "qa.spec_tools.run_conceptual_specs",
+        "report_path": PROJECT_ROOT / "qa" / "reports" / "latest-conceptual-report.md",
+    },
+    "client_server": {
+        "label": "Client-Server tests",
+        "description": "Run generated client-server specification tests.",
+        "module": "qa.spec_tools.run_client_server_specs",
+        "report_path": PROJECT_ROOT / "qa" / "reports" / "latest-client-server-spec-report.md",
+    },
+    "server": {
+        "label": "Server tests",
+        "description": "Run generated server specification tests.",
+        "module": "qa.spec_tools.run_server_specs",
+        "report_path": PROJECT_ROOT / "qa" / "reports" / "latest-server-spec-report.md",
     },
 }
 

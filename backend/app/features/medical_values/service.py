@@ -41,14 +41,6 @@ def _iter_episode_organs(episode: Episode) -> Iterable[int]:
         yield episode.organ_id
 
 
-def _context_token(*, organ_id: int | None, is_donor_context: bool) -> tuple[str, int | None]:
-    if is_donor_context:
-        return ("DONOR", None)
-    if organ_id is None:
-        return ("STATIC", None)
-    return ("ORGAN", organ_id)
-
-
 def ensure_group_instance(
     db: Session,
     *,
@@ -108,7 +100,7 @@ def instantiate_templates_for_patient(
         .all()
     )
 
-    contexts: list[dict[str, int | str | bool | None]] = [{"organ_id": None, "organ_key": None, "is_donor_context": False}]
+    available_non_donor_tokens: set[tuple[str, int | None]] = {("STATIC", None)}
     open_episodes = db.query(Episode).filter(Episode.patient_id == patient_id, Episode.closed.is_(False)).all()
     seen_organ_ids: set[int] = set()
     for episode in open_episodes:
@@ -116,79 +108,97 @@ def instantiate_templates_for_patient(
             if organ_id in seen_organ_ids:
                 continue
             seen_organ_ids.add(organ_id)
-            organ_key = None
-            if episode.organs:
-                organ = next((entry for entry in episode.organs if entry and entry.id == organ_id), None)
-                organ_key = organ.key if organ else None
-            contexts.append(
-                {
-                    "organ_id": organ_id,
-                    "organ_key": organ_key,
-                    "is_donor_context": False,
-                }
-            )
-
-    if include_donor_context:
-        contexts.append({"organ_id": None, "organ_key": None, "is_donor_context": True})
+            available_non_donor_tokens.add(("ORGAN", organ_id))
 
     existing = {
         (
             row.medical_value_template_id,
-            row.context_key or build_context_key(organ_id=row.organ_id, is_donor_context=row.is_donor_context),
+            bool(row.is_donor_context),
         )
         for row in db.query(MedicalValue).filter(MedicalValue.patient_id == patient_id).all()
         if row.medical_value_template_id is not None
     }
 
     created = 0
-    for context in contexts:
-        token = _context_token(
-            organ_id=context["organ_id"],  # type: ignore[arg-type]
-            is_donor_context=bool(context["is_donor_context"]),
-        )
-        context_key = build_context_key(
-            organ_id=context["organ_id"],  # type: ignore[arg-type]
-            is_donor_context=bool(context["is_donor_context"]),
-        )
-        for template in templates:
-            group = group_by_id.get(template.medical_value_group_id or -1)
-            if not group:
-                continue
-            group_tokens = {(entry.context_kind, entry.organ_id) for entry in group.context_templates}
-            template_tokens = {(entry.context_kind, entry.organ_id) for entry in template.context_templates}
-            if token not in group_tokens or token not in template_tokens:
-                continue
-            key = (template.id, context_key)
-            if key in existing:
-                continue
-            group_instance = ensure_group_instance(
-                db,
-                patient_id=patient_id,
-                medical_value_group_id=template.medical_value_group_id,
-                context_key=context_key,
-                organ_id=context["organ_id"],  # type: ignore[arg-type]
-                is_donor_context=bool(context["is_donor_context"]),
-                changed_by_id=changed_by_id,
-            )
-            db.add(
-                MedicalValue(
+    donor_token = ("DONOR", None)
+    non_donor_context_key = build_context_key(organ_id=None, is_donor_context=False)
+    donor_context_key = build_context_key(organ_id=None, is_donor_context=True)
+
+    for template in templates:
+        group = group_by_id.get(template.medical_value_group_id or -1)
+        if not group:
+            continue
+
+        group_tokens = {(entry.context_kind, entry.organ_id) for entry in group.context_templates}
+        template_tokens = {(entry.context_kind, entry.organ_id) for entry in template.context_templates}
+        allowed_tokens = group_tokens & template_tokens
+
+        non_donor_applicable = any(token in available_non_donor_tokens for token in allowed_tokens)
+        donor_applicable = include_donor_context and donor_token in allowed_tokens
+
+        if non_donor_applicable:
+            key = (template.id, False)
+            if key not in existing:
+                group_instance = ensure_group_instance(
+                    db,
                     patient_id=patient_id,
-                    medical_value_template_id=template.id,
-                    datatype_id=template.datatype_id,
                     medical_value_group_id=template.medical_value_group_id,
-                    medical_value_group_instance_id=group_instance.id,
-                    name=template.name_default or "",
-                    pos=template.pos or 0,
-                    value="",
-                    renew_date=None,
-                    organ_id=context["organ_id"],  # type: ignore[arg-type]
-                    is_donor_context=bool(context["is_donor_context"]),
-                    context_key=context_key,
+                    context_key=non_donor_context_key,
+                    organ_id=None,
+                    is_donor_context=False,
                     changed_by_id=changed_by_id,
                 )
-            )
-            existing.add(key)
-            created += 1
+                db.add(
+                    MedicalValue(
+                        patient_id=patient_id,
+                        medical_value_template_id=template.id,
+                        datatype_id=template.datatype_id,
+                        medical_value_group_id=template.medical_value_group_id,
+                        medical_value_group_instance_id=group_instance.id,
+                        name=template.name_default or "",
+                        pos=template.pos or 0,
+                        value="",
+                        renew_date=None,
+                        organ_id=None,
+                        is_donor_context=False,
+                        context_key=non_donor_context_key,
+                        changed_by_id=changed_by_id,
+                    )
+                )
+                existing.add(key)
+                created += 1
+
+        if donor_applicable:
+            key = (template.id, True)
+            if key not in existing:
+                group_instance = ensure_group_instance(
+                    db,
+                    patient_id=patient_id,
+                    medical_value_group_id=template.medical_value_group_id,
+                    context_key=donor_context_key,
+                    organ_id=None,
+                    is_donor_context=True,
+                    changed_by_id=changed_by_id,
+                )
+                db.add(
+                    MedicalValue(
+                        patient_id=patient_id,
+                        medical_value_template_id=template.id,
+                        datatype_id=template.datatype_id,
+                        medical_value_group_id=template.medical_value_group_id,
+                        medical_value_group_instance_id=group_instance.id,
+                        name=template.name_default or "",
+                        pos=template.pos or 0,
+                        value="",
+                        renew_date=None,
+                        organ_id=None,
+                        is_donor_context=True,
+                        context_key=donor_context_key,
+                        changed_by_id=changed_by_id,
+                    )
+                )
+                existing.add(key)
+                created += 1
 
     db.commit()
     return {"created_values": created}
@@ -221,7 +231,7 @@ def _assert_medical_value_unique_for_non_user_captured(
     *,
     patient_id: int,
     group_key: str | None,
-    context_key: str,
+    is_donor_context: bool,
     medical_value_template_id: int | None,
     name: str,
     db: Session,
@@ -231,7 +241,7 @@ def _assert_medical_value_unique_for_non_user_captured(
         return
     query = db.query(MedicalValue).filter(
         MedicalValue.patient_id == patient_id,
-        MedicalValue.context_key == context_key,
+        MedicalValue.is_donor_context == is_donor_context,
     )
     if medical_value_template_id is not None:
         query = query.filter(MedicalValue.medical_value_template_id == medical_value_template_id)
@@ -309,7 +319,7 @@ def create_medical_value_for_patient(
     _assert_medical_value_unique_for_non_user_captured(
         patient_id=patient_id,
         group_key=_group_key_for_id(db, data.get("medical_value_group_id")),
-        context_key=context_key,
+        is_donor_context=bool(data.get("is_donor_context")),
         medical_value_template_id=data.get("medical_value_template_id"),
         name=data.get("name", ""),
         db=db,
@@ -386,7 +396,7 @@ def update_medical_value_for_patient(
         _assert_medical_value_unique_for_non_user_captured(
             patient_id=patient_id,
             group_key=_group_key_for_id(db, mv.medical_value_group_id),
-            context_key=mv.context_key or build_context_key(organ_id=mv.organ_id, is_donor_context=bool(mv.is_donor_context)),
+            is_donor_context=bool(mv.is_donor_context),
             medical_value_template_id=mv.medical_value_template_id,
             name=mv.name or "",
             db=db,

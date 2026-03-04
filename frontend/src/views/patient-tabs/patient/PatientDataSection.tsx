@@ -1,4 +1,5 @@
 import type { Patient } from '../../../api';
+import { translateCodeLabel } from '../../../i18n/codeTranslations';
 import { useI18n } from '../../../i18n/i18n';
 import type { PatientCoreModel } from '../../patient-detail/PatientDetailTabs';
 import EditableSectionHeader from '../../layout/EditableSectionHeader';
@@ -149,11 +150,11 @@ export default function PatientDataSection({
             >
               <option value="">{t('common.emptySymbol', '–')}</option>
               {sexCodes.map((sex) => (
-                <option key={sex.id} value={sex.id}>{sex.name_default}</option>
+                <option key={sex.id} value={sex.id}>{translateCodeLabel(t, sex)}</option>
               ))}
             </select>
           ) : (
-            <span className="detail-value">{patient.sex?.name_default ?? t('common.emptySymbol', '–')}</span>
+            <span className="detail-value">{translateCodeLabel(t, patient.sex)}</span>
           )}
         </div>
         <div className="detail-field">

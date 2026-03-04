@@ -1,4 +1,5 @@
 import { useState } from 'react';
+import { translateCodeLabel } from '../../../i18n/codeTranslations';
 import { useI18n } from '../../../i18n/i18n';
 import type { PatientMedicalValuesModel } from '../../patient-detail/PatientDetailTabs';
 import InlineDeleteActions from '../../layout/InlineDeleteActions';
@@ -166,7 +167,7 @@ export default function MedicalValuesSection({
                     >
                       <option value="" disabled>{t('medicalValues.datatypePlaceholder', 'Datatype...')}</option>
                       {datatypeCodes.map((c) => (
-                        <option key={c.id} value={c.id}>{c.name_default}</option>
+                        <option key={c.id} value={c.id}>{translateCodeLabel(t, c)}</option>
                       ))}
                     </select>
                     <input

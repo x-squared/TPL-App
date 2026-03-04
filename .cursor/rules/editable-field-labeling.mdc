@@ -17,6 +17,3 @@ Rules for the fallback micro-label:
 - Anchor the label to the target field container so it appears above that field (not at far left/right of the whole row).
 - Use small helper-text styling (low visual weight, e.g. around `0.62rem`, muted color).
 - Do not introduce large section labels or extra vertical spacing.
-
-Example intent:
-- `Renewal` above renewal date input, while all capture inputs remain on the same line.

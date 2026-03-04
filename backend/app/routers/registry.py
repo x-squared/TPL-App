@@ -15,6 +15,7 @@ from . import (
     coordination_donors,
     coordination_episodes,
     coordination_organ_effects,
+    coordination_protocol_state,
     coordination_protocol_events,
     coordination_procurements,
     coordination_procurement_flex,
@@ -74,6 +75,7 @@ def register_routers(app: FastAPI) -> None:
     app.include_router(coordination_donors.router, prefix="/api")
     app.include_router(coordination_episodes.router, prefix="/api")
     app.include_router(coordination_organ_effects.router, prefix="/api")
+    app.include_router(coordination_protocol_state.router, prefix="/api")
     app.include_router(coordination_protocol_events.router, prefix="/api")
     app.include_router(coordination_procurements.router, prefix="/api")
     app.include_router(coordination_procurement_flex.router, prefix="/api")

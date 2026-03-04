@@ -14,6 +14,7 @@ class EpisodeBase(BaseModel):
     end: date | None = None
     fall_nr: str = ""
     status_id: int | None = None
+    phase_id: int | None = None
     closed: bool = False
     comment: str = ""
     cave: str = ""
@@ -42,6 +43,7 @@ class EpisodeCreate(BaseModel):
     end: date | None = None
     fall_nr: str = ""
     status_id: int | None = None
+    phase_id: int | None = None
     closed: bool = False
     comment: str = ""
     cave: str = ""
@@ -82,6 +84,7 @@ class EpisodeUpdate(BaseModel):
     end: date | None = None
     fall_nr: str | None = None
     status_id: int | None = None
+    phase_id: int | None = None
     closed: bool | None = None
     comment: str | None = None
     cave: str | None = None
@@ -144,7 +147,28 @@ class EpisodeResponse(EpisodeBase):
     organs: list[CodeResponse] = []
     episode_organs: list[EpisodeOrganResponse] = []
     status: CodeResponse | None = None
+    phase: CodeResponse | None = None
     changed_by_id: int | None = None
     changed_by_user: UserResponse | None = None
     created_at: datetime
     updated_at: datetime | None = None
+
+
+class EpisodeListResponse(BaseModel):
+    model_config = ConfigDict(from_attributes=True)
+
+    id: int
+    patient_id: int
+    organ_id: int
+    organ: CodeResponse | None = None
+    organs: list[CodeResponse] = []
+    start: date | None = None
+    end: date | None = None
+    fall_nr: str = ""
+    status_id: int | None = None
+    status: CodeResponse | None = None
+    phase_id: int | None = None
+    phase: CodeResponse | None = None
+    closed: bool = False
+    tpl_date: date | None = None
+    list_rs_nr: str = ""

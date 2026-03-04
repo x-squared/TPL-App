@@ -16,15 +16,18 @@ from ...features.coordination_procurement_flex.catalog import (
     set_typed_column_value,
 )
 from ...models import (
+    Code,
     Coordination,
     CoordinationEpisode,
     CoordinationProcurementFieldGroupTemplate,
     CoordinationProcurementProtocolTaskGroupSelection,
     CoordinationProcurement,
+    CoordinationProcurementOrganRejection,
     CoordinationProcurementFieldTemplate,
     CoordinationProcurementTypedData,
     CoordinationProcurementTypedDataPersonList,
     CoordinationProcurementTypedDataTeamList,
+    Episode,
     Person,
     PersonTeam,
     TaskGroupTemplate,
@@ -40,6 +43,8 @@ from ...schemas import (
     CoordinationProcurementSlotResponse,
     CoordinationProcurementValueResponse,
 )
+
+_DUAL_ASSIGNMENT_ORGAN_KEYS = {"KIDNEY", "LUNG"}
 
 
 def _ensure_coordination_exists(coordination_id: int, db: Session) -> None:
@@ -72,6 +77,133 @@ def _next_value_id(row: CoordinationProcurementTypedData, field_template_id: int
 
 def _enum_value(raw: object) -> str:
     return raw.value if hasattr(raw, "value") else str(raw or "")
+
+
+def _max_assignments_for_organ(*, organ_id: int, db: Session) -> int:
+    organ = db.query(Code).filter(Code.id == organ_id, Code.type == "ORGAN").first()
+    organ_key = ((organ.key if organ else "") or "").strip().upper()
+    return 2 if organ_key in _DUAL_ASSIGNMENT_ORGAN_KEYS else 1
+
+
+def _attach_episode_link(
+    *,
+    coordination_id: int,
+    organ_id: int,
+    episode_id: int,
+    changed_by_id: int,
+    db: Session,
+) -> CoordinationEpisode:
+    existing_for_episode = (
+        db.query(CoordinationEpisode)
+        .filter(
+            CoordinationEpisode.coordination_id == coordination_id,
+            CoordinationEpisode.organ_id == organ_id,
+            CoordinationEpisode.episode_id == episode_id,
+        )
+        .first()
+    )
+    if existing_for_episode:
+        return existing_for_episode
+
+    existing_rows = (
+        db.query(CoordinationEpisode)
+        .filter(
+            CoordinationEpisode.coordination_id == coordination_id,
+            CoordinationEpisode.organ_id == organ_id,
+        )
+        .order_by(CoordinationEpisode.id.asc())
+        .all()
+    )
+    max_allowed = _max_assignments_for_organ(organ_id=organ_id, db=db)
+
+    # For single-assignment organs, treat a new selection as replacement.
+    if max_allowed == 1 and existing_rows:
+        row = existing_rows[0]
+        row.episode_id = episode_id
+        row.changed_by_id = changed_by_id
+        db.flush()
+        return row
+
+    if len(existing_rows) >= max_allowed:
+        raise HTTPException(
+            status_code=422,
+            detail=f"At most {max_allowed} episode assignment(s) are allowed for the selected organ in this coordination.",
+        )
+
+    row = CoordinationEpisode(
+        coordination_id=coordination_id,
+        episode_id=episode_id,
+        organ_id=organ_id,
+        changed_by_id=changed_by_id,
+    )
+    db.add(row)
+    db.flush()
+    return row
+
+
+def _sync_episode_links_from_typed_rows(
+    *,
+    coordination_id: int,
+    organ_id: int,
+    changed_by_id: int,
+    db: Session,
+) -> None:
+    referenced_episode_ids = {
+        row.recipient_episode_id
+        for row in (
+            db.query(CoordinationProcurementTypedData)
+            .filter(
+                CoordinationProcurementTypedData.coordination_id == coordination_id,
+                CoordinationProcurementTypedData.organ_id == organ_id,
+                CoordinationProcurementTypedData.recipient_episode_id.isnot(None),
+            )
+            .all()
+        )
+        if row.recipient_episode_id is not None
+    }
+    existing_rows = (
+        db.query(CoordinationEpisode)
+        .filter(
+            CoordinationEpisode.coordination_id == coordination_id,
+            CoordinationEpisode.organ_id == organ_id,
+        )
+        .order_by(CoordinationEpisode.id.asc())
+        .all()
+    )
+    existing_by_episode_id: dict[int, CoordinationEpisode] = {}
+    duplicate_row_ids: set[int] = set()
+    for row in existing_rows:
+        if row.episode_id in existing_by_episode_id:
+            duplicate_row_ids.add(row.id)
+            continue
+        existing_by_episode_id[row.episode_id] = row
+
+    for row in existing_rows:
+        if row.id in duplicate_row_ids:
+            db.delete(row)
+            continue
+        if row.episode_id not in referenced_episode_ids and not row.is_organ_rejected:
+            db.delete(row)
+
+    for episode_id in referenced_episode_ids:
+        existing = existing_by_episode_id.get(episode_id)
+        if existing is None:
+            continue
+        if existing.is_organ_rejected:
+            existing.is_organ_rejected = False
+            existing.changed_by_id = changed_by_id
+
+    existing_episode_ids = set(existing_by_episode_id.keys())
+    missing_episode_ids = referenced_episode_ids - existing_episode_ids
+    for episode_id in missing_episode_ids:
+        db.add(
+            CoordinationEpisode(
+                coordination_id=coordination_id,
+                organ_id=organ_id,
+                episode_id=episode_id,
+                changed_by_id=changed_by_id,
+            )
+        )
 
 
 def _build_value_response(
@@ -147,17 +279,21 @@ def _build_flex_response_from_typed_data(
     field_group_templates: list[CoordinationProcurementFieldGroupTemplate],
     protocol_task_group_selections: list[CoordinationProcurementProtocolTaskGroupSelection],
     typed_rows: list[CoordinationProcurementTypedData],
+    organ_rejections: list[CoordinationProcurementOrganRejection],
 ) -> CoordinationProcurementFlexResponse:
     slot_rows_by_organ: dict[int, list[CoordinationProcurementTypedData]] = {}
     for row in typed_rows:
         slot_rows_by_organ.setdefault(row.organ_id, []).append(row)
+    rejection_by_organ_id = {entry.organ_id: entry for entry in organ_rejections}
+    organ_ids = sorted(set(slot_rows_by_organ.keys()) | set(rejection_by_organ_id.keys()))
     organs: list[CoordinationProcurementOrganResponse] = []
-    for organ_id in sorted(slot_rows_by_organ.keys()):
+    for organ_id in organ_ids:
         rows_for_organ = sorted(
-            slot_rows_by_organ[organ_id],
+            slot_rows_by_organ.get(organ_id, []),
             key=lambda item: item.slot_key.value if hasattr(item.slot_key, "value") else item.slot_key,
         )
         sample_row = rows_for_organ[0] if rows_for_organ else None
+        rejection_row = rejection_by_organ_id.get(organ_id)
         slots: list[CoordinationProcurementSlotResponse] = []
         for row in rows_for_organ:
             values = []
@@ -184,12 +320,30 @@ def _build_flex_response_from_typed_data(
                 coordination_id=coordination_id,
                 organ_id=organ_id,
                 procurement_surgeon="",
+                organ_rejected=bool(rejection_row.is_rejected) if rejection_row else False,
+                organ_rejection_comment=(rejection_row.rejection_comment or "") if rejection_row else "",
                 organ=sample_row.organ if sample_row else None,
                 slots=slots,
-                changed_by_id=sample_row.changed_by_id if sample_row else None,
-                changed_by_user=sample_row.changed_by_user if sample_row else None,
-                created_at=sample_row.created_at if sample_row else None,
-                updated_at=sample_row.updated_at if sample_row else None,
+                changed_by_id=(
+                    rejection_row.changed_by_id
+                    if rejection_row is not None
+                    else (sample_row.changed_by_id if sample_row else None)
+                ),
+                changed_by_user=(
+                    rejection_row.changed_by_user
+                    if rejection_row is not None
+                    else (sample_row.changed_by_user if sample_row else None)
+                ),
+                created_at=(
+                    rejection_row.created_at
+                    if rejection_row is not None
+                    else (sample_row.created_at if sample_row else None)
+                ),
+                updated_at=(
+                    rejection_row.updated_at
+                    if rejection_row is not None
+                    else (sample_row.updated_at if sample_row else None)
+                ),
             )
         )
 
@@ -244,6 +398,15 @@ def get_procurement_flex(*, coordination_id: int, db: Session) -> CoordinationPr
         .order_by(CoordinationProcurementProtocolTaskGroupSelection.pos.asc(), CoordinationProcurementProtocolTaskGroupSelection.id.asc())
         .all()
     )
+    organ_rejections = (
+        db.query(CoordinationProcurementOrganRejection)
+        .options(
+            joinedload(CoordinationProcurementOrganRejection.organ),
+            joinedload(CoordinationProcurementOrganRejection.changed_by_user),
+        )
+        .filter(CoordinationProcurementOrganRejection.coordination_id == coordination_id)
+        .all()
+    )
     return _build_flex_response_from_typed_data(
         coordination_id=coordination_id,
         procurement=procurement,
@@ -251,6 +414,7 @@ def get_procurement_flex(*, coordination_id: int, db: Session) -> CoordinationPr
         field_group_templates=field_group_templates,
         protocol_task_group_selections=protocol_task_group_selections,
         typed_rows=typed_rows,
+        organ_rejections=organ_rejections,
     )
 
 
@@ -263,8 +427,42 @@ def upsert_procurement_organ(
     db: Session,
 ) -> CoordinationProcurementOrganResponse:
     _ensure_coordination_exists(coordination_id, db)
-    _ = payload
-    _ = changed_by_id
+    row = (
+        db.query(CoordinationProcurementOrganRejection)
+        .filter(
+            CoordinationProcurementOrganRejection.coordination_id == coordination_id,
+            CoordinationProcurementOrganRejection.organ_id == organ_id,
+        )
+        .first()
+    )
+    if not row:
+        row = CoordinationProcurementOrganRejection(
+            coordination_id=coordination_id,
+            organ_id=organ_id,
+            is_rejected=bool(payload.organ_rejected),
+            rejection_comment=(payload.organ_rejection_comment or "").strip(),
+            changed_by_id=changed_by_id,
+        )
+        db.add(row)
+    else:
+        row.is_rejected = bool(payload.organ_rejected)
+        row.rejection_comment = (payload.organ_rejection_comment or "").strip()
+        row.changed_by_id = changed_by_id
+
+    if row.is_rejected:
+        db.query(CoordinationProcurementTypedData).filter(
+            CoordinationProcurementTypedData.coordination_id == coordination_id,
+            CoordinationProcurementTypedData.organ_id == organ_id,
+        ).update(
+            {CoordinationProcurementTypedData.recipient_episode_id: None},
+            synchronize_session=False,
+        )
+        db.query(CoordinationEpisode).filter(
+            CoordinationEpisode.coordination_id == coordination_id,
+            CoordinationEpisode.organ_id == organ_id,
+        ).delete(synchronize_session=False)
+
+    db.commit()
     response = get_procurement_flex(coordination_id=coordination_id, db=db)
     existing = next((item for item in response.organs if item.organ_id == organ_id), None)
     if existing:
@@ -274,9 +472,11 @@ def upsert_procurement_organ(
         coordination_id=coordination_id,
         organ_id=organ_id,
         procurement_surgeon="",
+        organ_rejected=bool(payload.organ_rejected),
+        organ_rejection_comment=(payload.organ_rejection_comment or "").strip(),
         organ=None,
         slots=[],
-        changed_by_id=None,
+        changed_by_id=changed_by_id,
         changed_by_user=None,
         created_at=datetime.now(),
         updated_at=None,
@@ -292,8 +492,47 @@ def update_procurement_organ(
     db: Session,
 ) -> CoordinationProcurementOrganResponse:
     _ensure_coordination_exists(coordination_id, db)
-    _ = payload
-    _ = changed_by_id
+    existing = (
+        db.query(CoordinationProcurementOrganRejection)
+        .filter(
+            CoordinationProcurementOrganRejection.coordination_id == coordination_id,
+            CoordinationProcurementOrganRejection.organ_id == organ_id,
+        )
+        .first()
+    )
+    if existing is None:
+        return upsert_procurement_organ(
+            coordination_id=coordination_id,
+            organ_id=organ_id,
+            payload=CoordinationProcurementOrganCreate(
+                procurement_surgeon=payload.procurement_surgeon or "",
+                organ_rejected=bool(payload.organ_rejected),
+                organ_rejection_comment=payload.organ_rejection_comment or "",
+            ),
+            changed_by_id=changed_by_id,
+            db=db,
+        )
+
+    if payload.organ_rejected is not None:
+        existing.is_rejected = bool(payload.organ_rejected)
+    if payload.organ_rejection_comment is not None:
+        existing.rejection_comment = payload.organ_rejection_comment.strip()
+    existing.changed_by_id = changed_by_id
+
+    if existing.is_rejected:
+        db.query(CoordinationProcurementTypedData).filter(
+            CoordinationProcurementTypedData.coordination_id == coordination_id,
+            CoordinationProcurementTypedData.organ_id == organ_id,
+        ).update(
+            {CoordinationProcurementTypedData.recipient_episode_id: None},
+            synchronize_session=False,
+        )
+        db.query(CoordinationEpisode).filter(
+            CoordinationEpisode.coordination_id == coordination_id,
+            CoordinationEpisode.organ_id == organ_id,
+        ).delete(synchronize_session=False)
+
+    db.commit()
     response = get_procurement_flex(coordination_id=coordination_id, db=db)
     item = next((entry for entry in response.organs if entry.organ_id == organ_id), None)
     if not item:
@@ -326,6 +565,20 @@ def upsert_procurement_value(
         raise HTTPException(status_code=422, detail=f"No typed attribute mapping defined for field key '{field_template.key}'")
 
     _ensure_coordination_exists(coordination_id, db)
+    rejection = (
+        db.query(CoordinationProcurementOrganRejection)
+        .filter(
+            CoordinationProcurementOrganRejection.coordination_id == coordination_id,
+            CoordinationProcurementOrganRejection.organ_id == organ_id,
+            CoordinationProcurementOrganRejection.is_rejected.is_(True),
+        )
+        .first()
+    )
+    if rejection is not None and payload.episode_id is not None:
+        raise HTTPException(
+            status_code=422,
+            detail="Cannot assign recipient episode while organ is marked as rejected",
+        )
     typed_row = (
         db.query(CoordinationProcurementTypedData)
         .filter(
@@ -392,6 +645,8 @@ def upsert_procurement_value(
     elif spec.kind == "team_list":
         list_key = TEAM_LIST_KEY_BY_FIELD[field_template.key]
         unique_team_ids = list(dict.fromkeys(payload.team_ids))
+        if field_template.key == "IMPLANT_TEAM" and len(unique_team_ids) > 1:
+            raise HTTPException(status_code=422, detail="IMPLANT_TEAM accepts at most one team_id")
         if unique_team_ids:
             existing_teams = db.query(PersonTeam).filter(PersonTeam.id.in_(unique_team_ids)).all()
             by_id = {row.id: row for row in existing_teams}
@@ -411,23 +666,110 @@ def upsert_procurement_value(
     elif spec.kind == "episode_single":
         episode_id = payload.episode_id
         if episode_id is None:
+            previous_episode_id = get_typed_column_value(typed_row, field_template.key)
             set_typed_column_value(typed_row, field_template.key, None)
+            if previous_episode_id is not None:
+                # Keep coordination_episode rows in sync with slot-level recipient selection.
+                # Remove the link only when no other slot for this organ still references it.
+                db.flush()
+                still_referenced = (
+                    db.query(CoordinationProcurementTypedData)
+                    .filter(
+                        CoordinationProcurementTypedData.coordination_id == coordination_id,
+                        CoordinationProcurementTypedData.organ_id == organ_id,
+                        CoordinationProcurementTypedData.recipient_episode_id == previous_episode_id,
+                    )
+                    .first()
+                )
+                if not still_referenced:
+                    (
+                        db.query(CoordinationEpisode)
+                        .filter(
+                            CoordinationEpisode.coordination_id == coordination_id,
+                            CoordinationEpisode.organ_id == organ_id,
+                            CoordinationEpisode.episode_id == previous_episode_id,
+                        )
+                        .delete()
+                    )
         else:
-            linked_episode = (
-                db.query(CoordinationEpisode)
+            other_slot_rows = (
+                db.query(CoordinationProcurementTypedData)
                 .filter(
-                    CoordinationEpisode.coordination_id == coordination_id,
-                    CoordinationEpisode.organ_id == organ_id,
-                    CoordinationEpisode.episode_id == episode_id,
+                    CoordinationProcurementTypedData.coordination_id == coordination_id,
+                    CoordinationProcurementTypedData.organ_id == organ_id,
+                    CoordinationProcurementTypedData.id != typed_row.id,
+                    CoordinationProcurementTypedData.recipient_episode_id.isnot(None),
+                )
+                .all()
+            )
+            current_slot_value = slot_key.value
+            has_main_assignment_elsewhere = any(
+                (row.slot_key.value if hasattr(row.slot_key, "value") else str(row.slot_key)) == ProcurementSlotKey.MAIN.value
+                for row in other_slot_rows
+            )
+            has_side_assignment_elsewhere = any(
+                (row.slot_key.value if hasattr(row.slot_key, "value") else str(row.slot_key))
+                in {ProcurementSlotKey.LEFT.value, ProcurementSlotKey.RIGHT.value}
+                for row in other_slot_rows
+            )
+            if current_slot_value == ProcurementSlotKey.MAIN.value and has_side_assignment_elsewhere:
+                raise HTTPException(
+                    status_code=422,
+                    detail="Use either MAIN or LEFT/RIGHT recipient assignment slots, not both",
+                )
+            if current_slot_value in {ProcurementSlotKey.LEFT.value, ProcurementSlotKey.RIGHT.value} and has_main_assignment_elsewhere:
+                raise HTTPException(
+                    status_code=422,
+                    detail="Use either MAIN or LEFT/RIGHT recipient assignment slots, not both",
+                )
+            duplicate_slot = (
+                db.query(CoordinationProcurementTypedData)
+                .filter(
+                    CoordinationProcurementTypedData.coordination_id == coordination_id,
+                    CoordinationProcurementTypedData.organ_id == organ_id,
+                    CoordinationProcurementTypedData.id != typed_row.id,
+                    CoordinationProcurementTypedData.recipient_episode_id == episode_id,
                 )
                 .first()
             )
-            if not linked_episode:
+            if duplicate_slot is not None:
                 raise HTTPException(
                     status_code=422,
-                    detail="episode_id must reference a coordination episode linked to this coordination and organ",
+                    detail="episode_id is already assigned to another slot for this organ in this coordination",
                 )
+            episode = (
+                db.query(Episode)
+                .options(joinedload(Episode.organs))
+                .filter(Episode.id == episode_id)
+                .first()
+            )
+            if not episode:
+                raise HTTPException(status_code=422, detail="episode_id must reference EPISODE")
+            organ_ids = [entry.id for entry in (episode.organs or []) if entry and entry.id is not None]
+            if not organ_ids and episode.organ_id is not None:
+                organ_ids = [episode.organ_id]
+            if organ_id not in organ_ids:
+                raise HTTPException(
+                    status_code=422,
+                    detail="episode_id must reference an episode with the selected organ",
+                )
+            _attach_episode_link(
+                coordination_id=coordination_id,
+                organ_id=organ_id,
+                episode_id=episode_id,
+                changed_by_id=changed_by_id,
+                db=db,
+            )
             set_typed_column_value(typed_row, field_template.key, episode_id)
+        # SessionLocal uses autoflush=False, so persist slot recipient changes
+        # before synchronizing coordination_episode links from typed rows.
+        db.flush()
+        _sync_episode_links_from_typed_rows(
+            coordination_id=coordination_id,
+            organ_id=organ_id,
+            changed_by_id=changed_by_id,
+            db=db,
+        )
 
     typed_row.changed_by_id = changed_by_id
     db.commit()

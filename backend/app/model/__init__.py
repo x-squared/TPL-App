@@ -5,6 +5,7 @@ from .coordination_episode import CoordinationEpisode
 from .coordination_organ_effect import CoordinationOrganEffect
 from .coordination_procurement import (
     CoordinationProcurement,
+    CoordinationProcurementOrganRejection,
     CoordinationProcurementFieldGroupTemplate,
     CoordinationProcurementFieldScopeTemplate,
     CoordinationProcurementFieldTemplate,
@@ -72,6 +73,7 @@ __all__ = [
     "CoordinationEpisode",
     "CoordinationOrganEffect",
     "CoordinationProcurement",
+    "CoordinationProcurementOrganRejection",
     "CoordinationProcurementFieldGroupTemplate",
     "CoordinationProcurementFieldTemplate",
     "CoordinationProcurementFieldScopeTemplate",

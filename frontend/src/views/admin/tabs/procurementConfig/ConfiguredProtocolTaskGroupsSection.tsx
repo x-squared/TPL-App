@@ -1,6 +1,7 @@
 import { useMemo, useState } from 'react';
 
 import type { ProcurementAdminConfig, TaskGroupTemplate } from '../../../../api';
+import { translateCodeLabel } from '../../../../i18n/codeTranslations';
 import { useI18n } from '../../../../i18n/i18n';
 import type { ProcurementProtocolTaskGroupSelectionCreatePayload } from './types';
 
@@ -61,12 +62,6 @@ export default function ConfiguredProtocolTaskGroupsSection({
     <section className="admin-proc-block">
       <div className="detail-section-heading admin-proc-block-heading">
         <h2>{t('admin.procurementConfig.protocolTaskGroups.title', 'Protocol Task Groups')}</h2>
-        <p className="status">
-          {t(
-            'admin.procurementConfig.protocolTaskGroups.subtitle',
-            'Choose which task groups are shown in protocol tasks, and define their order.',
-          )}
-        </p>
       </div>
       <div className="admin-proc-block-grid">
         <div className="admin-proc-pane admin-proc-define-pane">
@@ -96,7 +91,7 @@ export default function ConfiguredProtocolTaskGroupsSection({
               >
                 <option value={0}>{t('admin.taskTemplates.allOrgans', 'All organs')}</option>
                 {config.organs.map((organ) => (
-                  <option key={organ.id} value={organ.id}>{organ.name_default}</option>
+                  <option key={organ.id} value={organ.id}>{translateCodeLabel(t, organ)}</option>
                 ))}
               </select>
             </label>
@@ -173,7 +168,7 @@ export default function ConfiguredProtocolTaskGroupsSection({
                       }
                     >
                       <td>{selection.task_group_template?.name ?? `#${selection.task_group_template_id}`}</td>
-                      <td>{selection.organ?.name_default ?? t('admin.taskTemplates.allOrgans', 'All organs')}</td>
+                      <td>{selection.organ ? translateCodeLabel(t, selection.organ) : t('admin.taskTemplates.allOrgans', 'All organs')}</td>
                       <td className="detail-ci-actions">
                         <button
                           className="ci-cancel-inline"

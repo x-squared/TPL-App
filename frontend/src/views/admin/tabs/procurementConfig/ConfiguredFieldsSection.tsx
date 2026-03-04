@@ -1,20 +1,18 @@
 import { Fragment, useState } from 'react';
 
-import type { ProcurementAdminConfig, ProcurementSlotKey, ProcurementValueMode } from '../../../../api';
+import type { ProcurementAdminConfig, ProcurementSlotKey } from '../../../../api';
+import { translateCodeLabel } from '../../../../i18n/codeTranslations';
 import { useI18n } from '../../../../i18n/i18n';
-import type { ProcurementFieldCreatePayload, ProcurementFieldUpdatePayload, ProcurementScopeCreatePayload } from './types';
-import { suggestConfigKey } from './utils';
+import type { ProcurementFieldUpdatePayload, ProcurementScopeCreatePayload } from './types';
 
 interface ConfiguredFieldsSectionProps {
   config: ProcurementAdminConfig;
   groups: ProcurementAdminConfig['field_group_templates'];
-  sortedDatatypes: ProcurementAdminConfig['datatype_definitions'];
   sortedFieldTemplates: ProcurementAdminConfig['field_templates'];
   groupNameById: Map<number, string>;
   datatypeNameById: Map<number, string>;
   scopesByFieldId: Record<number, ProcurementAdminConfig['field_scope_templates']>;
   saving: boolean;
-  onCreateField: (payload: ProcurementFieldCreatePayload) => Promise<void>;
   onUpdateField: (fieldId: number, payload: ProcurementFieldUpdatePayload) => Promise<void>;
   onReorderFields: (
     assignments: Array<{ field_id: number; group_template_id: number | null; pos: number }>,
@@ -26,48 +24,23 @@ interface ConfiguredFieldsSectionProps {
 export default function ConfiguredFieldsSection({
   config,
   groups,
-  sortedDatatypes,
   sortedFieldTemplates,
   groupNameById,
   datatypeNameById,
   scopesByFieldId,
   saving,
-  onCreateField,
   onUpdateField,
   onReorderFields,
   onCreateScope,
   onDeleteScope,
 }: ConfiguredFieldsSectionProps) {
   const { t } = useI18n();
-  const [fieldDraft, setFieldDraft] = useState({
-    key: '',
-    name_default: '',
-    comment: '',
-    is_active: true,
-    datatype_def_id: 0,
-    group_template_id: 0,
-    value_mode: 'SCALAR' as ProcurementValueMode,
-  });
-  const [fieldKeyEdited, setFieldKeyEdited] = useState(false);
   const [editingFieldId, setEditingFieldId] = useState<number | null>(null);
   const [editingFieldDraft, setEditingFieldDraft] = useState({ group_template_id: 0, comment: '', is_active: true, pos: 0 });
   const [scopeDraftByFieldId, setScopeDraftByFieldId] = useState<Record<number, { organ_id: number; slot_key: ProcurementSlotKey }>>({});
   const [expandedScopeFieldId, setExpandedScopeFieldId] = useState<number | null>(null);
   const [draggingFieldId, setDraggingFieldId] = useState<number | null>(null);
   const [dragOverFieldId, setDragOverFieldId] = useState<number | null>(null);
-  const isScalarMode = fieldDraft.value_mode === 'SCALAR';
-
-  const applyUppercaseWithCaret = (input: HTMLInputElement, update: (value: string) => void) => {
-    const nextValue = input.value.toUpperCase();
-    const selectionStart = input.selectionStart;
-    const selectionEnd = input.selectionEnd;
-    update(nextValue);
-    requestAnimationFrame(() => {
-      if (document.activeElement !== input) return;
-      if (selectionStart == null || selectionEnd == null) return;
-      input.setSelectionRange(selectionStart, selectionEnd);
-    });
-  };
 
   const reorderIds = (ids: number[], sourceId: number, targetId: number): number[] => {
     const fromIndex = ids.indexOf(sourceId);
@@ -145,145 +118,9 @@ export default function ConfiguredFieldsSection({
     <section className="admin-proc-block">
       <div className="detail-section-heading admin-proc-block-heading">
         <h2>{t('admin.procurementConfig.fields.title', 'Fields')}</h2>
-        <p className="status">{t('admin.procurementConfig.fields.subtitle', 'Define field templates and manage assigned scopes as runtime configuration data.')}</p>
       </div>
       <div className="admin-proc-block-grid">
-        <div className="admin-proc-pane admin-proc-define-pane">
-          <h3>{t('admin.procurementConfig.fields.definitionArea', 'Definition Area')}</h3>
-          <div className="admin-people-form admin-proc-field-form">
-            <label>
-              <span>{t('patients.filters.name', 'Name')}</span>
-              <input
-                className="detail-input"
-                value={fieldDraft.name_default}
-                onChange={(e) => {
-                  const nextName = e.target.value;
-                  setFieldDraft((prev) => ({
-                    ...prev,
-                    name_default: nextName,
-                    key: fieldKeyEdited ? prev.key : suggestConfigKey(nextName),
-                  }));
-                }}
-              />
-            </label>
-            <label>
-              <span>{t('admin.procurementConfig.fields.key', 'Key')}</span>
-              <input
-                className="detail-input"
-                value={fieldDraft.key}
-                onChange={(e) => {
-                  setFieldKeyEdited(true);
-                  applyUppercaseWithCaret(e.currentTarget, (value) => {
-                    setFieldDraft((prev) => ({ ...prev, key: value }));
-                  });
-                }}
-              />
-            </label>
-            <label>
-              <span>{t('taskBoard.columns.comment', 'Comment')}</span>
-              <input
-                className="detail-input"
-                value={fieldDraft.comment}
-                onChange={(e) => setFieldDraft((prev) => ({ ...prev, comment: e.target.value }))}
-              />
-            </label>
-            <label>
-              <span>{t('admin.procurementConfig.fields.group', 'Group')}</span>
-              <select
-                className="detail-input"
-                value={fieldDraft.group_template_id}
-                onChange={(e) => setFieldDraft((prev) => ({ ...prev, group_template_id: Number(e.target.value) || 0 }))}
-              >
-                <option value={0}>{t('admin.procurementConfig.fields.noGroup', 'No group')}</option>
-                {groups.map((group) => (
-                  <option key={group.id} value={group.id}>{group.name_default}</option>
-                ))}
-              </select>
-            </label>
-            <label>
-              <span>{t('admin.procurementConfig.fields.datatype', 'Datatype')}</span>
-              <select
-                className="detail-input"
-                value={fieldDraft.datatype_def_id}
-                onChange={(e) => setFieldDraft((prev) => ({ ...prev, datatype_def_id: Number(e.target.value) || 0 }))}
-                disabled={!isScalarMode}
-              >
-                <option value={0}>
-                  {isScalarMode
-                    ? t('admin.procurementConfig.fields.selectDatatype', 'Select datatype')
-                    : t('admin.procurementConfig.fields.automaticDatatype', 'Automatic (Managed by value mode)')}
-                </option>
-                {sortedDatatypes.map((datatype) => (
-                  <option key={datatype.id} value={datatype.id}>
-                    {datatype.code?.name_default ?? datatype.code?.key ?? `Datatype ${datatype.id}`}
-                  </option>
-                ))}
-              </select>
-            </label>
-            <label>
-              <span>{t('admin.procurementConfig.fields.valueMode', 'Value Mode')}</span>
-              <select
-                className="detail-input"
-                value={fieldDraft.value_mode}
-                onChange={(e) => {
-                  const nextMode = e.target.value as ProcurementValueMode;
-                  setFieldDraft((prev) => ({
-                    ...prev,
-                    value_mode: nextMode,
-                    datatype_def_id: nextMode === 'SCALAR' ? prev.datatype_def_id : 0,
-                  }));
-                }}
-              >
-                <option value="SCALAR">{t('admin.procurementConfig.valueMode.scalar', 'Scalar')}</option>
-                <option value="PERSON_SINGLE">{t('admin.procurementConfig.valueMode.personSingle', 'Single Person')}</option>
-                <option value="PERSON_LIST">{t('admin.procurementConfig.valueMode.personList', 'Person List')}</option>
-                <option value="TEAM_SINGLE">{t('admin.procurementConfig.valueMode.teamSingle', 'Single Team')}</option>
-                <option value="TEAM_LIST">{t('admin.procurementConfig.valueMode.teamList', 'Team List')}</option>
-                <option value="EPISODE">{t('server.entities.episode', 'Episode')}</option>
-              </select>
-            </label>
-            <div className="admin-proc-action-cell">
-              <button
-                type="button"
-                className="patients-save-btn"
-                disabled={
-                  true
-                }
-                title={t('admin.procurementConfig.fields.fixedModelHint', 'Field templates are fixed and cannot be created here.')}
-                onClick={() => {
-                  const targetGroupId = fieldDraft.group_template_id || null;
-                  const nextPos = sortedFieldTemplates
-                    .filter((field) => (field.group_template_id ?? null) === targetGroupId)
-                    .reduce((maxPos, field) => Math.max(maxPos, field.pos), 0) + 1;
-                  void onCreateField({
-                    key: fieldDraft.key.trim().toUpperCase(),
-                    name_default: fieldDraft.name_default.trim(),
-                    comment: fieldDraft.comment.trim(),
-                    is_active: fieldDraft.is_active,
-                    pos: nextPos,
-                    datatype_def_id: isScalarMode ? fieldDraft.datatype_def_id : 0,
-                    group_template_id: fieldDraft.group_template_id || null,
-                    value_mode: fieldDraft.value_mode,
-                  });
-                  setFieldDraft({
-                    key: '',
-                    name_default: '',
-                    comment: '',
-                    is_active: true,
-                    datatype_def_id: 0,
-                    group_template_id: 0,
-                    value_mode: 'SCALAR',
-                  });
-                  setFieldKeyEdited(false);
-                }}
-              >
-                {t('admin.procurementConfig.fields.createField', 'Create Field')}
-              </button>
-            </div>
-          </div>
-        </div>
         <div className="admin-proc-pane admin-proc-data-pane">
-          <h3>{t('admin.procurementConfig.fields.configuredData', 'Configured Data')}</h3>
           <div className="patients-table-wrap ui-table-wrap">
             <table className="data-table">
               <thead>
@@ -451,7 +288,7 @@ export default function ConfiguredFieldsSection({
                                 <div className="admin-proc-scope-list">
                                   {scopes.map((scope) => (
                                     <span key={scope.id} className="person-pill">
-                                      {(scope.organ?.name_default ?? t('admin.procurementConfig.fields.all', 'All'))} / {scope.slot_key}
+                                      {(scope.organ ? translateCodeLabel(t, scope.organ) : t('admin.procurementConfig.fields.all', 'All'))} / {scope.slot_key}
                                       {isEditingRow ? (
                                         <button
                                           type="button"
@@ -485,7 +322,7 @@ export default function ConfiguredFieldsSection({
                                   >
                                     <option value={0}>{t('admin.procurementConfig.fields.selectOrgan', 'Select organ')}</option>
                                     {config.organs.map((organ) => (
-                                      <option key={organ.id} value={organ.id}>{organ.name_default}</option>
+                                      <option key={organ.id} value={organ.id}>{translateCodeLabel(t, organ)}</option>
                                     ))}
                                   </select>
                                   <select

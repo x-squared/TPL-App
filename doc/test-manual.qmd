@@ -6,14 +6,16 @@ For specification authoring conventions and structure, see `doc/specification-ma
 
 ## 1) Test Structure
 
-The project uses two complementary testing workflows:
+The project uses three complementary testing workflows:
 
 - **Spec-derived API checks** (lightweight HTTP assertions)
 - **Partner-driven UI + DB scenarios** (Playwright + SQLite verification)
+- **Conceptual consistency checks** (domain/model and architecture/dependency conformance)
 
 Main folders:
 
 - Specification files for testing: `spec/testing/server/`, `spec/testing/client-server/`
+- Conceptual specification files: `spec/testing/conceptual/`
 - Requirement specifications: `spec/requirements/`
 - Test tooling: `qa/spec_tools/`
 - Executable frontend browser tests: `frontend/test/`
@@ -78,20 +80,69 @@ python -m qa.spec_tools.run_specs
 
 This regenerates tests from specs and runs generated checks.
 
-### Partner-driven scenario pipeline
+### Server spec pipeline
 
 ```{bash}
-python -m qa.spec_tools.run_partner_specs
+python -m qa.spec_tools.run_server_specs
 ```
 
-This runs Playwright UI flow(s), then verifies DB persistence where defined.
+### Client-server spec pipeline
+
+```{bash}
+python -m qa.spec_tools.run_client_server_specs
+```
+
+### Conceptual domain-model sync check
+
+```{bash}
+cd backend
+source .venv/bin/activate
+cd ..
+python -m qa.spec_tools.check_domain_sync
+```
+
+This verifies that conceptual entities/relations in `spec/domain/conceptual-domain-model.puml` still map to backend SQLAlchemy model intent, using `spec/domain/domain-sync-mapping.json`.
+
+### Architecture dependency check
+
+```{bash}
+cd backend
+source .venv/bin/activate
+cd ..
+python -m qa.spec_tools.check_architecture_dependencies
+```
+
+This verifies backend dependency boundaries from `spec/architecture/dependency-rules.json`.
+
+### Conceptual spec runner (`conceptual-case`)
+
+```{bash}
+python -m qa.spec_tools.run_conceptual_specs
+```
+
+This executes conceptual checks defined under `spec/testing/conceptual/*.md` and writes:
+
+- `qa/reports/latest-conceptual-report.md`
+
+### Run all pipelines in sequence
+
+```{bash}
+python -m qa.spec_tools.run_all_tests
+```
+
+This runs `run_conceptual_specs`, `run_client_server_specs`, and `run_server_specs` in sequence and writes:
+
+- `qa/reports/latest-all-tests-report.md`
 
 ## 6) How To Evaluate Results
 
 Reports are written to:
 
 - `qa/reports/latest-spec-report.md`
-- `qa/reports/latest-partner-report.md`
+- `qa/reports/latest-conceptual-report.md`
+- `qa/reports/latest-client-server-spec-report.md`
+- `qa/reports/latest-server-spec-report.md`
+- `qa/reports/latest-all-tests-report.md`
 
 Each report includes:
 

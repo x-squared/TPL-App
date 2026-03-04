@@ -65,6 +65,7 @@ Medical value core seeds now define a template universe with:
 - group applicability flags (`is_static`, organ flags, donor flag)
 - ordered template values per group
 - a static blood type template (`STATIC_BLOOD_TYPE`) using `DATATYPE=BLOOD_TYPE`
+- global per-template runtime instantiation for non-donor contexts (templates applicable to multiple organs are still instantiated once per patient)
 
 Translation core seeding uses two inputs:
 

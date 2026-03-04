@@ -13,6 +13,7 @@ interface TreeNode {
 
 type TranslationFilterMode = 'keyContains' | 'keyPrefix' | 'displayTextContains';
 type TranslationCompletenessMode = 'all' | 'incomplete';
+type TranslationSortMode = 'none' | 'asc';
 
 function displayTranslationKey(key: string): string {
   return key;
@@ -162,6 +163,7 @@ export default function AdminTranslationsTab() {
   const [filterValue, setFilterValue] = useState('');
   const [filterMode, setFilterMode] = useState<TranslationFilterMode>('keyContains');
   const [completenessMode, setCompletenessMode] = useState<TranslationCompletenessMode>('all');
+  const [sortMode, setSortMode] = useState<TranslationSortMode>('none');
   const filterQuery = filterValue.trim().toLowerCase();
   const filterActive = filterQuery.length > 0;
 
@@ -201,8 +203,17 @@ export default function AdminTranslationsTab() {
     return walk(model.tree);
   }, [completenessMode, filterActive, filterMatches, model]);
 
+  const sortedTree = useMemo(() => {
+    if (sortMode === 'none') return filteredTree;
+    const sortNodes = (nodes: TreeNode[]): TreeNode[] =>
+      [...nodes]
+        .map((node) => (node.isLeaf ? node : { ...node, children: sortNodes(node.children) }))
+        .sort((a, b) => a.key.localeCompare(b.key, undefined, { sensitivity: 'base' }));
+    return sortNodes(filteredTree);
+  }, [filteredTree, sortMode]);
+
   const branchPaths = useMemo(() => collectBranchPaths(model.tree), [model.tree]);
-  const filteredBranchPaths = useMemo(() => collectBranchPaths(filteredTree), [filteredTree]);
+  const filteredBranchPaths = useMemo(() => collectBranchPaths(sortedTree), [sortedTree]);
   const leafCount = useMemo(
     () => ((filterActive || completenessMode === 'incomplete') ? countLeafNodes(filteredTree) : model.knownKeys.length),
     [completenessMode, filterActive, filteredTree, model.knownKeys.length],
@@ -315,7 +326,7 @@ export default function AdminTranslationsTab() {
   );
 
   return (
-    <section className="detail-section ui-panel-section">
+    <section className="detail-section ui-panel-section admin-translations-tab">
       <div className="detail-section-heading">
         <h2>{t('app.admin.tabs.translations', 'Translations')}</h2>
       </div>
@@ -375,6 +386,16 @@ export default function AdminTranslationsTab() {
                 ? t('admin.translations.tree.completenessAll', 'All')
                 : t('admin.translations.tree.completenessIncomplete', 'Incomplete')}
             </button>
+            <button
+              type="button"
+              className="admin-translation-mini-btn"
+              onClick={() => setSortMode((prev) => (prev === 'none' ? 'asc' : 'none'))}
+              title={t('admin.translations.tree.sortToggle', 'Toggle sort order')}
+            >
+              {sortMode === 'none'
+                ? t('admin.translations.tree.sortNone', 'No sort')
+                : t('admin.translations.tree.sortAsc', 'Sort A-Z')}
+            </button>
             <button type="button" className="admin-translation-mini-btn" onClick={collapseAll}>
               {t('admin.translations.tree.collapseAll', 'Collapse all')}
             </button>
@@ -391,19 +412,21 @@ export default function AdminTranslationsTab() {
         <p className="status">{t('admin.translations.filter.noMatches', 'No matching translation entries.')}</p>
       ) : null}
       {!model.loading && (
-        <TranslationTree
-          nodes={filteredTree}
-          depth={0}
-          draft={model.draft}
-          onChange={model.setDraftValue}
-          getSourceKind={model.getSourceKind}
-          getEnglishReference={model.getEnglishReference}
-          expandedPaths={effectiveExpandedPaths}
-          onTogglePath={togglePath}
-          onExpandBranch={expandBranch}
-          onCollapseBranch={collapseBranch}
-          filterActive={filterActive}
-        />
+        <div className="admin-tab-content-guard admin-translation-tree-wrap">
+          <TranslationTree
+            nodes={sortedTree}
+            depth={0}
+            draft={model.draft}
+            onChange={model.setDraftValue}
+            getSourceKind={model.getSourceKind}
+            getEnglishReference={model.getEnglishReference}
+            expandedPaths={effectiveExpandedPaths}
+            onTogglePath={togglePath}
+            onExpandBranch={expandBranch}
+            onCollapseBranch={collapseBranch}
+            filterActive={filterActive}
+          />
+        </div>
       )}
     </section>
   );

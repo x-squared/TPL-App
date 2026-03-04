@@ -39,6 +39,7 @@ def sync_coordination_procurement_field_templates(db: Session) -> None:
             name_default=group_entry.get("name_default") or group_key.replace("_", " ").title(),
             comment=group_entry.get("comment", ""),
             is_active=group_entry.get("is_active", True),
+            display_lane=group_entry.get("display_lane", "PRIMARY"),
             pos=group_entry.get("pos", index),
             changed_by_id=1,
         )
@@ -59,6 +60,7 @@ def sync_coordination_procurement_field_templates(db: Session) -> None:
             name_default=entry.get("group_name_default") or group_key.replace("_", " ").title(),
             comment=entry.get("group_comment", ""),
             is_active=entry.get("group_is_active", True),
+            display_lane=entry.get("group_display_lane", "PRIMARY"),
             pos=index,
             changed_by_id=1,
         )
@@ -75,6 +77,7 @@ def sync_coordination_procurement_field_templates(db: Session) -> None:
         raw.pop("group_name_default", None)
         raw.pop("group_comment", None)
         raw.pop("group_is_active", None)
+        raw.pop("group_display_lane", None)
         datatype_def_id = datatype_def_by_code_key.get(datatype_key)
         if datatype_def_id is None:
             continue

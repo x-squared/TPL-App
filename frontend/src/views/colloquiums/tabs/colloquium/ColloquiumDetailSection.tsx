@@ -1,4 +1,5 @@
 import type { Colloqium, ColloqiumAgenda, PatientListItem, Person } from '../../../../api';
+import { translateCodeLabel } from '../../../../i18n/codeTranslations';
 import { useI18n } from '../../../../i18n/i18n';
 import ColloquiumAgendaTable from './ColloquiumAgendaTable';
 import EpisodePickerDialog from './EpisodePickerDialog';
@@ -215,7 +216,7 @@ export default function ColloquiumDetailSection({
       </div>
       <EpisodePickerDialog
         open={pickerOpen}
-        organLabel={colloqium.colloqium_type?.organ?.name_default ?? t('colloquiums.detail.unknownOrgan', 'Unknown organ')}
+        organLabel={colloqium.colloqium_type?.organ ? translateCodeLabel(t, colloqium.colloqium_type.organ) : t('colloquiums.detail.unknownOrgan', 'Unknown organ')}
         rows={pickerRows}
         loading={pickerLoading}
         initialSelectedEpisodeIds={

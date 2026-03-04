@@ -6,6 +6,7 @@ alwaysApply: true
 # Clean Architecture Enforcement
 
 Apply this quality gate to every non-trivial change set.
+Use `system-architecture-blueprint.mdc` and `router-service-boundaries.mdc` as canonical architecture rules.
 
 ## 1) Drift Sweep (required)
 
@@ -24,9 +25,7 @@ Before finishing, explicitly check for architectural drift in touched flows:
 
 ## 3) Thin-Boundary Rule
 
-- Routers should stay transport-thin (validation/dependency wiring/delegation).
-- Put orchestration, subprocess/query workflow, and domain decisions into feature services.
-- Keep model/schema contracts decoupled from transport concerns.
+- Enforce thin boundaries per canonical rules; avoid duplicating business logic across transport/UI layers.
 
 ## 4) Decomposition Trigger
 

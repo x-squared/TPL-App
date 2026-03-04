@@ -1,5 +1,6 @@
 import jsPDF from 'jspdf';
 import type { ColloqiumAgenda, PatientListItem, Task } from '../../../../api';
+import { translateCodeLabel } from '../../../../i18n/codeTranslations';
 
 export interface ProtocolAgendaDraft {
   presented_by: string;
@@ -53,6 +54,13 @@ export function exportProtocolPdf({
   const sectionGap = 4;
   const generatedOn = formatDate(new Date().toISOString().slice(0, 10));
   const safeValue = (value: string | null | undefined) => (value && value.trim() ? value.trim() : '–');
+  const translateCodeForPdf = (
+    code: {
+      type?: string | null;
+      key?: string | null;
+      name_default?: string | null;
+    } | null | undefined,
+  ): string => translateCodeLabel((_key, englishDefault) => englishDefault, code);
   let y = margin;
 
   const ensureSpace = (heightNeeded: number) => {
@@ -122,7 +130,7 @@ export function exportProtocolPdf({
         ? `${patient.name}, ${patient.first_name} (${patient.pid})`
         : `Unknown patient (Episode ${agenda.episode?.fall_nr || `#${agenda.episode_id}`})`;
       const episodeLabel = agenda.episode?.fall_nr || `#${agenda.episode_id}`;
-      const statusLabel = agenda.episode?.status?.name_default ?? '–';
+      const statusLabel = translateCodeForPdf(agenda.episode?.status);
       const phaseLabel = `${phase.label} (${formatDate(phase.from)} – ${formatDate(phase.to)})`;
 
       const sectionEntries = [
@@ -140,7 +148,7 @@ export function exportProtocolPdf({
         : [
           { text: `Tasks (${tasks.length}):`, indent: 2, spacingAfter: 1 },
           ...tasks.map((task) => {
-            const status = task.status?.name_default ?? task.status?.key ?? 'Open';
+            const status = translateCodeForPdf(task.status);
             const assignee = task.assigned_to?.name ?? 'Unassigned';
             const due = task.until ? formatDate(task.until) : '–';
             const comment = task.comment?.trim() ? ` | ${task.comment.trim()}` : '';
@@ -171,7 +179,7 @@ export function exportProtocolPdf({
       } else {
         writeWrapped(`Tasks (${tasks.length}):`, { size: 10, indent: 2, style: 'bold', spacingAfter: 1 });
         tasks.forEach((task) => {
-          const status = task.status?.name_default ?? task.status?.key ?? 'Open';
+          const status = translateCodeForPdf(task.status);
           const assignee = task.assigned_to?.name ?? 'Unassigned';
           const due = task.until ? formatDate(task.until) : '–';
           const comment = task.comment?.trim() ? ` | ${task.comment.trim()}` : '';

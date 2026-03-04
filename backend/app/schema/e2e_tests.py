@@ -5,7 +5,7 @@ from typing import Literal
 
 from pydantic import BaseModel
 
-E2ETestRunnerKey = Literal["spec", "partner"]
+E2ETestRunnerKey = Literal["all", "specification", "client_server", "server"]
 
 
 class E2ETestRunnerOption(BaseModel):

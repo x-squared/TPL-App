@@ -1,0 +1,44 @@
+---
+description: Enforce list APIs to use view-dedicated view models and lean loading
+alwaysApply: true
+---
+
+# List View-Model Data Loading Rule
+
+For all list/table views, use a dedicated list view model contract and avoid returning full entity graphs.
+
+## Core principles
+
+1. **View-dedicated list models**
+   - Build list endpoints around `*ListResponse` (or equivalent), separate from full detail/update response models.
+   - Do not reuse full detail schemas for list rendering by default.
+
+2. **Key-first loading**
+   - Do not eager-load joined entities unless the list view actually needs them.
+   - Prefer loading foreign keys and lightweight fields first.
+
+3. **Projection of joined data**
+   - If list UIs need joined context, project only minimal values needed by the view (for example counts, status key, display label, date).
+   - Avoid shipping full nested objects when a scalar summary is sufficient.
+
+4. **On-demand join data with reuse**
+   - For dropdowns/pickers and similar controls, load required joined datasets on demand.
+   - Store/cache loaded datasets in view model state so the same data is not fetched again unnecessarily.
+
+## Backend defaults
+
+- Use dedicated list queries (lean `.options(...)`) for list endpoints.
+- Keep full eager-loading only for detail/create/update flows where nested entities are explicitly required by API contract.
+- If adding a new list endpoint, add a dedicated list schema in `backend/app/schema/**`.
+
+## Frontend defaults
+
+- List pages should consume list-focused API types (for example `EpisodeList`) instead of full detail types.
+- Keep list orchestration in a focused hook/view model (`use*ListViewModel`) and centralize caching there.
+
+## Completion check
+
+Before finishing list-related changes, verify:
+- list endpoint returns a dedicated list schema,
+- query loading matches visible list needs only,
+- on-demand joined datasets are cached/reused in the view model.

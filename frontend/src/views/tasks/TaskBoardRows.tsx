@@ -1,4 +1,5 @@
 import type { Code, ColloqiumAgenda, Episode, Patient, Task, TaskGroup, TaskKindKey } from '../../api';
+import { translateCodeLabel } from '../../i18n/codeTranslations';
 import { useI18n } from '../../i18n/i18n';
 import TaskBoardActionForm from './TaskBoardActionForm';
 import {
@@ -284,7 +285,7 @@ export default function TaskBoardRows({
                     >
                       <option value="">{t('taskBoard.common.empty', '–')}</option>
                       {priorityCodes.map((priority) => (
-                        <option key={priority.id} value={priority.id}>{priority.name_default}</option>
+                        <option key={priority.id} value={priority.id}>{translateCodeLabel(t, priority)}</option>
                       ))}
                     </select>
                   </td>
@@ -384,7 +385,7 @@ export default function TaskBoardRows({
         const task = row.task;
         const patient = row.group.patient_id != null ? patientsById[row.group.patient_id] : undefined;
         const episode = row.group.episode_id ? episodesById[row.group.episode_id] : undefined;
-        const references = buildTaskReferences({ group: row.group, task, patient, episode });
+        const references = buildTaskReferences({ group: row.group, task, patient, episode }, t);
         const done = isDoneTask(task);
         const cancelled = isCancelledTask(task);
         const rowClass = done
@@ -439,10 +440,10 @@ export default function TaskBoardRows({
                   >
                     <option value="">{t('taskBoard.common.empty', '–')}</option>
                     {priorityCodes.map((priority) => (
-                      <option key={priority.id} value={priority.id}>{priority.name_default}</option>
+                      <option key={priority.id} value={priority.id}>{translateCodeLabel(t, priority)}</option>
                     ))}
                   </select>
-                ) : (task.priority?.name_default ?? task.priority?.key ?? t('taskBoard.common.empty', '–'))}
+                ) : translateCodeLabel(t, task.priority)}
               </td>
             ) : null}
             {showReference ? <td><ReferenceCell references={references} /></td> : null}

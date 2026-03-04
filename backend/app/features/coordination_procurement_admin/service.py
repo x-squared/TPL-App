@@ -24,6 +24,30 @@ from ...schemas import (
 )
 
 
+def _lane_rank(value: str | None) -> int:
+    return 0 if value == "PRIMARY" else 1
+
+
+def _normalize_group_positions(db: Session) -> None:
+    ordered = (
+        db.query(CoordinationProcurementFieldGroupTemplate)
+        .order_by(
+            CoordinationProcurementFieldGroupTemplate.pos.asc(),
+            CoordinationProcurementFieldGroupTemplate.id.asc(),
+        )
+        .all()
+    )
+    ordered.sort(
+        key=lambda entry: (
+            _lane_rank(entry.display_lane),
+            entry.pos,
+            entry.id,
+        )
+    )
+    for index, entry in enumerate(ordered, start=1):
+        entry.pos = index
+
+
 def _field_template_query(db: Session):
     return db.query(CoordinationProcurementFieldTemplate).options(
         joinedload(CoordinationProcurementFieldTemplate.datatype_definition).joinedload(DatatypeDefinition.code),
@@ -111,10 +135,28 @@ def create_field_group_template(
     changed_by_id: int,
     db: Session,
 ) -> CoordinationProcurementFieldGroupTemplate:
-    raise HTTPException(
-        status_code=422,
-        detail="Procurement group templates are fixed and cannot be created",
+    key = payload.key.strip().upper()
+    if not key:
+        raise HTTPException(status_code=422, detail="key must not be empty")
+    existing = db.query(CoordinationProcurementFieldGroupTemplate).filter(
+        CoordinationProcurementFieldGroupTemplate.key == key
+    ).first()
+    if existing is not None:
+        raise HTTPException(status_code=422, detail="key already exists")
+    item = CoordinationProcurementFieldGroupTemplate(
+        key=key,
+        name_default=payload.name_default.strip(),
+        comment=payload.comment.strip(),
+        is_active=bool(payload.is_active),
+        display_lane=payload.display_lane,
+        pos=payload.pos,
+        changed_by_id=changed_by_id,
     )
+    db.add(item)
+    db.flush()
+    _normalize_group_positions(db)
+    db.commit()
+    return item
 
 
 def update_field_group_template(
@@ -128,12 +170,28 @@ def update_field_group_template(
     if not item:
         raise HTTPException(status_code=404, detail="Field group template not found")
     data = payload.model_dump(exclude_unset=True)
-    allowed = {"pos"}
+    allowed = {"key", "name_default", "comment", "is_active", "pos", "display_lane"}
     forbidden = [key for key in data.keys() if key not in allowed]
     if forbidden:
-        raise HTTPException(status_code=422, detail=f"Only arrangement updates are allowed for groups (invalid: {', '.join(sorted(forbidden))})")
+        raise HTTPException(status_code=422, detail=f"Unsupported group update fields: {', '.join(sorted(forbidden))}")
+    if "key" in data:
+        normalized_key = data["key"].strip().upper()
+        if not normalized_key:
+            raise HTTPException(status_code=422, detail="key must not be empty")
+        duplicate = db.query(CoordinationProcurementFieldGroupTemplate).filter(
+            CoordinationProcurementFieldGroupTemplate.id != item.id,
+            CoordinationProcurementFieldGroupTemplate.key == normalized_key,
+        ).first()
+        if duplicate is not None:
+            raise HTTPException(status_code=422, detail="key already exists")
+        data["key"] = normalized_key
+    if "name_default" in data:
+        data["name_default"] = data["name_default"].strip()
+    if "comment" in data:
+        data["comment"] = data["comment"].strip()
     for key, value in data.items():
         setattr(item, key, value)
+    _normalize_group_positions(db)
     item.changed_by_id = changed_by_id
     db.commit()
     return item

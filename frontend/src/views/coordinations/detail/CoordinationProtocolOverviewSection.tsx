@@ -1,22 +1,14 @@
 import type { Code } from '../../../api';
+import { translateCodeLabel } from '../../../i18n/codeTranslations';
 import { useI18n } from '../../../i18n/i18n';
-
-const ENGLISH_ORGAN_LABEL_BY_KEY: Record<string, string> = {
-  KIDNEY: 'Kidney',
-  PANCREAS: 'Pancreas',
-  LIVER: 'Liver',
-  HEART: 'Heart',
-  HEART_VALVE: 'Heart valve',
-  LUNG: 'Lung',
-  ISLET: 'Islet cells',
-  VESSELS: 'Vessels',
-  INTESTINE: 'Intestine',
-};
 
 export interface ProtocolOverviewEntry {
   id: number;
   patientId: number | null;
   episodeId: number | null;
+  assignmentSlotLabel: string;
+  expectedOrganIds: number[];
+  isOrganRejected: boolean;
   recipientName: string;
   fallNr: string;
   birthDate: string;
@@ -40,11 +32,7 @@ interface Props {
 
 export default function CoordinationProtocolOverviewSection({ groups, onOpenPatientEpisode }: Props) {
   const { t } = useI18n();
-  const getOrganLabel = (organ: Code): string => {
-    const key = (organ.key ?? '').trim().toUpperCase();
-    if (!key) return organ.name_default;
-    return t(`coordinations.protocolOverview.organByKey.${key}`, ENGLISH_ORGAN_LABEL_BY_KEY[key] ?? organ.name_default);
-  };
+  const getOrganLabel = (organ: Code): string => translateCodeLabel(t, organ);
   return (
     <section className="detail-section ui-panel-section">
       <div className="detail-section-heading">
@@ -80,6 +68,10 @@ export default function CoordinationProtocolOverviewSection({ groups, onOpenPati
                       <div className="detail-field">
                         <span className="detail-label">{t('coordinations.protocolOverview.recipientFullName', 'Recipient full name')}</span>
                         <span className="detail-value">{entry.recipientName}</span>
+                      </div>
+                      <div className="detail-field">
+                        <span className="detail-label">{t('coordinations.protocolOverview.assignmentSlot', 'Assignment slot')}</span>
+                        <span className="detail-value">{entry.assignmentSlotLabel}</span>
                       </div>
                       <div className="detail-field">
                         <span className="detail-label">{t('coordinations.protocolOverview.fallNumber', 'Fallnummer')}</span>

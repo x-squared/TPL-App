@@ -36,8 +36,7 @@ Key points:
 
 Frontend translation function behavior:
 
-- If locale is `en`: return the `englishDefault` passed in code
-- If locale is non-English (currently `de`):
+- all modes:
   1. check runtime override bundle (`TRANSLATION_BUNDLE`)
   2. fallback to built-in `translations.json` text for that locale
   3. fallback to `englishDefault`

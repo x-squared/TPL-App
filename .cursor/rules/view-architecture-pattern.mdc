@@ -37,6 +37,12 @@ For any new complex view (like patients or colloquiums), follow this structure b
   - Do not create ad-hoc wrappers for primary section titles when `detail-section-heading` fits.
   - Use `h4/h5` only for local micro-labels inside an already headed section, not as the primary section heading pattern.
   - Keep heading text concise; add helper text only when it provides concrete operational value.
+- **Tabs + panel layout defaults**:
+  - Build tab selectors as explicit tab controls (`<nav>` + tab buttons), and keep tab content in adjacent panel containers.
+  - Tab bars must span the full visible container width, with tab buttons left-aligned from the start edge.
+  - Tab bars must remain visible while scrolling (sticky at the top of the scroll container), including when tabs wrap across two lines.
+  - Keep each tab panel rooted in `ui-panel-section` (or feature-specific extension of it) for consistent spacing, borders, and background.
+  - Within tab panels, prefer a clear two-level structure: section heading (`h2`) then boxed subsections (`h3`) instead of ad-hoc heading levels.
 - **Shared rendering utilities**:
   - Centralize repeated display formatting logic (for example dates/times, empty placeholders, labels) in shared utilities under `frontend/src/views/layout/` (or another shared location) instead of duplicating inline logic in components.
   - For date rendering in view output, use shared formatters (for example `dateFormat.ts`) and keep formatting consistent across list/detail/header sections.
@@ -45,6 +51,7 @@ For any new complex view (like patients or colloquiums), follow this structure b
   - For data sections in detail views, default to explicit **Edit / Save / Cancel** behavior.
   - Fields are read-only until Edit is clicked; Cancel restores the original data.
   - Save is section-scoped and disabled when there are no changes.
+  - Save/update flows that trigger data reloads must preserve the current scroll position (no jump-to-top during data capture).
   - Reuse shared panel controls (for example `EditableSectionHeader`) instead of duplicating heading/action markup.
   - Exceptions (autosave/inline editing) must be explicitly requested.
 - **Table add/delete consistency**:

@@ -1,6 +1,7 @@
 from __future__ import annotations
 
 from datetime import date, datetime
+from typing import Literal
 
 from pydantic import BaseModel, ConfigDict, field_validator
 
@@ -286,6 +287,7 @@ class CoordinationProcurementFieldGroupTemplateBase(BaseModel):
     name_default: str = ""
     comment: str = ""
     is_active: bool = True
+    display_lane: Literal["PRIMARY", "SECONDARY"] = "PRIMARY"
     pos: int = 0
 
 
@@ -304,6 +306,11 @@ class CoordinationProcurementFieldGroupTemplateCreate(CoordinationProcurementFie
 
 
 class CoordinationProcurementFieldGroupTemplateUpdate(BaseModel):
+    key: str | None = None
+    name_default: str | None = None
+    comment: str | None = None
+    is_active: bool | None = None
+    display_lane: Literal["PRIMARY", "SECONDARY"] | None = None
     pos: int | None = None
 
 
@@ -426,14 +433,20 @@ class CoordinationProcurementOrganBase(BaseModel):
     coordination_id: int
     organ_id: int
     procurement_surgeon: str = ""
+    organ_rejected: bool = False
+    organ_rejection_comment: str = ""
 
 
 class CoordinationProcurementOrganCreate(BaseModel):
     procurement_surgeon: str = ""
+    organ_rejected: bool = False
+    organ_rejection_comment: str = ""
 
 
 class CoordinationProcurementOrganUpdate(BaseModel):
     procurement_surgeon: str | None = None
+    organ_rejected: bool | None = None
+    organ_rejection_comment: str | None = None
 
 
 class CoordinationProcurementOrganResponse(CoordinationProcurementOrganBase):
@@ -456,6 +469,30 @@ class CoordinationProcurementFlexResponse(BaseModel):
     field_group_templates: list[CoordinationProcurementFieldGroupTemplateResponse] = []
     field_templates: list[CoordinationProcurementFieldTemplateResponse] = []
     protocol_task_group_selections: list[CoordinationProcurementProtocolTaskGroupSelectionResponse] = []
+
+
+class CoordinationProtocolStateSlotResponse(BaseModel):
+    slot_key: ProcurementSlotKey
+    episode_id: int | None = None
+    expected_organ_ids: list[int] = []
+    patient_id: int | None = None
+    recipient_name: str = ""
+    patient_pid: str = ""
+    patient_birth_date: date | None = None
+    episode_fall_nr: str = ""
+
+
+class CoordinationProtocolStateOrganResponse(BaseModel):
+    organ_id: int
+    organ: CodeResponse | None = None
+    organ_rejected: bool = False
+    organ_rejection_comment: str = ""
+    slots: list[CoordinationProtocolStateSlotResponse] = []
+
+
+class CoordinationProtocolStateResponse(BaseModel):
+    coordination_id: int
+    organs: list[CoordinationProtocolStateOrganResponse] = []
 
 
 class CoordinationProcurementFieldTemplateCreate(BaseModel):

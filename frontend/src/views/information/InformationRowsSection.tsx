@@ -1,4 +1,5 @@
 import { useEffect, useRef, useState } from 'react';
+import { translateCodeLabel } from '../../i18n/codeTranslations';
 import ErrorBanner from '../layout/ErrorBanner';
 import { formatDateDdMmYyyy } from '../layout/dateFormat';
 import InlineDeleteActions from '../layout/InlineDeleteActions';
@@ -142,7 +143,7 @@ export default function InformationRowsSection({ model }: InformationRowsSection
                     <option value="">{t('information.context.general', 'General')}</option>
                     {model.organContexts.map((context) => (
                       <option key={context.id} value={context.id}>
-                        {context.name_default}
+                        {translateCodeLabel(t, context)}
                       </option>
                     ))}
                   </select>
@@ -223,7 +224,7 @@ export default function InformationRowsSection({ model }: InformationRowsSection
                 </td>
                 <td className="info-valid-from-col">{formatDateDdMmYyyy(row.valid_from)}</td>
                 <td className="info-author-col">{row.author?.name ?? `#${row.author_id}`}</td>
-                <td>{row.context?.name_default ?? t('information.context.general', 'General')}</td>
+                <td>{row.context ? translateCodeLabel(t, row.context) : t('information.context.general', 'General')}</td>
                 <td className="detail-ci-actions">
                   {canManageRow(row) ? (
                     row.withdrawn ? (

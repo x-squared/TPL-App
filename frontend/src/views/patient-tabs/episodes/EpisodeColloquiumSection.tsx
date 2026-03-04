@@ -1,4 +1,5 @@
 import type { ColloqiumAgenda, ColloqiumType } from '../../../api';
+import { translateCodeLabel } from '../../../i18n/codeTranslations';
 import { useI18n } from '../../../i18n/i18n';
 import ErrorBanner from '../../layout/ErrorBanner';
 
@@ -82,7 +83,7 @@ export default function EpisodeColloquiumSection({
                         &#x279C;
                       </button>
                     </td>
-                    <td>{agenda.colloqium?.colloqium_type?.organ?.name_default ?? t('common.emptySymbol', '–')}</td>
+                    <td>{translateCodeLabel(t, agenda.colloqium?.colloqium_type?.organ)}</td>
                     <td>{agenda.colloqium?.colloqium_type?.name ?? t('common.emptySymbol', '–')}</td>
                     <td>{formatDate(agenda.colloqium?.date ?? null)}</td>
                     <td>{agenda.colloqium?.participants ?? ''}</td>
@@ -109,7 +110,7 @@ export default function EpisodeColloquiumSection({
                   <option value="">{t('episode.colloquium.assignDialog.selectType', 'Select type...')}</option>
                   {selectableColloqiumTypes.map((type) => (
                     <option key={type.id} value={type.id}>
-                      {type.organ?.name_default ?? t('common.emptySymbol', '–')} - {type.name}
+                      {translateCodeLabel(t, type.organ)} - {type.name}
                     </option>
                   ))}
                 </select>

@@ -12,6 +12,7 @@ This directory contains intent-level domain specifications that are independent 
 - `coordinations-domain.puml`: coordination, donor/procurement, episode links, and logs.
 - `tasking-domain.puml`: task templates, task groups, tasks, and context links.
 - `communication-ux-domain.puml`: information/read-state and favorites concepts.
+- `domain-sync-mapping.json`: conceptual-to-model alias and checker configuration.
 
 ## Scope
 
@@ -34,6 +35,17 @@ Example with PlantUML installed locally:
 
 ```bash
 plantuml spec/domain/conceptual-domain-model.puml
+```
+
+## Domain sync check
+
+Run the conceptual-vs-model consistency check:
+
+```bash
+cd /Users/stephan/Workspace/TPL-App/backend
+source .venv/bin/activate
+cd /Users/stephan/Workspace/TPL-App
+python -m qa.spec_tools.check_domain_sync
 ```
 
 ## Maintenance guidance

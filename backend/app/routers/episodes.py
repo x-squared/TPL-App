@@ -14,6 +14,7 @@ from ..features.episodes import (
 from ..models import User
 from ..schemas import (
     EpisodeCreate,
+    EpisodeListResponse,
     EpisodeOrganCreate,
     EpisodeOrganResponse,
     EpisodeOrganUpdate,
@@ -24,7 +25,7 @@ from ..schemas import (
 router = APIRouter(prefix="/patients/{patient_id}/episodes", tags=["episodes"])
 
 
-@router.get("/", response_model=list[EpisodeResponse])
+@router.get("/", response_model=list[EpisodeListResponse])
 def list_episodes(
     patient_id: int,
     db: Session = Depends(get_db),

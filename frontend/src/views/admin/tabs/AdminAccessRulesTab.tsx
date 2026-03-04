@@ -1,4 +1,5 @@
 import type { AccessControlMatrix } from '../../../api';
+import { translateCodeLabel } from '../../../i18n/codeTranslations';
 import ErrorBanner from '../../layout/ErrorBanner';
 import { useI18n } from '../../../i18n/i18n';
 
@@ -51,7 +52,7 @@ export default function AdminAccessRulesTab({
               >
                 {matrix.roles.map((role) => (
                   <option key={role.key} value={role.key}>
-                    {role.name_default || role.key}
+                    {translateCodeLabel(t, { type: 'ROLE', key: role.key, name_default: role.name_default })}
                   </option>
                 ))}
               </select>

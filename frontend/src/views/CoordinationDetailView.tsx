@@ -83,6 +83,7 @@ export default function CoordinationDetailView({
         donor={model.donor}
         origin={model.origin}
         coordinationEpisodes={model.coordinationEpisodes}
+        procurementFlex={model.procurementFlex}
         patientsById={model.patientsById}
         organCodes={model.organCodes}
         deathKinds={model.deathKinds}
@@ -125,6 +126,7 @@ export default function CoordinationDetailView({
         onSaveDonor={(patch) => model.saveDonor(patch)}
         onSaveOrigin={(patch) => model.saveOrigin(patch)}
         onRefresh={model.refresh}
+        onRefreshAssignments={model.refreshAssignments}
         onOpenPatientEpisode={onOpenPatientEpisode}
       />
     </div>

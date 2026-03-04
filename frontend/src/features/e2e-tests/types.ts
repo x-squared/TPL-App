@@ -10,6 +10,7 @@ export interface E2ETestsViewModel {
   loading: boolean;
   running: boolean;
   runningHealthCheck: boolean;
+  runningServerHealthTest: boolean;
   error: string;
   activeTab: E2ETestsTabKey;
   setActiveTab: (value: E2ETestsTabKey) => void;
@@ -19,8 +20,11 @@ export interface E2ETestsViewModel {
   outputTailLines: number;
   setOutputTailLines: (value: number) => void;
   lastResult: E2ETestRunResponse | null;
+  serverHealthResult: E2ETestRunResponse | null;
   runTests: () => Promise<void>;
+  triggerServerHealthTest: () => Promise<void>;
   triggerHealthCheck422: () => Promise<void>;
+  clearServerHealthResult: () => void;
   clearResults: () => void;
   refreshMetadata: () => Promise<void>;
 }

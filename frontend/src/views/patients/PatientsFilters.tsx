@@ -1,4 +1,5 @@
 import type { Code } from '../../api';
+import { translateCodeLabel } from '../../i18n/codeTranslations';
 import { useI18n } from '../../i18n/i18n';
 
 interface Props {
@@ -52,7 +53,7 @@ export default function PatientsFilters({
       <div className="filter-episode-filters">
         <select className="filter-select" value={filterOrgan} onChange={(e) => setFilterOrgan(e.target.value)}>
           <option value="">{t('patients.filters.organ', 'Organ...')}</option>
-          {organCodes.map((c) => <option key={c.id} value={c.id}>{c.name_default}</option>)}
+          {organCodes.map((c) => <option key={c.id} value={c.id}>{translateCodeLabel(t, c)}</option>)}
         </select>
         <select className="filter-select" value={filterOpenOnly ? 'open' : ''} onChange={(e) => setFilterOpenOnly(e.target.value === 'open')}>
           <option value="">{t('patients.filters.allEpisodes', 'All episodes')}</option>

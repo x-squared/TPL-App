@@ -1,7 +1,8 @@
 import type React from 'react';
 import { useEffect, useMemo, useState } from 'react';
-import type { Code, Coordination, CoordinationDonor, CoordinationEpisode, CoordinationOrigin, Patient } from '../../../api';
+import type { Code, Coordination, CoordinationDonor, CoordinationEpisode, CoordinationOrigin, CoordinationProcurementFlex, Patient } from '../../../api';
 import { ApiError, toUserErrorMessage } from '../../../api/error';
+import { translateCodeLabel } from '../../../i18n/codeTranslations';
 import { useI18n } from '../../../i18n/i18n';
 import { formatDateDdMmYyyy } from '../../layout/dateFormat';
 import CoordinationBasicDataSection from './CoordinationBasicDataSection';
@@ -40,6 +41,7 @@ interface Props {
   donor: CoordinationDonor | null;
   origin: CoordinationOrigin | null;
   coordinationEpisodes: CoordinationEpisode[];
+  procurementFlex: CoordinationProcurementFlex | null;
   patientsById: Record<number, Patient>;
   organCodes: Code[];
   deathKinds: Code[];
@@ -72,6 +74,7 @@ interface Props {
   onSaveDonor: (patch: Partial<CoordinationDonor>) => Promise<void>;
   onSaveOrigin: (patch: Partial<CoordinationOrigin>) => Promise<void>;
   onRefresh: () => Promise<void>;
+  onRefreshAssignments: () => Promise<void>;
   onOpenPatientEpisode: (patientId: number, episodeId: number) => void;
 }
 
@@ -91,6 +94,7 @@ export default function CoordinationDetailTabs({
   donor,
   origin,
   coordinationEpisodes,
+  procurementFlex,
   patientsById,
   organCodes,
   deathKinds,
@@ -123,6 +127,7 @@ export default function CoordinationDetailTabs({
   onSaveDonor,
   onSaveOrigin,
   onRefresh,
+  onRefreshAssignments,
   onOpenPatientEpisode,
 }: Props) {
   const { t } = useI18n();
@@ -344,11 +349,21 @@ export default function CoordinationDetailTabs({
   }, [timeLogs]);
 
   const protocolEntriesByOrgan = useMemo(() => {
-    const sortedOrgans = [...organCodes].sort((a, b) => a.pos - b.pos || a.name_default.localeCompare(b.name_default));
+    const sortedOrgans = [...organCodes].sort(
+      (a, b) => a.pos - b.pos || translateCodeLabel(t, a).localeCompare(translateCodeLabel(t, b)),
+    );
     return sortedOrgans.map((organ) => {
+      const organKey = ((organ.key ?? '') || '').trim().toUpperCase();
+      const useSides = organKey === 'KIDNEY' || organKey === 'LUNG';
+      const slotLabels = useSides
+        ? [
+          t('admin.procurementConfig.slot.left', 'LEFT'),
+          t('admin.procurementConfig.slot.right', 'RIGHT'),
+        ]
+        : [t('admin.procurementConfig.slot.main', 'MAIN')];
       const entries = coordinationEpisodes
         .filter((item) => item.organ_id === organ.id)
-        .map((item) => {
+        .map((item, index) => {
           const patientId = item.episode?.patient_id;
           const patient = typeof patientId === 'number' ? patientsById[patientId] : undefined;
           const recipientName = patient
@@ -359,6 +374,9 @@ export default function CoordinationDetailTabs({
             id: item.id,
             patientId: item.episode?.patient_id ?? null,
             episodeId: item.episode_id,
+            assignmentSlotLabel: slotLabels[Math.min(index, slotLabels.length - 1)],
+            expectedOrganIds: item.episode?.organs?.map((entry) => entry.id).filter((value) => typeof value === 'number') ?? [],
+            isOrganRejected: item.is_organ_rejected,
             recipientName,
             fallNr: item.episode?.fall_nr || t('common.emptySymbol', '–'),
             birthDate: formatDateDdMmYyyy(patient?.date_of_birth),
@@ -372,7 +390,18 @@ export default function CoordinationDetailTabs({
         });
       return { organ, entries };
     });
-  }, [coordinationEpisodes, organCodes, patientsById]);
+  }, [coordinationEpisodes, organCodes, patientsById, t]);
+
+  const organRejectionsByOrganId = useMemo(() => {
+    const byOrganId: Record<number, { rejected: boolean; comment: string }> = {};
+    for (const organRow of procurementFlex?.organs ?? []) {
+      byOrganId[organRow.organ_id] = {
+        rejected: Boolean(organRow.organ_rejected),
+        comment: organRow.organ_rejection_comment ?? '',
+      };
+    }
+    return byOrganId;
+  }, [procurementFlex]);
 
   const section = (() => {
     if (tab === 'coordination') {
@@ -462,7 +491,9 @@ export default function CoordinationDetailTabs({
         <CoordinationProtocolTab
           coordinationId={coordination.id}
           groups={protocolEntriesByOrgan}
+          organRejectionsByOrganId={organRejectionsByOrganId}
           onOpenPatientEpisode={onOpenPatientEpisode}
+          onRefreshAssignments={onRefreshAssignments}
         />
       );
     }

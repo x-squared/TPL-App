@@ -1,10 +1,13 @@
 import { useEffect, useMemo, useState } from 'react';
 import { api, type ColloqiumAgenda, type Patient, type PatientListItem } from '../../../../api';
+import { translateCodeLabel } from '../../../../i18n/codeTranslations';
+import { useI18n } from '../../../../i18n/i18n';
 import { formatEpisodeDisplayName } from '../../../layout/episodeDisplay';
 import type { AgendaDraft } from '../../tabs/protocol/ColloquiumProtocolTab';
 import type { AgendaEditForm, EpisodeChoice, EpisodePreview, PickerRow } from '../colloquiumDetailViewModelTypes';
 
 export function useColloquiumAgendaManager(colloqiumId: number, organId: number | null | undefined) {
+  const { t } = useI18n();
   const [agendas, setAgendas] = useState<ColloqiumAgenda[]>([]);
   const [loadingAgendas, setLoadingAgendas] = useState(true);
   const [agendaDrafts, setAgendaDrafts] = useState<Record<number, AgendaDraft>>({});
@@ -112,8 +115,8 @@ export function useColloquiumAgendaManager(colloqiumId: number, organId: number 
         patientFirstName: patient?.first_name ?? '–',
         patientPid: patient?.pid ?? '–',
         fallNr: episode.fall_nr || `#${episode.id}`,
-        organName: episode.organ?.name_default ?? '–',
-        statusName: episode.status?.name_default ?? '–',
+        organName: translateCodeLabel(t, episode.organ),
+        statusName: translateCodeLabel(t, episode.status),
         start: episode.start,
         end: episode.end,
       };
@@ -134,7 +137,7 @@ export function useColloquiumAgendaManager(colloqiumId: number, organId: number 
       });
     });
     return map;
-  }, [agendas, patientsById, pickerRows]);
+  }, [agendas, patientsById, pickerRows, t]);
 
   const selectedEpisodePreviews = useMemo(() => {
     const ids = agendaForm.episode_ids.length > 0
@@ -263,8 +266,8 @@ export function useColloquiumAgendaManager(colloqiumId: number, organId: number 
             patientFirstName: patient.first_name,
             patientPid: patient.pid,
             fallNr: ep.fall_nr,
-            organName: ep.organ?.name_default ?? '–',
-            statusName: ep.status?.name_default ?? '–',
+            organName: translateCodeLabel(t, ep.organ),
+            statusName: translateCodeLabel(t, ep.status),
             start: ep.start,
             end: ep.end,
           }));

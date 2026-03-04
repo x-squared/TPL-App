@@ -1,5 +1,6 @@
 import { useMemo, useState } from 'react';
 import type { Code, Episode, EpisodeOrgan } from '../../../api';
+import { translateCodeLabel } from '../../../i18n/codeTranslations';
 import { useI18n } from '../../../i18n/i18n';
 import type { EpisodeMetaForm } from './types';
 
@@ -59,11 +60,12 @@ export default function EpisodeMetaSection({
   const activeOrganName = useMemo(() => {
     const active = selectedEpisode.episode_organs
       .filter((row) => row.is_active)
-      .map((row) => row.organ?.name_default)
+      .filter((row) => row.organ != null)
+      .map((row) => translateCodeLabel(t, row.organ))
       .filter((name): name is string => Boolean(name));
     if (active.length > 0) return active.join(' / ');
-    return selectedEpisode.organ?.name_default ?? t('common.emptySymbol', '–');
-  }, [selectedEpisode]);
+    return translateCodeLabel(t, selectedEpisode.organ);
+  }, [selectedEpisode, t]);
 
   const currentOrganIds = new Set(selectedEpisode.episode_organs.map((row) => row.organ_id));
 
@@ -71,11 +73,11 @@ export default function EpisodeMetaSection({
     () =>
       [...selectedEpisode.episode_organs].sort((a, b) => {
         if (a.is_active !== b.is_active) return a.is_active ? -1 : 1;
-        const an = a.organ?.name_default ?? '';
-        const bn = b.organ?.name_default ?? '';
+        const an = translateCodeLabel(t, a.organ);
+        const bn = translateCodeLabel(t, b.organ);
         return an.localeCompare(bn);
       }),
-    [selectedEpisode.episode_organs],
+    [selectedEpisode.episode_organs, t],
   );
 
   const handleAdd = () => {
@@ -155,7 +157,7 @@ export default function EpisodeMetaSection({
             ) : null}
             {sortedRows.map((row) => (
               <tr key={row.id} className={row.is_active ? '' : 'episode-organ-row-inactive'}>
-                <td>{row.organ?.name_default ?? t('common.emptySymbol', '–')}</td>
+                <td>{translateCodeLabel(t, row.organ)}</td>
                 <td>{formatDate(row.date_added)}</td>
                 <td>
                   {editingOrganId === row.id ? (
@@ -249,7 +251,7 @@ export default function EpisodeMetaSection({
                     <option value="">{t('episode.meta.selectOrgan', 'Select organ...')}</option>
                     {organCodes.map((code) => (
                       <option key={code.id} value={code.id}>
-                        {code.name_default}
+                        {translateCodeLabel(t, code)}
                         {currentOrganIds.has(code.id) ? ` (${t('episode.meta.existing', 'existing')})` : ''}
                       </option>
                     ))}

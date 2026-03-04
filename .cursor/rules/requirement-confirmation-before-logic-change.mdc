@@ -1,0 +1,27 @@
+---
+description: Require explicit user confirmation before inferred behavior changes
+alwaysApply: true
+---
+
+# Requirement Confirmation Before Logic Change
+
+- Do not introduce behavior/logic changes unless they are:
+  - explicitly requested by the user, or
+  - explicitly proposed by the assistant and then confirmed by the user.
+- If requirements are ambiguous, stop and ask a targeted clarification before implementing.
+- If multiple valid behaviors exist, present options and wait for a decision.
+- For inferred defaults, mark them as assumptions and request confirmation before coding.
+- Never treat a previous workaround as approved product behavior without explicit user confirmation.
+
+## Implementation Protocol
+
+1. Restate the behavior change in one sentence.
+2. Label whether it is `requested` or `proposed`.
+3. If `proposed`, wait for user approval before implementation.
+4. In final notes, list any assumptions that were confirmed.
+
+## Quick Examples
+
+- Bad: "Implemented auto-reject side effects" (not requested, not discussed).
+- Good: "Proposed side effect X because of Y — should I implement it?"
+

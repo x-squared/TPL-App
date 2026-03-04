@@ -153,6 +153,11 @@ export interface CoordinationEpisodeLinkedEpisode {
   fall_nr: string;
   tpl_date: string | null;
   list_rs_nr: string;
+  status_id?: number | null;
+  status?: Code | null;
+  phase_id?: number | null;
+  phase?: Code | null;
+  organs?: Code[];
 }
 
 export interface CoordinationEpisode {
@@ -175,11 +180,13 @@ export interface CoordinationEpisode {
 
 export type ProcurementSlotKey = 'MAIN' | 'LEFT' | 'RIGHT';
 export type ProcurementValueMode = 'SCALAR' | 'PERSON_SINGLE' | 'PERSON_LIST' | 'TEAM_SINGLE' | 'TEAM_LIST' | 'EPISODE';
+export type ProcurementGroupDisplayLane = 'PRIMARY' | 'SECONDARY';
 
 export interface CoordinationProcurementFieldGroupTemplate {
   id: number;
   key: string;
   name_default: string;
+  display_lane: ProcurementGroupDisplayLane;
   pos: number;
 }
 
@@ -234,6 +241,8 @@ export interface CoordinationProcurementOrgan {
   coordination_id: number;
   organ_id: number;
   procurement_surgeon: string;
+  organ_rejected: boolean;
+  organ_rejection_comment: string;
   organ: Code | null;
   slots: CoordinationProcurementSlot[];
 }
@@ -250,6 +259,36 @@ export interface CoordinationProcurementValueUpsert {
   person_ids?: number[];
   team_ids?: number[];
   episode_id?: number | null;
+}
+
+export interface CoordinationProcurementOrganUpsert {
+  procurement_surgeon?: string;
+  organ_rejected?: boolean;
+  organ_rejection_comment?: string;
+}
+
+export interface CoordinationProtocolStateSlot {
+  slot_key: ProcurementSlotKey;
+  episode_id: number | null;
+  expected_organ_ids: number[];
+  patient_id: number | null;
+  recipient_name: string;
+  patient_pid: string;
+  patient_birth_date: string | null;
+  episode_fall_nr: string;
+}
+
+export interface CoordinationProtocolStateOrgan {
+  organ_id: number;
+  organ: Code | null;
+  organ_rejected: boolean;
+  organ_rejection_comment: string;
+  slots: CoordinationProtocolStateSlot[];
+}
+
+export interface CoordinationProtocolState {
+  coordination_id: number;
+  organs: CoordinationProtocolStateOrgan[];
 }
 
 export const coordinationsApi = {
@@ -299,10 +338,35 @@ export const coordinationsApi = {
       body: JSON.stringify(data),
     }),
 
-  listCoordinationEpisodes: (coordinationId: number) =>
-    request<CoordinationEpisode[]>(`/coordinations/${coordinationId}/episodes/`),
+  listCoordinationEpisodes: (
+    coordinationId: number,
+    params?: { recipientSelection?: boolean; organId?: number | null },
+  ) => {
+    const query = new URLSearchParams();
+    if (params?.recipientSelection) {
+      query.set('recipient_selection', 'true');
+    }
+    if (typeof params?.organId === 'number') {
+      query.set('organ_id', String(params.organId));
+    }
+    const suffix = query.toString() ? `?${query.toString()}` : '';
+    return request<CoordinationEpisode[]>(`/coordinations/${coordinationId}/episodes/${suffix}`);
+  },
+  listCoordinationRecipientSelectableEpisodes: (coordinationId: number, organId: number) =>
+    request<CoordinationEpisodeLinkedEpisode[]>(`/coordinations/${coordinationId}/episodes/recipient-selectable?organ_id=${organId}`),
+  getCoordinationProtocolState: (coordinationId: number) =>
+    request<CoordinationProtocolState>(`/coordinations/${coordinationId}/protocol-state/`),
   getCoordinationProcurementFlex: (coordinationId: number) =>
     request<CoordinationProcurementFlex>(`/coordinations/${coordinationId}/procurement-flex/`),
+  upsertCoordinationProcurementOrgan: (
+    coordinationId: number,
+    organId: number,
+    data: CoordinationProcurementOrganUpsert,
+  ) =>
+    request<CoordinationProcurementOrgan>(
+      `/coordinations/${coordinationId}/procurement-flex/organs/${organId}`,
+      { method: 'PUT', body: JSON.stringify(data) },
+    ),
   upsertCoordinationProcurementValue: (
     coordinationId: number,
     organId: number,

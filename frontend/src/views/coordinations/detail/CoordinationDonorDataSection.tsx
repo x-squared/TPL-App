@@ -1,5 +1,6 @@
 import type React from 'react';
 import type { Code, CoordinationDonor } from '../../../api';
+import { translateCodeLabel } from '../../../i18n/codeTranslations';
 import { useI18n } from '../../../i18n/i18n';
 import EditableSectionHeader from '../../layout/EditableSectionHeader';
 import ErrorBanner from '../../layout/ErrorBanner';
@@ -101,12 +102,12 @@ export default function CoordinationDonorDataSection({
               <option value="">{t('common.emptySymbol', '–')}</option>
               {deathKinds.map((kind) => (
                 <option key={kind.id} value={kind.id}>
-                  {kind.name_default}
+                  {translateCodeLabel(t, kind)}
                 </option>
               ))}
             </select>
           ) : (
-            <span className="detail-value">{donor?.death_kind?.name_default ?? t('common.emptySymbol', '–')}</span>
+            <span className="detail-value">{translateCodeLabel(t, donor?.death_kind)}</span>
           )}
         </div>
         <div className="detail-field">
@@ -122,12 +123,12 @@ export default function CoordinationDonorDataSection({
               <option value="">{t('common.emptySymbol', '–')}</option>
               {sexCodes.map((sex) => (
                 <option key={sex.id} value={sex.id}>
-                  {sex.name_default}
+                  {translateCodeLabel(t, sex)}
                 </option>
               ))}
             </select>
           ) : (
-            <span className="detail-value">{sexCodes.find((s) => s.id === donor?.sex_id)?.name_default ?? t('common.emptySymbol', '–')}</span>
+            <span className="detail-value">{translateCodeLabel(t, sexCodes.find((s) => s.id === donor?.sex_id))}</span>
           )}
         </div>
         <div className="detail-field">
@@ -143,12 +144,12 @@ export default function CoordinationDonorDataSection({
               <option value="">{t('common.emptySymbol', '–')}</option>
               {bloodTypes.map((bt) => (
                 <option key={bt.id} value={bt.id}>
-                  {bt.name_default}
+                  {translateCodeLabel(t, bt)}
                 </option>
               ))}
             </select>
           ) : (
-            <span className="detail-value">{bloodTypes.find((bt) => bt.id === donor?.blood_type_id)?.name_default ?? t('common.emptySymbol', '–')}</span>
+            <span className="detail-value">{translateCodeLabel(t, bloodTypes.find((bt) => bt.id === donor?.blood_type_id))}</span>
           )}
         </div>
         <div className="detail-field">
@@ -206,13 +207,13 @@ export default function CoordinationDonorDataSection({
               <option value="">{t('common.emptySymbol', '–')}</option>
               {diagnosisDonorOptions.map((diag) => (
                 <option key={diag.id} value={diag.id}>
-                  {diag.name_default}
+                  {translateCodeLabel(t, diag)}
                 </option>
               ))}
             </select>
           ) : (
             <span className="detail-value">
-              {diagnosisDonorOptions.find((diag) => diag.id === donor?.diagnosis_id)?.name_default ?? t('common.emptySymbol', '–')}
+              {translateCodeLabel(t, diagnosisDonorOptions.find((diag) => diag.id === donor?.diagnosis_id))}
             </span>
           )}
         </div>

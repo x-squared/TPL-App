@@ -103,12 +103,17 @@
 .e2e-health-grid {
   display: grid;
   gap: 0.8rem;
+  justify-items: stretch;
 }
 
 .e2e-health-box {
   border: 1px solid #222;
   border-radius: 6px;
   padding: 0.6rem 0.75rem 0.7rem;
+  width: 100%;
+  max-width: none;
+  min-width: 0;
+  box-sizing: border-box;
 }
 
 .e2e-health-box legend {
@@ -122,5 +127,32 @@
 
 .e2e-health-actions {
   display: flex;
+  gap: 0.45rem;
   justify-content: flex-end;
+}
+
+.e2e-health-result-meta {
+  margin: 0.45rem 0;
+  min-width: 0;
+  white-space: nowrap;
+  overflow-x: auto;
+}
+
+.e2e-health-box .e2e-output-block {
+  min-width: 0;
+}
+
+.e2e-health-box .e2e-output-block pre {
+  max-width: 100%;
+  overflow-x: auto;
+  box-sizing: border-box;
+}
+
+.e2e-health-result-box {
+  max-height: 340px;
+  overflow: auto;
+}
+
+.e2e-health-result-box pre {
+  max-height: none;
 }

@@ -1,5 +1,6 @@
 import type React from 'react';
 import type { Coordination } from '../../../api';
+import { translateCodeLabel } from '../../../i18n/codeTranslations';
 import { useI18n } from '../../../i18n/i18n';
 import EditableSectionHeader from '../../layout/EditableSectionHeader';
 import ErrorBanner from '../../layout/ErrorBanner';
@@ -53,7 +54,7 @@ export default function CoordinationBasicDataSection({
       <div className="detail-grid">
         <div className="detail-field">
           <span className="detail-label">{t('coordinations.basicData.status', 'Status')}</span>
-          <span className="detail-value">{coordination.status?.name_default ?? t('common.emptySymbol', '–')}</span>
+          <span className="detail-value">{translateCodeLabel(t, coordination.status)}</span>
         </div>
         <div className="detail-field">
           <span className="detail-label">{t('coordinations.basicData.start', 'Start')}</span>

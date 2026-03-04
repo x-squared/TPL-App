@@ -1,13 +1,24 @@
 from sqlalchemy.orm import Session
 
 from ....features.medical_values import instantiate_templates_for_patient
-from ....models import Code, ContactInfo, Episode, EpisodeOrgan, MedicalValue, MedicalValueTemplate, Patient
+from ....models import (
+    Code,
+    ContactInfo,
+    Episode,
+    EpisodeOrgan,
+    MedicalValue,
+    MedicalValueGroup,
+    MedicalValueTemplate,
+    Patient,
+)
 
 
 def sync_patients(db: Session) -> None:
     """Replace all PATIENT and CONTACT_INFO rows with seed data on every startup."""
     from ...datasets.sample.patient_cases import CONTACT_INFOS, EPISODES, PATIENTS, SAMPLE_CHANGED_BY_ID
 
+    db.query(MedicalValue).delete()
+    db.query(MedicalValueGroup).delete()
     db.query(EpisodeOrgan).delete()
     db.query(Episode).delete()
     db.query(ContactInfo).delete()
@@ -41,9 +52,15 @@ def sync_patients(db: Session) -> None:
                 organ_ids.append(organ.id)
         organ_ids = list(dict.fromkeys(organ_ids))
         status_key = raw.pop("status_key", None)
+        phase_key = raw.pop("phase_key", None)
         status = (
             db.query(Code).filter(Code.type == "TPL_STATUS", Code.key == status_key).first()
             if status_key
+            else None
+        )
+        phase = (
+            db.query(Code).filter(Code.type == "TPL_PHASE", Code.key == phase_key).first()
+            if phase_key
             else None
         )
         if patient and organ_ids:
@@ -51,6 +68,7 @@ def sync_patients(db: Session) -> None:
                 patient_id=patient.id,
                 organ_id=organ_ids[0],
                 status_id=status.id if status else None,
+                phase_id=phase.id if phase else None,
                 **raw,
             )
             db.add(episode)

@@ -1,14 +1,20 @@
-import type { ProcurementSlotKey, ProcurementValueMode } from '../../../../api';
+import type { ProcurementGroupDisplayLane, ProcurementSlotKey, ProcurementValueMode } from '../../../../api';
 
 export interface ProcurementGroupCreatePayload {
   key: string;
   name_default: string;
   comment: string;
   is_active?: boolean;
+  display_lane?: ProcurementGroupDisplayLane;
   pos: number;
 }
 
 export interface ProcurementGroupUpdatePayload {
+  key?: string;
+  name_default?: string;
+  comment?: string;
+  is_active?: boolean;
+  display_lane?: ProcurementGroupDisplayLane;
   pos?: number;
 }
 

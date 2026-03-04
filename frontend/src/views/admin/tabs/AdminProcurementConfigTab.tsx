@@ -1,13 +1,13 @@
 import { useMemo } from 'react';
 
 import type { ProcurementAdminConfig, TaskGroupTemplate } from '../../../api';
+import { translateCodeLabel } from '../../../i18n/codeTranslations';
 import ErrorBanner from '../../layout/ErrorBanner';
 import { useI18n } from '../../../i18n/i18n';
 import ConfiguredFieldsSection from './procurementConfig/ConfiguredFieldsSection';
 import ConfiguredGroupsSection from './procurementConfig/ConfiguredGroupsSection';
 import ConfiguredProtocolTaskGroupsSection from './procurementConfig/ConfiguredProtocolTaskGroupsSection';
 import type {
-  ProcurementFieldCreatePayload,
   ProcurementFieldUpdatePayload,
   ProcurementGroupCreatePayload,
   ProcurementProtocolTaskGroupSelectionCreatePayload,
@@ -26,7 +26,6 @@ interface AdminProcurementConfigTabProps {
   onUpdateGroup: (groupId: number, payload: ProcurementGroupUpdatePayload) => Promise<void>;
   onReorderGroups: (groupIdsInOrder: number[]) => Promise<void>;
   onDeleteGroup: (groupId: number) => Promise<void>;
-  onCreateField: (payload: ProcurementFieldCreatePayload) => Promise<void>;
   onUpdateField: (fieldId: number, payload: ProcurementFieldUpdatePayload) => Promise<void>;
   onReorderFields: (
     assignments: Array<{ field_id: number; group_template_id: number | null; pos: number }>,
@@ -50,7 +49,6 @@ export default function AdminProcurementConfigTab({
   onUpdateGroup,
   onReorderGroups,
   onDeleteGroup,
-  onCreateField,
   onUpdateField,
   onReorderFields,
   onCreateScope,
@@ -61,10 +59,6 @@ export default function AdminProcurementConfigTab({
   onDeleteProtocolTaskGroupSelection,
 }: AdminProcurementConfigTabProps) {
   const { t } = useI18n();
-  const sortedDatatypes = useMemo(
-    () => [...(config?.datatype_definitions ?? [])].sort((a, b) => (a.code?.name_default ?? '').localeCompare(b.code?.name_default ?? '')),
-    [config?.datatype_definitions],
-  );
   const groupNameById = useMemo(
     () =>
       new Map(
@@ -77,10 +71,10 @@ export default function AdminProcurementConfigTab({
       new Map(
         (config?.datatype_definitions ?? []).map((datatype) => [
           datatype.id,
-          datatype.code?.name_default ?? datatype.code?.key ?? `Datatype ${datatype.id}`,
+          translateCodeLabel(t, datatype.code),
         ] as const),
       ),
-    [config?.datatype_definitions],
+    [config?.datatype_definitions, t],
   );
 
   const resolvedGroups = useMemo(() => {
@@ -106,12 +100,12 @@ export default function AdminProcurementConfigTab({
   }, [config?.field_templates, resolvedGroups]);
 
   return (
-    <section className="detail-section ui-panel-section">
+    <section className="detail-section ui-panel-section admin-protocol-config-tab">
       {loading && <p className="status">{t('admin.procurement.loading', 'Loading procurement configuration...')}</p>}
       {error && <ErrorBanner message={error} />}
       {status && <p className="status">{status}</p>}
       {!loading && config && (
-        <>
+        <div className="admin-tab-content-guard">
           <ConfiguredGroupsSection
             groups={resolvedGroups}
             saving={saving}
@@ -119,6 +113,20 @@ export default function AdminProcurementConfigTab({
             onUpdateGroup={onUpdateGroup}
             onReorderGroups={onReorderGroups}
             onDeleteGroup={onDeleteGroup}
+          />
+
+          <ConfiguredFieldsSection
+            config={config}
+            groups={resolvedGroups}
+            sortedFieldTemplates={sortedFieldTemplates}
+            groupNameById={groupNameById}
+            datatypeNameById={datatypeNameById}
+            scopesByFieldId={scopesByFieldId}
+            saving={saving}
+            onUpdateField={onUpdateField}
+            onReorderFields={onReorderFields}
+            onCreateScope={onCreateScope}
+            onDeleteScope={onDeleteScope}
           />
 
           <ConfiguredProtocolTaskGroupsSection
@@ -129,23 +137,7 @@ export default function AdminProcurementConfigTab({
             onReorderSelections={onReorderProtocolTaskGroupSelections}
             onDeleteSelection={onDeleteProtocolTaskGroupSelection}
           />
-
-          <ConfiguredFieldsSection
-            config={config}
-            groups={resolvedGroups}
-            sortedDatatypes={sortedDatatypes}
-            sortedFieldTemplates={sortedFieldTemplates}
-            groupNameById={groupNameById}
-            datatypeNameById={datatypeNameById}
-            scopesByFieldId={scopesByFieldId}
-            saving={saving}
-            onCreateField={onCreateField}
-            onUpdateField={onUpdateField}
-            onReorderFields={onReorderFields}
-            onCreateScope={onCreateScope}
-            onDeleteScope={onDeleteScope}
-          />
-        </>
+        </div>
       )}
     </section>
   );

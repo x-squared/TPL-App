@@ -11,6 +11,7 @@ import {
   type TaskTemplateUpdate,
 } from '../../../api';
 import { toUserErrorMessage } from '../../../api/error';
+import { withPreservedMainContentScroll } from '../../layout/scrollPreservation';
 
 interface TaskTemplateOffsetParts {
   days: number;
@@ -84,8 +85,10 @@ export function useAdminTaskTemplates() {
     setSaving(true);
     setError('');
     try {
-      await api.createTaskTemplate(payload);
-      await load();
+      await withPreservedMainContentScroll(async () => {
+        await api.createTaskTemplate(payload);
+        await load();
+      });
     } catch (err) {
       setError(toUserErrorMessage(err, 'Could not create task template.'));
     } finally {
@@ -97,8 +100,10 @@ export function useAdminTaskTemplates() {
     setSaving(true);
     setError('');
     try {
-      await api.updateTaskTemplate(taskTemplateId, payload);
-      await load();
+      await withPreservedMainContentScroll(async () => {
+        await api.updateTaskTemplate(taskTemplateId, payload);
+        await load();
+      });
     } catch (err) {
       setError(toUserErrorMessage(err, 'Could not update task template.'));
     } finally {
@@ -111,12 +116,14 @@ export function useAdminTaskTemplates() {
     setSaving(true);
     setError('');
     try {
-      await Promise.all(
-        taskTemplateIdsInOrder.map((taskTemplateId, index) =>
-          api.updateTaskTemplate(taskTemplateId, { sort_pos: index + 1 }),
-        ),
-      );
-      await load();
+      await withPreservedMainContentScroll(async () => {
+        await Promise.all(
+          taskTemplateIdsInOrder.map((taskTemplateId, index) =>
+            api.updateTaskTemplate(taskTemplateId, { sort_pos: index + 1 }),
+          ),
+        );
+        await load();
+      });
     } catch (err) {
       setError(toUserErrorMessage(err, 'Could not reorder task templates.'));
     } finally {
@@ -128,8 +135,10 @@ export function useAdminTaskTemplates() {
     setSaving(true);
     setError('');
     try {
-      await api.createTaskGroupTemplate(payload);
-      await load();
+      await withPreservedMainContentScroll(async () => {
+        await api.createTaskGroupTemplate(payload);
+        await load();
+      });
     } catch (err) {
       setError(toUserErrorMessage(err, 'Could not create task group template.'));
     } finally {
@@ -141,8 +150,10 @@ export function useAdminTaskTemplates() {
     setSaving(true);
     setError('');
     try {
-      await api.updateTaskGroupTemplate(taskGroupTemplateId, payload);
-      await load();
+      await withPreservedMainContentScroll(async () => {
+        await api.updateTaskGroupTemplate(taskGroupTemplateId, payload);
+        await load();
+      });
     } catch (err) {
       setError(toUserErrorMessage(err, 'Could not update task group template.'));
     } finally {
@@ -155,12 +166,14 @@ export function useAdminTaskTemplates() {
     setSaving(true);
     setError('');
     try {
-      await Promise.all(
-        taskGroupTemplateIdsInOrder.map((taskGroupTemplateId, index) =>
-          api.updateTaskGroupTemplate(taskGroupTemplateId, { sort_pos: index + 1 }),
-        ),
-      );
-      await load();
+      await withPreservedMainContentScroll(async () => {
+        await Promise.all(
+          taskGroupTemplateIdsInOrder.map((taskGroupTemplateId, index) =>
+            api.updateTaskGroupTemplate(taskGroupTemplateId, { sort_pos: index + 1 }),
+          ),
+        );
+        await load();
+      });
     } catch (err) {
       setError(toUserErrorMessage(err, 'Could not reorder task group templates.'));
     } finally {

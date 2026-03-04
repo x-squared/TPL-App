@@ -1,5 +1,6 @@
 import { Fragment } from 'react';
 import type { Colloqium, ColloqiumAgenda } from '../../../api';
+import { translateCodeLabel } from '../../../i18n/codeTranslations';
 import { useI18n } from '../../../i18n/i18n';
 
 function formatDate(iso: string): string {
@@ -63,7 +64,7 @@ export default function ColloquiumsTable({
                       &#x279C;
                     </button>
                   </td>
-                  <td>{item.colloqium_type?.organ?.name_default ?? t('common.emptySymbol', '–')}</td>
+                  <td>{translateCodeLabel(t, item.colloqium_type?.organ)}</td>
                   <td>{item.colloqium_type?.name ?? t('common.emptySymbol', '–')}</td>
                   <td>{formatDate(item.date)}</td>
                   <td>

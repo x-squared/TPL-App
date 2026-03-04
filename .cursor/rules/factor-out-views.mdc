@@ -6,29 +6,13 @@ alwaysApply: false
 
 # Factor Out Views and API Modules
 
-## Views
+For view decomposition/layout decisions, use `view-architecture-pattern.mdc` as the canonical rule.
 
-When creating or modifying a page-level view (e.g. Patients), always place it in its own file under `frontend/src/views/`, with a co-located CSS file.
+This rule keeps only the folder-level defaults:
 
-- Each view is a self-contained component with its own state, data fetching, and event handlers.
-- The view file exports a default function component (e.g. `PatientsView`).
-- Each view has its own CSS file (e.g. `PatientsView.css`) imported by the component. Only styles specific to that view belong there.
-- `App.tsx` only imports and renders views; it does not contain view-specific logic.
-- `App.css` only contains global, layout, and shared styles (login, sidebar, main-content, data-table, etc.).
-- Shared utilities (e.g. `formatDate`, `matchesFilter`) may live in the view file or be extracted to a shared utils module if reused across views.
-
-```
-frontend/src/views/
-  PatientsView.tsx
-  PatientsView.css
-  PatientDetailView.tsx
-  PatientDetailView.css
-```
-
-```tsx
-// App.tsx – render views by page
-{page === 'patients' && <PatientsView />}
-```
+- Page-level views live under `frontend/src/views/` with feature-local CSS where appropriate.
+- `App.tsx` composes views and app-shell routing/state; avoid embedding feature-specific view logic there.
+- Keep global/shared styling in shared/global style files; keep feature-specific rules inside feature view CSS.
 
 ## API Modules
 
@@ -39,14 +23,6 @@ The API layer lives under `frontend/src/api/`. Each domain entity gets its own f
 - `index.ts` – barrel file that re-exports everything and provides a unified `api` object.
 
 When adding a new entity:
-1. If it is a top-level domain (like patients), create a new file (e.g. `api/orders.ts`).
-2. If it is a child of an existing domain (like contact info is to patients), add it to the parent's file.
-3. Export all types and the entity's API object from the new file.
-4. Re-export from `index.ts` and merge into the unified `api` object.
-
-```
-frontend/src/api/
-  core.ts        – request, tokens, auth, codes/catalogues, shared types
-  patients.ts    – Patient, ContactInfo, Absence, Diagnosis types & methods
-  index.ts       – barrel re-exports + unified api object
-```
+1. Top-level domain -> new `frontend/src/api/<domain>.ts`.
+2. Child domain -> keep in parent module when tightly coupled.
+3. Re-export through `frontend/src/api/index.ts` and merged `api`.

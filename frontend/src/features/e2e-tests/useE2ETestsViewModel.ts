@@ -12,12 +12,14 @@ export function useE2ETestsViewModel(): E2ETestsViewModel {
   const [loading, setLoading] = useState(true);
   const [running, setRunning] = useState(false);
   const [runningHealthCheck, setRunningHealthCheck] = useState(false);
+  const [runningServerHealthTest, setRunningServerHealthTest] = useState(false);
   const [error, setError] = useState('');
   const [activeTab, setActiveTab] = useState<E2ETestsTabKey>('e2e-tests');
   const [runners, setRunners] = useState<E2ETestRunnerOption[]>([]);
-  const [selectedRunner, setSelectedRunner] = useState<E2ETestRunnerKey>('partner');
+  const [selectedRunner, setSelectedRunner] = useState<E2ETestRunnerKey>('all');
   const [outputTailLines, setOutputTailLines] = useState(160);
   const [lastResult, setLastResult] = useState<E2ETestRunResponse | null>(null);
+  const [serverHealthResult, setServerHealthResult] = useState<E2ETestRunResponse | null>(null);
 
   const loadMetadata = useCallback(async () => {
     setLoading(true);
@@ -57,6 +59,7 @@ export function useE2ETestsViewModel(): E2ETestsViewModel {
 
   const clearResults = useCallback(() => {
     setLastResult(null);
+    setServerHealthResult(null);
   }, []);
 
   const triggerHealthCheck422 = useCallback(async () => {
@@ -71,10 +74,31 @@ export function useE2ETestsViewModel(): E2ETestsViewModel {
     }
   }, []);
 
+  const triggerServerHealthTest = useCallback(async () => {
+    setRunningServerHealthTest(true);
+    setError('');
+    try {
+      const result = await api.runE2ETest({
+        runner: 'server',
+        output_tail_lines: outputTailLines,
+      });
+      setServerHealthResult(result);
+    } catch (err) {
+      setError(toUserErrorMessage(err, 'Failed to run server health test.'));
+    } finally {
+      setRunningServerHealthTest(false);
+    }
+  }, [outputTailLines]);
+
+  const clearServerHealthResult = useCallback(() => {
+    setServerHealthResult(null);
+  }, []);
+
   return {
     loading,
     running,
     runningHealthCheck,
+    runningServerHealthTest,
     error,
     activeTab,
     setActiveTab,
@@ -84,8 +108,11 @@ export function useE2ETestsViewModel(): E2ETestsViewModel {
     outputTailLines,
     setOutputTailLines,
     lastResult,
+    serverHealthResult,
     runTests,
+    triggerServerHealthTest,
     triggerHealthCheck422,
+    clearServerHealthResult,
     clearResults,
     refreshMetadata: loadMetadata,
   };

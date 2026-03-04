@@ -1,4 +1,5 @@
 import type { PatientContactsModel } from '../../patient-detail/PatientDetailTabs';
+import { translateCodeLabel } from '../../../i18n/codeTranslations';
 import { useI18n } from '../../../i18n/i18n';
 import InlineDeleteActions from '../../layout/InlineDeleteActions';
 
@@ -59,7 +60,7 @@ export default function ContactsSection({
                         onChange={(e) => setCiEditForm((f) => ({ ...f, type_id: Number(e.target.value) }))}
                     >
                       {contactTypes.map((c: any) => (
-                        <option key={c.id} value={c.id}>{c.name_default}</option>
+                        <option key={c.id} value={c.id}>{translateCodeLabel(t, c)}</option>
                       ))}
                     </select>
                   </td>
@@ -97,7 +98,7 @@ export default function ContactsSection({
                   <td className="detail-ci-main">
                     {ci.main && <span className="main-badge">{t('patients.contact.main', 'Main')}</span>}
                   </td>
-                  <td className="detail-ci-type">{ci.type?.name_default ?? ci.type?.key ?? t('common.emptySymbol', '–')}</td>
+                  <td className="detail-ci-type">{translateCodeLabel(t, ci.type)}</td>
                   <td className="detail-ci-data">{ci.data}</td>
                   <td className="detail-ci-comment">{ci.comment || ''}</td>
                   <td className="detail-ci-actions">
@@ -126,7 +127,7 @@ export default function ContactsSection({
             onChange={(e) => setCiForm((f) => ({ ...f, type_id: Number(e.target.value) }))}
           >
             {contactTypes.map((c: any) => (
-              <option key={c.id} value={c.id}>{c.name_default}</option>
+              <option key={c.id} value={c.id}>{translateCodeLabel(t, c)}</option>
             ))}
           </select>
           <input

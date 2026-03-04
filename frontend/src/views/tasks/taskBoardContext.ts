@@ -36,9 +36,9 @@ export function findContextManagedGroup(
   return [...candidates].sort((a, b) => a.id - b.id)[0];
 }
 
-export function buildDefaultTaskDescription(taskGroup: TaskGroup): string {
+export function buildDefaultTaskDescription(taskGroup: TaskGroup, phaseLabel?: string | null): string {
   const parts = [taskGroup.patient_id != null ? `New task for P#${taskGroup.patient_id}` : 'New coordination task'];
   if (taskGroup.episode_id != null) parts.push(`E#${taskGroup.episode_id}`);
-  if (taskGroup.tpl_phase?.name_default) parts.push(taskGroup.tpl_phase.name_default);
+  if (phaseLabel?.trim()) parts.push(phaseLabel.trim());
   return parts.join(' · ');
 }

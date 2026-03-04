@@ -1,0 +1,41 @@
+---
+description: General conventions for defining and consuming code/reference values
+alwaysApply: true
+---
+
+# Code Handling Conventions
+
+Use this rule for all reference/code tables and code-key comparisons.
+
+## Scope
+
+- `backend/app/seed/datasets/core/codes.py`
+- `backend/app/seed/datasets/sample/**` entries using `*_key`
+- Backend logic comparing `Code.key` / `status_key`
+- Frontend logic that displays or branches on code keys
+
+## Key conventions
+
+- Machine keys must be stable, English, ASCII uppercase with underscores.
+- Do not introduce locale-specific machine keys.
+- Keep user-facing language in labels/translations (`name_default`, i18n), not in keys.
+- Prefer canonical keys and keep aliases only as explicit transition compatibility.
+
+## Display conventions
+
+- UI should not directly display raw machine keys unless explicitly requested.
+- Prefer i18n by key (for example `...statusByKey.<KEY>`) with fallback to localized label text.
+- When using fallback text, do not mutate machine keys to build display labels.
+- If code definitions or display mappings change, update `frontend/src/i18n/translations.json` in the same change set.
+
+## Change protocol
+
+When adding/renaming/deprecating code keys:
+
+1. Update `codes.py` definitions.
+2. Update all seed references (`status_key`, related `*_key` fields).
+3. Update backend comparisons/filters that rely on those keys.
+4. Update frontend mappings/translations where keys are rendered, including `frontend/src/i18n/translations.json`.
+5. If aliases are needed, document them as temporary compatibility and remove later.
+6. Run targeted verification (compile/lint/tests) before finishing.
+

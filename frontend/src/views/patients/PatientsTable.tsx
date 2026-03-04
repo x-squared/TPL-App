@@ -1,7 +1,7 @@
 import React from 'react';
-import type { Patient, PatientListItem } from '../../api';
+import type { Code, Patient, PatientListItem } from '../../api';
 import { formatDate } from './patientsViewUtils';
-import { formatOrganNames } from '../layout/episodeDisplay';
+import { translateCodeLabel } from '../../i18n/codeTranslations';
 import { useI18n } from '../../i18n/i18n';
 
 interface Props {
@@ -11,6 +11,7 @@ interface Props {
   expandedMedical: number | null;
   selectedTaskPatientId: number | null;
   setSelectedTaskPatientId: React.Dispatch<React.SetStateAction<number | null>>;
+  organCodes: Code[];
   onSelectPatient: (id: number) => void;
   toggleEpisodes: (id: number) => void;
   toggleContacts: (id: number) => void;
@@ -26,6 +27,7 @@ export default function PatientsTable({
   expandedMedical,
   selectedTaskPatientId,
   setSelectedTaskPatientId,
+  organCodes,
   onSelectPatient,
   toggleEpisodes,
   toggleContacts,
@@ -34,6 +36,40 @@ export default function PatientsTable({
   patientDetails,
 }: Props) {
   const { t } = useI18n();
+  const organById = new Map(organCodes.map((entry) => [entry.id, entry]));
+  const getOrganLabel = (organ: Code | null | undefined): string => {
+    return translateCodeLabel(t, organ);
+  };
+  const getOrganShortCode = (organ: Code | null | undefined): string => {
+    const key = (organ?.key ?? '').trim().toUpperCase();
+    if (key.length >= 2) return key.slice(0, 2);
+    const fallback = getOrganLabel(organ).trim().toUpperCase();
+    if (fallback.length >= 2) return fallback.slice(0, 2);
+    return '--';
+  };
+  const formatEpisodeOpenIndicators = (item: PatientListItem): string => {
+    const codes = item.open_episode_organ_ids
+      .map((organId) => getOrganShortCode(organById.get(organId)))
+      .filter((value) => value.trim().length > 0);
+    if (codes.length > 0) {
+      return codes.join(' | ');
+    }
+    return item.open_episode_indicators
+      .map((value) => value.trim().toUpperCase().slice(0, 2))
+      .filter((value) => value.length > 0)
+      .join(' | ');
+  };
+  const formatEpisodeOrganNames = (episode: Patient['episodes'][number]): string => {
+    const names = (episode.organs ?? [])
+      .map((entry) => getOrganLabel(entry))
+      .filter((name) => name.trim().length > 0);
+    const unique = [...new Set(names)];
+    if (unique.length > 0) return unique.join(' + ');
+    return getOrganLabel(episode.organ);
+  };
+  const getEpisodeStatusLabel = (status: Code | null | undefined): string => {
+    return translateCodeLabel(t, status);
+  };
   const medicalSummary = (p: PatientListItem) => {
     const entries = p.static_medical_values ?? [];
     if (!entries.length) return t('common.emptySymbol', '–');
@@ -94,7 +130,7 @@ export default function PatientsTable({
                   <>
                     {p.open_episode_count > 0 && (
                       <span className="ep-open-indicators">
-                        {p.open_episode_indicators.join(' | ')}
+                        {formatEpisodeOpenIndicators(p)}
                       </span>
                     )}
                     <button className="link-btn" onClick={() => toggleEpisodes(p.id)}>
@@ -125,7 +161,7 @@ export default function PatientsTable({
                                 <td className="contact-main-cell">
                                   {ci.main && <span className="main-badge">{t('patients.contact.main', 'Main')}</span>}
                                 </td>
-                                <td>{ci.type?.name_default ?? ci.type?.key ?? t('common.emptySymbol', '–')}</td>
+                                <td>{translateCodeLabel(t, ci.type)}</td>
                                 <td>{ci.data}</td>
                                 <td>{ci.comment || t('common.emptySymbol', '–')}</td>
                               </tr>
@@ -188,8 +224,8 @@ export default function PatientsTable({
                           <tbody>
                             {[...patientDetails[p.id].episodes].sort((a, b) => (a.status?.pos ?? 999) - (b.status?.pos ?? 999)).map((ep) => (
                               <tr key={ep.id}>
-                                <td>{formatOrganNames(ep.organs, ep.organ?.name_default ?? null)}</td>
-                                <td>{ep.status?.name_default ?? t('common.emptySymbol', '–')}</td>
+                                <td>{formatEpisodeOrganNames(ep)}</td>
+                                <td>{getEpisodeStatusLabel(ep.status)}</td>
                                 <td>{formatDate(ep.start)}</td>
                                 <td>{formatDate(ep.end)}</td>
                                 <td>{ep.fall_nr || t('common.emptySymbol', '–')}</td>

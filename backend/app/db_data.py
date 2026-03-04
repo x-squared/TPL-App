@@ -224,6 +224,21 @@ def _export_translation_json_from_db() -> tuple[Path, int]:
     return target, len(all_keys)
 
 
+def _clear_translation_bundles() -> int:
+    from .database import engine
+
+    deleted_rows = 0
+    with engine.begin() as conn:
+        inspector = inspect(conn)
+        if inspector.has_table("TRANSLATION_BUNDLE"):
+            deleted_rows += int(conn.execute(text('SELECT COUNT(*) FROM "TRANSLATION_BUNDLE"')).scalar_one())
+            conn.execute(text('DELETE FROM "TRANSLATION_BUNDLE"'))
+        if inspector.has_table("TRANSLATION_OVERRIDE"):
+            deleted_rows += int(conn.execute(text('SELECT COUNT(*) FROM "TRANSLATION_OVERRIDE"')).scalar_one())
+            conn.execute(text('DELETE FROM "TRANSLATION_OVERRIDE"'))
+    return deleted_rows
+
+
 def _seed(*, app_env: str | None, seed_profile: str | None) -> dict[str, object]:
     from .database import SessionLocal
     from .seed import run_seed_profile
@@ -519,16 +534,12 @@ def _migrate_procurement_to_typed() -> dict[str, int]:
             }
 
         scalar_sql_by_field_key = {
-            "AMBULANCE_ARRIVAL_TIME": 'UPDATE "COORDINATION_PROCUREMENT_TYPED_DATA" SET "AMBULANCE_ARRIVAL_TIME" = :value_text, "CHANGED_BY" = :changed_by_id WHERE "ID" = :typed_id',
-            "INFORMED_TIME": 'UPDATE "COORDINATION_PROCUREMENT_TYPED_DATA" SET "INFORMED_TIME" = :value_text, "CHANGED_BY" = :changed_by_id WHERE "ID" = :typed_id',
             "INCISION_TIME": 'UPDATE "COORDINATION_PROCUREMENT_TYPED_DATA" SET "INCISION_TIME" = :value_text, "CHANGED_BY" = :changed_by_id WHERE "ID" = :typed_id',
             "CARDIAC_ARREST_TIME": 'UPDATE "COORDINATION_PROCUREMENT_TYPED_DATA" SET "CARDIAC_ARREST_TIME" = :value_text, "CHANGED_BY" = :changed_by_id WHERE "ID" = :typed_id',
             "COLD_PERFUSION": 'UPDATE "COORDINATION_PROCUREMENT_TYPED_DATA" SET "COLD_PERFUSION" = :value_text, "CHANGED_BY" = :changed_by_id WHERE "ID" = :typed_id',
             "COLD_PERFUSION_ABDOMINAL": 'UPDATE "COORDINATION_PROCUREMENT_TYPED_DATA" SET "COLD_PERFUSION_ABDOMINAL" = :value_text, "CHANGED_BY" = :changed_by_id WHERE "ID" = :typed_id',
             "EHB_BOX_NR": 'UPDATE "COORDINATION_PROCUREMENT_TYPED_DATA" SET "EHB_BOX_NR" = :value_text, "CHANGED_BY" = :changed_by_id WHERE "ID" = :typed_id',
             "EHB_NR": 'UPDATE "COORDINATION_PROCUREMENT_TYPED_DATA" SET "EHB_NR" = :value_text, "CHANGED_BY" = :changed_by_id WHERE "ID" = :typed_id',
-            "REACHED_TIME": 'UPDATE "COORDINATION_PROCUREMENT_TYPED_DATA" SET "REACHED_TIME" = :value_text, "CHANGED_BY" = :changed_by_id WHERE "ID" = :typed_id',
-            "INFORMED_IMPLANTTEAM_TIME": 'UPDATE "COORDINATION_PROCUREMENT_TYPED_DATA" SET "INFORMED_IMPLANTTEAM_TIME" = :value_text, "CHANGED_BY" = :changed_by_id WHERE "ID" = :typed_id',
             "INCISION_DONOR_TIME": 'UPDATE "COORDINATION_PROCUREMENT_TYPED_DATA" SET "INCISION_DONOR_TIME" = :value_text, "CHANGED_BY" = :changed_by_id WHERE "ID" = :typed_id',
             "CROSS_CLAMP_TIME": 'UPDATE "COORDINATION_PROCUREMENT_TYPED_DATA" SET "CROSS_CLAMP_TIME" = :value_text, "CHANGED_BY" = :changed_by_id WHERE "ID" = :typed_id',
             "PROCUREMENT_TEAM_DEPARTURE_TIME": 'UPDATE "COORDINATION_PROCUREMENT_TYPED_DATA" SET "PROCUREMENT_TEAM_DEPARTURE_TIME" = :value_text, "CHANGED_BY" = :changed_by_id WHERE "ID" = :typed_id',
@@ -722,9 +733,23 @@ def main() -> int:
     parser = argparse.ArgumentParser(description="Data management (DML only).")
     parser.add_argument(
         "--mode",
-        choices=("clean", "seed", "refresh", "migrate-procurement-runtime", "migrate-procurement-typed", "export-translations-json"),
+        choices=(
+            "clean",
+            "seed",
+            "refresh",
+            "migrate-procurement-runtime",
+            "migrate-procurement-typed",
+            "export-translations-json",
+            "clear-translation-bundles",
+        ),
         default="refresh",
-        help="clean=wipe data, seed=seed only, refresh=clean+seed, migrate-procurement-runtime=backfill legacy procurement runtime, migrate-procurement-typed=backfill typed procurement model from generic runtime rows, export-translations-json=write DB translations to frontend/src/i18n/translations.json",
+        help=(
+            "clean=wipe data, seed=seed only, refresh=clean+seed, "
+            "migrate-procurement-runtime=backfill legacy procurement runtime, "
+            "migrate-procurement-typed=backfill typed procurement model from generic runtime rows, "
+            "export-translations-json=write DB translations to frontend/src/i18n/translations.json, "
+            "clear-translation-bundles=delete translation override rows from DB only"
+        ),
     )
     parser.add_argument("--env", default=os.getenv("TPL_ENV", "DEV"), help="Application env (DEV/TEST/PROD)")
     parser.add_argument("--seed-profile", default=os.getenv("TPL_SEED_PROFILE"), help="Optional seed profile override")
@@ -770,6 +795,10 @@ def main() -> int:
     if args.mode == "export-translations-json":
         output_path, key_count = _export_translation_json_from_db()
         print(f"Frontend translations exported: {output_path} (keys: {key_count})")
+
+    if args.mode == "clear-translation-bundles":
+        deleted_rows = _clear_translation_bundles()
+        print(f"Translation bundle rows deleted from DB: {deleted_rows}")
 
     return 0
 

@@ -1,5 +1,6 @@
 import type React from 'react';
 import type { Code, CoordinationOrigin } from '../../../api';
+import { translateCodeLabel } from '../../../i18n/codeTranslations';
 import { useI18n } from '../../../i18n/i18n';
 import EditableSectionHeader from '../../layout/EditableSectionHeader';
 import ErrorBanner from '../../layout/ErrorBanner';
@@ -65,12 +66,12 @@ export default function CoordinationHospitalsSection({
               <option value="">{t('common.emptySymbol', '–')}</option>
               {hospitals.map((h) => (
                 <option key={h.id} value={h.id}>
-                  {h.name_default}
+                  {translateCodeLabel(t, h)}
                 </option>
               ))}
             </select>
           ) : (
-            <span className="detail-value">{origin?.detection_hospital?.name_default ?? t('common.emptySymbol', '–')}</span>
+            <span className="detail-value">{translateCodeLabel(t, origin?.detection_hospital)}</span>
           )}
         </div>
         <div className="detail-field">
@@ -89,12 +90,12 @@ export default function CoordinationHospitalsSection({
               <option value="">{t('common.emptySymbol', '–')}</option>
               {hospitals.map((h) => (
                 <option key={h.id} value={h.id}>
-                  {h.name_default}
+                  {translateCodeLabel(t, h)}
                 </option>
               ))}
             </select>
           ) : (
-            <span className="detail-value">{origin?.procurement_hospital?.name_default ?? t('common.emptySymbol', '–')}</span>
+            <span className="detail-value">{translateCodeLabel(t, origin?.procurement_hospital)}</span>
           )}
         </div>
       </div>

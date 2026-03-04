@@ -8,9 +8,10 @@ import { useI18n } from '../../../i18n/i18n';
 interface CoordinationProtocolTasksPanelProps {
   coordinationId: number;
   organId: number;
+  refreshSignal?: number;
 }
 
-export default function CoordinationProtocolTasksPanel({ coordinationId, organId }: CoordinationProtocolTasksPanelProps) {
+export default function CoordinationProtocolTasksPanel({ coordinationId, organId, refreshSignal = 0 }: CoordinationProtocolTasksPanelProps) {
   const { t } = useI18n();
   const [selectedTaskGroupTemplateIds, setSelectedTaskGroupTemplateIds] = useState<number[]>([]);
   const [isFetchingAll, setIsFetchingAll] = useState(false);
@@ -19,6 +20,7 @@ export default function CoordinationProtocolTasksPanel({ coordinationId, organId
   const [fetchInfo, setFetchInfo] = useState('');
   const [fetchError, setFetchError] = useState('');
   const [refreshToken, setRefreshToken] = useState(0);
+  const [showClosedTasks, setShowClosedTasks] = useState(false);
   const didFetchAll = didFetchByOrganId[organId] === true;
 
   useEffect(() => {
@@ -101,8 +103,9 @@ export default function CoordinationProtocolTasksPanel({ coordinationId, organId
       organ_id: organId,
       task_group_template_id: selectedTaskGroupTemplateIds,
       refresh_token: refreshToken,
+      refresh_signal: refreshSignal,
     }),
-    [coordinationId, organId, refreshToken, selectedTaskGroupTemplateIds],
+    [coordinationId, organId, refreshSignal, refreshToken, selectedTaskGroupTemplateIds],
   );
 
   return (
@@ -112,6 +115,22 @@ export default function CoordinationProtocolTasksPanel({ coordinationId, organId
         title={t('coordinations.protocolTasks.title', 'Protocol Tasks')}
         headerMeta={(
           <div className="coord-protocol-tasks-header-actions">
+            <button
+              type="button"
+              className="coord-protocol-tasks-fetch-btn"
+              onClick={() => setShowClosedTasks((prev) => !prev)}
+              disabled={isFetchingAll || isClearingAll}
+              title={showClosedTasks
+                ? t('coordinations.protocolTasks.visibility.hideClosed', 'Show only open tasks')
+                : t('coordinations.protocolTasks.visibility.showClosed', 'Show also done tasks')}
+              aria-label={showClosedTasks
+                ? t('coordinations.protocolTasks.visibility.hideClosed', 'Show only open tasks')
+                : t('coordinations.protocolTasks.visibility.showClosed', 'Show also done tasks')}
+            >
+              {showClosedTasks
+                ? t('coordinations.protocolTasks.visibility.hideClosed', 'Show only open tasks')
+                : t('coordinations.protocolTasks.visibility.showClosed', 'Show also done tasks')}
+            </button>
             <button
               type="button"
               className="coord-protocol-tasks-fetch-btn"
@@ -148,7 +167,7 @@ export default function CoordinationProtocolTasksPanel({ coordinationId, organId
         )}
         hideFilters
         hideAddButton
-        includeClosedTasks
+        includeClosedTasks={showClosedTasks}
         columnVisibility={{
           reference: false,
           priority: false,

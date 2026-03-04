@@ -122,9 +122,21 @@ source .venv/bin/activate
 python -m app.db_data --mode export-translations-json --env DEV
 ```
 
+**G) Clear translation bundles from DB only (no `translations.json` write):**
+
+```{bash}
+cd /Users/stephan/Workspace/TPL-App/backend
+source .venv/bin/activate
+python -m app.db_admin --mode clear-translation-bundles --env DEV
+```
+
+This removes runtime translation overrides from DB tables (`TRANSLATION_BUNDLE` and legacy `TRANSLATION_OVERRIDE`) without exporting anything into `frontend/src/i18n/translations.json`.
+
 ### 3) Start backend
 
 ```{bash}
+clear
+echo "Starting backend..."
 cd backend
 source .venv/bin/activate
 export TPL_ENV=DEV
@@ -145,14 +157,51 @@ cd /Users/stephan/Workspace/TPL-App
 python -m qa.spec_tools.run_specs
 ```
 
-### 6) Run partner scenario tests (UI + DB)
+### 6) Run conceptual spec suite (`conceptual-case`)
 
 ```{bash}
 cd /Users/stephan/Workspace/TPL-App
-python -m qa.spec_tools.run_partner_specs
+python -m qa.spec_tools.run_conceptual_specs
 ```
 
-### 7) Execute suggestions from latest reports
+This suite includes both conceptual checks:
+
+- domain-model consistency (`check_domain_sync`)
+- architecture dependency consistency (`check_architecture_dependencies`)
+
+### 7) Run standalone domain-model sync check (part of the conceptual spec suite)
+
+```{bash}
+cd /Users/stephan/Workspace/TPL-App/backend
+source .venv/bin/activate
+cd /Users/stephan/Workspace/TPL-App
+python -m qa.spec_tools.check_domain_sync
+```
+
+### 8) Run standalone architecture dependency check (part of the conceptual spec suite)
+
+```{bash}
+cd /Users/stephan/Workspace/TPL-App/backend
+source .venv/bin/activate
+cd /Users/stephan/Workspace/TPL-App
+python -m qa.spec_tools.check_architecture_dependencies
+```
+
+### 9) Run client-server spec tests
+
+```{bash}
+cd /Users/stephan/Workspace/TPL-App
+python -m qa.spec_tools.run_client_server_specs
+```
+
+### 10) Run all test pipelines in sequence
+
+```{bash}
+cd /Users/stephan/Workspace/TPL-App
+python -m qa.spec_tools.run_all_tests
+```
+
+### 11) Execute suggestions from latest reports
 
 ```{bash}
 cd /Users/stephan/Workspace/TPL-App

@@ -161,6 +161,8 @@ export interface Episode {
   fall_nr: string;
   status_id: number | null;
   status: Code | null;
+  phase_id: number | null;
+  phase: Code | null;
   closed: boolean;
   comment: string;
   cave: string;
@@ -184,6 +186,24 @@ export interface Episode {
   changed_by_user: AppUser | null;
   created_at: string;
   updated_at: string | null;
+}
+
+export interface EpisodeList {
+  id: number;
+  patient_id: number;
+  organ_id: number;
+  organ: Code | null;
+  organs: Code[];
+  start: string | null;
+  end: string | null;
+  fall_nr: string;
+  status_id: number | null;
+  status: Code | null;
+  phase_id: number | null;
+  phase: Code | null;
+  closed: boolean;
+  tpl_date: string | null;
+  list_rs_nr: string;
 }
 
 export interface EpisodeOrgan {
@@ -220,6 +240,7 @@ export interface EpisodeCreate {
   end?: string | null;
   fall_nr?: string;
   status_id?: number | null;
+  phase_id?: number | null;
   closed?: boolean;
   comment?: string;
   cave?: string;
@@ -248,6 +269,7 @@ export interface EpisodeUpdate {
   end?: string | null;
   fall_nr?: string;
   status_id?: number | null;
+  phase_id?: number | null;
   closed?: boolean;
   comment?: string;
   cave?: string;
@@ -422,7 +444,7 @@ export const patientsApi = {
     ),
 
   listEpisodes: (patientId: number) =>
-    request<Episode[]>(`/patients/${patientId}/episodes/`),
+    request<EpisodeList[]>(`/patients/${patientId}/episodes/`),
   createEpisode: (patientId: number, data: EpisodeCreate) =>
     request<Episode>(`/patients/${patientId}/episodes/`, {
       method: 'POST',

@@ -64,6 +64,14 @@ class Episode(Base):
         comment="Episode status reference (`CODE.EPISODE_STATUS`).",
         info={"label": "Episode Status"},
     )
+    phase_id = Column(
+        "PHASE_ID",
+        Integer,
+        ForeignKey("CODE.ID"),
+        nullable=True,
+        comment="Episode phase reference (`CODE.TPL_PHASE`).",
+        info={"label": "Episode Phase"},
+    )
     closed = Column(
         "CLOSED",
         Boolean,
@@ -223,6 +231,7 @@ class Episode(Base):
     patient = relationship("Patient", back_populates="episodes")
     organ = relationship("Code", foreign_keys=[organ_id])
     status = relationship("Code", foreign_keys=[status_id])
+    phase = relationship("Code", foreign_keys=[phase_id])
     changed_by_user = relationship("User")
     coordination_episodes = relationship("CoordinationEpisode", back_populates="episode")
     task_groups = relationship("TaskGroup", back_populates="episode")

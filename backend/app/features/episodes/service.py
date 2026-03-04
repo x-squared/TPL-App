@@ -102,6 +102,7 @@ def _episode_query(db: Session):
         db.query(Episode)
         .options(
             joinedload(Episode.organ),
+            joinedload(Episode.phase),
             selectinload(Episode.organs),
             selectinload(Episode.organ_links).joinedload(EpisodeOrgan.organ),
             joinedload(Episode.status),
@@ -110,9 +111,21 @@ def _episode_query(db: Session):
     )
 
 
+def _episode_list_query(db: Session):
+    return (
+        db.query(Episode)
+        .options(
+            joinedload(Episode.organ),
+            joinedload(Episode.phase),
+            selectinload(Episode.organs),
+            joinedload(Episode.status),
+        )
+    )
+
+
 def list_episodes(*, patient_id: int, db: Session) -> list[Episode]:
     get_patient_or_404(patient_id, db)
-    return _episode_query(db).filter(Episode.patient_id == patient_id).all()
+    return _episode_list_query(db).filter(Episode.patient_id == patient_id).all()
 
 
 def create_episode(*, patient_id: int, payload: EpisodeCreate, changed_by_id: int, db: Session) -> Episode:

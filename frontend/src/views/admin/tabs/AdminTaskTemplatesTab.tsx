@@ -1,6 +1,7 @@
 import { useEffect, useMemo, useState } from 'react';
 
 import type { Code, TaskGroupTemplate, TaskTemplate } from '../../../api';
+import { translateCodeLabel } from '../../../i18n/codeTranslations';
 import ErrorBanner from '../../layout/ErrorBanner';
 import { combineOffsetMinutes, splitOffsetMinutes } from '../hooks/useAdminTaskTemplates';
 import { useI18n } from '../../../i18n/i18n';
@@ -339,7 +340,7 @@ export default function AdminTaskTemplatesTab({
                 <option value="">{t('admin.taskTemplates.allOrgans', 'All organs')}</option>
                 {organCodes.map((organ) => (
                   <option key={organ.id} value={organ.id}>
-                    {organ.name_default}
+                    {translateCodeLabel(t, organ)}
                   </option>
                 ))}
               </select>
@@ -449,11 +450,11 @@ export default function AdminTaskTemplatesTab({
                             <option value="">{t('admin.taskTemplates.allOrgans', 'All organs')}</option>
                             {organCodes.map((organ) => (
                               <option key={organ.id} value={organ.id}>
-                                {organ.name_default}
+                                {translateCodeLabel(t, organ)}
                               </option>
                             ))}
                           </select>
-                        ) : (groupTemplate.organ?.name_default ?? t('admin.taskTemplates.allOrgans', 'All organs'))}
+                        ) : (groupTemplate.organ ? translateCodeLabel(t, groupTemplate.organ) : t('admin.taskTemplates.allOrgans', 'All organs'))}
                       </td>
                       <td>
                         {isEditing ? (
@@ -546,7 +547,7 @@ export default function AdminTaskTemplatesTab({
               >
                 <option value="">{t('admin.taskTemplates.defaultPriority', '(default)')}</option>
                 {priorityCodes.map((priority) => (
-                  <option key={priority.id} value={priority.id}>{priority.name_default}</option>
+                  <option key={priority.id} value={priority.id}>{translateCodeLabel(t, priority)}</option>
                 ))}
               </select>
             </label>
@@ -688,10 +689,10 @@ export default function AdminTaskTemplatesTab({
                           >
                             <option value="">{t('admin.taskTemplates.defaultPriority', '(default)')}</option>
                             {priorityCodes.map((priority) => (
-                              <option key={priority.id} value={priority.id}>{priority.name_default}</option>
+                              <option key={priority.id} value={priority.id}>{translateCodeLabel(t, priority)}</option>
                             ))}
                           </select>
-                        ) : (template.priority?.name_default ?? t('common.emptySymbol', '–'))}
+                        ) : translateCodeLabel(t, template.priority)}
                       </td>
                       <td>
                         {isEditing ? (

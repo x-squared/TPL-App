@@ -5,6 +5,8 @@ alwaysApply: true
 
 # Report Metadata Verification Gate
 
+This rule is a focused completion gate that complements `model-change-impact-sweep.mdc`.
+
 When a change modifies the data model (entities, attributes, relations, cardinalities, or source keys), always verify report metadata before finishing.
 
 ## Required finish check

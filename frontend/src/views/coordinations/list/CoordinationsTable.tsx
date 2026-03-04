@@ -1,5 +1,6 @@
 import { useEffect, useRef } from 'react';
 import type { CoordinationListRow } from './useCoordinationsListViewModel';
+import { translateCodeLabel } from '../../../i18n/codeTranslations';
 import ErrorBanner from '../../layout/ErrorBanner';
 import { formatDateDdMmYyyy } from '../../layout/dateFormat';
 import type { Code } from '../../../api';
@@ -127,7 +128,7 @@ export default function CoordinationsTable({
                     <option value="">{t('coordinations.form.reasonOfDeath', 'Reason of death...')}</option>
                     {deathKindCodes.map((code) => (
                       <option key={code.id} value={code.id}>
-                        {code.name_default}
+                        {translateCodeLabel(t, code)}
                       </option>
                     ))}
                   </select>
@@ -179,12 +180,12 @@ export default function CoordinationsTable({
                   &#x279C;
                 </button>
               </td>
-              <td>{row.coordination.status?.name_default ?? t('common.emptySymbol', '–')}</td>
+              <td>{translateCodeLabel(t, row.coordination.status)}</td>
               <td>{fmt(row.coordination.start)}</td>
               <td>{fmt(row.coordination.end)}</td>
               <td>{row.donor?.full_name || t('common.emptySymbol', '–')}</td>
               <td>{fmt(row.donor?.birth_date ?? null)}</td>
-              <td>{row.donor?.death_kind?.name_default ?? t('common.emptySymbol', '–')}</td>
+              <td>{translateCodeLabel(t, row.donor?.death_kind)}</td>
               <td>{row.coordination.swtpl_nr || t('common.emptySymbol', '–')}</td>
             </tr>
           ))}

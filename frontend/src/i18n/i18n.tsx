@@ -89,7 +89,6 @@ export function I18nProvider({ children }: { children: ReactNode }) {
   }, []);
 
   const t = useCallback((key: string, englishDefault: string): string => {
-    if (locale === 'en') return englishDefault;
     const builtinByLocale = builtinTranslationsByLocale[locale] ?? {};
     return runtimeTranslations[key] ?? builtinByLocale[key] ?? englishDefault;
   }, [runtimeTranslations, locale]);

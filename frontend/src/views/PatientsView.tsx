@@ -104,6 +104,7 @@ export default function PatientsView({ onSelectPatient }: Props) {
           expandedMedical={expandedMedical}
           selectedTaskPatientId={selectedTaskPatientId}
           setSelectedTaskPatientId={setSelectedTaskPatientId}
+          organCodes={organCodes}
           onSelectPatient={onSelectPatient}
           toggleEpisodes={toggleEpisodes}
           toggleContacts={toggleContacts}

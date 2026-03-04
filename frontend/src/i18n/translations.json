@@ -1930,6 +1930,108 @@
           "de": "Geschlossen"
         }
       },
+      "statusByKey": {
+        "EVALUATION": {
+          "label": {
+            "en": "Patients episodes status EVALUATION",
+            "de": "Patienten Episoden Status EVALUATION"
+          },
+          "text": {
+            "en": "Evaluation",
+            "de": "Abklärung"
+          }
+        },
+        "TRANSPLANTABLE": {
+          "label": {
+            "en": "Patients episodes status TRANSPLANTABLE",
+            "de": "Patienten Episoden Status TRANSPLANTABLE"
+          },
+          "text": {
+            "en": "Transplantable",
+            "de": "Transplantabel"
+          }
+        },
+        "ALLOCATED": {
+          "label": {
+            "en": "Patients episodes status ALLOCATED",
+            "de": "Patienten Episoden Status ALLOCATED"
+          },
+          "text": {
+            "en": "Allocated",
+            "de": "Alloziert"
+          }
+        },
+        "TRANSPLANTED": {
+          "label": {
+            "en": "Patients episodes status TRANSPLANTED",
+            "de": "Patienten Episoden Status TRANSPLANTED"
+          },
+          "text": {
+            "en": "Transplanted",
+            "de": "Transplantiert"
+          }
+        },
+        "DECEASED": {
+          "label": {
+            "en": "Patients episodes status DECEASED",
+            "de": "Patienten Episoden Status DECEASED"
+          },
+          "text": {
+            "en": "Deceased",
+            "de": "Verstorben"
+          }
+        },
+        "REJECTED": {
+          "label": {
+            "en": "Patients episodes status REJECTED",
+            "de": "Patienten Episoden Status REJECTED"
+          },
+          "text": {
+            "en": "Rejected",
+            "de": "Abgelehnt"
+          }
+        },
+        "DELISTED_USZ": {
+          "label": {
+            "en": "Patients episodes status DELISTED_USZ",
+            "de": "Patienten Episoden Status DELISTED_USZ"
+          },
+          "text": {
+            "en": "Delisted (USZ)",
+            "de": "Delistung USZ"
+          }
+        },
+        "DELISTED_PATIENT": {
+          "label": {
+            "en": "Patients episodes status DELISTED_PATIENT",
+            "de": "Patienten Episoden Status DELISTED_PATIENT"
+          },
+          "text": {
+            "en": "Delisted (patient)",
+            "de": "Delistung Patient"
+          }
+        },
+        "CANCELLED": {
+          "label": {
+            "en": "Patients episodes status CANCELLED",
+            "de": "Patienten Episoden Status CANCELLED"
+          },
+          "text": {
+            "en": "Cancelled",
+            "de": "Storniert"
+          }
+        },
+        "LISTING": {
+          "label": {
+            "en": "Patients episodes status LISTING",
+            "de": "Patienten Episoden Status LISTING"
+          },
+          "text": {
+            "en": "Listing",
+            "de": "Listung"
+          }
+        }
+      },
       "empty": {
         "label": {
           "en": "Patients episodes empty state",
@@ -2562,6 +2664,16 @@
           "de": "Empfänger Vollname"
         }
       },
+      "assignmentSlot": {
+        "label": {
+          "en": "Coordinations protocol overview assignment slot label",
+          "de": "Koordinationen Protokollübersicht Zuordnungsslot Label"
+        },
+        "text": {
+          "en": "Assignment slot",
+          "de": "Zuordnungsslot"
+        }
+      },
       "fallNumber": {
         "label": {
           "en": "Coordinations protocol overview case number label",
@@ -2630,6 +2742,126 @@
         "text": {
           "en": "Perfusion",
           "de": "Perfusion"
+        }
+      }
+    },
+    "protocolAssignments": {
+      "title": {
+        "label": {
+          "en": "Coordinations protocol assignment table title",
+          "de": "Koordinationen Protokoll Zuordnungstabelle Titel"
+        },
+        "text": {
+          "en": "Organ assignment table",
+          "de": "Organzuordnungstabelle"
+        }
+      },
+      "columns": {
+        "organ": {
+          "label": {
+            "en": "Coordinations protocol assignment table organ column",
+            "de": "Koordinationen Protokoll Zuordnungstabelle Organ Spalte"
+          },
+          "text": {
+            "en": "Organ",
+            "de": "Organ"
+          }
+        },
+        "assignment": {
+          "label": {
+            "en": "Coordinations protocol assignment table assignment column",
+            "de": "Koordinationen Protokoll Zuordnungstabelle Zuordnung Spalte"
+          },
+          "text": {
+            "en": "Assigned recipient / status",
+            "de": "Zugeordneter Empfänger / Status"
+          }
+        }
+      },
+      "noAssignment": {
+        "label": {
+          "en": "Coordinations protocol assignment table no assignment text",
+          "de": "Koordinationen Protokoll Zuordnungstabelle Keine Zuordnung Text"
+        },
+        "text": {
+          "en": "No assignment",
+          "de": "Keine Zuordnung"
+        }
+      },
+      "badge": {
+        "discarded": {
+          "label": {
+            "en": "Coordinations protocol assignment discarded badge",
+            "de": "Koordinationen Protokoll Zuordnung Verworfen Badge"
+          },
+          "text": {
+            "en": "Rejected",
+            "de": "Abgelehnt"
+          }
+        },
+        "unassigned": {
+          "label": {
+            "en": "Coordinations protocol assignment unassigned badge",
+            "de": "Koordinationen Protokoll Zuordnung Nicht zugewiesen Badge"
+          },
+          "text": {
+            "en": "Unassigned",
+            "de": "Nicht zugewiesen"
+          }
+        },
+        "missingPrefix": {
+          "label": {
+            "en": "Coordinations protocol assignment missing organs prefix",
+            "de": "Koordinationen Protokoll Zuordnung Fehlende Organe Präfix"
+          },
+          "text": {
+            "en": "missing",
+            "de": "fehlend"
+          }
+        }
+      },
+      "toggle": {
+        "showTable": {
+          "label": {
+            "en": "Coordinations protocol assignment toggle show table",
+            "de": "Koordinationen Protokoll Zuordnung Umschalten Tabelle anzeigen"
+          },
+          "text": {
+            "en": "Show table",
+            "de": "Tabelle anzeigen"
+          }
+        },
+        "hideTable": {
+          "label": {
+            "en": "Coordinations protocol assignment toggle hide table",
+            "de": "Koordinationen Protokoll Zuordnung Umschalten Tabelle ausblenden"
+          },
+          "text": {
+            "en": "Hide table",
+            "de": "Tabelle ausblenden"
+          }
+        }
+      },
+      "summary": {
+        "complete": {
+          "label": {
+            "en": "Coordinations protocol assignment summary complete",
+            "de": "Koordinationen Protokoll Zuordnung Zusammenfassung vollständig"
+          },
+          "text": {
+            "en": "All organs assigned or discarded",
+            "de": "Alle Organe zugeordnet oder verworfen"
+          }
+        },
+        "pending": {
+          "label": {
+            "en": "Coordinations protocol assignment summary pending",
+            "de": "Koordinationen Protokoll Zuordnung Zusammenfassung ausstehend"
+          },
+          "text": {
+            "en": "Not all organs assigned or discarded",
+            "de": "Nicht alle Organe zugeordnet oder verworfen"
+          }
         }
       }
     },
@@ -2860,6 +3092,26 @@
             "en": "Logistics",
             "de": "Logistik"
           }
+        },
+        "TASKS": {
+          "label": {
+            "en": "Coordination protocol group TASKS",
+            "de": "Koordinationsprotokoll Gruppe TASKS"
+          },
+          "text": {
+            "en": "Tasks",
+            "de": "Aufgaben"
+          }
+        },
+        "PROTOCOL_COMMON": {
+          "label": {
+            "en": "Coordination protocol group PROTOCOL_COMMON",
+            "de": "Koordinationsprotokoll Gruppe PROTOCOL_COMMON"
+          },
+          "text": {
+            "en": "Protocol - Common",
+            "de": "Protokoll - Allgemein"
+          }
         }
       },
       "fieldsByKey": {
@@ -3009,8 +3261,8 @@
             "de": "Koordinationsprotokoll Feld REACHED_TIME"
           },
           "text": {
-            "en": "Reached Time",
-            "de": "Eintreffzeit"
+            "en": "Contact patient",
+            "de": "Patient kontaktieren"
           }
         },
         "INFORMED_IMPLANTTEAM_TIME": {
@@ -3155,6 +3407,244 @@
           "text": {
             "en": "Select recipient episode...",
             "de": "Empfängerepisode wählen..."
+          }
+        },
+        "debugHint": {
+          "label": {
+            "en": "Coordinations protocol data episode debug hint",
+            "de": "Koordinationen Protokolldaten Episode Debug Hinweis"
+          },
+          "text": {
+            "en": "Debug: links={links}, withEpisode={withEpisode}, unique={unique}, open={open}, withOrgans={withOrgans}, organMatch={organMatch}, final={final}",
+            "de": "Debug: Links={links}, mitEpisode={withEpisode}, eindeutig={unique}, offen={open}, mitOrganen={withOrgans}, OrganTreffer={organMatch}, final={final}"
+          }
+        },
+        "noneSelected": {
+          "label": {
+            "en": "Coordinations protocol data no episode selected",
+            "de": "Koordinationen Protokolldaten keine Episode ausgewählt"
+          },
+          "text": {
+            "en": "No recipient episode selected",
+            "de": "Keine Empfängerepisode ausgewählt"
+          }
+        },
+        "openPicker": {
+          "label": {
+            "en": "Coordinations protocol data open episode picker action",
+            "de": "Koordinationen Protokolldaten Episodeauswahl öffnen Aktion"
+          },
+          "text": {
+            "en": "Open picker",
+            "de": "Auswahl öffnen"
+          }
+        },
+        "clearSelection": {
+          "label": {
+            "en": "Coordinations protocol data clear episode selection action",
+            "de": "Koordinationen Protokolldaten Episodeauswahl löschen Aktion"
+          },
+          "text": {
+            "en": "Clear",
+            "de": "Leeren"
+          }
+        }
+      },
+      "organRejection": {
+        "toggle": {
+          "label": {
+            "en": "Coordinations protocol data organ rejection toggle label",
+            "de": "Koordinationen Protokolldaten Organablehnung Umschalter Beschriftung"
+          },
+          "text": {
+            "en": "Organ rejected",
+            "de": "Organ abgelehnt"
+          }
+        },
+        "commentPlaceholder": {
+          "label": {
+            "en": "Coordinations protocol data organ rejection comment placeholder",
+            "de": "Koordinationen Protokolldaten Organablehnung Kommentar Platzhalter"
+          },
+          "text": {
+            "en": "Reason for rejection",
+            "de": "Grund der Ablehnung"
+          }
+        },
+        "clearWorkflowButton": {
+          "label": {
+            "en": "Coordinations protocol data clear organ workflow button",
+            "de": "Koordinationen Protokolldaten Organ-Workflow leeren Schaltfläche"
+          },
+          "text": {
+            "en": "Clear organ workflow",
+            "de": "Organ-Workflow leeren"
+          }
+        },
+        "clearWorkflowTitle": {
+          "label": {
+            "en": "Coordinations protocol data clear organ workflow tooltip",
+            "de": "Koordinationen Protokolldaten Organ-Workflow leeren Tooltip"
+          },
+          "text": {
+            "en": "Discard remaining tasks and force all open protocol fields to done for this rejected organ.",
+            "de": "Verwirft verbleibende Aufgaben und markiert alle offenen Protokollfelder fuer dieses abgelehnte Organ als erledigt."
+          }
+        },
+        "clearWorkflowConfirm": {
+          "label": {
+            "en": "Coordinations protocol data clear organ workflow confirmation",
+            "de": "Koordinationen Protokolldaten Organ-Workflow leeren Bestaetigung"
+          },
+          "text": {
+            "en": "Discard all remaining tasks and mark all open protocol fields as done for this rejected organ?",
+            "de": "Alle verbleibenden Aufgaben verwerfen und alle offenen Protokollfelder fuer dieses abgelehnte Organ als erledigt markieren?"
+          }
+        },
+        "cancelledStatusMissing": {
+          "label": {
+            "en": "Coordinations protocol data missing cancelled task status error",
+            "de": "Koordinationen Protokolldaten Fehler fehlender CANCELLED-Aufgabenstatus"
+          },
+          "text": {
+            "en": "Task status CANCELLED is missing.",
+            "de": "Aufgabenstatus CANCELLED fehlt."
+          }
+        },
+        "clearingWorkflow": {
+          "label": {
+            "en": "Coordinations protocol data clear organ workflow loading",
+            "de": "Koordinationen Protokolldaten Organ-Workflow leeren Laden"
+          },
+          "text": {
+            "en": "Clearing...",
+            "de": "Leert..."
+          }
+        },
+        "workflowCleared": {
+          "label": {
+            "en": "Coordinations protocol data organ workflow already cleared state",
+            "de": "Koordinationen Protokolldaten Organ-Workflow bereits geleert Status"
+          },
+          "text": {
+            "en": "Workflow cleared",
+            "de": "Workflow geleert"
+          }
+        },
+        "clearWorkflowError": {
+          "label": {
+            "en": "Coordinations protocol data clear organ workflow error",
+            "de": "Koordinationen Protokolldaten Organ-Workflow leeren Fehler"
+          },
+          "text": {
+            "en": "Failed to clear rejected organ workflow.",
+            "de": "Abgelehnter Organ-Workflow konnte nicht geleert werden."
+          }
+        }
+      },
+      "episodePicker": {
+        "title": {
+          "label": {
+            "en": "Coordinations recipient episode picker title",
+            "de": "Koordinationen Empfängerepisode Auswahl Titel"
+          },
+          "text": {
+            "en": "Select recipient episode",
+            "de": "Empfängerepisode auswählen"
+          }
+        },
+        "searchPlaceholder": {
+          "label": {
+            "en": "Coordinations recipient episode picker search placeholder",
+            "de": "Koordinationen Empfängerepisode Auswahl Suche Platzhalter"
+          },
+          "text": {
+            "en": "Search across all visible columns",
+            "de": "In allen sichtbaren Spalten suchen"
+          }
+        },
+        "loading": {
+          "label": {
+            "en": "Coordinations recipient episode picker loading state",
+            "de": "Koordinationen Empfängerepisode Auswahl Laden Status"
+          },
+          "text": {
+            "en": "Loading eligible patients and medical data...",
+            "de": "Lade geeignete Patienten und medizinische Daten..."
+          }
+        },
+        "empty": {
+          "label": {
+            "en": "Coordinations recipient episode picker empty state",
+            "de": "Koordinationen Empfängerepisode Auswahl leerer Status"
+          },
+          "text": {
+            "en": "No matching eligible patients found.",
+            "de": "Keine passenden geeigneten Patienten gefunden."
+          }
+        },
+        "selectAction": {
+          "label": {
+            "en": "Coordinations recipient episode picker select action",
+            "de": "Koordinationen Empfängerepisode Auswahl Auswählen Aktion"
+          },
+          "text": {
+            "en": "Select episode",
+            "de": "Episode auswählen"
+          }
+        },
+        "selectActionShort": {
+          "label": {
+            "en": "Coordinations recipient episode picker short select action",
+            "de": "Koordinationen Empfängerepisode Auswahl kurze Auswählen Aktion"
+          },
+          "text": {
+            "en": "->",
+            "de": "->"
+          }
+        },
+        "columns": {
+          "select": {
+            "label": {
+              "en": "Coordinations recipient episode picker select column",
+              "de": "Koordinationen Empfängerepisode Auswahl Spalte Auswählen"
+            },
+            "text": {
+              "en": "Select",
+              "de": "Auswählen"
+            }
+          },
+          "episode": {
+            "label": {
+              "en": "Coordinations recipient episode picker episode column",
+              "de": "Koordinationen Empfängerepisode Auswahl Spalte Episode"
+            },
+            "text": {
+              "en": "Episode",
+              "de": "Episode"
+            }
+          },
+          "organs": {
+            "label": {
+              "en": "Coordinations recipient episode picker organs column",
+              "de": "Koordinationen Empfängerepisode Auswahl Spalte Organe"
+            },
+            "text": {
+              "en": "Organs",
+              "de": "Organe"
+            }
+          }
+        },
+        "errors": {
+          "load": {
+            "label": {
+              "en": "Coordinations recipient episode picker load error",
+              "de": "Koordinationen Empfängerepisode Auswahl Laden Fehler"
+            },
+            "text": {
+              "en": "Failed to load recipient picker data.",
+              "de": "Empfängerauswahldaten konnten nicht geladen werden."
+            }
           }
         }
       },
@@ -3461,6 +3951,28 @@
           "text": {
             "en": "Could not remove protocol tasks.",
             "de": "Protokollaufgaben konnten nicht entfernt werden."
+          }
+        }
+      },
+      "visibility": {
+        "showClosed": {
+          "label": {
+            "en": "Coordinations protocol tasks show closed toggle",
+            "de": "Koordinationen Protokollaufgaben erledigte anzeigen Umschalter"
+          },
+          "text": {
+            "en": "Show also done tasks",
+            "de": "Auch erledigte Aufgaben anzeigen"
+          }
+        },
+        "hideClosed": {
+          "label": {
+            "en": "Coordinations protocol tasks hide closed toggle",
+            "de": "Koordinationen Protokollaufgaben nur offene anzeigen Umschalter"
+          },
+          "text": {
+            "en": "Show only open tasks",
+            "de": "Nur offene Aufgaben anzeigen"
           }
         }
       }
@@ -4668,6 +5180,192 @@
           "de": "Laufergebnis löschen"
         }
       }
+    },
+    "health": {
+      "title": {
+        "label": {
+          "en": "E2E health tab title",
+          "de": "E2E Health Tab Titel"
+        },
+        "text": {
+          "en": "Health Check",
+          "de": "Health-Check"
+        }
+      },
+      "serverHealth": {
+        "legend": {
+          "label": {
+            "en": "E2E health server test box legend",
+            "de": "E2E Health Servertest Box Legende"
+          },
+          "text": {
+            "en": "Server Health Test",
+            "de": "Server-Health-Test"
+          }
+        },
+        "help": {
+          "label": {
+            "en": "E2E health server test help text",
+            "de": "E2E Health Servertest Hilfetext"
+          },
+          "text": {
+            "en": "Run the server health specification test (`spec/testing/server/health.md`).",
+            "de": "Führen Sie den Server-Health-Spezifikationstest aus (`spec/testing/server/health.md`)."
+          }
+        },
+        "running": {
+          "label": {
+            "en": "E2E health server test running state",
+            "de": "E2E Health Servertest Läuft-Status"
+          },
+          "text": {
+            "en": "Running...",
+            "de": "Läuft..."
+          }
+        },
+        "run": {
+          "label": {
+            "en": "E2E health server test action",
+            "de": "E2E Health Servertest Aktion"
+          },
+          "text": {
+            "en": "Run health test",
+            "de": "Health-Test starten"
+          }
+        },
+        "clearResult": {
+          "label": {
+            "en": "E2E health server test clear result action",
+            "de": "E2E Health Servertest Ergebnis löschen Aktion"
+          },
+          "text": {
+            "en": "Clear result",
+            "de": "Ergebnis löschen"
+          }
+        },
+        "resultTitle": {
+          "label": {
+            "en": "E2E health server test result title",
+            "de": "E2E Health Servertest Ergebnis Titel"
+          },
+          "text": {
+            "en": "Result",
+            "de": "Ergebnis"
+          }
+        },
+        "statusPass": {
+          "label": {
+            "en": "E2E health server test pass status",
+            "de": "E2E Health Servertest Pass Status"
+          },
+          "text": {
+            "en": "PASS",
+            "de": "PASS"
+          }
+        },
+        "statusFail": {
+          "label": {
+            "en": "E2E health server test fail status",
+            "de": "E2E Health Servertest Fail Status"
+          },
+          "text": {
+            "en": "FAIL",
+            "de": "FAIL"
+          }
+        },
+        "exitCodeLabel": {
+          "label": {
+            "en": "E2E health server test exit code label",
+            "de": "E2E Health Servertest Exit-Code Label"
+          },
+          "text": {
+            "en": "Exit code",
+            "de": "Exit-Code"
+          }
+        },
+        "durationLabel": {
+          "label": {
+            "en": "E2E health server test duration label",
+            "de": "E2E Health Servertest Dauer Label"
+          },
+          "text": {
+            "en": "Duration",
+            "de": "Dauer"
+          }
+        },
+        "reportLabel": {
+          "label": {
+            "en": "E2E health server test report label",
+            "de": "E2E Health Servertest Report Label"
+          },
+          "text": {
+            "en": "Report",
+            "de": "Report"
+          }
+        },
+        "noOutput": {
+          "label": {
+            "en": "E2E health server test no output text",
+            "de": "E2E Health Servertest Kein-Output Text"
+          },
+          "text": {
+            "en": "No output captured.",
+            "de": "Kein Output erfasst."
+          }
+        },
+        "noResult": {
+          "label": {
+            "en": "E2E health server test no result text",
+            "de": "E2E Health Servertest Kein-Ergebnis Text"
+          },
+          "text": {
+            "en": "No run yet.",
+            "de": "Noch kein Lauf."
+          }
+        }
+      },
+      "errorFramework": {
+        "legend": {
+          "label": {
+            "en": "E2E health error framework box legend",
+            "de": "E2E Health Fehlerframework Box Legende"
+          },
+          "text": {
+            "en": "Error Framework Check",
+            "de": "Fehlerframework-Prüfung"
+          }
+        },
+        "help": {
+          "label": {
+            "en": "E2E health error framework help text",
+            "de": "E2E Health Fehlerframework Hilfetext"
+          },
+          "text": {
+            "en": "This test intentionally triggers a backend `422` response so the shared error framework can be verified.",
+            "de": "Dieser Test löst absichtlich eine Backend-`422`-Antwort aus, damit das gemeinsame Fehlerframework geprüft werden kann."
+          }
+        },
+        "creating": {
+          "label": {
+            "en": "E2E health error framework creating state",
+            "de": "E2E Health Fehlerframework Erzeugen-Status"
+          },
+          "text": {
+            "en": "Creating...",
+            "de": "Erzeuge..."
+          }
+        },
+        "createError": {
+          "label": {
+            "en": "E2E health error framework action",
+            "de": "E2E Health Fehlerframework Aktion"
+          },
+          "text": {
+            "en": "Create error",
+            "de": "Fehler erzeugen"
+          }
+        }
+      }
     }
   },
   "donors": {
@@ -5208,6 +5906,36 @@
             "en": "Open",
             "de": "Oeffnen"
           }
+        },
+        "sortToggle": {
+          "label": {
+            "en": "Admin translations tree sort toggle action",
+            "de": "Admin Uebersetzungen Baum Sortierung umschalten Aktion"
+          },
+          "text": {
+            "en": "Toggle sort order",
+            "de": "Sortierung umschalten"
+          }
+        },
+        "sortNone": {
+          "label": {
+            "en": "Admin translations tree sort mode none",
+            "de": "Admin Uebersetzungen Baum Sortiermodus keine Sortierung"
+          },
+          "text": {
+            "en": "No sort",
+            "de": "Keine Sortierung"
+          }
+        },
+        "sortAsc": {
+          "label": {
+            "en": "Admin translations tree sort mode ascending",
+            "de": "Admin Uebersetzungen Baum Sortiermodus aufsteigend"
+          },
+          "text": {
+            "en": "Sort A-Z",
+            "de": "Sortierung A-Z"
+          }
         }
       }
     },
@@ -5283,6 +6011,96 @@
           "text": {
             "en": "Deleting this group will unassign fields from the group. Do you want to continue?",
             "de": "Beim Löschen dieser Gruppe wird die Zuordnung der Felder zur Gruppe aufgehoben. Möchten Sie fortfahren?"
+          }
+        },
+        "laneHint": {
+          "label": {
+            "en": "Admin procurement groups lane hint",
+            "de": "Admin Beschaffung Gruppen Spur Hinweis"
+          },
+          "text": {
+            "en": "Primary groups are always shown before secondary groups. Drag and drop works inside a lane and between lanes.",
+            "de": "Primäre Gruppen werden immer vor sekundären Gruppen angezeigt. Ziehen und Ablegen funktioniert innerhalb einer Spur und zwischen den Spuren."
+          }
+        },
+        "primaryLaneTitle": {
+          "label": {
+            "en": "Admin procurement groups primary lane title",
+            "de": "Admin Beschaffung Gruppen Primäre Spur Titel"
+          },
+          "text": {
+            "en": "Primary lane",
+            "de": "Primäre Spur"
+          }
+        },
+        "secondaryLaneTitle": {
+          "label": {
+            "en": "Admin procurement groups secondary lane title",
+            "de": "Admin Beschaffung Gruppen Sekundäre Spur Titel"
+          },
+          "text": {
+            "en": "Secondary lane",
+            "de": "Sekundäre Spur"
+          }
+        },
+        "noGroupsInLane": {
+          "label": {
+            "en": "Admin procurement groups empty lane",
+            "de": "Admin Beschaffung Gruppen Leere Spur"
+          },
+          "text": {
+            "en": "No groups in this lane.",
+            "de": "Keine Gruppen in dieser Spur."
+          }
+        },
+        "laneActions": {
+          "label": {
+            "en": "Admin procurement groups lane action column",
+            "de": "Admin Beschaffung Gruppen Spur Aktionsspalte"
+          },
+          "text": {
+            "en": "Lane",
+            "de": "Spur"
+          }
+        },
+        "primaryLaneShort": {
+          "label": {
+            "en": "Admin procurement groups primary lane short label",
+            "de": "Admin Beschaffung Gruppen Primäre Spur Kurzlabel"
+          },
+          "text": {
+            "en": "Primary",
+            "de": "Primär"
+          }
+        },
+        "secondaryLaneShort": {
+          "label": {
+            "en": "Admin procurement groups secondary lane short label",
+            "de": "Admin Beschaffung Gruppen Sekundäre Spur Kurzlabel"
+          },
+          "text": {
+            "en": "Secondary",
+            "de": "Sekundär"
+          }
+        },
+        "moveToSecondary": {
+          "label": {
+            "en": "Admin procurement groups move to secondary lane action",
+            "de": "Admin Beschaffung Gruppen In sekundäre Spur verschieben Aktion"
+          },
+          "text": {
+            "en": "Move to secondary",
+            "de": "In sekundäre Spur"
+          }
+        },
+        "moveToPrimary": {
+          "label": {
+            "en": "Admin procurement groups move to primary lane action",
+            "de": "Admin Beschaffung Gruppen In primäre Spur verschieben Aktion"
+          },
+          "text": {
+            "en": "Move to primary",
+            "de": "In primäre Spur"
           }
         }
       },
@@ -6402,6 +7220,222 @@
         },
         "text": {
           "de": "Person"
+        }
+      }
+    },
+    "codeValuesByType": {
+      "ORGAN": {
+        "KIDNEY": {
+          "label": { "en": "Server code value ORGAN.KIDNEY", "de": "Server Codewert ORGAN.KIDNEY" },
+          "text": { "en": "Kidney", "de": "Niere" }
+        },
+        "PANCREAS": {
+          "label": { "en": "Server code value ORGAN.PANCREAS", "de": "Server Codewert ORGAN.PANCREAS" },
+          "text": { "en": "Pancreas", "de": "Pankreas" }
+        },
+        "LIVER": {
+          "label": { "en": "Server code value ORGAN.LIVER", "de": "Server Codewert ORGAN.LIVER" },
+          "text": { "en": "Liver", "de": "Leber" }
+        },
+        "HEART": {
+          "label": { "en": "Server code value ORGAN.HEART", "de": "Server Codewert ORGAN.HEART" },
+          "text": { "en": "Heart", "de": "Herz" }
+        },
+        "HEART_VALVE": {
+          "label": { "en": "Server code value ORGAN.HEART_VALVE", "de": "Server Codewert ORGAN.HEART_VALVE" },
+          "text": { "en": "Heart valve", "de": "Herzklappe" }
+        },
+        "LUNG": {
+          "label": { "en": "Server code value ORGAN.LUNG", "de": "Server Codewert ORGAN.LUNG" },
+          "text": { "en": "Lung", "de": "Lunge" }
+        },
+        "ISLET": {
+          "label": { "en": "Server code value ORGAN.ISLET", "de": "Server Codewert ORGAN.ISLET" },
+          "text": { "en": "Islet cells", "de": "Inselzellen" }
+        },
+        "VESSELS": {
+          "label": { "en": "Server code value ORGAN.VESSELS", "de": "Server Codewert ORGAN.VESSELS" },
+          "text": { "en": "Vessels", "de": "Gefässe" }
+        },
+        "INTESTINE": {
+          "label": { "en": "Server code value ORGAN.INTESTINE", "de": "Server Codewert ORGAN.INTESTINE" },
+          "text": { "en": "Intestine", "de": "Dünndarm" }
+        }
+      },
+      "TPL_STATUS": {
+        "EVALUATION": {
+          "label": { "en": "Server code value TPL_STATUS.EVALUATION", "de": "Server Codewert TPL_STATUS.EVALUATION" },
+          "text": { "en": "Evaluation", "de": "Abklärung" }
+        },
+        "TRANSPLANTABLE": {
+          "label": { "en": "Server code value TPL_STATUS.TRANSPLANTABLE", "de": "Server Codewert TPL_STATUS.TRANSPLANTABLE" },
+          "text": { "en": "Transplantable", "de": "Transplantabel" }
+        },
+        "ALLOCATED": {
+          "label": { "en": "Server code value TPL_STATUS.ALLOCATED", "de": "Server Codewert TPL_STATUS.ALLOCATED" },
+          "text": { "en": "Allocated", "de": "Alloziert" }
+        },
+        "TRANSPLANTED": {
+          "label": { "en": "Server code value TPL_STATUS.TRANSPLANTED", "de": "Server Codewert TPL_STATUS.TRANSPLANTED" },
+          "text": { "en": "Transplanted", "de": "Transplantiert" }
+        },
+        "DECEASED": {
+          "label": { "en": "Server code value TPL_STATUS.DECEASED", "de": "Server Codewert TPL_STATUS.DECEASED" },
+          "text": { "en": "Deceased", "de": "Verstorben" }
+        },
+        "REJECTED": {
+          "label": { "en": "Server code value TPL_STATUS.REJECTED", "de": "Server Codewert TPL_STATUS.REJECTED" },
+          "text": { "en": "Rejected", "de": "Abgelehnt" }
+        },
+        "DELISTED_USZ": {
+          "label": { "en": "Server code value TPL_STATUS.DELISTED_USZ", "de": "Server Codewert TPL_STATUS.DELISTED_USZ" },
+          "text": { "en": "Delisted (USZ)", "de": "Delistung USZ" }
+        },
+        "DELISTED_PATIENT": {
+          "label": { "en": "Server code value TPL_STATUS.DELISTED_PATIENT", "de": "Server Codewert TPL_STATUS.DELISTED_PATIENT" },
+          "text": { "en": "Delisted (patient)", "de": "Delistung Patient" }
+        },
+        "CANCELLED": {
+          "label": { "en": "Server code value TPL_STATUS.CANCELLED", "de": "Server Codewert TPL_STATUS.CANCELLED" },
+          "text": { "en": "Cancelled", "de": "Storniert" }
+        },
+        "LISTING": {
+          "label": { "en": "Server code value TPL_STATUS.LISTING", "de": "Server Codewert TPL_STATUS.LISTING" },
+          "text": { "en": "Listing", "de": "Listung" }
+        }
+      },
+      "CONTACT": {
+        "EMAIL": {
+          "label": { "en": "Server code value CONTACT.EMAIL", "de": "Server Codewert CONTACT.EMAIL" },
+          "text": { "en": "Email", "de": "E-Mail" }
+        },
+        "PHONE": {
+          "label": { "en": "Server code value CONTACT.PHONE", "de": "Server Codewert CONTACT.PHONE" },
+          "text": { "en": "Phone", "de": "Telefon" }
+        },
+        "SOCIAL": {
+          "label": { "en": "Server code value CONTACT.SOCIAL", "de": "Server Codewert CONTACT.SOCIAL" },
+          "text": { "en": "Social", "de": "Sozial" }
+        },
+        "OTHER": {
+          "label": { "en": "Server code value CONTACT.OTHER", "de": "Server Codewert CONTACT.OTHER" },
+          "text": { "en": "Other", "de": "Andere" }
+        }
+      },
+      "SEX": {
+        "F": {
+          "label": { "en": "Server code value SEX.F", "de": "Server Codewert SEX.F" },
+          "text": { "en": "Female", "de": "Weiblich" }
+        },
+        "M": {
+          "label": { "en": "Server code value SEX.M", "de": "Server Codewert SEX.M" },
+          "text": { "en": "Male", "de": "Männlich" }
+        },
+        "X": {
+          "label": { "en": "Server code value SEX.X", "de": "Server Codewert SEX.X" },
+          "text": { "en": "Other", "de": "Divers" }
+        }
+      },
+      "COORDINATION_STATUS": {
+        "OPEN": {
+          "label": { "en": "Server code value COORDINATION_STATUS.OPEN", "de": "Server Codewert COORDINATION_STATUS.OPEN" },
+          "text": { "en": "Open", "de": "Offen" }
+        }
+      },
+      "DEATH_KIND": {
+        "DCD": {
+          "label": { "en": "Server code value DEATH_KIND.DCD", "de": "Server Codewert DEATH_KIND.DCD" },
+          "text": { "en": "DCD", "de": "DCD" }
+        },
+        "DBD": {
+          "label": { "en": "Server code value DEATH_KIND.DBD", "de": "Server Codewert DEATH_KIND.DBD" },
+          "text": { "en": "DBD", "de": "DBD" }
+        }
+      },
+      "PRIORITY": {
+        "LOW": {
+          "label": { "en": "Server code value PRIORITY.LOW", "de": "Server Codewert PRIORITY.LOW" },
+          "text": { "en": "Low", "de": "Niedrig" }
+        },
+        "NORMAL": {
+          "label": { "en": "Server code value PRIORITY.NORMAL", "de": "Server Codewert PRIORITY.NORMAL" },
+          "text": { "en": "Normal", "de": "Normal" }
+        },
+        "HIGH": {
+          "label": { "en": "Server code value PRIORITY.HIGH", "de": "Server Codewert PRIORITY.HIGH" },
+          "text": { "en": "High", "de": "Hoch" }
+        }
+      },
+      "TASK_STATUS": {
+        "PENDING": {
+          "label": { "en": "Server code value TASK_STATUS.PENDING", "de": "Server Codewert TASK_STATUS.PENDING" },
+          "text": { "en": "Pending", "de": "Ausstehend" }
+        },
+        "COMPLETED": {
+          "label": { "en": "Server code value TASK_STATUS.COMPLETED", "de": "Server Codewert TASK_STATUS.COMPLETED" },
+          "text": { "en": "Completed", "de": "Abgeschlossen" }
+        },
+        "CANCELLED": {
+          "label": { "en": "Server code value TASK_STATUS.CANCELLED", "de": "Server Codewert TASK_STATUS.CANCELLED" },
+          "text": { "en": "Cancelled", "de": "Abgebrochen" }
+        }
+      },
+      "TASK_SCOPE": {
+        "ALL": {
+          "label": { "en": "Server code value TASK_SCOPE.ALL", "de": "Server Codewert TASK_SCOPE.ALL" },
+          "text": { "en": "All", "de": "Alle" }
+        },
+        "PATIENT": {
+          "label": { "en": "Server code value TASK_SCOPE.PATIENT", "de": "Server Codewert TASK_SCOPE.PATIENT" },
+          "text": { "en": "Patient", "de": "Patient" }
+        },
+        "EPISODE": {
+          "label": { "en": "Server code value TASK_SCOPE.EPISODE", "de": "Server Codewert TASK_SCOPE.EPISODE" },
+          "text": { "en": "Episode", "de": "Episode" }
+        },
+        "COORDINATION_PROTOCOL": {
+          "label": { "en": "Server code value TASK_SCOPE.COORDINATION_PROTOCOL", "de": "Server Codewert TASK_SCOPE.COORDINATION_PROTOCOL" },
+          "text": { "en": "Coordination protocol", "de": "Koordinationsprotokoll" }
+        }
+      },
+      "TPL_PHASE": {
+        "EVALUATION": {
+          "label": { "en": "Server code value TPL_PHASE.EVALUATION", "de": "Server Codewert TPL_PHASE.EVALUATION" },
+          "text": { "en": "Evaluation", "de": "Evaluation" }
+        },
+        "LISTING": {
+          "label": { "en": "Server code value TPL_PHASE.LISTING", "de": "Server Codewert TPL_PHASE.LISTING" },
+          "text": { "en": "Listing", "de": "Listung" }
+        },
+        "TRANSPLANTATION": {
+          "label": { "en": "Server code value TPL_PHASE.TRANSPLANTATION", "de": "Server Codewert TPL_PHASE.TRANSPLANTATION" },
+          "text": { "en": "Transplantation", "de": "Transplantation" }
+        },
+        "FOLLOW_UP": {
+          "label": { "en": "Server code value TPL_PHASE.FOLLOW_UP", "de": "Server Codewert TPL_PHASE.FOLLOW_UP" },
+          "text": { "en": "Follow-Up", "de": "Nachsorge" }
+        }
+      },
+      "ROLE": {
+        "KOORD": {
+          "label": { "en": "Server code value ROLE.KOORD", "de": "Server Codewert ROLE.KOORD" },
+          "text": { "en": "Coordinator", "de": "Koordinator" }
+        },
+        "KOORD_DONOR": {
+          "label": { "en": "Server code value ROLE.KOORD_DONOR", "de": "Server Codewert ROLE.KOORD_DONOR" },
+          "text": { "en": "Coordinator (donor edit)", "de": "Koordinator (Donor Edit)" }
+        },
+        "ARZT": {
+          "label": { "en": "Server code value ROLE.ARZT", "de": "Server Codewert ROLE.ARZT" },
+          "text": { "en": "Physician", "de": "Arzt" }
+        },
+        "SYSTEM": {
+          "label": { "en": "Server code value ROLE.SYSTEM", "de": "Server Codewert ROLE.SYSTEM" },
+          "text": { "en": "System", "de": "System" }
+        },
+        "ADMIN": {
+          "label": { "en": "Server code value ROLE.ADMIN", "de": "Server Codewert ROLE.ADMIN" },
+          "text": { "en": "Admin", "de": "Admin" }
         }
       }
     },

@@ -7,6 +7,7 @@ from pydantic import BaseModel, ConfigDict, model_validator
 from .clinical_episodes import (
     EpisodeBase,
     EpisodeCreate,
+    EpisodeListResponse,
     EpisodeOrganBase,
     EpisodeOrganCreate,
     EpisodeOrganResponse,

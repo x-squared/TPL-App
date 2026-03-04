@@ -3,11 +3,13 @@ import { useEffect, useMemo, useState } from 'react';
 import {
   api,
   type ProcurementAdminConfig,
+  type ProcurementGroupDisplayLane,
   type ProcurementSlotKey,
   type TaskGroupTemplate,
   type ProcurementValueMode,
 } from '../../../api';
 import { toUserErrorMessage } from '../../../api/error';
+import { withPreservedMainContentScroll } from '../../layout/scrollPreservation';
 
 export function useAdminProcurementConfig() {
   const [config, setConfig] = useState<ProcurementAdminConfig | null>(null);
@@ -24,12 +26,19 @@ export function useAdminProcurementConfig() {
     }
     setError('');
     try {
-      const payload = await api.getProcurementAdminConfig();
-      const taskGroupTemplates = await api.listTaskGroupTemplates();
-      const protocolTaskGroupTemplates = taskGroupTemplates
-        .filter((entry) => entry.scope?.key === 'COORDINATION_PROTOCOL')
-        .sort((a, b) => (a.sort_pos - b.sort_pos) || (a.id - b.id));
-      setConfig(payload);
+      const [configResult, taskTemplatesResult] = await Promise.allSettled([
+        api.getProcurementAdminConfig(),
+        api.listTaskGroupTemplates(),
+      ]);
+      if (configResult.status !== 'fulfilled') {
+        throw configResult.reason;
+      }
+      const protocolTaskGroupTemplates = taskTemplatesResult.status === 'fulfilled'
+        ? taskTemplatesResult.value
+          .filter((entry) => entry.scope?.key === 'COORDINATION_PROTOCOL')
+          .sort((a, b) => (a.sort_pos - b.sort_pos) || (a.id - b.id))
+        : [];
+      setConfig(configResult.value);
       setCoordinationProtocolTaskGroupTemplates(protocolTaskGroupTemplates);
     } catch (err) {
       setError(toUserErrorMessage(err, 'Could not load procurement data configuration.'));
@@ -44,22 +53,41 @@ export function useAdminProcurementConfig() {
     void load({ withLoading: true });
   }, []);
 
-  const createGroup = async (payload: { key: string; name_default: string; comment: string; is_active?: boolean; pos: number }) => {
-    void payload;
+  const createGroup = async (payload: { key: string; name_default: string; comment: string; is_active?: boolean; display_lane?: ProcurementGroupDisplayLane; pos: number }) => {
+    setSaving(true);
     setStatus('');
     setError('');
+    try {
+      await withPreservedMainContentScroll(async () => {
+        await api.createProcurementFieldGroupTemplate(payload);
+        await load();
+      });
+    } catch (err) {
+      setError(toUserErrorMessage(err, 'Could not create data group.'));
+    } finally {
+      setSaving(false);
+    }
   };
 
   const updateGroup = async (
     groupId: number,
-    payload: { pos?: number },
+    payload: {
+      key?: string;
+      name_default?: string;
+      comment?: string;
+      is_active?: boolean;
+      pos?: number;
+      display_lane?: ProcurementGroupDisplayLane;
+    },
   ) => {
     setSaving(true);
     setError('');
     setStatus('');
     try {
-      await api.updateProcurementFieldGroupTemplate(groupId, payload);
-      await load();
+      await withPreservedMainContentScroll(async () => {
+        await api.updateProcurementFieldGroupTemplate(groupId, payload);
+        await load();
+      });
     } catch (err) {
       setError(toUserErrorMessage(err, 'Could not update data group.'));
     } finally {
@@ -72,12 +100,12 @@ export function useAdminProcurementConfig() {
     setError('');
     setStatus('');
     try {
-      await Promise.all(
-        groupIdsInOrder.map((groupId, index) =>
-          api.updateProcurementFieldGroupTemplate(groupId, { pos: index + 1 }),
-        ),
-      );
-      await load();
+      await withPreservedMainContentScroll(async () => {
+        for (const [index, groupId] of groupIdsInOrder.entries()) {
+          await api.updateProcurementFieldGroupTemplate(groupId, { pos: index + 1 });
+        }
+        await load();
+      });
     } catch (err) {
       setError(toUserErrorMessage(err, 'Could not reorder groups.'));
     } finally {
@@ -90,8 +118,10 @@ export function useAdminProcurementConfig() {
     setError('');
     setStatus('');
     try {
-      await api.deleteProcurementFieldGroupTemplate(groupId);
-      await load();
+      await withPreservedMainContentScroll(async () => {
+        await api.deleteProcurementFieldGroupTemplate(groupId);
+        await load();
+      });
     } catch (err) {
       setError(toUserErrorMessage(err, 'Could not delete data group.'));
     } finally {
@@ -124,15 +154,17 @@ export function useAdminProcurementConfig() {
     setError('');
     setStatus('');
     try {
-      await Promise.all(
-        assignments.map((entry) =>
-          api.updateProcurementFieldTemplate(entry.field_id, {
-            group_template_id: entry.group_template_id,
-            pos: entry.pos,
-          }),
-        ),
-      );
-      await load();
+      await withPreservedMainContentScroll(async () => {
+        await Promise.all(
+          assignments.map((entry) =>
+            api.updateProcurementFieldTemplate(entry.field_id, {
+              group_template_id: entry.group_template_id,
+              pos: entry.pos,
+            }),
+          ),
+        );
+        await load();
+      });
     } catch (err) {
       setError(toUserErrorMessage(err, 'Could not reorder fields.'));
     } finally {
@@ -148,9 +180,11 @@ export function useAdminProcurementConfig() {
     setError('');
     setStatus('');
     try {
-      await api.updateProcurementFieldTemplate(fieldId, payload);
-      setStatus('Field updated.');
-      await load();
+      await withPreservedMainContentScroll(async () => {
+        await api.updateProcurementFieldTemplate(fieldId, payload);
+        setStatus('Field updated.');
+        await load();
+      });
     } catch (err) {
       setError(toUserErrorMessage(err, 'Could not update field.'));
     } finally {
@@ -167,9 +201,11 @@ export function useAdminProcurementConfig() {
     setError('');
     setStatus('');
     try {
-      await api.createProcurementFieldScopeTemplate(payload);
-      setStatus('Scope added.');
-      await load();
+      await withPreservedMainContentScroll(async () => {
+        await api.createProcurementFieldScopeTemplate(payload);
+        setStatus('Scope added.');
+        await load();
+      });
     } catch (err) {
       setError(toUserErrorMessage(err, 'Could not add scope.'));
     } finally {
@@ -182,9 +218,11 @@ export function useAdminProcurementConfig() {
     setError('');
     setStatus('');
     try {
-      await api.deleteProcurementFieldScopeTemplate(scopeId);
-      setStatus('Scope removed.');
-      await load();
+      await withPreservedMainContentScroll(async () => {
+        await api.deleteProcurementFieldScopeTemplate(scopeId);
+        setStatus('Scope removed.');
+        await load();
+      });
     } catch (err) {
       setError(toUserErrorMessage(err, 'Could not remove scope.'));
     } finally {
@@ -201,8 +239,10 @@ export function useAdminProcurementConfig() {
     setError('');
     setStatus('');
     try {
-      await api.createProcurementProtocolTaskGroupSelection(payload);
-      await load();
+      await withPreservedMainContentScroll(async () => {
+        await api.createProcurementProtocolTaskGroupSelection(payload);
+        await load();
+      });
     } catch (err) {
       setError(toUserErrorMessage(err, 'Could not add protocol task-group selection.'));
     } finally {
@@ -218,8 +258,10 @@ export function useAdminProcurementConfig() {
     setError('');
     setStatus('');
     try {
-      await api.updateProcurementProtocolTaskGroupSelection(selectionId, payload);
-      await load();
+      await withPreservedMainContentScroll(async () => {
+        await api.updateProcurementProtocolTaskGroupSelection(selectionId, payload);
+        await load();
+      });
     } catch (err) {
       setError(toUserErrorMessage(err, 'Could not update protocol task-group selection.'));
     } finally {
@@ -233,12 +275,14 @@ export function useAdminProcurementConfig() {
     setError('');
     setStatus('');
     try {
-      await Promise.all(
-        selectionIdsInOrder.map((selectionId, index) =>
-          api.updateProcurementProtocolTaskGroupSelection(selectionId, { pos: index + 1 }),
-        ),
-      );
-      await load();
+      await withPreservedMainContentScroll(async () => {
+        await Promise.all(
+          selectionIdsInOrder.map((selectionId, index) =>
+            api.updateProcurementProtocolTaskGroupSelection(selectionId, { pos: index + 1 }),
+          ),
+        );
+        await load();
+      });
     } catch (err) {
       setError(toUserErrorMessage(err, 'Could not reorder protocol task-group selections.'));
     } finally {
@@ -251,8 +295,10 @@ export function useAdminProcurementConfig() {
     setError('');
     setStatus('');
     try {
-      await api.deleteProcurementProtocolTaskGroupSelection(selectionId);
-      await load();
+      await withPreservedMainContentScroll(async () => {
+        await api.deleteProcurementProtocolTaskGroupSelection(selectionId);
+        await load();
+      });
     } catch (err) {
       setError(toUserErrorMessage(err, 'Could not remove protocol task-group selection.'));
     } finally {

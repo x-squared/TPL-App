@@ -1,5 +1,6 @@
 import { useState } from 'react';
 import type { ColloqiumAgenda, PatientListItem } from '../../../../api';
+import { translateCodeLabel } from '../../../../i18n/codeTranslations';
 import { useI18n } from '../../../../i18n/i18n';
 import { formatEpisodeDisplayName } from '../../../layout/episodeDisplay';
 import InlineDeleteActions from '../../../layout/InlineDeleteActions';
@@ -134,7 +135,7 @@ export default function ColloquiumAgendaTable({
                   ) : (
                     formatEpisodeDisplayName({
                       patientName: `${patient?.first_name ?? ''} ${patient?.name ?? ''}`.trim(),
-                      organName: agenda.episode?.organ?.name_default,
+                      organName: translateCodeLabel(t, agenda.episode?.organ),
                       startDate: agenda.episode?.start ?? null,
                     })
                   )}
@@ -142,8 +143,8 @@ export default function ColloquiumAgendaTable({
                 <td>{patient?.name ?? t('common.emptySymbol', '–')}</td>
                 <td>{patient?.first_name ?? t('common.emptySymbol', '–')}</td>
                 <td>{patient?.pid ?? t('common.emptySymbol', '–')}</td>
-                <td>{isEditing ? (selectedPreview?.organName ?? (selectedEpisodePreviews.length > 1 ? t('colloquiums.protocol.multiple', 'Multiple') : t('common.emptySymbol', '–'))) : (agenda.episode?.organ?.name_default ?? t('common.emptySymbol', '–'))}</td>
-                <td>{isEditing ? (selectedPreview?.statusName ?? (selectedEpisodePreviews.length > 1 ? t('colloquiums.protocol.multiple', 'Multiple') : t('common.emptySymbol', '–'))) : (agenda.episode?.status?.name_default ?? t('common.emptySymbol', '–'))}</td>
+                <td>{isEditing ? (selectedPreview?.organName ?? (selectedEpisodePreviews.length > 1 ? t('colloquiums.protocol.multiple', 'Multiple') : t('common.emptySymbol', '–'))) : translateCodeLabel(t, agenda.episode?.organ)}</td>
+                <td>{isEditing ? (selectedPreview?.statusName ?? (selectedEpisodePreviews.length > 1 ? t('colloquiums.protocol.multiple', 'Multiple') : t('common.emptySymbol', '–'))) : translateCodeLabel(t, agenda.episode?.status)}</td>
                 <td>{isEditing ? formatDate(selectedPreview?.start ?? null) : formatDate(agenda.episode?.start ?? null)}</td>
                 <td>{isEditing ? formatDate(selectedPreview?.end ?? null) : formatDate(agenda.episode?.end ?? null)}</td>
                 <td>

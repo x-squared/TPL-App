@@ -23,6 +23,7 @@ Use this rule as the default blueprint when designing or implementing new capabi
 ## Frontend defaults
 
 - Build complex screens as thin container views plus composed `use*ViewModel` hooks.
+- For list/table data loading strategy, follow `.cursor/rules/list-viewmodel-data-loading.mdc`.
 - Decompose tabs/pages section-first into focused components under `frontend/src/views/<feature>/...`.
 - Reuse shared styling and rendering utilities before introducing local one-off patterns.
 - Keep behavior consistent with established edit/save/cancel and table action patterns unless explicitly changed.
