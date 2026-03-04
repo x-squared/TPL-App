@@ -1,7 +1,7 @@
 from fastapi import APIRouter, Depends
 from sqlalchemy.orm import Session
 
-from ..auth import get_current_user
+from ..auth import require_permission
 from ..database import get_db
 from ..features.colloqium_types import (
     create_colloqium_type as create_colloqium_type_service,
@@ -20,7 +20,10 @@ router = APIRouter(prefix="/colloqium-types", tags=["colloqium-types"])
 
 
 @router.get("/", response_model=list[ColloqiumTypeResponse])
-def list_colloqium_types(db: Session = Depends(get_db)):
+def list_colloqium_types(
+    db: Session = Depends(get_db),
+    _: User = Depends(require_permission("view.colloquiums")),
+):
     return list_colloqium_types_service(db=db)
 
 
@@ -28,7 +31,7 @@ def list_colloqium_types(db: Session = Depends(get_db)):
 def create_colloqium_type(
     payload: ColloqiumTypeCreate,
     db: Session = Depends(get_db),
-    current_user: User = Depends(get_current_user),
+    current_user: User = Depends(require_permission("edit.colloquiums")),
 ):
     return create_colloqium_type_service(
         payload=payload,
@@ -42,7 +45,7 @@ def update_colloqium_type(
     colloqium_type_id: int,
     payload: ColloqiumTypeUpdate,
     db: Session = Depends(get_db),
-    current_user: User = Depends(get_current_user),
+    current_user: User = Depends(require_permission("edit.colloquiums")),
 ):
     return update_colloqium_type_service(
         colloqium_type_id=colloqium_type_id,
@@ -56,7 +59,7 @@ def update_colloqium_type(
 def delete_colloqium_type(
     colloqium_type_id: int,
     db: Session = Depends(get_db),
-    current_user: User = Depends(get_current_user),
+    current_user: User = Depends(require_permission("edit.colloquiums")),
 ):
     _ = current_user
     delete_colloqium_type_service(colloqium_type_id=colloqium_type_id, db=db)

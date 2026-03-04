@@ -1,7 +1,7 @@
 from fastapi import APIRouter, Depends
 from sqlalchemy.orm import Session
 
-from ..auth import get_current_user
+from ..auth import require_permission
 from ..database import get_db
 from ..features.tasks import (
     create_task_group_template as create_task_group_template_service,
@@ -26,6 +26,7 @@ router = APIRouter(prefix="/task-group-templates", tags=["task-group-templates"]
 def list_task_group_templates(
     is_active: bool | None = None,
     db: Session = Depends(get_db),
+    _: User = Depends(require_permission("view.tasks")),
 ):
     return list_task_group_templates_service(is_active=is_active, db=db)
 
@@ -34,7 +35,7 @@ def list_task_group_templates(
 def create_task_group_template(
     payload: TaskGroupTemplateCreate,
     db: Session = Depends(get_db),
-    current_user: User = Depends(get_current_user),
+    current_user: User = Depends(require_permission("edit.tasks")),
 ):
     return create_task_group_template_service(
         payload=payload,
@@ -48,7 +49,7 @@ def update_task_group_template(
     template_id: int,
     payload: TaskGroupTemplateUpdate,
     db: Session = Depends(get_db),
-    current_user: User = Depends(get_current_user),
+    current_user: User = Depends(require_permission("edit.tasks")),
 ):
     return update_task_group_template_service(
         template_id=template_id,
@@ -62,7 +63,7 @@ def update_task_group_template(
 def delete_task_group_template(
     template_id: int,
     db: Session = Depends(get_db),
-    _: User = Depends(get_current_user),
+    _: User = Depends(require_permission("edit.tasks")),
 ):
     delete_task_group_template_service(template_id=template_id, db=db)
 
@@ -72,7 +73,7 @@ def instantiate_task_group_template(
     template_id: int,
     payload: TaskGroupTemplateInstantiateRequest,
     db: Session = Depends(get_db),
-    current_user: User = Depends(get_current_user),
+    current_user: User = Depends(require_permission("edit.tasks")),
 ):
     return instantiate_task_group_template_service(
         template_id=template_id,

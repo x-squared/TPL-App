@@ -21,6 +21,55 @@ Test specs are plain Markdown documents with structured `spec-case` blocks.
 
 Business requirement specs in `spec/requirements/*.md` are maintained as plain Markdown.
 
+## Domain Concept Model (PlantUML)
+
+TPL-App also keeps intent-level conceptual domain specification artifacts in:
+
+- `spec/domain/*.puml`
+
+These files describe business concepts and conceptual relationships independently from direct database implementation details.
+
+### Artifacts and purpose
+
+- `spec/domain/conceptual-domain-model.puml`: integrated overview across domains
+- `spec/domain/conceptual-paths.puml`: path/scenario view (`P1..P6`) for cross-domain journeys
+- `spec/domain/identity-access-domain.puml`: users, roles, permissions
+- `spec/domain/patient-care-domain.puml`: patient, episode, medical values
+- `spec/domain/colloquiums-domain.puml`: colloquiums and agenda relationships
+- `spec/domain/coordinations-domain.puml`: coordination and donor workflow concepts
+- `spec/domain/tasking-domain.puml`: task templates, groups, and runtime tasks
+- `spec/domain/communication-ux-domain.puml`: information and favorites concepts
+
+### How to work with these files
+
+- Source of truth is the `.puml` text files in `spec/domain/`
+- Edit manually in the editor
+- Render/preview visually via PlantUML
+- Keep concept names aligned with business language (not DB naming)
+
+Render example:
+
+```{bash}
+plantuml spec/domain/conceptual-domain-model.puml
+```
+
+### Update rules (required)
+
+Update affected `spec/domain/*.puml` files in the same change set when any of these change:
+
+- a conceptual entity is added/removed/renamed
+- a conceptual relationship or cardinality changes
+- a key domain invariant or ownership intent changes
+- a primary path in `conceptual-paths.puml` changes (`P1..P6`)
+
+Usually no conceptual diagram update is required for implementation-only technical changes (for example index changes or internal column refactors) when concept intent is unchanged.
+
+### Pull request checklist for domain changes
+
+- identify impacted conceptual diagram(s)
+- update diagram(s) and path view if needed
+- mention impacted path IDs (`P1..P6`) in PR notes when behavior/journey changes
+
 ## Requirement Specification Standard
 
 All requirement specification documents under `spec/requirements/` must follow the same hierarchy:

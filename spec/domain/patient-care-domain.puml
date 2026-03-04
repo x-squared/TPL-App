@@ -1,0 +1,42 @@
+@startuml
+title TPL Conceptual Domain - Patient Care
+
+hide methods
+hide stereotypes
+skinparam shadowing false
+skinparam classAttributeIconSize 0
+left to right direction
+
+class Patient
+class Episode
+class EpisodeOrgan
+class ContactInfo
+class Absence
+class Diagnosis
+
+class MedicalValueTemplate
+class MedicalValueGroupTemplate
+class MedicalValueGroup
+class MedicalValue
+
+Patient "1" -- "0..*" Episode
+Episode "1" -- "0..*" EpisodeOrgan
+Patient "1" -- "0..*" ContactInfo
+Patient "1" -- "0..*" Absence
+Patient "1" -- "0..*" Diagnosis
+
+MedicalValueGroupTemplate "1" -- "0..*" MedicalValueTemplate
+MedicalValueGroupTemplate "1" -- "0..*" MedicalValueGroup
+Patient "1" -- "0..*" MedicalValueGroup
+Patient "1" -- "0..*" MedicalValue
+MedicalValueTemplate "1" -- "0..*" MedicalValue
+MedicalValueGroup "1" -- "0..*" MedicalValue
+Episode "1" <-- "0..*" MedicalValue : context (optional)
+
+note bottom of MedicalValue
+Medical values are context-aware:
+always linked to a patient, optionally linked
+to an episode (and organ context when applicable).
+end note
+
+@enduml

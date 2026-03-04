@@ -1,7 +1,7 @@
 from fastapi import APIRouter, Depends
 from sqlalchemy.orm import Session
 
-from ..auth import get_current_user
+from ..auth import require_permission
 from ..database import get_db
 from ..features.diagnoses import (
     create_diagnosis as create_diagnosis_service,
@@ -16,7 +16,11 @@ router = APIRouter(prefix="/patients/{patient_id}/diagnoses", tags=["diagnoses"]
 
 
 @router.get("/", response_model=list[DiagnosisResponse])
-def list_diagnoses(patient_id: int, db: Session = Depends(get_db)):
+def list_diagnoses(
+    patient_id: int,
+    db: Session = Depends(get_db),
+    _: User = Depends(require_permission("view.patients")),
+):
     return list_diagnoses_service(patient_id=patient_id, db=db)
 
 
@@ -25,7 +29,7 @@ def create_diagnosis(
     patient_id: int,
     payload: DiagnosisCreate,
     db: Session = Depends(get_db),
-    current_user: User = Depends(get_current_user),
+    current_user: User = Depends(require_permission("edit.patients")),
 ):
     return create_diagnosis_service(
         patient_id=patient_id,
@@ -41,7 +45,7 @@ def update_diagnosis(
     diagnosis_id: int,
     payload: DiagnosisUpdate,
     db: Session = Depends(get_db),
-    current_user: User = Depends(get_current_user),
+    current_user: User = Depends(require_permission("edit.patients")),
 ):
     return update_diagnosis_service(
         patient_id=patient_id,
@@ -57,6 +61,6 @@ def delete_diagnosis(
     patient_id: int,
     diagnosis_id: int,
     db: Session = Depends(get_db),
-    current_user: User = Depends(get_current_user),
+    current_user: User = Depends(require_permission("edit.patients")),
 ):
     delete_diagnosis_service(patient_id=patient_id, diagnosis_id=diagnosis_id, db=db)

@@ -1,7 +1,7 @@
 from fastapi import APIRouter, Depends, Query
 from sqlalchemy.orm import Session
 
-from ..auth import get_current_user
+from ..auth import require_permission
 from ..database import get_db
 from ..features.tasks import (
     create_task_group as create_task_group_service,
@@ -25,6 +25,7 @@ def list_task_groups(
     organ_id: int | None = None,
     task_group_template_id: list[int] | None = Query(default=None),
     db: Session = Depends(get_db),
+    _: User = Depends(require_permission("view.tasks")),
 ):
     return list_task_groups_service(
         patient_id=patient_id,
@@ -41,7 +42,7 @@ def list_task_groups(
 def create_task_group(
     payload: TaskGroupCreate,
     db: Session = Depends(get_db),
-    current_user: User = Depends(get_current_user),
+    current_user: User = Depends(require_permission("edit.tasks")),
 ):
     return create_task_group_service(
         payload=payload,
@@ -55,7 +56,7 @@ def ensure_coordination_protocol_task_groups(
     coordination_id: int,
     organ_id: int | None = None,
     db: Session = Depends(get_db),
-    current_user: User = Depends(get_current_user),
+    current_user: User = Depends(require_permission("edit.tasks")),
 ):
     created_group_count = ensure_coordination_protocol_task_groups_service(
         coordination_id=coordination_id,
@@ -71,7 +72,7 @@ def update_task_group(
     task_group_id: int,
     payload: TaskGroupUpdate,
     db: Session = Depends(get_db),
-    current_user: User = Depends(get_current_user),
+    current_user: User = Depends(require_permission("edit.tasks")),
 ):
     return update_task_group_service(
         task_group_id=task_group_id,
@@ -85,6 +86,6 @@ def update_task_group(
 def delete_task_group(
     task_group_id: int,
     db: Session = Depends(get_db),
-    _: User = Depends(get_current_user),
+    _: User = Depends(require_permission("edit.tasks")),
 ):
     delete_task_group_service(task_group_id=task_group_id, db=db)

@@ -1,7 +1,7 @@
 from fastapi import APIRouter, Depends
 from sqlalchemy.orm import Session
 
-from ..auth import get_current_user
+from ..auth import require_permission
 from ..database import get_db
 from ..features.medical_values import (
     create_medical_value_for_patient,
@@ -17,7 +17,11 @@ router = APIRouter(prefix="/patients/{patient_id}/medical-values", tags=["medica
 
 
 @router.get("/", response_model=list[MedicalValueResponse])
-def list_medical_values(patient_id: int, db: Session = Depends(get_db)):
+def list_medical_values(
+    patient_id: int,
+    db: Session = Depends(get_db),
+    _: User = Depends(require_permission("view.patients")),
+):
     return list_medical_values_for_patient(patient_id=patient_id, db=db)
 
 
@@ -26,7 +30,7 @@ def instantiate_medical_values(
     patient_id: int,
     include_donor_context: bool = False,
     db: Session = Depends(get_db),
-    current_user: User = Depends(get_current_user),
+    current_user: User = Depends(require_permission("edit.patients")),
 ):
     return instantiate_templates_for_patient(
         db,
@@ -41,7 +45,7 @@ def create_medical_value(
     patient_id: int,
     payload: MedicalValueCreate,
     db: Session = Depends(get_db),
-    current_user: User = Depends(get_current_user),
+    current_user: User = Depends(require_permission("edit.patients")),
 ):
     return create_medical_value_for_patient(
         patient_id=patient_id,
@@ -57,7 +61,7 @@ def update_medical_value(
     medical_value_id: int,
     payload: MedicalValueUpdate,
     db: Session = Depends(get_db),
-    current_user: User = Depends(get_current_user),
+    current_user: User = Depends(require_permission("edit.patients")),
 ):
     return update_medical_value_for_patient(
         patient_id=patient_id,
@@ -73,6 +77,6 @@ def delete_medical_value(
     patient_id: int,
     medical_value_id: int,
     db: Session = Depends(get_db),
-    current_user: User = Depends(get_current_user),
+    current_user: User = Depends(require_permission("edit.patients")),
 ):
     delete_medical_value_for_patient(patient_id=patient_id, medical_value_id=medical_value_id, db=db)

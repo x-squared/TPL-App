@@ -1,7 +1,7 @@
 from fastapi import APIRouter, Depends
 from sqlalchemy.orm import Session
 
-from ..auth import get_current_user
+from ..auth import require_permission
 from ..database import get_db
 from ..features.absences import (
     create_absence as create_absence_service,
@@ -16,7 +16,11 @@ router = APIRouter(prefix="/patients/{patient_id}/absences", tags=["absences"])
 
 
 @router.get("/", response_model=list[AbsenceResponse])
-def list_absences(patient_id: int, db: Session = Depends(get_db)):
+def list_absences(
+    patient_id: int,
+    db: Session = Depends(get_db),
+    _: User = Depends(require_permission("view.patients")),
+):
     return list_absences_service(patient_id=patient_id, db=db)
 
 
@@ -25,7 +29,7 @@ def create_absence(
     patient_id: int,
     payload: AbsenceCreate,
     db: Session = Depends(get_db),
-    current_user: User = Depends(get_current_user),
+    current_user: User = Depends(require_permission("edit.patients")),
 ):
     return create_absence_service(
         patient_id=patient_id,
@@ -41,7 +45,7 @@ def update_absence(
     absence_id: int,
     payload: AbsenceUpdate,
     db: Session = Depends(get_db),
-    current_user: User = Depends(get_current_user),
+    current_user: User = Depends(require_permission("edit.patients")),
 ):
     return update_absence_service(
         patient_id=patient_id,
@@ -57,6 +61,6 @@ def delete_absence(
     patient_id: int,
     absence_id: int,
     db: Session = Depends(get_db),
-    current_user: User = Depends(get_current_user),
+    current_user: User = Depends(require_permission("edit.patients")),
 ):
     delete_absence_service(patient_id=patient_id, absence_id=absence_id, db=db)

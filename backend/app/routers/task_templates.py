@@ -1,7 +1,7 @@
 from fastapi import APIRouter, Depends
 from sqlalchemy.orm import Session
 
-from ..auth import get_current_user
+from ..auth import require_permission
 from ..database import get_db
 from ..features.tasks import (
     create_task_template as create_task_template_service,
@@ -20,6 +20,7 @@ def list_task_templates(
     task_group_template_id: int | None = None,
     is_active: bool | None = None,
     db: Session = Depends(get_db),
+    _: User = Depends(require_permission("view.tasks")),
 ):
     return list_task_templates_service(
         task_group_template_id=task_group_template_id,
@@ -32,7 +33,7 @@ def list_task_templates(
 def create_task_template(
     payload: TaskTemplateCreate,
     db: Session = Depends(get_db),
-    current_user: User = Depends(get_current_user),
+    current_user: User = Depends(require_permission("edit.tasks")),
 ):
     return create_task_template_service(
         payload=payload,
@@ -46,7 +47,7 @@ def update_task_template(
     task_template_id: int,
     payload: TaskTemplateUpdate,
     db: Session = Depends(get_db),
-    current_user: User = Depends(get_current_user),
+    current_user: User = Depends(require_permission("edit.tasks")),
 ):
     return update_task_template_service(
         task_template_id=task_template_id,
@@ -60,6 +61,6 @@ def update_task_template(
 def delete_task_template(
     task_template_id: int,
     db: Session = Depends(get_db),
-    current_user: User = Depends(get_current_user),
+    current_user: User = Depends(require_permission("edit.tasks")),
 ):
     delete_task_template_service(task_template_id=task_template_id, db=db)

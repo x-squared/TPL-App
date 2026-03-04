@@ -1,7 +1,7 @@
 from fastapi import APIRouter, Depends
 from sqlalchemy.orm import Session
 
-from ..auth import get_current_user
+from ..auth import require_permission
 from ..database import get_db
 from ..features.patients import (
     create_patient as create_patient_service,
@@ -17,12 +17,21 @@ router = APIRouter(prefix="/patients", tags=["patients"])
 
 
 @router.get("/", response_model=list[PatientListResponse])
-def list_patients(skip: int = 0, limit: int = 100, db: Session = Depends(get_db)):
+def list_patients(
+    skip: int = 0,
+    limit: int = 100,
+    db: Session = Depends(get_db),
+    _: User = Depends(require_permission("view.patients")),
+):
     return list_patients_service(skip=skip, limit=limit, db=db)
 
 
 @router.get("/{patient_id}", response_model=PatientResponse)
-def get_patient(patient_id: int, db: Session = Depends(get_db)):
+def get_patient(
+    patient_id: int,
+    db: Session = Depends(get_db),
+    _: User = Depends(require_permission("view.patients")),
+):
     return get_patient_or_404(patient_id=patient_id, db=db)
 
 
@@ -30,7 +39,7 @@ def get_patient(patient_id: int, db: Session = Depends(get_db)):
 def create_patient(
     payload: PatientCreate,
     db: Session = Depends(get_db),
-    current_user: User = Depends(get_current_user),
+    current_user: User = Depends(require_permission("edit.patients")),
 ):
     return create_patient_service(payload=payload, changed_by_id=current_user.id, db=db)
 
@@ -40,7 +49,7 @@ def update_patient(
     patient_id: int,
     payload: PatientUpdate,
     db: Session = Depends(get_db),
-    current_user: User = Depends(get_current_user),
+    current_user: User = Depends(require_permission("edit.patients")),
 ):
     return update_patient_service(
         patient_id=patient_id,
@@ -54,6 +63,6 @@ def update_patient(
 def delete_patient(
     patient_id: int,
     db: Session = Depends(get_db),
-    current_user: User = Depends(get_current_user),
+    current_user: User = Depends(require_permission("edit.patients")),
 ):
     delete_patient_service(patient_id=patient_id, db=db)

@@ -1,7 +1,7 @@
 from fastapi import APIRouter, Depends
 from sqlalchemy.orm import Session
 
-from ..auth import get_current_user
+from ..auth import require_permission
 from ..database import get_db
 from ..features.medical_value_groups import (
     list_medical_value_groups as list_medical_value_groups_service,
@@ -14,7 +14,10 @@ router = APIRouter(prefix="/medical-value-groups", tags=["medical-value-groups"]
 
 
 @router.get("/", response_model=list[MedicalValueGroupTemplateResponse])
-def list_medical_value_groups(db: Session = Depends(get_db)):
+def list_medical_value_groups(
+    db: Session = Depends(get_db),
+    _: User = Depends(require_permission("view.patients")),
+):
     return list_medical_value_groups_service(db=db)
 
 
@@ -23,7 +26,7 @@ def update_medical_value_group(
     group_id: int,
     payload: MedicalValueGroupTemplateUpdate,
     db: Session = Depends(get_db),
-    current_user: User = Depends(get_current_user),
+    current_user: User = Depends(require_permission("edit.patients")),
 ):
     return update_medical_value_group_service(
         group_id=group_id,

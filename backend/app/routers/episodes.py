@@ -1,7 +1,7 @@
 from fastapi import APIRouter, Depends
 from sqlalchemy.orm import Session
 
-from ..auth import get_current_user
+from ..auth import require_permission
 from ..database import get_db
 from ..features.episodes import (
     add_or_reactivate_episode_organ as add_or_reactivate_episode_organ_service,
@@ -25,7 +25,11 @@ router = APIRouter(prefix="/patients/{patient_id}/episodes", tags=["episodes"])
 
 
 @router.get("/", response_model=list[EpisodeResponse])
-def list_episodes(patient_id: int, db: Session = Depends(get_db)):
+def list_episodes(
+    patient_id: int,
+    db: Session = Depends(get_db),
+    _: User = Depends(require_permission("view.patients")),
+):
     return list_episodes_service(patient_id=patient_id, db=db)
 
 
@@ -34,7 +38,7 @@ def create_episode(
     patient_id: int,
     payload: EpisodeCreate,
     db: Session = Depends(get_db),
-    current_user: User = Depends(get_current_user),
+    current_user: User = Depends(require_permission("edit.patients")),
 ):
     return create_episode_service(
         patient_id=patient_id,
@@ -50,7 +54,7 @@ def update_episode(
     episode_id: int,
     payload: EpisodeUpdate,
     db: Session = Depends(get_db),
-    current_user: User = Depends(get_current_user),
+    current_user: User = Depends(require_permission("edit.patients")),
 ):
     return update_episode_service(
         patient_id=patient_id,
@@ -67,7 +71,7 @@ def add_or_reactivate_episode_organ(
     episode_id: int,
     payload: EpisodeOrganCreate,
     db: Session = Depends(get_db),
-    current_user: User = Depends(get_current_user),
+    current_user: User = Depends(require_permission("edit.patients")),
 ):
     return add_or_reactivate_episode_organ_service(
         patient_id=patient_id,
@@ -85,7 +89,7 @@ def update_episode_organ(
     episode_organ_id: int,
     payload: EpisodeOrganUpdate,
     db: Session = Depends(get_db),
-    current_user: User = Depends(get_current_user),
+    current_user: User = Depends(require_permission("edit.patients")),
 ):
     return update_episode_organ_service(
         patient_id=patient_id,
@@ -102,6 +106,6 @@ def delete_episode(
     patient_id: int,
     episode_id: int,
     db: Session = Depends(get_db),
-    current_user: User = Depends(get_current_user),
+    current_user: User = Depends(require_permission("edit.patients")),
 ):
     delete_episode_service(patient_id=patient_id, episode_id=episode_id, db=db)

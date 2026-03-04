@@ -1,7 +1,7 @@
 from fastapi import APIRouter, Depends
 from sqlalchemy.orm import Session
 
-from ..auth import get_current_user
+from ..auth import require_permission
 from ..database import get_db
 from ..features.contact_infos import (
     create_contact_info as create_contact_info_service,
@@ -16,7 +16,11 @@ router = APIRouter(prefix="/patients/{patient_id}/contacts", tags=["contact_info
 
 
 @router.get("/", response_model=list[ContactInfoResponse])
-def list_contact_infos(patient_id: int, db: Session = Depends(get_db)):
+def list_contact_infos(
+    patient_id: int,
+    db: Session = Depends(get_db),
+    _: User = Depends(require_permission("view.patients")),
+):
     return list_contact_infos_service(patient_id=patient_id, db=db)
 
 
@@ -25,7 +29,7 @@ def create_contact_info(
     patient_id: int,
     payload: ContactInfoCreate,
     db: Session = Depends(get_db),
-    current_user: User = Depends(get_current_user),
+    current_user: User = Depends(require_permission("edit.patients")),
 ):
     return create_contact_info_service(
         patient_id=patient_id,
@@ -41,7 +45,7 @@ def update_contact_info(
     contact_id: int,
     payload: ContactInfoUpdate,
     db: Session = Depends(get_db),
-    current_user: User = Depends(get_current_user),
+    current_user: User = Depends(require_permission("edit.patients")),
 ):
     return update_contact_info_service(
         patient_id=patient_id,
@@ -57,6 +61,6 @@ def delete_contact_info(
     patient_id: int,
     contact_id: int,
     db: Session = Depends(get_db),
-    current_user: User = Depends(get_current_user),
+    current_user: User = Depends(require_permission("edit.patients")),
 ):
     delete_contact_info_service(patient_id=patient_id, contact_id=contact_id, db=db)

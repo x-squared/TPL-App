@@ -1,0 +1,23 @@
+@startuml
+title TPL Conceptual Domain - Colloquiums
+
+hide methods
+hide stereotypes
+skinparam shadowing false
+skinparam classAttributeIconSize 0
+left to right direction
+
+class Person
+class Episode
+
+class ColloqiumType
+class Colloqium
+class ColloqiumAgenda
+
+ColloqiumType "1" -- "0..*" Colloqium
+ColloqiumType "*" -- "*" Person : default participants
+Colloqium "*" -- "*" Person : participants
+Colloqium "1" -- "0..*" ColloqiumAgenda
+Episode "1" <-- "0..*" ColloqiumAgenda : references >
+
+@enduml

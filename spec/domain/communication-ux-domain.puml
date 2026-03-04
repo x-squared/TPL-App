@@ -1,0 +1,25 @@
+@startuml
+title TPL Conceptual Domain - Communication and UX
+
+hide methods
+hide stereotypes
+skinparam shadowing false
+skinparam classAttributeIconSize 0
+left to right direction
+
+class User
+class Information
+class InformationRead
+class Favorite
+
+Information "1" -- "0..*" InformationRead
+User "1" <-- "0..*" InformationRead : read state
+User "1" <-- "0..*" Information : authored by
+User "1" <-- "0..*" Favorite : owner
+
+note right of Favorite
+Favorites can target different domain objects
+(patient, episode, colloquium, coordination).
+end note
+
+@enduml

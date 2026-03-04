@@ -1,0 +1,28 @@
+@startuml
+title TPL Conceptual Domain - Coordinations (Donor Domain)
+
+hide methods
+hide stereotypes
+skinparam shadowing false
+skinparam classAttributeIconSize 0
+left to right direction
+
+class Coordination
+class CoordinationDonor
+class CoordinationEpisode
+class CoordinationProcurement
+class CoordinationTimeLog
+class CoordinationProtocolEventLog
+
+class Episode
+class Task
+
+Coordination "1" -- "0..1" CoordinationDonor
+Coordination "1" -- "0..1" CoordinationProcurement
+Coordination "1" -- "0..*" CoordinationEpisode
+Episode "1" <-- "0..*" CoordinationEpisode : references >
+Coordination "1" -- "0..*" CoordinationTimeLog
+Coordination "1" -- "0..*" CoordinationProtocolEventLog
+Task "1" <-- "0..*" CoordinationProtocolEventLog : optional task reference
+
+@enduml

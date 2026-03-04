@@ -89,6 +89,7 @@ With Vite dev mode, most file changes hot-reload automatically.
 - **Port 5173 already in use**: stop the process using that port, then restart.
 - **Blank or stale UI**: hard refresh browser and restart `npm run dev`.
 - **API errors in browser**: verify backend is running on port `8000`.
+- **Unexpected 403 after role/permission updates**: re-login so the client refreshes `user.permissions` from `/api/auth/me`.
 - **Dependency issues**: remove `node_modules` and reinstall with `npm install`.
 - **Build fails**: run `npm run build` to see TypeScript/build errors explicitly.
 

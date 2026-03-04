@@ -70,12 +70,16 @@ Two concepts must be kept separate:
 
 Write operations use separate **edit-rights**.
 
-Example policy currently implemented:
+Read/write split currently implemented by domain:
 
-- `view.donors` allows viewing donor/coordinations data
-- `edit.donors` allows changing donor/coordinations data
+- patients domain: `view.patients` / `edit.patients`
+- colloquiums domain: `view.colloquiums` / `edit.colloquiums`
+- donor + coordination domain: `view.donors` / `edit.donors`
+- tasks domain: `view.tasks` / `edit.tasks`
+- information domain: `view.information` / `edit.information`
+- reports domain: `view.reports` (read/execute)
 
-So a user can be read-only for Donors when they have `view.donors` but not `edit.donors`.
+So a user can be read-only for a domain when they only have the corresponding `view.*` permission and not the `edit.*` permission.
 
 ### 3.2 Seeded roles and permissions
 
@@ -90,6 +94,13 @@ Seed source for role codes:
 Important role currently used for donor editing:
 
 - `KOORD_DONOR` (separate from generic coordinator role)
+
+Current migration baseline (seed defaults):
+
+- `KOORD`: read/write for patients, colloquiums, tasks, information; read-only for donors/coordinations/reports
+- `KOORD_DONOR`: donor/coordinations read/write via `view.donors` + `edit.donors`
+- `ARZT`: read-only for patients, colloquiums, donors/coordinations, tasks, information, reports
+- `SYSTEM`, `ADMIN`: read/write across all non-admin domains (`ADMIN` additionally has `view.admin`)
 
 ### 3.3 How permissions are resolved
 
@@ -260,9 +271,15 @@ Minimum recurring checks:
    - donors/coordinations pages are visible
    - read APIs work
    - create/update/delete donor operations are blocked (`403`)
-8. Login as user with `view.donors` + `edit.donors`:
+8. Login as user with `view.patients` only:
+   - patient read APIs work
+   - patient create/update/delete operations are blocked (`403`)
+9. Login as user with `view.tasks` only:
+   - task reads work
+   - task create/update/delete operations are blocked (`403`)
+10. Login as user with `view.donors` + `edit.donors`:
    - mutation operations succeed
-9. Edit the same versioned record in two windows:
+11. Edit the same versioned record in two windows:
    - first save succeeds
    - second stale save returns `409` and user can continue after refresh
 

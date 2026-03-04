@@ -1,7 +1,7 @@
 from fastapi import APIRouter, Depends
 from sqlalchemy.orm import Session
 
-from ..auth import get_current_user
+from ..auth import require_permission
 from ..database import get_db
 from ..features.colloqium_agendas import (
     create_colloqium_agenda as create_colloqium_agenda_service,
@@ -24,6 +24,7 @@ def list_colloqium_agendas(
     colloqium_id: int | None = None,
     episode_id: int | None = None,
     db: Session = Depends(get_db),
+    _: User = Depends(require_permission("view.colloquiums")),
 ):
     return list_colloqium_agendas_service(
         colloqium_id=colloqium_id,
@@ -36,7 +37,7 @@ def list_colloqium_agendas(
 def create_colloqium_agenda(
     payload: ColloqiumAgendaCreate,
     db: Session = Depends(get_db),
-    current_user: User = Depends(get_current_user),
+    current_user: User = Depends(require_permission("edit.colloquiums")),
 ):
     return create_colloqium_agenda_service(
         payload=payload,
@@ -50,7 +51,7 @@ def update_colloqium_agenda(
     colloqium_agenda_id: int,
     payload: ColloqiumAgendaUpdate,
     db: Session = Depends(get_db),
-    current_user: User = Depends(get_current_user),
+    current_user: User = Depends(require_permission("edit.colloquiums")),
 ):
     return update_colloqium_agenda_service(
         colloqium_agenda_id=colloqium_agenda_id,
@@ -64,6 +65,6 @@ def update_colloqium_agenda(
 def delete_colloqium_agenda(
     colloqium_agenda_id: int,
     db: Session = Depends(get_db),
-    current_user: User = Depends(get_current_user),
+    current_user: User = Depends(require_permission("edit.colloquiums")),
 ):
     delete_colloqium_agenda_service(colloqium_agenda_id=colloqium_agenda_id, db=db)

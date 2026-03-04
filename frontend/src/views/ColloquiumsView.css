@@ -17,6 +17,153 @@
   width: 100%;
 }
 
+.colloquiums-top-controls {
+  justify-content: space-between;
+  align-items: flex-end;
+}
+
+.colloquiums-view-toggle {
+  display: inline-flex;
+  gap: 0.45rem;
+}
+
+.colloquiums-view-toggle .btn-secondary.is-active {
+  background: #dfe8ff;
+  border-color: #a8bcf0;
+  color: #1f376f;
+}
+
+.colloquiums-add-form {
+  display: flex;
+  flex-direction: column;
+  align-items: stretch;
+}
+
+.colloquiums-add-row {
+  display: flex;
+  align-items: flex-start;
+  gap: 0.5rem;
+  width: 100%;
+}
+
+.colloquiums-add-row-primary {
+  align-items: center;
+  flex-wrap: wrap;
+}
+
+.colloquiums-add-row-secondary {
+  justify-content: space-between;
+}
+
+.colloquiums-add-names-picker {
+  flex: 1 1 32rem;
+}
+
+.colloquiums-add-selected-names {
+  flex: 1 1 14rem;
+  align-self: center;
+  color: #5f6678;
+  font-size: 0.85rem;
+  text-align: right;
+}
+
+.colloquiums-calendar {
+  margin-top: 0.9rem;
+}
+
+.colloquiums-calendar-toolbar {
+  display: flex;
+  align-items: center;
+  gap: 0.55rem;
+  margin-bottom: 0.6rem;
+}
+
+.colloquiums-calendar-grid {
+  display: grid;
+  grid-template-columns: minmax(3rem, 4rem) repeat(5, minmax(10rem, 1fr));
+  border: 1px solid #c7cedc;
+  border-radius: 8px;
+  overflow: hidden;
+  background: #fff;
+}
+
+.colloquiums-calendar-row {
+  display: contents;
+}
+
+.colloquiums-calendar-header {
+  padding: 0.48rem 0.42rem;
+  border-bottom: 1px solid #c7cedc;
+  border-right: 1px solid #cfd5e1;
+  font-weight: 700;
+  text-transform: uppercase;
+  font-size: 0.75rem;
+  letter-spacing: 0.02em;
+  color: #4f576a;
+  background: #edf1f9;
+}
+
+.colloquiums-calendar-week-header {
+  text-align: center;
+  text-transform: none;
+  letter-spacing: 0;
+}
+
+.colloquiums-calendar-week-number {
+  border-bottom: 1px solid #e1e6f0;
+  border-right: 1px solid #d6dcea;
+  padding: 0.5rem 0.35rem;
+  font-weight: 700;
+  color: #6d7587;
+  background: #f8faff;
+  text-align: center;
+}
+
+.colloquiums-calendar-day {
+  min-height: 7rem;
+  border-bottom: 1px solid #e1e6f0;
+  border-right: 1px solid #e1e6f0;
+  padding: 0.38rem;
+  background: #fff;
+}
+
+.colloquiums-calendar-day.is-outside-month {
+  background: #f7f8fb;
+}
+
+.colloquiums-calendar-day.is-today {
+  border: 2px solid #1f376f;
+}
+
+.colloquiums-calendar-day-date {
+  font-size: 0.76rem;
+  color: #656f84;
+  font-weight: 600;
+  margin-bottom: 0.28rem;
+}
+
+.colloquiums-calendar-badges {
+  display: flex;
+  flex-direction: column;
+  gap: 0.25rem;
+}
+
+.colloquiums-calendar-badge {
+  width: 100%;
+  border: 1px solid transparent;
+  border-radius: 999px;
+  text-align: left;
+  font-size: 0.72rem;
+  line-height: 1.2;
+  padding: 0.15rem 0.45rem;
+  cursor: pointer;
+  background: #eef1f7;
+}
+
+.colloquiums-calendar-badge:hover {
+  filter: brightness(0.97);
+}
+
 .colloquiums-detail-section {
   margin-top: 1.5rem;
 }

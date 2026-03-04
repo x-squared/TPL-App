@@ -1,7 +1,7 @@
 from fastapi import APIRouter, Depends, Query
 from sqlalchemy.orm import Session
 
-from ..auth import get_current_user
+from ..auth import require_permission
 from ..database import get_db
 from ..features.tasks import (
     create_task as create_task_service,
@@ -21,6 +21,7 @@ def list_tasks(
     status_key: list[str] | None = Query(default=None),
     assigned_to_id: int | None = None,
     db: Session = Depends(get_db),
+    _: User = Depends(require_permission("view.tasks")),
 ):
     return list_tasks_service(
         task_group_id=task_group_id,
@@ -34,7 +35,7 @@ def list_tasks(
 def create_task(
     payload: TaskCreate,
     db: Session = Depends(get_db),
-    current_user: User = Depends(get_current_user),
+    current_user: User = Depends(require_permission("edit.tasks")),
 ):
     return create_task_service(
         payload=payload,
@@ -48,7 +49,7 @@ def update_task(
     task_id: int,
     payload: TaskUpdate,
     db: Session = Depends(get_db),
-    current_user: User = Depends(get_current_user),
+    current_user: User = Depends(require_permission("edit.tasks")),
 ):
     return update_task_service(
         task_id=task_id,
@@ -62,7 +63,7 @@ def update_task(
 def delete_task(
     task_id: int,
     db: Session = Depends(get_db),
-    current_user: User = Depends(get_current_user),
+    current_user: User = Depends(require_permission("edit.tasks")),
 ):
     _ = current_user
     delete_task_service(task_id=task_id, db=db)

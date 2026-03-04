@@ -1,0 +1,29 @@
+---
+description: Keep conceptual domain specs synced with data model changes
+alwaysApply: true
+---
+
+# Domain Spec Sync With Data Model
+
+When changing domain/data model structures, always keep `spec/domain/*.puml` synchronized in the same change set.
+
+## Trigger (must update conceptual specs)
+
+Apply this whenever a change affects conceptual intent in `backend/app/model/**`, including:
+
+- entity added, removed, or renamed
+- relationship/cardinality changed
+- ownership/context semantics changed
+- lifecycle/invariant semantics changed
+
+## Required updates
+
+- Update the relevant focused diagram(s) in `spec/domain/*-domain.puml`.
+- Update `spec/domain/conceptual-domain-model.puml` for cross-domain impacts.
+- Update `spec/domain/conceptual-paths.puml` when user/business journeys (`P1..P6`) change.
+- Keep `spec/domain/README.md` aligned when files or scope change.
+
+## Completion gate
+
+Do not finish model-affecting work unless conceptual specs are updated or you explicitly document why no conceptual change occurred.
+

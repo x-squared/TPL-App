@@ -1,7 +1,7 @@
 from fastapi import APIRouter, Depends
 from sqlalchemy.orm import Session
 
-from ..auth import get_current_user, get_user_permission_keys
+from ..auth import get_user_permission_keys, require_permission
 from ..database import get_db
 from ..features.information import (
     create_information as create_information_service,
@@ -19,7 +19,7 @@ router = APIRouter(prefix="/information", tags=["information"])
 @router.get("/", response_model=list[InformationResponse])
 def list_information(
     db: Session = Depends(get_db),
-    current_user: User = Depends(get_current_user),
+    current_user: User = Depends(require_permission("view.information")),
 ):
     return list_information_service(db=db, current_user_id=current_user.id)
 
@@ -28,7 +28,7 @@ def list_information(
 def create_information(
     payload: InformationCreate,
     db: Session = Depends(get_db),
-    current_user: User = Depends(get_current_user),
+    current_user: User = Depends(require_permission("edit.information")),
 ):
     return create_information_service(payload=payload, db=db, current_user_id=current_user.id)
 
@@ -38,7 +38,7 @@ def update_information(
     information_id: int,
     payload: InformationUpdate,
     db: Session = Depends(get_db),
-    current_user: User = Depends(get_current_user),
+    current_user: User = Depends(require_permission("edit.information")),
 ):
     permissions = set(get_user_permission_keys(db, current_user))
     return update_information_service(
@@ -54,7 +54,7 @@ def update_information(
 def delete_information(
     information_id: int,
     db: Session = Depends(get_db),
-    current_user: User = Depends(get_current_user),
+    current_user: User = Depends(require_permission("edit.information")),
 ):
     permissions = set(get_user_permission_keys(db, current_user))
     delete_information_service(
@@ -69,7 +69,7 @@ def delete_information(
 def mark_information_read(
     information_id: int,
     db: Session = Depends(get_db),
-    current_user: User = Depends(get_current_user),
+    current_user: User = Depends(require_permission("view.information")),
 ):
     return mark_information_read_service(
         information_id=information_id,
