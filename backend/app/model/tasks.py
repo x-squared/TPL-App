@@ -262,9 +262,9 @@ class TaskGroup(Base):
         "PATIENT_ID",
         Integer,
         ForeignKey("PATIENT.ID"),
-        nullable=False,
+        nullable=True,
         index=True,
-        comment="Required patient context of the task group.",
+        comment="Optional patient context of the task group.",
         info={"label": "Patient"},
     )
     task_group_template_id = Column(

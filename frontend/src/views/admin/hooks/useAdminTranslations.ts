@@ -158,6 +158,10 @@ export function useAdminTranslations() {
     return getEnglishReference(key);
   };
 
+  const isIncompleteKey = (key: string): boolean => {
+    return (draft[key] ?? entries[key] ?? builtinEntries[key] ?? '').trim() === '';
+  };
+
   return {
     locale,
     setLocale,
@@ -174,5 +178,6 @@ export function useAdminTranslations() {
     getSourceKind,
     getEnglishReference,
     getEffectiveText,
+    isIncompleteKey,
   };
 }

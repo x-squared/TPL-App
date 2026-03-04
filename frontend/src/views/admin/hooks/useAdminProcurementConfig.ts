@@ -227,6 +227,25 @@ export function useAdminProcurementConfig() {
     }
   };
 
+  const reorderProtocolTaskGroupSelections = async (selectionIdsInOrder: number[]) => {
+    if (selectionIdsInOrder.length === 0) return;
+    setSaving(true);
+    setError('');
+    setStatus('');
+    try {
+      await Promise.all(
+        selectionIdsInOrder.map((selectionId, index) =>
+          api.updateProcurementProtocolTaskGroupSelection(selectionId, { pos: index + 1 }),
+        ),
+      );
+      await load();
+    } catch (err) {
+      setError(toUserErrorMessage(err, 'Could not reorder protocol task-group selections.'));
+    } finally {
+      setSaving(false);
+    }
+  };
+
   const deleteProtocolTaskGroupSelection = async (selectionId: number) => {
     setSaving(true);
     setError('');
@@ -268,6 +287,7 @@ export function useAdminProcurementConfig() {
     deleteScope,
     createProtocolTaskGroupSelection,
     updateProtocolTaskGroupSelection,
+    reorderProtocolTaskGroupSelections,
     deleteProtocolTaskGroupSelection,
     refresh: load,
   };

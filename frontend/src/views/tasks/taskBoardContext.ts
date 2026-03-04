@@ -37,7 +37,7 @@ export function findContextManagedGroup(
 }
 
 export function buildDefaultTaskDescription(taskGroup: TaskGroup): string {
-  const parts = [`New task for P#${taskGroup.patient_id}`];
+  const parts = [taskGroup.patient_id != null ? `New task for P#${taskGroup.patient_id}` : 'New coordination task'];
   if (taskGroup.episode_id != null) parts.push(`E#${taskGroup.episode_id}`);
   if (taskGroup.tpl_phase?.name_default) parts.push(taskGroup.tpl_phase.name_default);
   return parts.join(' · ');

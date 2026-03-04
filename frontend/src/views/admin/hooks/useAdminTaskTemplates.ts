@@ -106,6 +106,24 @@ export function useAdminTaskTemplates() {
     }
   };
 
+  const reorderTemplates = async (taskTemplateIdsInOrder: number[]) => {
+    if (taskTemplateIdsInOrder.length === 0) return;
+    setSaving(true);
+    setError('');
+    try {
+      await Promise.all(
+        taskTemplateIdsInOrder.map((taskTemplateId, index) =>
+          api.updateTaskTemplate(taskTemplateId, { sort_pos: index + 1 }),
+        ),
+      );
+      await load();
+    } catch (err) {
+      setError(toUserErrorMessage(err, 'Could not reorder task templates.'));
+    } finally {
+      setSaving(false);
+    }
+  };
+
   const createGroupTemplate = async (payload: TaskGroupTemplateCreate) => {
     setSaving(true);
     setError('');
@@ -132,6 +150,24 @@ export function useAdminTaskTemplates() {
     }
   };
 
+  const reorderGroupTemplates = async (taskGroupTemplateIdsInOrder: number[]) => {
+    if (taskGroupTemplateIdsInOrder.length === 0) return;
+    setSaving(true);
+    setError('');
+    try {
+      await Promise.all(
+        taskGroupTemplateIdsInOrder.map((taskGroupTemplateId, index) =>
+          api.updateTaskGroupTemplate(taskGroupTemplateId, { sort_pos: index + 1 }),
+        ),
+      );
+      await load();
+    } catch (err) {
+      setError(toUserErrorMessage(err, 'Could not reorder task group templates.'));
+    } finally {
+      setSaving(false);
+    }
+  };
+
   return {
     templates,
     groupTemplates,
@@ -143,8 +179,10 @@ export function useAdminTaskTemplates() {
     error,
     createGroupTemplate,
     updateGroupTemplate,
+    reorderGroupTemplates,
     createTemplate,
     updateTemplate,
+    reorderTemplates,
     refresh: load,
   };
 }

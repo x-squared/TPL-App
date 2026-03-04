@@ -30,6 +30,19 @@
   text-align: right;
 }
 
+.admin-people-filter-row {
+  margin-bottom: 0.55rem;
+}
+
+.admin-people-filter-input {
+  width: min(28rem, 100%);
+}
+
+.admin-people-list-scroll {
+  max-height: 75vh;
+  overflow-y: auto;
+}
+
 .admin-team-member-actions {
   margin-top: 0.6rem;
 }

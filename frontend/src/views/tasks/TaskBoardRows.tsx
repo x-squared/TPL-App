@@ -80,8 +80,13 @@ function buildContextTarget(
     const agenda = colloqiumAgendasById[group.colloqium_agenda_id];
     if (agenda?.colloqium_id != null) return { type: 'COLLOQUIUM', colloqiumId: agenda.colloqium_id };
   }
-  if (group.episode_id != null) return { type: 'EPISODE', patientId: group.patient_id, episodeId: group.episode_id };
-  return { type: 'PATIENT', patientId: group.patient_id };
+  if (group.episode_id != null && group.patient_id != null) {
+    return { type: 'EPISODE', patientId: group.patient_id, episodeId: group.episode_id };
+  }
+  if (group.patient_id != null) {
+    return { type: 'PATIENT', patientId: group.patient_id };
+  }
+  throw new Error(`Task group ${group.id} has no resolvable context target`);
 }
 
 function toKindSpecificUntil(kindKey: TaskKindKey, value: string): string {
@@ -377,7 +382,7 @@ export default function TaskBoardRows({
         }
 
         const task = row.task;
-        const patient = patientsById[row.group.patient_id];
+        const patient = row.group.patient_id != null ? patientsById[row.group.patient_id] : undefined;
         const episode = row.group.episode_id ? episodesById[row.group.episode_id] : undefined;
         const references = buildTaskReferences({ group: row.group, task, patient, episode });
         const done = isDoneTask(task);

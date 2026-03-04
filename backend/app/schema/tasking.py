@@ -96,7 +96,7 @@ class CoordinationProtocolTaskGroupsEnsureResponse(BaseModel):
 
 
 class TaskGroupBase(BaseModel):
-    patient_id: int
+    patient_id: int | None = None
     task_group_template_id: int | None = None
     name: str = ""
     episode_id: int | None = None
@@ -108,7 +108,11 @@ class TaskGroupBase(BaseModel):
 
 class TaskGroupCreate(TaskGroupBase):
     @model_validator(mode="after")
-    def tpl_phase_requires_episode(self):
+    def validate_context(self):
+        if self.patient_id is None and self.coordination_id is None:
+            raise ValueError("patient_id is required unless coordination_id is set")
+        if self.episode_id is not None and self.patient_id is None:
+            raise ValueError("patient_id is required when episode_id is set")
         if self.tpl_phase_id is not None and self.episode_id is None:
             raise ValueError("tpl_phase_id can only be set if episode_id is set")
         return self

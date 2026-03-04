@@ -2,7 +2,6 @@ from __future__ import annotations
 
 from datetime import datetime, timedelta, timezone
 
-from fastapi import HTTPException
 from sqlalchemy import or_
 from sqlalchemy.orm import Session, joinedload
 
@@ -101,11 +100,6 @@ def ensure_coordination_protocol_task_groups(
         coordination_episode = by_organ_id.get(current_organ_id)
         episode = coordination_episode.episode if coordination_episode is not None else None
         patient_id = episode.patient_id if episode is not None else fallback_patient_id
-        if patient_id is None:
-            raise HTTPException(
-                status_code=422,
-                detail="No patient context available for protocol task instantiation",
-            )
         selected_templates: list[TaskGroupTemplate] = []
         seen_template_ids: set[int] = set()
         for selection in selections:

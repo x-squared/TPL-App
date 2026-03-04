@@ -1,7 +1,7 @@
 import { useEffect, useMemo, useState } from 'react';
 import { api, type Colloqium, type ColloqiumAgenda, type ColloqiumCreate, type ColloqiumType } from '../../../api';
 import { toUserErrorMessage } from '../../../api/error';
-import type { ColloquiumCreateFormState, ColloquiumsFilterState } from './listTypes';
+import type { ColloquiumCreateFormState, ColloquiumsListRangeFilterState } from './listTypes';
 import { daysBetween, todayIso } from './listUtils';
 
 export function useColloquiumsListViewModel() {
@@ -14,8 +14,8 @@ export function useColloquiumsListViewModel() {
   const [expandedAgendaColloqiumId, setExpandedAgendaColloqiumId] = useState<number | null>(null);
   const [agendasByColloqium, setAgendasByColloqium] = useState<Record<number, ColloqiumAgenda[]>>({});
   const [loadingAgendasByColloqium, setLoadingAgendasByColloqium] = useState<Record<number, boolean>>({});
-  const [filters, setFilters] = useState<ColloquiumsFilterState>({
-    typeId: '',
+  const [typeId, setTypeId] = useState('');
+  const [listFilters, setListFilters] = useState<ColloquiumsListRangeFilterState>({
     anchorDate: '',
     rangeDays: 14,
   });
@@ -55,15 +55,21 @@ export function useColloquiumsListViewModel() {
     }
   };
 
-  const filtered = useMemo(() => {
+  const typeFiltered = useMemo(() => {
     return colloqiums.filter((item) => {
-      if (filters.typeId && item.colloqium_type_id !== Number(filters.typeId)) return false;
-      if (filters.anchorDate) {
-        if (daysBetween(item.date, filters.anchorDate) > filters.rangeDays) return false;
+      if (!typeId) return true;
+      return item.colloqium_type_id === Number(typeId);
+    });
+  }, [colloqiums, typeId]);
+
+  const listFiltered = useMemo(() => {
+    return typeFiltered.filter((item) => {
+      if (listFilters.anchorDate) {
+        if (daysBetween(item.date, listFilters.anchorDate) > listFilters.rangeDays) return false;
       }
       return true;
     });
-  }, [colloqiums, filters]);
+  }, [listFilters.anchorDate, listFilters.rangeDays, typeFiltered]);
 
   const handleCreate = async () => {
     if (!form.colloqium_type_id || !form.date) return;
@@ -112,9 +118,12 @@ export function useColloquiumsListViewModel() {
     form,
     setForm,
     types,
-    filters,
-    setFilters,
-    filtered,
+    typeId,
+    setTypeId,
+    listFilters,
+    setListFilters,
+    typeFiltered,
+    listFiltered,
     expandedAgendaColloqiumId,
     agendasByColloqium,
     loadingAgendasByColloqium,

@@ -27,7 +27,7 @@ def episode_organ_ids(episode: Episode) -> list[int]:
 
 def validate_task_group_links(
     *,
-    patient_id: int,
+    patient_id: int | None,
     task_group_template_id: int | None,
     episode_id: int | None,
     colloqium_agenda_id: int | None,
@@ -36,7 +36,8 @@ def validate_task_group_links(
     tpl_phase_id: int | None,
     db: Session,
 ) -> None:
-    get_patient_or_404(patient_id, db)
+    if patient_id is not None:
+        get_patient_or_404(patient_id, db)
     template = None
     if task_group_template_id is not None:
         template = db.query(TaskGroupTemplate).filter(TaskGroupTemplate.id == task_group_template_id).first()
@@ -46,6 +47,11 @@ def validate_task_group_links(
         episode = db.query(Episode).filter(Episode.id == episode_id).first()
         if not episode:
             raise HTTPException(status_code=404, detail="Episode not found")
+        if patient_id is None:
+            raise HTTPException(
+                status_code=422,
+                detail="patient_id is required when episode_id is set",
+            )
         if episode.patient_id != patient_id:
             raise HTTPException(
                 status_code=422,

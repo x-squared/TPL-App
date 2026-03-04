@@ -12,6 +12,7 @@ interface TreeNode {
 }
 
 type TranslationFilterMode = 'keyContains' | 'keyPrefix' | 'displayTextContains';
+type TranslationCompletenessMode = 'all' | 'incomplete';
 
 function displayTranslationKey(key: string): string {
   return key;
@@ -160,6 +161,7 @@ export default function AdminTranslationsTab() {
   const model = useAdminTranslations();
   const [filterValue, setFilterValue] = useState('');
   const [filterMode, setFilterMode] = useState<TranslationFilterMode>('keyContains');
+  const [completenessMode, setCompletenessMode] = useState<TranslationCompletenessMode>('all');
   const filterQuery = filterValue.trim().toLowerCase();
   const filterActive = filterQuery.length > 0;
 
@@ -183,12 +185,13 @@ export default function AdminTranslationsTab() {
   }, [filterActive, filterMode, filterQuery, model]);
 
   const filteredTree = useMemo(() => {
-    if (!filterActive) return model.tree;
+    if (!filterActive && completenessMode === 'all') return model.tree;
     const walk = (nodes: TreeNode[]): TreeNode[] =>
       nodes
         .map((node) => {
           if (node.isLeaf) {
-            return filterMatches(node.fullPath) ? node : null;
+            const isCompleteMatch = completenessMode === 'all' || model.isIncompleteKey(node.fullPath);
+            return filterMatches(node.fullPath) && isCompleteMatch ? node : null;
           }
           const children = walk(node.children);
           if (children.length === 0) return null;
@@ -196,13 +199,13 @@ export default function AdminTranslationsTab() {
         })
         .filter((node): node is TreeNode => Boolean(node));
     return walk(model.tree);
-  }, [filterActive, filterMatches, model.tree]);
+  }, [completenessMode, filterActive, filterMatches, model]);
 
   const branchPaths = useMemo(() => collectBranchPaths(model.tree), [model.tree]);
   const filteredBranchPaths = useMemo(() => collectBranchPaths(filteredTree), [filteredTree]);
   const leafCount = useMemo(
-    () => (filterActive ? countLeafNodes(filteredTree) : model.knownKeys.length),
-    [filterActive, filteredTree, model.knownKeys.length],
+    () => ((filterActive || completenessMode === 'incomplete') ? countLeafNodes(filteredTree) : model.knownKeys.length),
+    [completenessMode, filterActive, filteredTree, model.knownKeys.length],
   );
   const [expandedPaths, setExpandedPaths] = useState<Set<string>>(() => new Set(branchPaths));
   const [didInitExpansion, setDidInitExpansion] = useState(false);
@@ -362,6 +365,16 @@ export default function AdminTranslationsTab() {
             </datalist>
           </div>
           <div className="admin-translation-tree-actions">
+            <button
+              type="button"
+              className="admin-translation-mini-btn"
+              onClick={() => setCompletenessMode((prev) => (prev === 'all' ? 'incomplete' : 'all'))}
+              title={t('admin.translations.tree.completenessToggle', 'Toggle all vs incomplete labels')}
+            >
+              {completenessMode === 'all'
+                ? t('admin.translations.tree.completenessAll', 'All')
+                : t('admin.translations.tree.completenessIncomplete', 'Incomplete')}
+            </button>
             <button type="button" className="admin-translation-mini-btn" onClick={collapseAll}>
               {t('admin.translations.tree.collapseAll', 'Collapse all')}
             </button>
@@ -374,7 +387,7 @@ export default function AdminTranslationsTab() {
       {model.loading ? <p className="status">{t('admin.translations.loading', 'Loading translations...')}</p> : null}
       {model.error ? <ErrorBanner message={model.error} /> : null}
       {model.status ? <p className="status">{model.status}</p> : null}
-      {!model.loading && filterActive && leafCount === 0 ? (
+      {!model.loading && (filterActive || completenessMode === 'incomplete') && leafCount === 0 ? (
         <p className="status">{t('admin.translations.filter.noMatches', 'No matching translation entries.')}</p>
       ) : null}
       {!model.loading && (

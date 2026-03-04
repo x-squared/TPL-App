@@ -35,7 +35,7 @@ interface AdminProcurementConfigTabProps {
   onDeleteScope: (scopeId: number) => Promise<void>;
   coordinationProtocolTaskGroupTemplates: TaskGroupTemplate[];
   onCreateProtocolTaskGroupSelection: (payload: ProcurementProtocolTaskGroupSelectionCreatePayload) => Promise<void>;
-  onUpdateProtocolTaskGroupSelection: (selectionId: number, payload: { organ_id?: number | null; pos?: number }) => Promise<void>;
+  onReorderProtocolTaskGroupSelections: (selectionIdsInOrder: number[]) => Promise<void>;
   onDeleteProtocolTaskGroupSelection: (selectionId: number) => Promise<void>;
 }
 
@@ -57,7 +57,7 @@ export default function AdminProcurementConfigTab({
   onDeleteScope,
   coordinationProtocolTaskGroupTemplates,
   onCreateProtocolTaskGroupSelection,
-  onUpdateProtocolTaskGroupSelection,
+  onReorderProtocolTaskGroupSelections,
   onDeleteProtocolTaskGroupSelection,
 }: AdminProcurementConfigTabProps) {
   const { t } = useI18n();
@@ -126,7 +126,7 @@ export default function AdminProcurementConfigTab({
             sortedTaskGroupTemplates={coordinationProtocolTaskGroupTemplates}
             saving={saving}
             onCreateSelection={onCreateProtocolTaskGroupSelection}
-            onUpdateSelection={onUpdateProtocolTaskGroupSelection}
+            onReorderSelections={onReorderProtocolTaskGroupSelections}
             onDeleteSelection={onDeleteProtocolTaskGroupSelection}
           />
 

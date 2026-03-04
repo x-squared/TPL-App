@@ -126,8 +126,10 @@ export default function AdminView() {
           error={taskTemplates.error}
           onCreateGroupTemplate={taskTemplates.createGroupTemplate}
           onUpdateGroupTemplate={taskTemplates.updateGroupTemplate}
+          onReorderGroupTemplates={taskTemplates.reorderGroupTemplates}
           onCreateTemplate={taskTemplates.createTemplate}
           onUpdateTemplate={taskTemplates.updateTemplate}
+          onReorderTemplates={taskTemplates.reorderTemplates}
         />
       )}
       {activeTab === 'procurement-config' && (
@@ -149,7 +151,7 @@ export default function AdminView() {
           onDeleteScope={procurementConfig.deleteScope}
           coordinationProtocolTaskGroupTemplates={procurementConfig.coordinationProtocolTaskGroupTemplates}
           onCreateProtocolTaskGroupSelection={procurementConfig.createProtocolTaskGroupSelection}
-          onUpdateProtocolTaskGroupSelection={procurementConfig.updateProtocolTaskGroupSelection}
+          onReorderProtocolTaskGroupSelections={procurementConfig.reorderProtocolTaskGroupSelections}
           onDeleteProtocolTaskGroupSelection={procurementConfig.deleteProtocolTaskGroupSelection}
         />
       )}

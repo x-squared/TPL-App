@@ -82,7 +82,11 @@ export default function useTaskBoardData(criteria: TaskBoardCriteria, statusKeys
             group.colloqium_agenda_id == null && group.task_group_template_id == null);
         })();
 
-        const patientIds = [...new Set(groupsWithContext.map((group) => group.patient_id))];
+        const patientIds = [...new Set(
+          groupsWithContext
+            .map((group) => group.patient_id)
+            .filter((id): id is number => id != null),
+        )];
         const patientDetails = await Promise.all(patientIds.map((id) => api.getPatient(id)));
 
         const tasksPerGroup = await Promise.all(

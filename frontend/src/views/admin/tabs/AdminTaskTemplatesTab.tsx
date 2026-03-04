@@ -18,7 +18,6 @@ interface EditFormState {
   kind_key: 'TASK' | 'EVENT';
   priority_id: number | null;
   is_active: boolean;
-  sort_pos: number;
   offset: OffsetParts;
 }
 
@@ -30,7 +29,6 @@ interface GroupTemplateCreateFormState {
   description: string;
   organ_id: number | null;
   is_active: boolean;
-  sort_pos: number;
 }
 
 interface GroupTemplateEditFormState {
@@ -39,7 +37,6 @@ interface GroupTemplateEditFormState {
   description: string;
   organ_id: number | null;
   is_active: boolean;
-  sort_pos: number;
 }
 
 interface AdminTaskTemplatesTabProps {
@@ -71,6 +68,7 @@ interface AdminTaskTemplatesTabProps {
       sort_pos: number;
     },
   ) => Promise<void>;
+  onReorderGroupTemplates: (taskGroupTemplateIdsInOrder: number[]) => Promise<void>;
   onCreateTemplate: (payload: {
     task_group_template_id: number;
     description: string;
@@ -94,6 +92,7 @@ interface AdminTaskTemplatesTabProps {
       sort_pos: number;
     },
   ) => Promise<void>;
+  onReorderTemplates: (taskTemplateIdsInOrder: number[]) => Promise<void>;
 }
 
 function buildInitialCreateForm(groupTemplates: TaskGroupTemplate[]): CreateFormState {
@@ -104,7 +103,6 @@ function buildInitialCreateForm(groupTemplates: TaskGroupTemplate[]): CreateForm
     kind_key: 'TASK',
     priority_id: null,
     is_active: true,
-    sort_pos: 0,
     offset: { days: 0, hours: 0, minutes: 0 },
   };
 }
@@ -120,8 +118,10 @@ export default function AdminTaskTemplatesTab({
   error,
   onCreateGroupTemplate,
   onUpdateGroupTemplate,
+  onReorderGroupTemplates,
   onCreateTemplate,
   onUpdateTemplate,
+  onReorderTemplates,
 }: AdminTaskTemplatesTabProps) {
   const { t } = useI18n();
   const [editingTemplateId, setEditingTemplateId] = useState<number | null>(null);
@@ -135,9 +135,12 @@ export default function AdminTaskTemplatesTab({
     description: '',
     organ_id: null,
     is_active: true,
-    sort_pos: 0,
   });
   const [selectedGroupTemplateId, setSelectedGroupTemplateId] = useState<number | null>(null);
+  const [draggingGroupTemplateId, setDraggingGroupTemplateId] = useState<number | null>(null);
+  const [dragOverGroupTemplateId, setDragOverGroupTemplateId] = useState<number | null>(null);
+  const [draggingTemplateId, setDraggingTemplateId] = useState<number | null>(null);
+  const [dragOverTemplateId, setDragOverTemplateId] = useState<number | null>(null);
 
   useEffect(() => {
     if (groupTemplates.length === 0) return;
@@ -191,7 +194,6 @@ export default function AdminTaskTemplatesTab({
       kind_key: template.kind_key ?? 'TASK',
       priority_id: template.priority_id,
       is_active: template.is_active,
-      sort_pos: template.sort_pos,
       offset: splitOffsetMinutes(template.offset_minutes_default),
     });
   };
@@ -206,14 +208,27 @@ export default function AdminTaskTemplatesTab({
       priority_id: editForm.priority_id,
       offset_minutes_default: combineOffsetMinutes(editForm.offset),
       is_active: editForm.is_active,
-      sort_pos: editForm.sort_pos,
+      sort_pos: templates.find((entry) => entry.id === templateId)?.sort_pos ?? 0,
     });
     setEditingTemplateId(null);
     setEditForm(null);
   };
 
+  const reorderIds = (ids: number[], sourceId: number, targetId: number): number[] => {
+    const fromIndex = ids.indexOf(sourceId);
+    const toIndex = ids.indexOf(targetId);
+    if (fromIndex < 0 || toIndex < 0 || fromIndex === toIndex) {
+      return ids;
+    }
+    const next = [...ids];
+    const [moved] = next.splice(fromIndex, 1);
+    next.splice(toIndex, 0, moved);
+    return next;
+  };
+
   const saveCreate = async () => {
     if (!createForm.description.trim() || !createForm.task_group_template_id) return;
+    const nextSortPos = filteredTemplates.reduce((maxPos, entry) => Math.max(maxPos, entry.sort_pos), 0) + 1;
     await onCreateTemplate({
       task_group_template_id: createForm.task_group_template_id,
       description: createForm.description.trim(),
@@ -222,7 +237,7 @@ export default function AdminTaskTemplatesTab({
       priority_id: createForm.priority_id,
       offset_minutes_default: combineOffsetMinutes(createForm.offset),
       is_active: createForm.is_active,
-      sort_pos: createForm.sort_pos,
+      sort_pos: nextSortPos,
     });
     setCreateForm((prev) => ({ ...buildInitialCreateForm(groupTemplates), task_group_template_id: prev.task_group_template_id }));
   };
@@ -235,13 +250,13 @@ export default function AdminTaskTemplatesTab({
       description: template.description,
       organ_id: template.organ_id,
       is_active: template.is_active,
-      sort_pos: template.sort_pos,
     });
   };
 
   const saveCreateGroupTemplate = async () => {
     if (!coordinationProtocolScopeId) return;
     if (!createGroupTemplateForm.key.trim() || !createGroupTemplateForm.name.trim()) return;
+    const nextSortPos = sortedGroupTemplates.reduce((maxPos, entry) => Math.max(maxPos, entry.sort_pos), 0) + 1;
     await onCreateGroupTemplate({
       key: createGroupTemplateForm.key.trim(),
       name: createGroupTemplateForm.name.trim(),
@@ -249,7 +264,7 @@ export default function AdminTaskTemplatesTab({
       scope_id: coordinationProtocolScopeId,
       organ_id: createGroupTemplateForm.organ_id,
       is_active: createGroupTemplateForm.is_active,
-      sort_pos: createGroupTemplateForm.sort_pos,
+      sort_pos: nextSortPos,
     });
     setCreateGroupTemplateForm({
       key: '',
@@ -257,7 +272,6 @@ export default function AdminTaskTemplatesTab({
       description: '',
       organ_id: null,
       is_active: true,
-      sort_pos: 0,
     });
   };
 
@@ -269,7 +283,7 @@ export default function AdminTaskTemplatesTab({
       description: editGroupTemplateForm.description.trim(),
       organ_id: editGroupTemplateForm.organ_id,
       is_active: editGroupTemplateForm.is_active,
-      sort_pos: editGroupTemplateForm.sort_pos,
+      sort_pos: groupTemplates.find((entry) => entry.id === taskGroupTemplateId)?.sort_pos ?? 0,
     });
     setEditingGroupTemplateId(null);
     setEditGroupTemplateForm(null);
@@ -341,15 +355,6 @@ export default function AdminTaskTemplatesTab({
                 <option value="false">{t('common.no', 'No')}</option>
               </select>
             </label>
-            <label>
-              <span>{t('admin.taskTemplates.position', 'Pos')}</span>
-              <input
-                className="detail-input"
-                type="number"
-                value={createGroupTemplateForm.sort_pos}
-                onChange={(e) => setCreateGroupTemplateForm((prev) => ({ ...prev, sort_pos: Number(e.target.value || 0) }))}
-              />
-            </label>
             <div className="admin-proc-action-cell">
               <button
                 className="save-btn"
@@ -370,7 +375,6 @@ export default function AdminTaskTemplatesTab({
                   <th>{t('taskBoard.columns.description', 'Description')}</th>
                   <th>{t('taskBoard.filters.organ', 'Organ')}</th>
                   <th>{t('admin.taskTemplates.active', 'Active')}</th>
-                  <th>{t('admin.taskTemplates.position', 'Pos')}</th>
                   <th>{t('taskBoard.columns.actions', 'Actions')}</th>
                 </tr>
               </thead>
@@ -380,7 +384,32 @@ export default function AdminTaskTemplatesTab({
                   return (
                     <tr
                       key={groupTemplate.id}
-                      className={selectedGroupTemplateId === groupTemplate.id ? 'admin-task-template-group-row-selected' : ''}
+                      draggable={!saving && editingGroupTemplateId == null}
+                      onDragStart={() => setDraggingGroupTemplateId(groupTemplate.id)}
+                      onDragOver={(event) => {
+                        event.preventDefault();
+                        setDragOverGroupTemplateId(groupTemplate.id);
+                      }}
+                      onDragLeave={() => setDragOverGroupTemplateId((prev) => (prev === groupTemplate.id ? null : prev))}
+                      onDrop={() => {
+                        if (draggingGroupTemplateId == null) return;
+                        const orderedIds = sortedGroupTemplates.map((entry) => entry.id);
+                        const nextOrder = reorderIds(orderedIds, draggingGroupTemplateId, groupTemplate.id);
+                        if (nextOrder.join(',') !== orderedIds.join(',')) {
+                          void onReorderGroupTemplates(nextOrder);
+                        }
+                        setDraggingGroupTemplateId(null);
+                        setDragOverGroupTemplateId(null);
+                      }}
+                      onDragEnd={() => {
+                        setDraggingGroupTemplateId(null);
+                        setDragOverGroupTemplateId(null);
+                      }}
+                      className={[
+                        selectedGroupTemplateId === groupTemplate.id ? 'admin-task-template-group-row-selected' : '',
+                        draggingGroupTemplateId === groupTemplate.id ? 'ci-dragging' : '',
+                        dragOverGroupTemplateId === groupTemplate.id ? 'ci-drag-over' : '',
+                      ].filter(Boolean).join(' ')}
                       onClick={() => setSelectedGroupTemplateId(groupTemplate.id)}
                     >
                       <td>
@@ -438,16 +467,6 @@ export default function AdminTaskTemplatesTab({
                           </select>
                         ) : (groupTemplate.is_active ? t('common.yes', 'Yes') : t('common.no', 'No'))}
                       </td>
-                      <td>
-                        {isEditing ? (
-                          <input
-                            className="detail-input"
-                            type="number"
-                            value={editGroupTemplateForm.sort_pos}
-                            onChange={(e) => setEditGroupTemplateForm((prev) => (prev ? { ...prev, sort_pos: Number(e.target.value || 0) } : prev))}
-                          />
-                        ) : groupTemplate.sort_pos}
-                      </td>
                       <td className="admin-people-actions-cell">
                         {isEditing ? (
                           <div className="admin-inline-actions">
@@ -477,7 +496,7 @@ export default function AdminTaskTemplatesTab({
                 })}
                 {sortedGroupTemplates.length === 0 && (
                   <tr>
-                    <td colSpan={7}>{t('admin.taskTemplates.emptyGroupTemplates', 'No coordination protocol group templates available.')}</td>
+                    <td colSpan={6}>{t('admin.taskTemplates.emptyGroupTemplates', 'No coordination protocol group templates available.')}</td>
                   </tr>
                 )}
               </tbody>
@@ -582,7 +601,6 @@ export default function AdminTaskTemplatesTab({
                   <th>{t('admin.taskTemplates.table.hours', 'Hours')}</th>
                   <th>{t('admin.taskTemplates.table.minutes', 'Minutes')}</th>
                   <th>{t('admin.taskTemplates.active', 'Active')}</th>
-                  <th>{t('admin.taskTemplates.position', 'Pos')}</th>
                   <th>{t('taskBoard.columns.actions', 'Actions')}</th>
                 </tr>
               </thead>
@@ -591,7 +609,31 @@ export default function AdminTaskTemplatesTab({
                   const isEditing = editingTemplateId === template.id && editForm !== null;
                   const offset = splitOffsetMinutes(template.offset_minutes_default);
                   return (
-                    <tr key={template.id}>
+                    <tr
+                      key={template.id}
+                      draggable={!saving && editingTemplateId == null}
+                      onDragStart={() => setDraggingTemplateId(template.id)}
+                      onDragOver={(event) => {
+                        event.preventDefault();
+                        setDragOverTemplateId(template.id);
+                      }}
+                      onDragLeave={() => setDragOverTemplateId((prev) => (prev === template.id ? null : prev))}
+                      onDrop={() => {
+                        if (draggingTemplateId == null) return;
+                        const orderedIds = filteredTemplates.map((entry) => entry.id);
+                        const nextOrder = reorderIds(orderedIds, draggingTemplateId, template.id);
+                        if (nextOrder.join(',') !== orderedIds.join(',')) {
+                          void onReorderTemplates(nextOrder);
+                        }
+                        setDraggingTemplateId(null);
+                        setDragOverTemplateId(null);
+                      }}
+                      onDragEnd={() => {
+                        setDraggingTemplateId(null);
+                        setDragOverTemplateId(null);
+                      }}
+                      className={draggingTemplateId === template.id ? 'ci-dragging' : dragOverTemplateId === template.id ? 'ci-drag-over' : ''}
+                    >
                       <td>
                         {isEditing ? (
                           <select
@@ -693,16 +735,6 @@ export default function AdminTaskTemplatesTab({
                           </select>
                         ) : (template.is_active ? t('common.yes', 'Yes') : t('common.no', 'No'))}
                       </td>
-                      <td>
-                        {isEditing ? (
-                          <input
-                            className="detail-input"
-                            type="number"
-                            value={editForm.sort_pos}
-                            onChange={(e) => setEditForm((prev) => (prev ? { ...prev, sort_pos: Number(e.target.value || 0) } : prev))}
-                          />
-                        ) : template.sort_pos}
-                      </td>
                       <td className="admin-people-actions-cell">
                         {isEditing ? (
                           <div className="admin-inline-actions">
@@ -724,7 +756,7 @@ export default function AdminTaskTemplatesTab({
                 })}
                 {filteredTemplates.length === 0 && (
                   <tr>
-                    <td colSpan={11}>{t('admin.taskTemplates.emptyTemplates', 'No task templates available.')}</td>
+                    <td colSpan={10}>{t('admin.taskTemplates.emptyTemplates', 'No task templates available.')}</td>
                   </tr>
                 )}
               </tbody>

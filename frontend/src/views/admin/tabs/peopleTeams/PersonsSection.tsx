@@ -24,6 +24,15 @@ export default function PersonsSection({
   const [personDraft, setPersonDraft] = useState({ first_name: '', surname: '', user_id: '' });
   const [editingPersonId, setEditingPersonId] = useState<number | null>(null);
   const [confirmDeletePersonId, setConfirmDeletePersonId] = useState<number | null>(null);
+  const [filterValue, setFilterValue] = useState('');
+  const filterQuery = filterValue.trim().toLowerCase();
+  const filteredPeople = filterQuery
+    ? people.filter((person) => {
+      const name = `${person.first_name} ${person.surname}`.toLowerCase();
+      const userId = (person.user_id ?? '').toLowerCase();
+      return name.includes(filterQuery) || userId.includes(filterQuery);
+    })
+    : people;
 
   const startEdit = (person: Person) => {
     setEditingPersonId(person.id);
@@ -56,7 +65,16 @@ export default function PersonsSection({
           </button>
         )}
       </div>
-      <div className="patients-table-wrap ui-table-wrap">
+      <div className="admin-people-filter-row">
+        <input
+          className="detail-input admin-people-filter-input"
+          value={filterValue}
+          onChange={(event) => setFilterValue(event.target.value)}
+          placeholder={t('admin.peopleTeams.persons.filterPlaceholder', 'Filter by name or user ID...')}
+          aria-label={t('admin.peopleTeams.persons.filterPlaceholder', 'Filter by name or user ID...')}
+        />
+      </div>
+      <div className="patients-table-wrap ui-table-wrap admin-people-list-scroll">
         <table className="data-table">
           <thead>
             <tr>
@@ -112,7 +130,7 @@ export default function PersonsSection({
                 </td>
               </tr>
             )}
-            {people.map((person) => (
+            {filteredPeople.map((person) => (
               editingPersonId === person.id ? (
                 <tr key={person.id} className="ci-editing-row">
                   <td>
@@ -172,6 +190,11 @@ export default function PersonsSection({
                 </tr>
               )
             ))}
+            {filteredPeople.length === 0 && !addingPerson ? (
+              <tr>
+                <td colSpan={4}>{t('admin.peopleTeams.persons.noMatches', 'No matching persons found.')}</td>
+              </tr>
+            ) : null}
           </tbody>
         </table>
       </div>

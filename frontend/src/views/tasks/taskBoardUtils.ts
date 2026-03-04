@@ -13,7 +13,7 @@ const defaultReferenceRenderers: TaskReferenceRenderer[] = [
   {
     id: 'patient',
     buildSegment: ({ group, patient }) => {
-      if (group.episode_id != null) return null;
+      if (group.episode_id != null || group.patient_id == null || group.coordination_id != null) return null;
       return {
         key: `patient-${group.patient_id}`,
         label: formatTaskPatientReference({

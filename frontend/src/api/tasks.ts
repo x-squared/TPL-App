@@ -4,7 +4,7 @@ export type TaskKindKey = 'TASK' | 'EVENT';
 
 export interface TaskGroup {
   id: number;
-  patient_id: number;
+  patient_id: number | null;
   task_group_template_id: number | null;
   name: string;
   episode_id: number | null;
@@ -118,7 +118,7 @@ export interface TaskGroupListParams {
 }
 
 export interface TaskGroupCreate {
-  patient_id: number;
+  patient_id?: number | null;
   task_group_template_id?: number | null;
   name?: string;
   episode_id?: number | null;
@@ -129,7 +129,7 @@ export interface TaskGroupCreate {
 }
 
 export interface TaskGroupUpdate {
-  patient_id?: number;
+  patient_id?: number | null;
   task_group_template_id?: number | null;
   name?: string;
   episode_id?: number | null;

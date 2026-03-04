@@ -9,7 +9,7 @@ interface ConfiguredProtocolTaskGroupsSectionProps {
   sortedTaskGroupTemplates: TaskGroupTemplate[];
   saving: boolean;
   onCreateSelection: (payload: ProcurementProtocolTaskGroupSelectionCreatePayload) => Promise<void>;
-  onUpdateSelection: (selectionId: number, payload: { organ_id?: number | null; pos?: number }) => Promise<void>;
+  onReorderSelections: (selectionIdsInOrder: number[]) => Promise<void>;
   onDeleteSelection: (selectionId: number) => Promise<void>;
 }
 
@@ -18,13 +18,14 @@ export default function ConfiguredProtocolTaskGroupsSection({
   sortedTaskGroupTemplates,
   saving,
   onCreateSelection,
-  onUpdateSelection,
+  onReorderSelections,
   onDeleteSelection,
 }: ConfiguredProtocolTaskGroupsSectionProps) {
   const { t } = useI18n();
   const [draftTemplateId, setDraftTemplateId] = useState<number>(0);
   const [draftOrganId, setDraftOrganId] = useState<number>(0);
-  const [draftPos, setDraftPos] = useState<number>(0);
+  const [draggingSelectionId, setDraggingSelectionId] = useState<number | null>(null);
+  const [dragOverSelectionId, setDragOverSelectionId] = useState<number | null>(null);
 
   const selections = useMemo(
     () => [...(config.protocol_task_group_selections ?? [])].sort((a, b) => (a.pos - b.pos) || (a.id - b.id)),
@@ -43,6 +44,18 @@ export default function ConfiguredProtocolTaskGroupsSection({
     () => (selections.reduce((maxPos, entry) => Math.max(maxPos, entry.pos), 0) + 1),
     [selections],
   );
+
+  const reorderIds = (ids: number[], sourceId: number, targetId: number): number[] => {
+    const fromIndex = ids.indexOf(sourceId);
+    const toIndex = ids.indexOf(targetId);
+    if (fromIndex < 0 || toIndex < 0 || fromIndex === toIndex) {
+      return ids;
+    }
+    const next = [...ids];
+    const [moved] = next.splice(fromIndex, 1);
+    next.splice(toIndex, 0, moved);
+    return next;
+  };
 
   return (
     <section className="admin-proc-block">
@@ -87,15 +100,6 @@ export default function ConfiguredProtocolTaskGroupsSection({
                 ))}
               </select>
             </label>
-            <label>
-              <span>{t('admin.taskTemplates.position', 'Pos')}</span>
-              <input
-                className="detail-input"
-                type="number"
-                value={draftPos || nextDefaultPos}
-                onChange={(e) => setDraftPos(Number(e.target.value || 0))}
-              />
-            </label>
             <div className="admin-proc-action-cell">
               <button
                 type="button"
@@ -109,12 +113,11 @@ export default function ConfiguredProtocolTaskGroupsSection({
                   const payload = {
                     task_group_template_id: draftTemplateId,
                     organ_id: draftOrganId || null,
-                    pos: draftPos || nextDefaultPos,
+                    pos: nextDefaultPos,
                   };
                   void onCreateSelection(payload);
                   setDraftTemplateId(0);
                   setDraftOrganId(0);
-                  setDraftPos(0);
                 }}
               >
                 {t('admin.procurementConfig.protocolTaskGroups.addSelection', 'Add Selection')}
@@ -133,27 +136,44 @@ export default function ConfiguredProtocolTaskGroupsSection({
                   <tr>
                     <th>{t('admin.procurementConfig.protocolTaskGroups.groupTemplate', 'Task Group Template')}</th>
                     <th>{t('taskBoard.filters.organ', 'Organ')}</th>
-                    <th>{t('admin.taskTemplates.position', 'Pos')}</th>
                     <th>{t('taskBoard.columns.actions', 'Actions')}</th>
                   </tr>
                 </thead>
                 <tbody>
                   {selections.map((selection) => (
-                    <tr key={selection.id}>
+                    <tr
+                      key={selection.id}
+                      draggable={!saving}
+                      onDragStart={() => setDraggingSelectionId(selection.id)}
+                      onDragOver={(event) => {
+                        event.preventDefault();
+                        setDragOverSelectionId(selection.id);
+                      }}
+                      onDragLeave={() => setDragOverSelectionId((prev) => (prev === selection.id ? null : prev))}
+                      onDrop={() => {
+                        if (draggingSelectionId == null) return;
+                        const orderedIds = selections.map((entry) => entry.id);
+                        const nextOrder = reorderIds(orderedIds, draggingSelectionId, selection.id);
+                        if (nextOrder.join(',') !== orderedIds.join(',')) {
+                          void onReorderSelections(nextOrder);
+                        }
+                        setDraggingSelectionId(null);
+                        setDragOverSelectionId(null);
+                      }}
+                      onDragEnd={() => {
+                        setDraggingSelectionId(null);
+                        setDragOverSelectionId(null);
+                      }}
+                      className={
+                        draggingSelectionId === selection.id
+                          ? 'ci-dragging'
+                          : dragOverSelectionId === selection.id
+                            ? 'ci-drag-over'
+                            : ''
+                      }
+                    >
                       <td>{selection.task_group_template?.name ?? `#${selection.task_group_template_id}`}</td>
                       <td>{selection.organ?.name_default ?? t('admin.taskTemplates.allOrgans', 'All organs')}</td>
-                      <td>
-                        <input
-                          className="detail-input ci-inline-input"
-                          type="number"
-                          value={selection.pos}
-                          onBlur={(e) => {
-                            const nextPos = Number(e.target.value || 0);
-                            void onUpdateSelection(selection.id, { pos: nextPos });
-                          }}
-                          disabled={saving}
-                        />
-                      </td>
                       <td className="detail-ci-actions">
                         <button
                           className="ci-cancel-inline"

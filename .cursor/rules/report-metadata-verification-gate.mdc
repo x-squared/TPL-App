@@ -1,0 +1,23 @@
+---
+description: Require report metadata verification after model changes
+alwaysApply: true
+---
+
+# Report Metadata Verification Gate
+
+When a change modifies the data model (entities, attributes, relations, cardinalities, or source keys), always verify report metadata before finishing.
+
+## Required finish check
+
+1. Run a reporting metadata validation check (for example, fetch `/api/reports/metadata` via the app's normal runtime path).
+2. Confirm all returned source keys and metadata payloads validate against backend schemas.
+3. If report sources were added/removed/renamed, ensure schema literals/unions and source registries are aligned.
+4. Fix any mismatch in the same change set (do not defer).
+
+## Completion note requirement
+
+In the final response, always state:
+- that report metadata was checked, and
+- whether it passed or what was fixed.
+
+If the model change truly cannot affect reporting, explicitly state why the metadata check was skipped.

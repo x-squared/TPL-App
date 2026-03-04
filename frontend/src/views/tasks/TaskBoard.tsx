@@ -88,8 +88,13 @@ function buildContextTarget(
     const agenda = colloqiumAgendasById[resolvedAgendaId];
     if (agenda?.colloqium_id != null) return { type: 'COLLOQUIUM' as const, colloqiumId: agenda.colloqium_id };
   }
-  if (group.episode_id != null) return { type: 'EPISODE' as const, patientId: group.patient_id, episodeId: group.episode_id };
-  return { type: 'PATIENT' as const, patientId: group.patient_id };
+  if (group.episode_id != null && group.patient_id != null) {
+    return { type: 'EPISODE' as const, patientId: group.patient_id, episodeId: group.episode_id };
+  }
+  if (group.patient_id != null) {
+    return { type: 'PATIENT' as const, patientId: group.patient_id };
+  }
+  throw new Error(`Task group ${group.id} has no resolvable context target`);
 }
 
 const TaskBoard = forwardRef<TaskBoardHandle, TaskBoardProps>(function TaskBoard({
@@ -217,7 +222,7 @@ const TaskBoard = forwardRef<TaskBoardHandle, TaskBoardProps>(function TaskBoard
 
   const emitTaskChanged = useCallback((task: Task, reason: TaskBoardTaskChangeReason) => {
     const group = taskGroups.find((item) => item.id === task.task_group_id);
-    const patient = group ? patientsById[group.patient_id] : undefined;
+    const patient = group?.patient_id != null ? patientsById[group.patient_id] : undefined;
     const episode = group?.episode_id ? episodesById[group.episode_id] : undefined;
     const event = {
       reason,
