@@ -1,0 +1,18 @@
+---
+description: Do not edit requirement specs unless explicitly requested
+alwaysApply: true
+---
+
+# Spec Edit Safety Rule
+
+Requirement specifications under `spec/requirements/` are user-owned artifacts.
+
+- Do not create, modify, rename, move, or delete files in `spec/requirements/` unless the user explicitly asks to edit specification content in the current request.
+- When a task can be solved without changing requirement specs, leave those files untouched.
+- If a requested implementation could imply a spec update, ask first unless the user explicitly asked for spec edits.
+- Treat manual user edits in `spec/requirements/` as source of truth and build on the current file content.
+- Never silently overwrite user wording; if conflicts exist, ask for clarification.
+
+Examples:
+- Allowed: "Update `TPL-Koordination-Spezifikation.md` with a new Story..."
+- Not allowed without confirmation: "Implement feature X" -> auto-editing `spec/requirements/*.md`

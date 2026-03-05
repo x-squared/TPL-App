@@ -16,6 +16,7 @@ Current supported locales:
 - `de` (German)
 
 English is the canonical source language in code. Components should call `t(key, englishDefault)` with an English fallback string.
+The translation `key` must come from declared constants (for example `frontend/src/i18n/keys.ts`), not from inline string literals.
 
 ## 2) Translation data model
 
@@ -115,9 +116,10 @@ python -m app.db_admin --mode refresh --env DEV
 ### C) Introduce new translatable UI text
 
 1. Add key + metadata in `frontend/src/i18n/translations.json`
-2. Use `t("<key>", "<English default>")` in UI
-3. Add/update locale text (`de`) in `translations.json` or via Admin translations
-4. Validate in UI with both locales
+2. Declare/reference the key in `frontend/src/i18n/keys.ts` (or a feature key-constants module)
+3. Use `t(KEY_CONSTANT, "<English default>")` in UI
+4. Add/update locale text (`de`) in `translations.json` or via Admin translations
+5. Validate in UI with both locales
 
 ### D) Capture current DB translations back into `translations.json`
 
@@ -150,6 +152,8 @@ Behavior:
 
 - Keep English as the canonical source/fallback language.
 - Do not hardcode localized UI labels where `t()` is appropriate.
+- Do not pass inline translation key string literals to `t()` in frontend TS/TSX code.
+- Use declared key constants (for example from `frontend/src/i18n/keys.ts`) for all `t()` key arguments.
 - Prefer stable dot-path keys; avoid frequent renames.
 - Keep admin override values plain text (no markup).
 - When changing i18n architecture, update docs in this manual and cross-check seeding implications in `doc/seeding-manual.qmd`.

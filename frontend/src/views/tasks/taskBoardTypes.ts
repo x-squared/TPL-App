@@ -85,6 +85,7 @@ export interface TaskReferenceContext {
   task: Task;
   patient: Patient | undefined;
   episode: Episode | undefined;
+  coordinationLabel: string | undefined;
 }
 
 export interface TaskReferenceSegment {

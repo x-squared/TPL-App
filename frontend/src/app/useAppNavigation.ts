@@ -243,7 +243,7 @@ export function useAppNavigation({
       setPatientInitialEpisodeId(null);
       setSelectedCoordinationId(favorite.coordination_id);
       setSelectedCoordinationTab(
-        coordinationTab === 'coordination' || coordinationTab === 'protocol' || coordinationTab === 'time-log'
+        coordinationTab === 'coordination' || coordinationTab === 'protocol' || coordinationTab === 'time-log' || coordinationTab === 'completion'
           ? coordinationTab
           : undefined,
       );

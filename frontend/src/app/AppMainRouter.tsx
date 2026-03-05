@@ -46,6 +46,7 @@ interface AppMainRouterProps {
   setPatientInitialEpisodeId: React.Dispatch<React.SetStateAction<number | null>>;
   onOpenFavorite: (favorite: Favorite) => void;
   coordinationQuickCreateToken: number;
+  onCoordinationQuickCreateHandled: () => void;
   preferences: UserPreferences;
   startPageOptions: StartViewOption[];
   onSavePreferences: (payload: UserPreferences) => Promise<void>;
@@ -78,6 +79,7 @@ export default function AppMainRouter({
   setPatientInitialEpisodeId,
   onOpenFavorite,
   coordinationQuickCreateToken,
+  onCoordinationQuickCreateHandled,
   preferences,
   startPageOptions,
   onSavePreferences,
@@ -198,7 +200,18 @@ export default function AppMainRouter({
             setSelectedCoordinationId(id);
             setSelectedCoordinationTab(undefined);
           }}
+          onOpenPatientEpisode={(patientId, episodeId) => {
+            setPage('patients');
+            setSelectedColloqiumId(null);
+            setSelectedColloqiumTab(undefined);
+            setSelectedCoordinationId(null);
+            setSelectedCoordinationTab(undefined);
+            setSelectedPatientId(patientId);
+            setPatientInitialTab('episodes');
+            setPatientInitialEpisodeId(episodeId);
+          }}
           quickCreateToken={coordinationQuickCreateToken}
+          onQuickCreateHandled={onCoordinationQuickCreateHandled}
         />
       )}
       {page === 'coordinations' && canViewCoordinations && selectedCoordinationId !== null && (

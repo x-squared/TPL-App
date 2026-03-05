@@ -3,7 +3,7 @@ from __future__ import annotations
 from datetime import date, datetime
 from typing import Literal
 
-from pydantic import BaseModel, ConfigDict, field_validator
+from pydantic import BaseModel, ConfigDict, Field, field_validator
 
 from ..enums import ProcurementSlotKey, ProcurementValueMode
 from .clinical import EpisodeResponse
@@ -48,10 +48,38 @@ class CoordinationResponse(CoordinationBase):
 
     id: int
     status: CodeResponse | None = None
+    completion_confirmed: bool = False
+    completion_comment: str = ""
+    completion_confirmed_at: datetime | None = None
+    completion_confirmed_by_id: int | None = None
+    completion_confirmed_by_user: UserResponse | None = None
     changed_by_id: int | None = None
     changed_by_user: UserResponse | None = None
     created_at: datetime
     updated_at: datetime | None = None
+
+
+class CoordinationCompletionConfirmRequest(BaseModel):
+    comment: str = ""
+
+
+class CoordinationCompletionTaskGroupResponse(BaseModel):
+    task_group_template_id: int | None = None
+    group_name: str
+    due_window_days: int
+    tasks: list[TaskResponse] = Field(default_factory=list)
+
+
+class CoordinationCompletionStateResponse(BaseModel):
+    coordination_id: int
+    completion_confirmed: bool = False
+    completion_comment: str = ""
+    completion_confirmed_at: datetime | None = None
+    completion_confirmed_by_id: int | None = None
+    completion_confirmed_by_user: UserResponse | None = None
+    all_tasks: list[TaskResponse] = Field(default_factory=list)
+    block_1: CoordinationCompletionTaskGroupResponse
+    block_2: CoordinationCompletionTaskGroupResponse
 
 
 class CoordinationDonorBase(BaseModel):
@@ -136,6 +164,23 @@ class CoordinationTimeLogResponse(CoordinationTimeLogBase):
     changed_by_user: UserResponse | None = None
     created_at: datetime
     updated_at: datetime | None = None
+
+
+class CoordinationTimeClockStartRequest(BaseModel):
+    comment: str = ""
+
+
+class CoordinationTimeClockStopRequest(BaseModel):
+    comment: str = ""
+
+
+class CoordinationTimeClockStateResponse(BaseModel):
+    user_id: int
+    active_time_log: CoordinationTimeLogResponse | None = None
+    active_coordination_id: int | None = None
+    active_on_current_coordination: bool = False
+    auto_stopped_time_log_ids: list[int] = Field(default_factory=list)
+    auto_stopped_coordination_ids: list[int] = Field(default_factory=list)
 
 
 class CoordinationProtocolEventLogBase(BaseModel):
@@ -435,6 +480,7 @@ class CoordinationProcurementOrganBase(BaseModel):
     procurement_surgeon: str = ""
     organ_rejected: bool = False
     organ_rejection_comment: str = ""
+    organ_workflow_cleared: bool = False
 
 
 class CoordinationProcurementOrganCreate(BaseModel):

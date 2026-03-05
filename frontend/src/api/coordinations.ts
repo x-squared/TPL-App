@@ -7,6 +7,7 @@ import {
   type Person,
   type PersonTeam,
 } from './core';
+import type { Task } from './tasks';
 
 export interface Coordination {
   id: number;
@@ -18,6 +19,11 @@ export interface Coordination {
   swtpl_nr: string;
   national_coordinator: string;
   comment: string;
+  completion_confirmed: boolean;
+  completion_comment: string;
+  completion_confirmed_at: string | null;
+  completion_confirmed_by_id: number | null;
+  completion_confirmed_by_user: AppUser | null;
   changed_by_id: number | null;
   changed_by_user: AppUser | null;
   created_at: string;
@@ -120,6 +126,34 @@ export interface CoordinationTimeLogUpdate {
   start?: string | null;
   end?: string | null;
   comment?: string;
+}
+
+export interface CoordinationTimeClockState {
+  user_id: number;
+  active_time_log: CoordinationTimeLog | null;
+  active_coordination_id: number | null;
+  active_on_current_coordination: boolean;
+  auto_stopped_time_log_ids: number[];
+  auto_stopped_coordination_ids: number[];
+}
+
+export interface CoordinationCompletionTaskGroup {
+  task_group_template_id: number | null;
+  group_name: string;
+  due_window_days: number;
+  tasks: Task[];
+}
+
+export interface CoordinationCompletionState {
+  coordination_id: number;
+  completion_confirmed: boolean;
+  completion_comment: string;
+  completion_confirmed_at: string | null;
+  completion_confirmed_by_id: number | null;
+  completion_confirmed_by_user: AppUser | null;
+  all_tasks: Task[];
+  block_1: CoordinationCompletionTaskGroup;
+  block_2: CoordinationCompletionTaskGroup;
 }
 
 export interface CoordinationProtocolEventLog {
@@ -251,6 +285,7 @@ export interface CoordinationProcurementOrgan {
   procurement_surgeon: string;
   organ_rejected: boolean;
   organ_rejection_comment: string;
+  organ_workflow_cleared: boolean;
   organ: Code | null;
   slots: CoordinationProcurementSlot[];
 }
@@ -307,6 +342,13 @@ export const coordinationsApi = {
   getCoordination: (id: number) => request<Coordination>(`/coordinations/${id}`),
   updateCoordination: (id: number, data: CoordinationUpdate) =>
     request<Coordination>(`/coordinations/${id}`, { method: 'PATCH', body: JSON.stringify(data) }),
+  getCoordinationCompletion: (coordinationId: number) =>
+    request<CoordinationCompletionState>(`/coordinations/${coordinationId}/completion`),
+  confirmCoordinationCompletion: (coordinationId: number, comment: string) =>
+    request<CoordinationCompletionState>(`/coordinations/${coordinationId}/completion/confirm`, {
+      method: 'POST',
+      body: JSON.stringify({ comment }),
+    }),
 
   getCoordinationDonor: (coordinationId: number) =>
     request<CoordinationDonor>(`/coordinations/${coordinationId}/donor/`),
@@ -338,6 +380,18 @@ export const coordinationsApi = {
     }),
   deleteCoordinationTimeLog: (coordinationId: number, logId: number) =>
     request<void>(`/coordinations/${coordinationId}/time-logs/${logId}`, { method: 'DELETE' }),
+  getCoordinationClockState: (coordinationId: number) =>
+    request<CoordinationTimeClockState>(`/coordinations/${coordinationId}/time-logs/clock-state`),
+  startCoordinationClock: (coordinationId: number) =>
+    request<CoordinationTimeClockState>(`/coordinations/${coordinationId}/time-logs/clock/start`, {
+      method: 'POST',
+      body: JSON.stringify({ comment: '' }),
+    }),
+  stopCoordinationClock: (coordinationId: number, comment: string) =>
+    request<CoordinationTimeClockState>(`/coordinations/${coordinationId}/time-logs/clock/stop`, {
+      method: 'POST',
+      body: JSON.stringify({ comment }),
+    }),
 
   listCoordinationProtocolEvents: (coordinationId: number, organId: number) =>
     request<CoordinationProtocolEventLog[]>(`/coordinations/${coordinationId}/protocol-events/?organ_id=${organId}`),
@@ -375,6 +429,11 @@ export const coordinationsApi = {
     request<CoordinationProcurementOrgan>(
       `/coordinations/${coordinationId}/procurement-flex/organs/${organId}`,
       { method: 'PUT', body: JSON.stringify(data) },
+    ),
+  clearCoordinationRejectedOrganWorkflow: (coordinationId: number, organId: number) =>
+    request<CoordinationProcurementOrgan>(
+      `/coordinations/${coordinationId}/procurement-flex/organs/${organId}/rejected-workflow/clear`,
+      { method: 'POST' },
     ),
   upsertCoordinationProcurementValue: (
     coordinationId: number,

@@ -1,0 +1,37 @@
+---
+description: Model multi-step domain flows as backend workflows with thin routers and UI command-refresh coordination
+alwaysApply: true
+---
+
+# Workflow Orchestration Boundary
+
+Use this rule when a user action triggers multiple dependent domain side effects.
+
+## When to create a workflow service
+
+Create a dedicated backend workflow service when a flow includes two or more of:
+
+- state change on one aggregate/entity
+- cascading updates on related entities
+- task status transitions
+- event-log/audit side effects
+- refresh/projection rebuild requirements
+
+## Placement and boundaries
+
+- Implement orchestration in `backend/app/features/**/service.py` (or a focused `workflow` submodule).
+- Keep routers transport-thin (auth, parsing, delegation, HTTP mapping).
+- Do not orchestrate business workflows in frontend components.
+
+## Coordination pattern (UI <-> server)
+
+- UI sends one intent command to a workflow endpoint.
+- Server executes the full workflow in one transaction where possible.
+- Endpoint returns updated domain/projection state.
+- UI refreshes dependent panels from server state (no client-only business truth).
+
+## Reliability defaults
+
+- Make workflow commands idempotent when feasible.
+- Keep explicit conflict/error semantics (`422` for rule violation, `409` for conflicts).
+- Persist workflow markers/events when completion state must survive reloads.

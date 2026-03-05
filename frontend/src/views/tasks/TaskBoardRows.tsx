@@ -29,6 +29,7 @@ interface TaskBoardRowsProps {
   priorityCodes: Code[];
   allUserOptions: Array<{ id: number; name: string }>;
   colloqiumAgendasById: Record<number, ColloqiumAgenda>;
+  coordinationLabelsById: Record<number, string>;
   editingTaskId: number | null;
   editForm: TaskEditFormState | null;
   setEditForm: (updater: (prev: TaskEditFormState | null) => TaskEditFormState | null) => void;
@@ -123,6 +124,7 @@ export default function TaskBoardRows({
   priorityCodes,
   allUserOptions,
   colloqiumAgendasById,
+  coordinationLabelsById,
   editingTaskId,
   editForm,
   setEditForm,
@@ -385,7 +387,10 @@ export default function TaskBoardRows({
         const task = row.task;
         const patient = row.group.patient_id != null ? patientsById[row.group.patient_id] : undefined;
         const episode = row.group.episode_id ? episodesById[row.group.episode_id] : undefined;
-        const references = buildTaskReferences({ group: row.group, task, patient, episode }, t);
+        const coordinationLabel = row.group.coordination_id != null
+          ? coordinationLabelsById[row.group.coordination_id]
+          : undefined;
+        const references = buildTaskReferences({ group: row.group, task, patient, episode, coordinationLabel }, t);
         const done = isDoneTask(task);
         const cancelled = isCancelledTask(task);
         const rowClass = done

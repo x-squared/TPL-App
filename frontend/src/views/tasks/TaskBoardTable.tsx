@@ -20,6 +20,7 @@ export interface TaskBoardTableProps {
   priorityCodes: Code[];
   allUserOptions: Array<{ id: number; name: string }>;
   colloqiumAgendasById: Record<number, ColloqiumAgenda>;
+  coordinationLabelsById: Record<number, string>;
   editingTaskId: number | null;
   editForm: TaskEditFormState | null;
   setEditForm: (updater: (prev: TaskEditFormState | null) => TaskEditFormState | null) => void;
@@ -74,6 +75,7 @@ export default function TaskBoardTable({
   priorityCodes,
   allUserOptions,
   colloqiumAgendasById,
+  coordinationLabelsById,
   editingTaskId,
   editForm,
   setEditForm,
@@ -198,6 +200,7 @@ export default function TaskBoardTable({
             priorityCodes={priorityCodes}
             allUserOptions={allUserOptions}
             colloqiumAgendasById={colloqiumAgendasById}
+            coordinationLabelsById={coordinationLabelsById}
             editingTaskId={editingTaskId}
             editForm={editForm}
             setEditForm={setEditForm}

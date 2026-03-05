@@ -7,6 +7,15 @@ from sqlalchemy.orm import Session, joinedload, selectinload
 
 from ...models import Code, Episode, EpisodeOrgan, Patient
 from ...schemas import EpisodeCreate, EpisodeOrganCreate, EpisodeOrganUpdate, EpisodeUpdate
+from .workflow_service import (
+    cancel_episode,
+    close_episode,
+    enforce_phase_editability,
+    initialize_episode_workflow,
+    reject_episode,
+    start_listing_phase,
+    today_utc_date,
+)
 
 
 def get_patient_or_404(patient_id: int, db: Session) -> Patient:
@@ -141,6 +150,7 @@ def create_episode(*, patient_id: int, payload: EpisodeCreate, changed_by_id: in
     db.add(episode)
     db.flush()
     _replace_episode_organs(db=db, episode=episode, organ_ids=organ_ids)
+    initialize_episode_workflow(episode=episode, changed_by_id=changed_by_id, db=db)
     db.commit()
     return _episode_query(db).filter(Episode.id == episode.id).first()
 
@@ -161,6 +171,16 @@ def update_episode(
     if not episode:
         raise HTTPException(status_code=404, detail="Episode not found")
     update_data = payload.model_dump(exclude_unset=True, exclude={"organ_ids", "organ_id"})
+    changed_keys = {
+        key
+        for key, value in update_data.items()
+        if getattr(episode, key, None) != value
+    }
+    if "organ_id" in payload.model_fields_set:
+        changed_keys.add("organ_id")
+    if "organ_ids" in payload.model_fields_set:
+        changed_keys.add("organ_ids")
+    enforce_phase_editability(episode=episode, changed_keys=changed_keys)
     for key, value in update_data.items():
         setattr(episode, key, value)
     if "organ_id" in payload.model_fields_set or "organ_ids" in payload.model_fields_set:
@@ -169,6 +189,110 @@ def update_episode(
     if episode.closed and not episode.end:
         raise HTTPException(status_code=422, detail="closed can only be true if end date is set")
     episode.changed_by_id = changed_by_id
+    db.commit()
+    return _episode_query(db).filter(Episode.id == episode_id).first()
+
+
+def start_episode_listing(
+    *,
+    patient_id: int,
+    episode_id: int,
+    start_date: date,
+    changed_by_id: int,
+    db: Session,
+) -> Episode:
+    episode = (
+        db.query(Episode)
+        .filter(Episode.id == episode_id, Episode.patient_id == patient_id)
+        .first()
+    )
+    if not episode:
+        raise HTTPException(status_code=404, detail="Episode not found")
+    start_listing_phase(
+        episode=episode,
+        start_date=start_date,
+        changed_by_id=changed_by_id,
+        db=db,
+    )
+    db.commit()
+    return _episode_query(db).filter(Episode.id == episode_id).first()
+
+
+def close_episode_workflow(
+    *,
+    patient_id: int,
+    episode_id: int,
+    end_date: date,
+    changed_by_id: int,
+    db: Session,
+) -> Episode:
+    episode = (
+        db.query(Episode)
+        .filter(Episode.id == episode_id, Episode.patient_id == patient_id)
+        .first()
+    )
+    if not episode:
+        raise HTTPException(status_code=404, detail="Episode not found")
+    close_episode(
+        episode=episode,
+        end_date=end_date,
+        changed_by_id=changed_by_id,
+        db=db,
+    )
+    db.commit()
+    return _episode_query(db).filter(Episode.id == episode_id).first()
+
+
+def reject_episode_workflow(
+    *,
+    patient_id: int,
+    episode_id: int,
+    reason: str,
+    end_date: date | None,
+    changed_by_id: int,
+    db: Session,
+) -> Episode:
+    episode = (
+        db.query(Episode)
+        .filter(Episode.id == episode_id, Episode.patient_id == patient_id)
+        .first()
+    )
+    if not episode:
+        raise HTTPException(status_code=404, detail="Episode not found")
+    reject_episode(
+        episode=episode,
+        reason=reason,
+        end_date=end_date or today_utc_date(),
+        changed_by_id=changed_by_id,
+        db=db,
+    )
+    db.commit()
+    return _episode_query(db).filter(Episode.id == episode_id).first()
+
+
+def cancel_episode_workflow(
+    *,
+    patient_id: int,
+    episode_id: int,
+    reason: str,
+    end_date: date | None,
+    changed_by_id: int,
+    db: Session,
+) -> Episode:
+    episode = (
+        db.query(Episode)
+        .filter(Episode.id == episode_id, Episode.patient_id == patient_id)
+        .first()
+    )
+    if not episode:
+        raise HTTPException(status_code=404, detail="Episode not found")
+    cancel_episode(
+        episode=episode,
+        reason=reason,
+        end_date=end_date or today_utc_date(),
+        changed_by_id=changed_by_id,
+        db=db,
+    )
     db.commit()
     return _episode_query(db).filter(Episode.id == episode_id).first()
 

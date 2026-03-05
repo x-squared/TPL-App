@@ -13,6 +13,10 @@ from .clinical import (
     DiagnosisUpdate,
     EpisodeBase,
     EpisodeCreate,
+    EpisodeStartListingRequest,
+    EpisodeCloseRequest,
+    EpisodeRejectRequest,
+    EpisodeCancelRequest,
     EpisodeListResponse,
     EpisodeOrganBase,
     EpisodeOrganCreate,
@@ -55,6 +59,9 @@ from .colloqium import (
 )
 from .coordination import (
     CoordinationBase,
+    CoordinationCompletionConfirmRequest,
+    CoordinationCompletionStateResponse,
+    CoordinationCompletionTaskGroupResponse,
     CoordinationCreate,
     CoordinationDonorBase,
     CoordinationDonorCreate,
@@ -98,6 +105,9 @@ from .coordination import (
     CoordinationProtocolEventLogCreate,
     CoordinationProtocolEventLogResponse,
     CoordinationTimeLogBase,
+    CoordinationTimeClockStartRequest,
+    CoordinationTimeClockStateResponse,
+    CoordinationTimeClockStopRequest,
     CoordinationTimeLogCreate,
     CoordinationTimeLogResponse,
     CoordinationTimeLogUpdate,
@@ -162,6 +172,12 @@ from .reference import (
     UserResponse,
 )
 from .support_ticket import SupportTicketConfigResponse
+from .scheduler import (
+    ScheduledJobEnabledUpdate,
+    ScheduledJobResponse,
+    ScheduledJobRunResponse,
+    TriggerScheduledJobRequest,
+)
 from .tasking import (
     CoordinationProtocolTaskGroupsEnsureResponse,
     TaskBase,

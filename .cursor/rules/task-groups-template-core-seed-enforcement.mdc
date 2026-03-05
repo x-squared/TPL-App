@@ -1,0 +1,24 @@
+---
+description: Enforce template-first, core-seeded task group definitions
+alwaysApply: true
+---
+
+# Task Group Definition Policy
+
+When the user specifies new task groups/tasks, follow this policy by default:
+
+1. Define them via the existing task template framework:
+   - `TASK_GROUP_TEMPLATE` + `TASK_TEMPLATE`
+   - no ad-hoc runtime-only group/task definitions for feature logic
+2. Persist definitions in core seed data in the same change set:
+   - add/update core datasets under `backend/app/seed/datasets/core/`
+   - ensure core loader registration under `backend/app/seed/loaders/core/` and `backend/app/seed/__init__.py`
+3. Consume and render them through the usual configurable TaskBoard flow:
+   - avoid introducing custom one-off task UIs when TaskBoard can represent the workflow
+   - reuse existing task filtering/visibility mechanisms instead of bespoke task handling
+
+## Implementation Notes
+
+- Keep task template keys stable and English.
+- Use deterministic offsets (`offset_minutes_default`) for due-date semantics.
+- If sample seed also overrides templates in DEV, mirror new core templates there to prevent drift.

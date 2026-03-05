@@ -2,7 +2,7 @@ import { useEffect, useMemo, useState } from 'react';
 import { api, type ColloqiumAgenda, type Patient, type PatientListItem } from '../../../../api';
 import { translateCodeLabel } from '../../../../i18n/codeTranslations';
 import { useI18n } from '../../../../i18n/i18n';
-import { formatEpisodeDisplayName } from '../../../layout/episodeDisplay';
+import { formatEpisodeDisplayName, formatEpisodeStatusReference } from '../../../layout/episodeDisplay';
 import type { AgendaDraft } from '../../tabs/protocol/ColloquiumProtocolTab';
 import type { AgendaEditForm, EpisodeChoice, EpisodePreview, PickerRow } from '../colloquiumDetailViewModelTypes';
 
@@ -117,6 +117,12 @@ export function useColloquiumAgendaManager(colloqiumId: number, organId: number 
         fallNr: episode.fall_nr || `#${episode.id}`,
         organName: translateCodeLabel(t, episode.organ),
         statusName: translateCodeLabel(t, episode.status),
+        phaseName: translateCodeLabel(t, episode.phase),
+        statusReference: formatEpisodeStatusReference({
+          phaseLabel: translateCodeLabel(t, episode.phase),
+          processInfo: '(-)',
+          emptySymbol: t('common.emptySymbol', '–'),
+        }),
         start: episode.start,
         end: episode.end,
       };
@@ -131,6 +137,8 @@ export function useColloquiumAgendaManager(colloqiumId: number, organId: number 
           fallNr: episode.fallNr || `#${episode.episodeId}`,
           organName: episode.organName,
           statusName: episode.statusName,
+          phaseName: episode.phaseName,
+          statusReference: episode.statusReference,
           start: episode.start,
           end: episode.end,
         };
@@ -268,6 +276,12 @@ export function useColloquiumAgendaManager(colloqiumId: number, organId: number 
             fallNr: ep.fall_nr,
             organName: translateCodeLabel(t, ep.organ),
             statusName: translateCodeLabel(t, ep.status),
+            phaseName: translateCodeLabel(t, ep.phase),
+            statusReference: formatEpisodeStatusReference({
+              phaseLabel: translateCodeLabel(t, ep.phase),
+              processInfo: '(-)',
+              emptySymbol: t('common.emptySymbol', '–'),
+            }),
             start: ep.start,
             end: ep.end,
           }));

@@ -1,4 +1,4 @@
-from sqlalchemy import Column, Date, DateTime, Enum as SqlEnum, ForeignKey, Integer, String
+from sqlalchemy import Boolean, Column, Date, DateTime, Enum as SqlEnum, ForeignKey, Integer, String
 from sqlalchemy.orm import relationship
 from sqlalchemy.sql import func
 
@@ -82,6 +82,36 @@ class Coordination(Base):
         comment="Free-text comment (max 1024 characters).",
         info={"label": "Comment"},
     )
+    completion_confirmed = Column(
+        "COMPLETION_CONFIRMED",
+        Boolean,
+        nullable=False,
+        default=False,
+        comment="Whether final coordination completion has been confirmed.",
+        info={"label": "Completion Confirmed"},
+    )
+    completion_comment = Column(
+        "COMPLETION_COMMENT",
+        String(1024),
+        default="",
+        comment="Completion confirmation comment.",
+        info={"label": "Completion Comment"},
+    )
+    completion_confirmed_at = Column(
+        "COMPLETION_CONFIRMED_AT",
+        DateTime(timezone=True),
+        nullable=True,
+        comment="Timestamp when completion was confirmed.",
+        info={"label": "Completion Confirmed At"},
+    )
+    completion_confirmed_by_id = Column(
+        "COMPLETION_CONFIRMED_BY",
+        Integer,
+        ForeignKey("USER.ID"),
+        nullable=True,
+        comment="User who confirmed completion.",
+        info={"label": "Completion Confirmed By"},
+    )
     changed_by_id = Column(
         "CHANGED_BY",
         Integer,
@@ -106,7 +136,8 @@ class Coordination(Base):
     )
 
     status = relationship("Code", foreign_keys=[status_id])
-    changed_by_user = relationship("User")
+    changed_by_user = relationship("User", foreign_keys=[changed_by_id])
+    completion_confirmed_by_user = relationship("User", foreign_keys=[completion_confirmed_by_id])
     donor = relationship(
         "CoordinationDonor",
         back_populates="coordination",

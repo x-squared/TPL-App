@@ -38,6 +38,10 @@ function isFieldCompletedForOrgan(
   organId: number,
   field: CoordinationProcurementFlex['field_templates'][number],
 ): boolean {
+  const organ = flex.organs.find((entry) => entry.organ_id === organId);
+  if (organ?.organ_rejected && organ.organ_workflow_cleared) {
+    return true;
+  }
   const valueRow = hasValueForField(flex, organId, field.id);
   if (field.value_mode === 'PERSON_SINGLE' || field.value_mode === 'PERSON_LIST') {
     return (valueRow?.persons?.length ?? 0) > 0;

@@ -1,6 +1,7 @@
 import { useCallback, useEffect, useState } from 'react';
 import { api, type Code, type ColloqiumAgenda, type Episode, type Patient, type Task, type TaskGroup } from '../../api';
 import { toUserErrorMessage } from '../../api/error';
+import { formatCoordinationReferenceName } from '../layout/episodeDisplay';
 import type { TaskBoardCriteria } from './taskBoardTypes';
 
 interface TaskBoardDataState {
@@ -15,6 +16,7 @@ interface TaskBoardDataState {
   taskStatusByKey: Record<string, Code>;
   allUsers: Record<number, string>;
   colloqiumAgendasById: Record<number, ColloqiumAgenda>;
+  coordinationLabelsById: Record<number, string>;
   currentUserId: number | null;
 }
 
@@ -30,6 +32,7 @@ const initialState: TaskBoardDataState = {
   taskStatusByKey: {},
   allUsers: {},
   colloqiumAgendasById: {},
+  coordinationLabelsById: {},
   currentUserId: null,
 };
 
@@ -88,6 +91,36 @@ export default function useTaskBoardData(criteria: TaskBoardCriteria, statusKeys
             .filter((id): id is number => id != null),
         )];
         const patientDetails = await Promise.all(patientIds.map((id) => api.getPatient(id)));
+        const coordinationIds = [...new Set(
+          groupsWithContext
+            .map((group) => group.coordination_id)
+            .filter((id): id is number => id != null),
+        )];
+        const coordinationLabelEntries = await Promise.all(
+          coordinationIds.map(async (coordinationId) => {
+            try {
+              const [coordination, donor] = await Promise.all([
+                api.getCoordination(coordinationId),
+                api.getCoordinationDonor(coordinationId).catch(() => null),
+              ]);
+              const donorName = donor?.full_name?.trim();
+              const label = formatCoordinationReferenceName({
+                coordinationId,
+                donorFullName: donorName || null,
+                swtplNumber: coordination.swtpl_nr || null,
+                emptySymbol: '–',
+              });
+              return [coordinationId, label] as const;
+            } catch {
+              return [coordinationId, formatCoordinationReferenceName({
+                coordinationId,
+                donorFullName: null,
+                swtplNumber: null,
+                emptySymbol: '–',
+              })] as const;
+            }
+          }),
+        );
 
         const tasksPerGroup = await Promise.all(
           groupsWithContext.map(async (group) => ({
@@ -134,6 +167,10 @@ export default function useTaskBoardData(criteria: TaskBoardCriteria, statusKeys
         agendas.forEach((agenda) => {
           nextColloqiumAgendasById[agenda.id] = agenda;
         });
+        const nextCoordinationLabelsById: Record<number, string> = {};
+        coordinationLabelEntries.forEach(([coordinationId, label]) => {
+          nextCoordinationLabelsById[coordinationId] = label;
+        });
 
         setState({
           loading: false,
@@ -147,6 +184,7 @@ export default function useTaskBoardData(criteria: TaskBoardCriteria, statusKeys
           taskStatusByKey: nextTaskStatusByKey,
           allUsers: nextUsers,
           colloqiumAgendasById: nextColloqiumAgendasById,
+          coordinationLabelsById: nextCoordinationLabelsById,
           currentUserId: me.id,
         });
       } catch (err) {

@@ -3,17 +3,19 @@ import { useEffect, useState } from 'react';
 import { useAdminAccessRules } from './admin/hooks/useAdminAccessRules';
 import { useAdminPeopleTeams } from './admin/hooks/useAdminPeopleTeams';
 import { useAdminProcurementConfig } from './admin/hooks/useAdminProcurementConfig';
+import { useAdminScheduler } from './admin/hooks/useAdminScheduler';
 import { useAdminTaskTemplates } from './admin/hooks/useAdminTaskTemplates';
 import AdminOverviewTab from './admin/tabs/AdminOverviewTab';
 import AdminAccessRulesTab from './admin/tabs/AdminAccessRulesTab';
 import AdminPeopleTeamsTab from './admin/tabs/AdminPeopleTeamsTab';
 import AdminProcurementConfigTab from './admin/tabs/AdminProcurementConfigTab';
+import AdminSchedulerTab from './admin/tabs/AdminSchedulerTab';
 import AdminTaskTemplatesTab from './admin/tabs/AdminTaskTemplatesTab';
 import AdminTranslationsTab from './admin/tabs/AdminTranslationsTab';
 import { useI18n } from '../i18n/i18n';
 import './AdminView.css';
 
-type AdminTabKey = 'overview' | 'access-rules' | 'people-teams' | 'task-templates' | 'procurement-config' | 'translations';
+type AdminTabKey = 'overview' | 'access-rules' | 'people-teams' | 'task-templates' | 'procurement-config' | 'scheduler' | 'translations';
 
 export default function AdminView() {
   const { t } = useI18n();
@@ -22,6 +24,7 @@ export default function AdminView() {
   const peopleTeams = useAdminPeopleTeams();
   const taskTemplates = useAdminTaskTemplates();
   const procurementConfig = useAdminProcurementConfig();
+  const scheduler = useAdminScheduler();
 
   useEffect(() => {
     if (activeTab === 'procurement-config') {
@@ -70,6 +73,13 @@ export default function AdminView() {
           type="button"
         >
           {t('app.admin.tabs.protocolConfig', 'Protocol Config')}
+        </button>
+        <button
+          className={`detail-tab ${activeTab === 'scheduler' ? 'active' : ''}`}
+          onClick={() => setActiveTab('scheduler')}
+          type="button"
+        >
+          {t('app.admin.tabs.scheduler', 'Scheduler')}
         </button>
         <button
           className={`detail-tab ${activeTab === 'translations' ? 'active' : ''}`}
@@ -152,6 +162,21 @@ export default function AdminView() {
           onCreateProtocolTaskGroupSelection={procurementConfig.createProtocolTaskGroupSelection}
           onReorderProtocolTaskGroupSelections={procurementConfig.reorderProtocolTaskGroupSelections}
           onDeleteProtocolTaskGroupSelection={procurementConfig.deleteProtocolTaskGroupSelection}
+        />
+      )}
+      {activeTab === 'scheduler' && (
+        <AdminSchedulerTab
+          jobs={scheduler.jobs}
+          selectedJobKey={scheduler.selectedJobKey}
+          onSelectJobKey={scheduler.setSelectedJobKey}
+          runs={scheduler.selectedRuns}
+          loading={scheduler.loading}
+          saving={scheduler.saving}
+          error={scheduler.error}
+          statusKey={scheduler.statusKey}
+          onRefresh={() => { void scheduler.refresh(); }}
+          onTriggerJob={(jobKey) => { void scheduler.triggerJob(jobKey); }}
+          onSetJobEnabled={(jobKey, enabled) => { void scheduler.setJobEnabled(jobKey, enabled); }}
         />
       )}
       {activeTab === 'translations' && (

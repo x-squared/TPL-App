@@ -7,6 +7,7 @@ export interface CoordinationEpisodePickerRow {
   patientPid: string;
   patientDateOfBirth: string | null;
   episodeLabel: string;
+  statusLabel: string;
   organsLabel: string;
   basicValuesByColumn: Record<string, string>;
   detailValuesByColumn: Record<string, string>;
@@ -102,6 +103,8 @@ export default function CoordinationEpisodePickerDialog({
                     <th>{t('patients.table.name', 'Name')}</th>
                     <th>{t('patients.table.pid', 'PID')}</th>
                     <th>{t('patients.table.dateOfBirth', 'Date of Birth')}</th>
+                    <th>{t('episodePicker.episode', 'Episode')}</th>
+                    <th>{t('coordinations.table.status', 'Status')}</th>
                     <th>{t('coordinations.protocolData.episodePicker.columns.organs', 'Organs')}</th>
                     {basicColumns.map((column) => (
                       <th key={`basic-${column}`}>{column}</th>
@@ -129,6 +132,8 @@ export default function CoordinationEpisodePickerDialog({
                         <td>{row.patientName || t('common.emptySymbol', '–')}</td>
                         <td>{row.patientPid || t('common.emptySymbol', '–')}</td>
                         <td>{formatDate(row.patientDateOfBirth)}</td>
+                        <td>{row.episodeLabel || t('common.emptySymbol', '–')}</td>
+                        <td>{row.statusLabel || t('common.emptySymbol', '–')}</td>
                         <td>{row.organsLabel || t('common.emptySymbol', '–')}</td>
                         {basicColumns.map((column) => (
                           <td key={`b-${row.episodeId}-${column}`}>{row.basicValuesByColumn[column] ?? t('common.emptySymbol', '–')}</td>

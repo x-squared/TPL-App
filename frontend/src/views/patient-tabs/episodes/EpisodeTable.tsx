@@ -2,7 +2,7 @@ import type { Code, Episode, EpisodeCreate, EpisodeUpdate } from '../../../api';
 import { translateCodeLabel } from '../../../i18n/codeTranslations';
 import { useI18n } from '../../../i18n/i18n';
 import InlineDeleteActions from '../../layout/InlineDeleteActions';
-import { formatOrganNames } from '../../layout/episodeDisplay';
+import { formatEpisodeStatusReference, formatOrganNames } from '../../layout/episodeDisplay';
 
 interface EpisodeTableProps {
   patientEpisodes: Episode[];
@@ -54,8 +54,12 @@ export default function EpisodeTable({
   onSelectEpisode,
 }: EpisodeTableProps) {
   const { t } = useI18n();
-  const getEpisodeStatusLabel = (status: Code | null | undefined): string => {
-    return translateCodeLabel(t, status);
+  const getEpisodeStatusLabel = (episode: Episode): string => {
+    return formatEpisodeStatusReference({
+      phaseLabel: translateCodeLabel(t, episode.phase),
+      processInfo: '(-)',
+      emptySymbol: t('common.emptySymbol', '–'),
+    });
   };
   return (
     <>
@@ -86,7 +90,7 @@ export default function EpisodeTable({
                   <td>
                     <select className="detail-input ci-inline-input" value={epEditForm.status_id ?? ''} onChange={(e) => setEpEditForm((f) => ({ ...f, status_id: e.target.value ? Number(e.target.value) : null }))}>
                       <option value="">{t('common.emptySymbol', '–')}</option>
-                      {tplStatusCodes.map((c) => <option key={c.id} value={c.id}>{getEpisodeStatusLabel(c)}</option>)}
+                      {tplStatusCodes.map((c) => <option key={c.id} value={c.id}>{translateCodeLabel(t, c)}</option>)}
                     </select>
                   </td>
                   <td><input type="date" className="detail-input ci-inline-input" value={epEditForm.start ?? ''} onChange={(e) => setEpEditForm((f) => ({ ...f, start: e.target.value || null }))} /></td>
@@ -116,7 +120,7 @@ export default function EpisodeTable({
                   className={selectedEpisodeId === ep.id ? 'episode-row-selected' : ''}
                 >
                   <td>{formatOrganNames(ep.organs, translateCodeLabel(t, ep.organ), (organ) => translateCodeLabel(t, { type: 'ORGAN', key: organ.key ?? '', name_default: '' }))}</td>
-                  <td>{getEpisodeStatusLabel(ep.status)}</td>
+                  <td>{getEpisodeStatusLabel(ep)}</td>
                   <td>{formatDate(ep.start)}</td>
                   <td>{formatDate(ep.end)}</td>
                   <td>{ep.fall_nr || t('common.emptySymbol', '–')}</td>
@@ -151,7 +155,7 @@ export default function EpisodeTable({
           </select>
           <select className="detail-input" value={epForm.status_id ?? ''} onChange={(e) => setEpForm((f) => ({ ...f, status_id: e.target.value ? Number(e.target.value) : null }))}>
             <option value="">{t('episode.add.statusPlaceholder', 'Status...')}</option>
-            {tplStatusCodes.map((c) => <option key={c.id} value={c.id}>{getEpisodeStatusLabel(c)}</option>)}
+            {tplStatusCodes.map((c) => <option key={c.id} value={c.id}>{translateCodeLabel(t, c)}</option>)}
           </select>
           <input type="date" className="detail-input" placeholder={t('patients.episodes.start', 'Start')} value={epForm.start ?? ''} onChange={(e) => setEpForm((f) => ({ ...f, start: e.target.value || null }))} />
           <input type="date" className="detail-input" placeholder={t('patients.episodes.end', 'End')} value={epForm.end ?? ''} onChange={(e) => setEpForm((f) => ({ ...f, end: e.target.value || null }))} />

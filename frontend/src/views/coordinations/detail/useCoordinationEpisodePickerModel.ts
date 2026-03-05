@@ -1,7 +1,8 @@
 import { useMemo } from 'react';
 import type { CoordinationEpisodeLinkedEpisode, MedicalValue, PatientListItem } from '../../../api';
 import { useI18n } from '../../../i18n/i18n';
-import { formatDefaultEpisodeReference } from '../../layout/episodeDisplay';
+import { translateCodeLabel } from '../../../i18n/codeTranslations';
+import { formatDefaultEpisodeReference, formatEpisodeStatusReference } from '../../layout/episodeDisplay';
 import type { CoordinationEpisodePickerRow } from './CoordinationEpisodePickerDialog';
 
 interface UseCoordinationEpisodePickerModelArgs {
@@ -97,6 +98,11 @@ export function useCoordinationEpisodePickerModel({
         patientPid: patient?.pid ?? null,
         emptySymbol: empty,
       });
+      const statusLabel = formatEpisodeStatusReference({
+        phaseLabel: translateCodeLabel(t, episode.phase),
+        processInfo: '(-)',
+        emptySymbol: empty,
+      });
       const organsLabel = (episode.organs ?? [])
         .map((organ) => getOrganLabel(organ.key ?? '', empty))
         .join(', ');
@@ -107,6 +113,7 @@ export function useCoordinationEpisodePickerModel({
         patientPid: patient?.pid ?? empty,
         patientDateOfBirth: patient?.date_of_birth ?? null,
         episodeLabel,
+        statusLabel,
         organsLabel: organsLabel || empty,
         basicValuesByColumn,
         detailValuesByColumn,

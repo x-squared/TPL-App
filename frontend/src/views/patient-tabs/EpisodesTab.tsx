@@ -51,6 +51,7 @@ export default function EpisodesTab(props: EpisodesTabProps) {
   const [assignTypes, setAssignTypes] = useState<ColloqiumType[]>([]);
   const [assignTypeId, setAssignTypeId] = useState<number | null>(null);
   const [assignDate, setAssignDate] = useState(() => new Date().toISOString().slice(0, 10));
+  const [workflowDateInput, setWorkflowDateInput] = useState(() => new Date().toISOString().slice(0, 10));
 
   const evalKeys = ['eval_start', 'eval_end', 'eval_assigned_to', 'eval_stat', 'eval_register_date', 'eval_excluded', 'eval_non_list_sent'] as const;
   const listKeys = ['list_start', 'list_end', 'list_rs_nr', 'list_reason_delist', 'list_expl_delist', 'list_delist_sent'] as const;
@@ -60,6 +61,20 @@ export default function EpisodesTab(props: EpisodesTabProps) {
 
   const sortedEpisodes = [...(patient.episodes ?? [])].sort((a, b) => (a.status?.pos ?? 999) - (b.status?.pos ?? 999));
   const selectedEpisode = sortedEpisodes.find((ep) => ep.id === selectedEpisodeId) ?? null;
+  const selectedEpisodeStatusKey = ((selectedEpisode?.status?.key ?? '') || '').toUpperCase();
+  const selectedEpisodePhaseKey = ((selectedEpisode?.phase?.key ?? '') || '').toUpperCase();
+  const isTerminalEpisode = Boolean(
+    selectedEpisode?.closed || selectedEpisodeStatusKey === 'REJECTED' || selectedEpisodeStatusKey === 'CANCELLED',
+  );
+  const currentWorkflowTab: EpisodeDetailTab = useMemo(() => {
+    if (!selectedEpisode) return 'Evaluation';
+    if (isTerminalEpisode) return 'Closed';
+    if (selectedEpisodePhaseKey === 'FOLLOW_UP') return 'Follow-Up';
+    if (selectedEpisodePhaseKey === 'TRANSPLANTATION') return 'Transplantation';
+    if (selectedEpisodePhaseKey === 'LISTING') return 'Listing';
+    return 'Evaluation';
+  }, [isTerminalEpisode, selectedEpisode, selectedEpisodePhaseKey]);
+  const canEditActiveTab = !isTerminalEpisode && activeEpisodeTab === currentWorkflowTab && activeEpisodeTab !== 'Closed';
   const episodeFavorite = useFavoriteToggle(selectedEpisode ? {
     favorite_type_key: 'EPISODE',
     episode_id: selectedEpisode.id,
@@ -103,6 +118,10 @@ export default function EpisodesTab(props: EpisodesTabProps) {
   };
 
   const startEditingDetailTab = (tab: EpisodeDetailTab) => {
+    if (tab !== currentWorkflowTab || isTerminalEpisode || tab === 'Closed') {
+      setDetailSaveError(t('episode.processTabs.editLocked', 'Editing is only available for the active process phase.'));
+      return;
+    }
     const entries = getEntriesForTab(tab);
     const next: EpisodeDetailForm = {};
     entries.forEach(([key, value]) => {
@@ -114,6 +133,10 @@ export default function EpisodesTab(props: EpisodesTabProps) {
 
   const handleSaveDetailTab = async () => {
     if (!selectedEpisode) return;
+    if (!canEditActiveTab || editingDetailTab !== activeEpisodeTab) {
+      setDetailSaveError(t('episode.processTabs.editLocked', 'Editing is only available for the active process phase.'));
+      return;
+    }
     const payload: Record<string, string | boolean | null> = {};
     Object.entries(detailForm).forEach(([key, value]) => {
       if (typeof value === 'boolean') {
@@ -135,6 +158,65 @@ export default function EpisodesTab(props: EpisodesTabProps) {
     } finally {
       setDetailSaving(false);
     }
+  };
+
+  const runWorkflowTransition = async (runner: () => Promise<void>) => {
+    if (!selectedEpisode) return;
+    setDetailSaving(true);
+    setDetailSaveError('');
+    try {
+      await runner();
+      await refreshPatient();
+      setEditingDetailTab(null);
+    } catch (err) {
+      setDetailSaveError(toUserErrorMessage(err, t('episode.errors.saveDetails', 'Could not save episode details.')));
+    } finally {
+      setDetailSaving(false);
+    }
+  };
+
+  const handleStartListing = async () => {
+    if (!selectedEpisode || !workflowDateInput) return;
+    await runWorkflowTransition(async () => {
+      await api.startEpisodeListing(patient.id, selectedEpisode.id, { start: workflowDateInput });
+    });
+  };
+
+  const handleCloseEpisode = async () => {
+    if (!selectedEpisode || !workflowDateInput) return;
+    await runWorkflowTransition(async () => {
+      await api.closeEpisodeWorkflow(patient.id, selectedEpisode.id, { end: workflowDateInput });
+    });
+  };
+
+  const handleRejectEpisode = async () => {
+    if (!selectedEpisode) return;
+    const reason = window.prompt(
+      t('episode.processTabs.actions.rejectPrompt', 'Enter rejection reason (optional):'),
+      '',
+    );
+    if (reason == null) return;
+    await runWorkflowTransition(async () => {
+      await api.rejectEpisodeWorkflow(patient.id, selectedEpisode.id, {
+        end: workflowDateInput || null,
+        reason,
+      });
+    });
+  };
+
+  const handleCancelEpisode = async () => {
+    if (!selectedEpisode) return;
+    const reason = window.prompt(
+      t('episode.processTabs.actions.cancelPrompt', 'Enter cancellation reason (optional):'),
+      '',
+    );
+    if (reason == null) return;
+    await runWorkflowTransition(async () => {
+      await api.cancelEpisodeWorkflow(patient.id, selectedEpisode.id, {
+        end: workflowDateInput || null,
+        reason,
+      });
+    });
   };
 
   const startEditingEpisodeMeta = () => {
@@ -222,9 +304,18 @@ export default function EpisodesTab(props: EpisodesTabProps) {
     if (initialSelectedEpisodeId == null) return;
     const exists = sortedEpisodes.some((ep) => ep.id === initialSelectedEpisodeId);
     setSelectedEpisodeId(exists ? initialSelectedEpisodeId : null);
-    setActiveEpisodeTab('Evaluation');
+    setActiveEpisodeTab(currentWorkflowTab);
     setEditingDetailTab(null);
-  }, [initialSelectedEpisodeId, patient.id, sortedEpisodes]);
+  }, [currentWorkflowTab, initialSelectedEpisodeId, patient.id, sortedEpisodes]);
+
+  useEffect(() => {
+    if (!selectedEpisode) return;
+    setActiveEpisodeTab(currentWorkflowTab);
+    setWorkflowDateInput(new Date().toISOString().slice(0, 10));
+    if (editingDetailTab && editingDetailTab !== currentWorkflowTab) {
+      setEditingDetailTab(null);
+    }
+  }, [currentWorkflowTab, editingDetailTab, selectedEpisode]);
 
   useEffect(() => {
     if (!selectedEpisodeId) {
@@ -308,7 +399,20 @@ export default function EpisodesTab(props: EpisodesTabProps) {
         selectedEpisodeId={selectedEpisodeId}
         onSelectEpisode={(id) => {
           setSelectedEpisodeId(id);
-          setActiveEpisodeTab('Evaluation');
+          const episode = sortedEpisodes.find((entry) => entry.id === id);
+          if (!episode) {
+            setActiveEpisodeTab('Evaluation');
+            setEditingDetailTab(null);
+            return;
+          }
+          const phaseKey = ((episode.phase?.key ?? '') || '').toUpperCase();
+          const statusKey = ((episode.status?.key ?? '') || '').toUpperCase();
+          const terminal = Boolean(episode.closed || statusKey === 'REJECTED' || statusKey === 'CANCELLED');
+          if (terminal) setActiveEpisodeTab('Closed');
+          else if (phaseKey === 'FOLLOW_UP') setActiveEpisodeTab('Follow-Up');
+          else if (phaseKey === 'TRANSPLANTATION') setActiveEpisodeTab('Transplantation');
+          else if (phaseKey === 'LISTING') setActiveEpisodeTab('Listing');
+          else setActiveEpisodeTab('Evaluation');
           setEditingDetailTab(null);
         }}
       />
@@ -343,14 +447,50 @@ export default function EpisodesTab(props: EpisodesTabProps) {
 
           <EpisodeProcessTabs
             episodeDetailTabs={episodeDetailTabs}
+            currentWorkflowTab={currentWorkflowTab}
             activeEpisodeTab={activeEpisodeTab}
             setActiveEpisodeTab={setActiveEpisodeTab}
             editingDetailTab={editingDetailTab}
             detailSaving={detailSaving}
+            canEditActiveTab={canEditActiveTab}
             handleSaveDetailTab={handleSaveDetailTab}
             setEditingDetailTab={setEditingDetailTab}
             startEditingDetailTab={startEditingDetailTab}
             setDetailSaveError={setDetailSaveError}
+            workflowControls={(
+              <div className="episode-workflow-actions">
+                <label>
+                  <span>{t('episode.processTabs.progressDateLabel', 'Process date')}</span>
+                  <input
+                    type="date"
+                    className="detail-input"
+                    value={workflowDateInput}
+                    onChange={(event) => setWorkflowDateInput(event.target.value)}
+                    disabled={detailSaving}
+                  />
+                </label>
+                {currentWorkflowTab === 'Evaluation' && !isTerminalEpisode ? (
+                  <button type="button" className="save-btn" onClick={() => void handleStartListing()} disabled={detailSaving || !workflowDateInput}>
+                    {t('episode.processTabs.actions.startListing', 'Start listing')}
+                  </button>
+                ) : null}
+                {currentWorkflowTab === 'Follow-Up' && !isTerminalEpisode ? (
+                  <button type="button" className="save-btn" onClick={() => void handleCloseEpisode()} disabled={detailSaving || !workflowDateInput}>
+                    {t('episode.processTabs.actions.closeEpisode', 'Close episode')}
+                  </button>
+                ) : null}
+                {!isTerminalEpisode && (currentWorkflowTab === 'Evaluation' || currentWorkflowTab === 'Listing') ? (
+                  <button type="button" className="patients-cancel-btn" onClick={() => void handleRejectEpisode()} disabled={detailSaving}>
+                    {t('episode.processTabs.actions.rejectEpisode', 'Reject episode')}
+                  </button>
+                ) : null}
+                {!isTerminalEpisode ? (
+                  <button type="button" className="patients-cancel-btn" onClick={() => void handleCancelEpisode()} disabled={detailSaving}>
+                    {t('episode.processTabs.actions.cancelEpisode', 'Cancel episode')}
+                  </button>
+                ) : null}
+              </div>
+            )}
           />
 
           <ErrorBanner message={detailSaveError} />

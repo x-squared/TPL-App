@@ -5,6 +5,10 @@ from sqlalchemy import and_, or_
 from sqlalchemy.exc import IntegrityError
 from sqlalchemy.orm import Session, joinedload, selectinload
 
+from ...features.episodes.workflow_service import (
+    mark_coordination_allocation_started,
+    mark_transplantation_started,
+)
 from ...features.tasks import ensure_coordination_protocol_task_groups
 from ...models import Catalogue, Code, Coordination, CoordinationEpisode, Episode
 from ...schemas import CoordinationEpisodeCreate, CoordinationEpisodeUpdate
@@ -188,6 +192,22 @@ def create_coordination_episode(
         changed_by_id=changed_by_id,
     )
     db.add(item)
+    episode = db.query(Episode).filter(Episode.id == payload.episode_id).first()
+    coordination = db.query(Coordination).filter(Coordination.id == coordination_id).first()
+    if episode is not None and not item.is_organ_rejected:
+        mark_coordination_allocation_started(
+            episode=episode,
+            coordination_start=coordination.start if coordination else None,
+            changed_by_id=changed_by_id,
+            db=db,
+        )
+        if payload.tpl_date is not None:
+            mark_transplantation_started(
+                episode=episode,
+                transplant_date=payload.tpl_date,
+                changed_by_id=changed_by_id,
+                db=db,
+            )
     try:
         db.commit()
     except IntegrityError:
@@ -237,6 +257,22 @@ def update_coordination_episode(
     for key, value in data.items():
         setattr(item, key, value)
     item.changed_by_id = changed_by_id
+    episode = db.query(Episode).filter(Episode.id == item.episode_id).first()
+    coordination = db.query(Coordination).filter(Coordination.id == coordination_id).first()
+    if episode is not None and not item.is_organ_rejected:
+        mark_coordination_allocation_started(
+            episode=episode,
+            coordination_start=coordination.start if coordination else None,
+            changed_by_id=changed_by_id,
+            db=db,
+        )
+        if item.tpl_date is not None:
+            mark_transplantation_started(
+                episode=episode,
+                transplant_date=item.tpl_date,
+                changed_by_id=changed_by_id,
+                db=db,
+            )
     try:
         db.commit()
     except IntegrityError:

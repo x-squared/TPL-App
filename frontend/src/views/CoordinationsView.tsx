@@ -1,5 +1,6 @@
 import { useEffect, useState } from 'react';
 import { useI18n } from '../i18n/i18n';
+import { COMMON_I18N_KEYS, COORDINATION_I18N_KEYS } from '../i18n/keys';
 import CoordinationsTable from './coordinations/list/CoordinationsTable';
 import { useCoordinationsListViewModel } from './coordinations/list/useCoordinationsListViewModel';
 import './layout/PanelLayout.css';
@@ -8,15 +9,24 @@ import './CoordinationsView.css';
 
 interface Props {
   onOpenCoordination: (id: number) => void;
+  onOpenPatientEpisode?: (patientId: number, episodeId: number) => void;
   quickCreateToken?: number;
+  onQuickCreateHandled?: () => void;
 }
 
-export default function CoordinationsView({ onOpenCoordination, quickCreateToken = 0 }: Props) {
+export default function CoordinationsView({
+  onOpenCoordination,
+  onOpenPatientEpisode,
+  quickCreateToken = 0,
+  onQuickCreateHandled,
+}: Props) {
   const { t } = useI18n();
   const {
     loading,
     loadError,
     rows,
+    filterAny,
+    setFilterAny,
     adding,
     setAdding,
     creating,
@@ -33,6 +43,11 @@ export default function CoordinationsView({ onOpenCoordination, quickCreateToken
     setDonorDeathKind,
     setFormField,
     resetCreate,
+    expandedEpisodesCoordinationId,
+    episodesByCoordinationId,
+    patientById,
+    loadingEpisodesByCoordinationId,
+    toggleAssignedEpisodes,
   } = useCoordinationsListViewModel();
   const [donorFocusToken, setDonorFocusToken] = useState(0);
 
@@ -42,18 +57,27 @@ export default function CoordinationsView({ onOpenCoordination, quickCreateToken
     }
     setAdding(true);
     setDonorFocusToken((prev) => prev + 1);
-  }, [quickCreateToken, setAdding]);
+    onQuickCreateHandled?.();
+  }, [onQuickCreateHandled, quickCreateToken, setAdding]);
 
   return (
     <>
       <header className="patients-header">
-        <h1>{t('coordinations.title', 'Coordinations')}</h1>
+        <h1>{t(COORDINATION_I18N_KEYS.title, 'Coordinations')}</h1>
         <button className="patients-add-btn" onClick={() => setAdding(true)} disabled={adding}>
-          {t('coordinations.actions.add', '+ Add')}
+          {t(COORDINATION_I18N_KEYS.actions.add, '+ Add')}
         </button>
       </header>
+      <div className="filter-bar">
+        <input
+          type="text"
+          placeholder={t(COORDINATION_I18N_KEYS.filters.searchPlaceholder, 'Search across coordinations')}
+          value={filterAny}
+          onChange={(event) => setFilterAny(event.target.value)}
+        />
+      </div>
       {loading ? (
-        <p className="status">{t('common.loading', 'Loading...')}</p>
+        <p className="status">{t(COMMON_I18N_KEYS.loading, 'Loading...')}</p>
       ) : loadError ? (
         <p className="status">{loadError}</p>
       ) : (
@@ -78,6 +102,13 @@ export default function CoordinationsView({ onOpenCoordination, quickCreateToken
           onDonorDeathKindChange={setDonorDeathKind}
           onFieldChange={setFormField}
           donorFocusToken={donorFocusToken}
+          expandedEpisodesCoordinationId={expandedEpisodesCoordinationId}
+          episodesByCoordinationId={episodesByCoordinationId}
+          patientById={patientById}
+          loadingEpisodesByCoordinationId={loadingEpisodesByCoordinationId}
+          onToggleAssignedEpisodes={toggleAssignedEpisodes}
+          onOpenPatientEpisode={onOpenPatientEpisode}
+          hasActiveFilter={filterAny.trim().length > 0}
           onSave={() => {
             void (async () => {
               const createdId = await handleCreate();

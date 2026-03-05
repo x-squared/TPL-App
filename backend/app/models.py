@@ -50,6 +50,8 @@ from .model import (
     Patient,
     Person,
     PersonTeam,
+    ScheduledJob,
+    ScheduledJobRun,
     Task,
     TaskGroup,
     TaskGroupTemplate,
@@ -115,6 +117,8 @@ __all__ = [
     "TaskTemplate",
     "TaskGroup",
     "Task",
+    "ScheduledJob",
+    "ScheduledJobRun",
 ]
 
 

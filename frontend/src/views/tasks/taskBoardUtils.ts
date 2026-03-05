@@ -1,5 +1,6 @@
 import type { Task } from '../../api';
 import { translateCodeLabel } from '../../i18n/codeTranslations';
+import { TASKBOARD_I18N_KEYS } from '../../i18n/keys';
 import { formatDateDdMmYyyy, formatDateTimeDdMmYyyy } from '../layout/dateFormat';
 import { formatTaskEpisodeReference, formatTaskPatientReference } from '../layout/episodeDisplay';
 import type {
@@ -17,7 +18,24 @@ export function buildTaskReferences(
   t: Translate = passthroughTranslate,
 ): TaskReferenceSegment[] {
   const segments: TaskReferenceSegment[] = [];
-  const { group, patient, episode } = context;
+  const { group, patient, episode, coordinationLabel } = context;
+
+  if (group.coordination_id != null) {
+    segments.push({
+      key: `coordination-${group.coordination_id}`,
+      label: coordinationLabel
+        ? `${t(TASKBOARD_I18N_KEYS.references.coordination, 'Coordination')}: ${coordinationLabel}`
+        : `${t(TASKBOARD_I18N_KEYS.references.coordination, 'Coordination')} #${group.coordination_id}`,
+      kind: 'other',
+    });
+    if (group.organ) {
+      segments.push({
+        key: `coordination-organ-${group.organ.id}`,
+        label: `${t(TASKBOARD_I18N_KEYS.references.organ, 'Organ')}: ${translateCodeLabel(t, group.organ)}`,
+        kind: 'other',
+      });
+    }
+  }
 
   if (group.episode_id == null && group.patient_id != null && group.coordination_id == null) {
     segments.push({
@@ -32,7 +50,7 @@ export function buildTaskReferences(
     });
   }
 
-  if (group.episode_id != null) {
+  if (group.episode_id != null && group.coordination_id == null) {
     segments.push({
       key: `episode-${group.episode_id}`,
       label: formatTaskEpisodeReference({

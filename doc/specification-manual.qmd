@@ -124,7 +124,7 @@ All requirement specification documents under `spec/requirements/` must follow t
 3. Story
 4. Item
 
-Each level must include exactly one status label.
+Each level should include exactly one status label.
 
 Allowed labels:
 
@@ -136,7 +136,7 @@ Allowed labels:
 
 Overarching document:
 
-- `spec/requirements/TPLK-Specification.md`
+- `spec/requirements/TPLK-Spezifikation.md`
 
 ### Label format (low-overhead Markdown)
 
@@ -156,8 +156,32 @@ Item level should use the same heading-inline style:
 ##### Item: <Beschreibung> [QA]
 ```
 
-Rule: every Topic, Use Case, Story, and Item must carry exactly one status label.
+Rule: every Topic, Use Case, Story, and Item should carry exactly one status label.
 Do not place ` - ` before the status marker.
+
+Defaulting behavior:
+
+- If a Topic, Use Case, Story, or Item heading has no status marker, default to `Spec`.
+- During edits, missing labels are normalized by adding `[Spec]`.
+
+Status hierarchy gate:
+
+- A parent level cannot be marked `Done` before all lower levels under it are also `Done`.
+- Therefore:
+ - Topic `Done` only when all nested Use Cases/Stories/Items are `Done`.
+ - Use Case `Done` only when all nested Stories/Items are `Done`.
+ - Story `Done` only when all nested Items are `Done`.
+
+Starting-status policy during updates:
+
+- Default assumption is `Spec`.
+- Exception: when requirements are reverse-engineered from existing implementation code, starting status is `Impl`.
+
+TODO marker for open discussion:
+
+- The inline text label `TODO` is allowed in specification documents.
+- Anything after `TODO` on the same textual line is treated as still to be discussed (not yet finalized requirement text).
+- If the TODO sentence wraps into visual overflow lines, those wrapped continuations belong to the same TODO statement.
 
 ## How Specs Map To Test Pipelines
 

@@ -860,3 +860,14 @@
   display: flex;
   justify-content: flex-end;
 }
+
+.coord-assigned-episodes-list {
+  margin: 0;
+  padding-left: 1.1rem;
+  display: grid;
+  gap: 0.3rem;
+}
+
+.coord-assigned-episodes-table {
+  margin-top: 0.2rem;
+}

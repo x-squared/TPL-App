@@ -5,6 +5,7 @@ from ..auth import require_permission
 from ..database import get_db
 from ..enums import ProcurementSlotKey
 from ..features.coordination_procurement_flex import (
+    clear_rejected_organ_workflow as clear_rejected_organ_workflow_service,
     get_procurement_flex as get_procurement_flex_service,
     update_procurement_organ as update_procurement_organ_service,
     upsert_procurement_organ as upsert_procurement_organ_service,
@@ -61,6 +62,21 @@ def update_procurement_organ(
         coordination_id=coordination_id,
         organ_id=organ_id,
         payload=payload,
+        changed_by_id=current_user.id,
+        db=db,
+    )
+
+
+@router.post("/organs/{organ_id}/rejected-workflow/clear", response_model=CoordinationProcurementOrganResponse)
+def clear_rejected_organ_workflow(
+    coordination_id: int,
+    organ_id: int,
+    db: Session = Depends(get_db),
+    current_user: User = Depends(require_permission("edit.donors")),
+):
+    return clear_rejected_organ_workflow_service(
+        coordination_id=coordination_id,
+        organ_id=organ_id,
         changed_by_id=current_user.id,
         db=db,
     )

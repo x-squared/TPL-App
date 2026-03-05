@@ -20,6 +20,13 @@ Use this rule as the default blueprint when designing or implementing new capabi
 - Enforce permissions in routers (`require_permission(...)`), invariants in services, and structural integrity in DB relations/constraints.
 - For external systems, use feature modules under `backend/app/features/interfaces/**` with client/mapper/service separation.
 
+## Workflow orchestration default
+
+- When one user action triggers multiple dependent side effects, implement a dedicated backend workflow service (not router or frontend orchestration).
+- Prefer one workflow command endpoint that executes the full domain flow atomically where possible.
+- Return refreshed state/projections from the workflow endpoint so frontend panels can re-sync from server truth.
+- Persist workflow completion markers/events when workflow outcomes must survive reloads.
+
 ## Frontend defaults
 
 - Build complex screens as thin container views plus composed `use*ViewModel` hooks.

@@ -1,0 +1,12 @@
+# Translation Key Constants
+
+- Do not pass raw translation key literals (for example `t("some.key.path", "...")`) directly in frontend TypeScript/TSX code.
+- Define translation keys in declared constant maps under `frontend/src/i18n/keys.ts` (or a feature-specific key-constants module) and reference those constants.
+- Keep key constants English-first and stable.
+- Continue storing effective translations in `frontend/src/i18n/translations.json`; constants only replace inline key literals in code.
+- Apply this for component files, hooks, utilities, and render helpers equally.
+
+## Required check before finish
+
+- Scan touched frontend files for direct `t("...")` or `t('...')` key literals.
+- Replace any remaining direct key literal with a declared constant reference.

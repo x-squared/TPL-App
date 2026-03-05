@@ -1,8 +1,10 @@
-export { getToken, setToken, clearToken, authApi, codesApi, medicalValueTemplatesApi, medicalValueGroupsApi, usersApi, translationsApi, adminAccessApi, personsApi, adminPeopleApi, adminProcurementConfigApi, supportTicketApi } from './core';
+export { getToken, setToken, clearToken, authApi, codesApi, medicalValueTemplatesApi, medicalValueGroupsApi, usersApi, translationsApi, adminAccessApi, adminSchedulerApi, personsApi, adminPeopleApi, adminProcurementConfigApi, supportTicketApi } from './core';
 export type {
   AppUser,
   AccessControlMatrix,
   AccessPermission,
+  ScheduledJob,
+  ScheduledJobRun,
   Person,
   PersonCreate,
   PersonUpdate,
@@ -79,6 +81,8 @@ export type {
   CoordinationTimeLog,
   CoordinationTimeLogCreate,
   CoordinationTimeLogUpdate,
+  CoordinationCompletionState,
+  CoordinationCompletionTaskGroup,
   CoordinationProtocolEventLog,
   CoordinationProtocolEventLogCreate,
   CoordinationEpisode,
@@ -119,7 +123,7 @@ export type {
   E2ETestRunResponse,
 } from './e2eTests';
 
-import { authApi, codesApi, medicalValueTemplatesApi, medicalValueGroupsApi, usersApi, translationsApi, adminAccessApi, personsApi, adminPeopleApi, adminProcurementConfigApi, supportTicketApi } from './core';
+import { authApi, codesApi, medicalValueTemplatesApi, medicalValueGroupsApi, usersApi, translationsApi, adminAccessApi, adminSchedulerApi, personsApi, adminPeopleApi, adminProcurementConfigApi, supportTicketApi } from './core';
 import { patientsApi } from './patients';
 import { tasksApi } from './tasks';
 import { colloqiumsApi } from './colloqiums';
@@ -137,6 +141,7 @@ export const api = {
   ...usersApi,
   ...translationsApi,
   ...adminAccessApi,
+  ...adminSchedulerApi,
   ...personsApi,
   ...adminPeopleApi,
   ...adminProcurementConfigApi,

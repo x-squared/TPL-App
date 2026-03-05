@@ -1,5 +1,5 @@
 import { useCallback, useEffect, useMemo, useState } from 'react';
-import { api, type Code, type Coordination, type CoordinationCreate, type CoordinationDonor } from '../../../api';
+import { api, type Code, type Coordination, type CoordinationCreate, type CoordinationDonor, type CoordinationEpisode, type PatientListItem } from '../../../api';
 import { toUserErrorMessage } from '../../../api/error';
 
 export interface CoordinationListRow {
@@ -37,17 +37,26 @@ export function useCoordinationsListViewModel() {
   const [rows, setRows] = useState<CoordinationListRow[]>([]);
   const [loading, setLoading] = useState(true);
   const [loadError, setLoadError] = useState('');
+  const [filterAny, setFilterAny] = useState('');
   const [adding, setAdding] = useState(false);
   const [creating, setCreating] = useState(false);
   const [createError, setCreateError] = useState('');
   const [form, setForm] = useState<CoordinationCreateForm>(emptyCreateFormWithDonor);
   const [deathKindCodes, setDeathKindCodes] = useState<Code[]>([]);
+  const [expandedEpisodesCoordinationId, setExpandedEpisodesCoordinationId] = useState<number | null>(null);
+  const [episodesByCoordinationId, setEpisodesByCoordinationId] = useState<Record<number, CoordinationEpisode[]>>({});
+  const [loadingEpisodesByCoordinationId, setLoadingEpisodesByCoordinationId] = useState<Record<number, boolean>>({});
+  const [loadedEpisodesByCoordinationId, setLoadedEpisodesByCoordinationId] = useState<Record<number, boolean>>({});
+  const [patientById, setPatientById] = useState<Record<number, PatientListItem>>({});
 
   const loadRows = useCallback(async () => {
     setLoading(true);
     setLoadError('');
     try {
-      const coordinations = await api.listCoordinations();
+      const [coordinations, patients] = await Promise.all([
+        api.listCoordinations(),
+        api.listPatients(),
+      ]);
       const donorEntries = await Promise.all(
         coordinations.map(async (coordination) => {
           try {
@@ -59,6 +68,11 @@ export function useCoordinationsListViewModel() {
         }),
       );
       setRows(donorEntries);
+      setPatientById(Object.fromEntries(patients.map((patient) => [patient.id, patient])));
+      setExpandedEpisodesCoordinationId(null);
+      setEpisodesByCoordinationId({});
+      setLoadingEpisodesByCoordinationId({});
+      setLoadedEpisodesByCoordinationId({});
     } catch (err) {
       setLoadError(toUserErrorMessage(err, 'Failed to load coordinations'));
     } finally {
@@ -70,6 +84,30 @@ export function useCoordinationsListViewModel() {
     void loadRows();
     api.listCodes('DEATH_KIND').then(setDeathKindCodes);
   }, [loadRows]);
+
+  useEffect(() => {
+    rows.forEach((row) => {
+      const coordinationId = row.coordination.id;
+      if (loadedEpisodesByCoordinationId[coordinationId]) {
+        return;
+      }
+      if (loadingEpisodesByCoordinationId[coordinationId]) {
+        return;
+      }
+      setLoadingEpisodesByCoordinationId((prev) => ({ ...prev, [coordinationId]: true }));
+      void (async () => {
+        try {
+          const episodes = await api.listCoordinationEpisodes(coordinationId);
+          setEpisodesByCoordinationId((prev) => ({ ...prev, [coordinationId]: episodes }));
+          setLoadedEpisodesByCoordinationId((prev) => ({ ...prev, [coordinationId]: true }));
+        } catch {
+          // Keep "not loaded" so manual expand can retry.
+        } finally {
+          setLoadingEpisodesByCoordinationId((prev) => ({ ...prev, [coordinationId]: false }));
+        }
+      })();
+    });
+  }, [loadedEpisodesByCoordinationId, loadingEpisodesByCoordinationId, rows]);
 
   const handleCreate = useCallback(async (): Promise<number | null> => {
     const donorFullName = form.donor_full_name?.trim() ?? '';
@@ -146,10 +184,69 @@ export function useCoordinationsListViewModel() {
     [rows],
   );
 
+  const filteredRows = useMemo(() => {
+    const query = filterAny.trim().toLowerCase();
+    if (!query) return sortedRows;
+    const formatIsoAsDdMmYyyy = (value: string | null | undefined): string => {
+      if (!value) return '';
+      const parts = value.slice(0, 10).split('-');
+      if (parts.length !== 3) return value;
+      const [y, m, d] = parts;
+      return `${d}.${m}.${y}`;
+    };
+    return sortedRows.filter((row) => {
+      const searchParts = [
+        row.coordination.id.toString(),
+        row.coordination.donor_nr,
+        row.coordination.swtpl_nr,
+        row.coordination.national_coordinator,
+        row.coordination.comment,
+        row.coordination.start ?? '',
+        row.coordination.end ?? '',
+        formatIsoAsDdMmYyyy(row.coordination.start),
+        formatIsoAsDdMmYyyy(row.coordination.end),
+        row.coordination.status?.key ?? '',
+        row.coordination.status?.name_default ?? '',
+        row.donor?.full_name ?? '',
+        row.donor?.birth_date ?? '',
+        formatIsoAsDdMmYyyy(row.donor?.birth_date),
+        row.donor?.death_kind?.key ?? '',
+        row.donor?.death_kind?.name_default ?? '',
+      ];
+      return searchParts.join(' ').toLowerCase().includes(query);
+    });
+  }, [filterAny, sortedRows]);
+
+  const toggleAssignedEpisodes = useCallback(async (coordinationId: number) => {
+    if (expandedEpisodesCoordinationId === coordinationId) {
+      setExpandedEpisodesCoordinationId(null);
+      return;
+    }
+    setExpandedEpisodesCoordinationId(coordinationId);
+    if (loadedEpisodesByCoordinationId[coordinationId]) {
+      return;
+    }
+    if (loadingEpisodesByCoordinationId[coordinationId]) {
+      return;
+    }
+    setLoadingEpisodesByCoordinationId((prev) => ({ ...prev, [coordinationId]: true }));
+    try {
+      const episodes = await api.listCoordinationEpisodes(coordinationId);
+      setEpisodesByCoordinationId((prev) => ({ ...prev, [coordinationId]: episodes }));
+      setLoadedEpisodesByCoordinationId((prev) => ({ ...prev, [coordinationId]: true }));
+    } catch {
+      // Keep not-loaded state so user can retry by toggling again.
+    } finally {
+      setLoadingEpisodesByCoordinationId((prev) => ({ ...prev, [coordinationId]: false }));
+    }
+  }, [expandedEpisodesCoordinationId, loadedEpisodesByCoordinationId, loadingEpisodesByCoordinationId]);
+
   return {
     loading,
     loadError,
-    rows: sortedRows,
+    rows: filteredRows,
+    filterAny,
+    setFilterAny,
     adding,
     setAdding,
     creating,
@@ -166,5 +263,10 @@ export function useCoordinationsListViewModel() {
     setDonorDeathKind,
     setFormField,
     resetCreate,
+    expandedEpisodesCoordinationId,
+    episodesByCoordinationId,
+    patientById,
+    loadingEpisodesByCoordinationId,
+    toggleAssignedEpisodes,
   };
 }

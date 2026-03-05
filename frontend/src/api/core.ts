@@ -200,6 +200,44 @@ export interface AccessControlMatrix {
   role_permissions: Record<string, string[]>;
 }
 
+export interface ScheduledJob {
+  id: number;
+  job_key: string;
+  name: string;
+  description: string;
+  is_enabled: boolean;
+  interval_seconds: number;
+  next_run_at: string | null;
+  max_retries: number;
+  retry_delay_seconds: number;
+  last_started_at: string | null;
+  last_finished_at: string | null;
+  last_status: string | null;
+  changed_by_id: number | null;
+  changed_by_user: AppUser | null;
+  created_at: string;
+  updated_at: string | null;
+}
+
+export interface ScheduledJobRun {
+  id: number;
+  job_id: number;
+  trigger_type: string;
+  status: string;
+  attempt: number;
+  correlation_id: string;
+  summary: string;
+  error_text: string;
+  metrics_json: string;
+  started_at: string;
+  finished_at: string | null;
+  duration_ms: number | null;
+  changed_by_id: number | null;
+  changed_by_user: AppUser | null;
+  created_at: string;
+  updated_at: string | null;
+}
+
 export interface Person {
   id: number;
   first_name: string;
@@ -363,6 +401,23 @@ export const adminAccessApi = {
     request<AccessControlMatrix>(`/admin/access/roles/${encodeURIComponent(roleKey)}`, {
       method: 'PUT',
       body: JSON.stringify({ permission_keys: permissionKeys }),
+    }),
+};
+
+export const adminSchedulerApi = {
+  listScheduledJobs: () =>
+    request<ScheduledJob[]>('/admin/scheduler/jobs'),
+  listScheduledJobRuns: (jobKey: string, limit = 50) =>
+    request<ScheduledJobRun[]>(`/admin/scheduler/jobs/${encodeURIComponent(jobKey)}/runs?limit=${limit}`),
+  triggerScheduledJob: (jobKey: string, correlationId?: string) =>
+    request<ScheduledJobRun>(`/admin/scheduler/jobs/${encodeURIComponent(jobKey)}/trigger`, {
+      method: 'POST',
+      body: JSON.stringify({ correlation_id: correlationId ?? null }),
+    }),
+  setScheduledJobEnabled: (jobKey: string, isEnabled: boolean) =>
+    request<ScheduledJob>(`/admin/scheduler/jobs/${encodeURIComponent(jobKey)}/enabled`, {
+      method: 'PUT',
+      body: JSON.stringify({ is_enabled: isEnabled }),
     }),
 };
 

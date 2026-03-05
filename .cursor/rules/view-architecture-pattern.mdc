@@ -47,6 +47,7 @@ For any new complex view (like patients or colloquiums), follow this structure b
   - Centralize repeated display formatting logic (for example dates/times, empty placeholders, labels) in shared utilities under `frontend/src/views/layout/` (or another shared location) instead of duplicating inline logic in components.
   - For date rendering in view output, use shared formatters (for example `dateFormat.ts`) and keep formatting consistent across list/detail/header sections.
   - Do not use ad-hoc `toLocaleDateString()`/manual slicing in components when a shared formatter exists.
+  - For episode references, use shared helpers from `episodeDisplay.ts` (`formatDefaultEpisodeReference`, `formatEpisodeDisplayName`, `formatTaskEpisodeReference`) and pass available patient context (`name`, `birthDate`, `pid`) when present.
 - **Editable panel standard**:
   - For data sections in detail views, default to explicit **Edit / Save / Cancel** behavior.
   - Fields are read-only until Edit is clicked; Cancel restores the original data.
@@ -60,6 +61,14 @@ For any new complex view (like patients or colloquiums), follow this structure b
   - Destructive row deletes must require explicit confirmation before execution.
   - Reuse shared row-action components (for example `InlineDeleteActions`) for edit/delete/confirm UI instead of duplicating per-table markup.
   - Keep confirmation wording and Yes/No controls consistent across tables.
+  - For expandable dropdown rows, use the established table pattern:
+    - main row action remains in `open-col` with `open-btn` arrow for opening the main entity,
+    - expansion toggle uses `link-btn` and renders `count + ▲/▼` in the main row,
+    - expanded content renders as a sibling `<tr className="contact-row">` with `<td colSpan=...><div className="contact-section">...</div></td>`,
+    - expanded rows should include the same `open-btn` arrow in the first column when navigating to linked entities (for example episode open),
+    - loading/empty states in expanded content must use translated text and existing `contact-empty` style.
+  - Dropdown/secondary datasets in tables must load lazily and be cached in the corresponding `use*ListViewModel` state (for example `byId` map + loading map), not fetched repeatedly on each toggle.
+  - List screens with filtering should use the standard `.filter-bar` pattern above the table and provide an explicit filtered-empty message distinct from the unfiltered empty state.
 - **Task UI standardization**:
   - Treat `frontend/src/views/tasks/TaskBoard.tsx` as the default task/task-group UI component for list/edit/action flows.
   - Before creating a custom task list/panel, first try to integrate `TaskBoard` using `criteria`, mode flags (`hideFilters`, `hideAddButton`, `includeClosedTasks`, `showGroupHeadingsDefault`) and callbacks.

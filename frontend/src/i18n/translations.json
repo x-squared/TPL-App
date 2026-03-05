@@ -285,6 +285,16 @@
             "de": "Protokollkonfiguration"
           }
         },
+        "scheduler": {
+          "label": {
+            "en": "Admin tab name: Scheduler",
+            "de": "Admin Tab: Scheduler"
+          },
+          "text": {
+            "en": "Scheduler",
+            "de": "Scheduler"
+          }
+        },
         "translations": {
           "label": {
             "en": "Admin tab name: Translations",
@@ -325,6 +335,16 @@
         },
         "text": {
           "de": "Zeitprotokoll"
+        }
+      },
+      "completion": {
+        "label": {
+          "en": "Coordination detail tab: Completion",
+          "de": "Koordination Detail Tab: Abschluss"
+        },
+        "text": {
+          "en": "Completion",
+          "de": "Abschluss"
         }
       }
     }
@@ -988,6 +1008,28 @@
         "text": {
           "en": "–",
           "de": "–"
+        }
+      }
+    },
+    "references": {
+      "coordination": {
+        "label": {
+          "en": "Task board reference label: coordination",
+          "de": "Aufgabenboard Referenzbezeichnung: Koordination"
+        },
+        "text": {
+          "en": "Coordination",
+          "de": "Koordination"
+        }
+      },
+      "organ": {
+        "label": {
+          "en": "Task board reference label: organ",
+          "de": "Aufgabenboard Referenzbezeichnung: Organ"
+        },
+        "text": {
+          "en": "Organ",
+          "de": "Organ"
         }
       }
     },
@@ -1683,6 +1725,212 @@
         }
       }
     },
+    "completion": {
+      "title": {
+        "label": {
+          "en": "Coordination completion section title",
+          "de": "Koordination Abschluss Abschnitt Titel"
+        },
+        "text": {
+          "en": "Completion",
+          "de": "Abschluss"
+        }
+      },
+      "confirmAreaTitle": {
+        "label": {
+          "en": "Coordination completion confirmation area title",
+          "de": "Koordination Abschluss Bestaetigungsbereich Titel"
+        },
+        "text": {
+          "en": "Confirm completion",
+          "de": "Abschluss bestaetigen"
+        }
+      },
+      "confirmed": {
+        "label": {
+          "en": "Coordination completion confirmed state text",
+          "de": "Koordination Abschluss bestaetigt Status Text"
+        },
+        "text": {
+          "en": "Coordination is confirmed as completed.",
+          "de": "Koordination ist als abgeschlossen bestaetigt."
+        }
+      },
+      "notConfirmed": {
+        "label": {
+          "en": "Coordination completion not confirmed state text",
+          "de": "Koordination Abschluss nicht bestaetigt Status Text"
+        },
+        "text": {
+          "en": "Coordination is not yet confirmed as completed.",
+          "de": "Koordination ist noch nicht als abgeschlossen bestaetigt."
+        }
+      },
+      "confirmedMeta": {
+        "label": {
+          "en": "Coordination completion confirmation metadata text",
+          "de": "Koordination Abschluss Bestaetigungsmetadaten Text"
+        },
+        "text": {
+          "en": "Confirmed by {user} at {time}",
+          "de": "Bestaetigt von {user} am {time}"
+        }
+      },
+      "commentPlaceholder": {
+        "label": {
+          "en": "Coordination completion comment placeholder",
+          "de": "Koordination Abschluss Kommentar Platzhalter"
+        },
+        "text": {
+          "en": "Add completion comment",
+          "de": "Abschlusskommentar erfassen"
+        }
+      },
+      "confirmAction": {
+        "label": {
+          "en": "Coordination completion confirm action button",
+          "de": "Koordination Abschluss Bestaetigen Aktion"
+        },
+        "text": {
+          "en": "Confirm completion",
+          "de": "Abschluss bestaetigen"
+        }
+      },
+      "confirming": {
+        "label": {
+          "en": "Coordination completion confirming button text",
+          "de": "Koordination Abschluss Bestaetigen laeuft Text"
+        },
+        "text": {
+          "en": "Confirming...",
+          "de": "Bestaetige..."
+        }
+      },
+      "block1Title": {
+        "label": {
+          "en": "Coordination completion block 1 title",
+          "de": "Koordination Abschluss Block 1 Titel"
+        },
+        "text": {
+          "en": "Coordination final processing block 1",
+          "de": "Koordination Abschlussbearbeitung Block 1"
+        }
+      },
+      "block2Title": {
+        "label": {
+          "en": "Coordination completion block 2 title",
+          "de": "Koordination Abschluss Block 2 Titel"
+        },
+        "text": {
+          "en": "Coordination final processing block 2",
+          "de": "Koordination Abschlussbearbeitung Block 2"
+        }
+      },
+      "block1DueHint": {
+        "label": {
+          "en": "Coordination completion block 1 due hint",
+          "de": "Koordination Abschluss Block 1 Faelligkeit Hinweis"
+        },
+        "text": {
+          "en": "due within 1 day",
+          "de": "faellig innerhalb 1 Tag"
+        }
+      },
+      "block2DueHint": {
+        "label": {
+          "en": "Coordination completion block 2 due hint",
+          "de": "Koordination Abschluss Block 2 Faelligkeit Hinweis"
+        },
+        "text": {
+          "en": "due within 7 days",
+          "de": "faellig innerhalb 7 Tage"
+        }
+      },
+      "allTasksTitle": {
+        "label": {
+          "en": "Coordination completion all tasks title",
+          "de": "Koordination Abschluss Alle Aufgaben Titel"
+        },
+        "text": {
+          "en": "All coordination tasks",
+          "de": "Alle Aufgaben dieser Koordination"
+        }
+      },
+      "noTasks": {
+        "label": {
+          "en": "Coordination completion no tasks text",
+          "de": "Koordination Abschluss Keine Aufgaben Text"
+        },
+        "text": {
+          "en": "No tasks found.",
+          "de": "Keine Aufgaben gefunden."
+        }
+      },
+      "columns": {
+        "task": {
+          "label": {
+            "en": "Coordination completion tasks table column task",
+            "de": "Koordination Abschluss Aufgaben Tabelle Spalte Aufgabe"
+          },
+          "text": {
+            "en": "Task",
+            "de": "Aufgabe"
+          }
+        },
+        "due": {
+          "label": {
+            "en": "Coordination completion tasks table column due",
+            "de": "Koordination Abschluss Aufgaben Tabelle Spalte Faellig"
+          },
+          "text": {
+            "en": "Due",
+            "de": "Faellig"
+          }
+        },
+        "status": {
+          "label": {
+            "en": "Coordination completion tasks table column status",
+            "de": "Koordination Abschluss Aufgaben Tabelle Spalte Status"
+          },
+          "text": {
+            "en": "Status",
+            "de": "Status"
+          }
+        },
+        "assignedTo": {
+          "label": {
+            "en": "Coordination completion tasks table column assigned to",
+            "de": "Koordination Abschluss Aufgaben Tabelle Spalte Zugewiesen an"
+          },
+          "text": {
+            "en": "Assigned to",
+            "de": "Zugewiesen an"
+          }
+        },
+        "comment": {
+          "label": {
+            "en": "Coordination completion tasks table column comment",
+            "de": "Koordination Abschluss Aufgaben Tabelle Spalte Kommentar"
+          },
+          "text": {
+            "en": "Comment",
+            "de": "Kommentar"
+          }
+        }
+      },
+      "errors": {
+        "confirm": {
+          "label": {
+            "en": "Coordination completion confirmation error text",
+            "de": "Koordination Abschluss Bestaetigung Fehlertext"
+          },
+          "text": {
+            "en": "Failed to confirm coordination completion.",
+            "de": "Koordinationsabschluss konnte nicht bestaetigt werden."
+          }
+        }
+      }
+    },
     "table": {
       "pid": {
         "label": {
@@ -2097,6 +2345,16 @@
         "de": "Keine Koordinationen gefunden."
       }
     },
+    "emptyFiltered": {
+      "label": {
+        "en": "Coordinations list empty state while filtering",
+        "de": "Koordinationenliste leer bei Filterung"
+      },
+      "text": {
+        "en": "No coordinations match the filter.",
+        "de": "Keine Koordinationen entsprechen dem Filter."
+      }
+    },
     "entity": {
       "label": {
         "en": "Coordination entity label",
@@ -2252,6 +2510,16 @@
           "de": "SWTPL Nr"
         }
       },
+      "assignedEpisodes": {
+        "label": {
+          "en": "Coordinations table header assigned episodes",
+          "de": "Koordinationen Tabelle Kopf Zugeordnete Episoden"
+        },
+        "text": {
+          "en": "Assigned episodes",
+          "de": "Zugeordnete Episoden"
+        }
+      },
       "organ": {
         "label": {
           "en": "Coordinations table header organ",
@@ -2260,6 +2528,80 @@
         "text": {
           "en": "Organ",
           "de": "Organ"
+        }
+      }
+    },
+    "episodes": {
+      "show": {
+        "label": {
+          "en": "Coordinations assigned episodes action show",
+          "de": "Koordinationen Zugeordnete Episoden Aktion Anzeigen"
+        },
+        "text": {
+          "en": "Show",
+          "de": "Anzeigen"
+        }
+      },
+      "hide": {
+        "label": {
+          "en": "Coordinations assigned episodes action hide",
+          "de": "Koordinationen Zugeordnete Episoden Aktion Ausblenden"
+        },
+        "text": {
+          "en": "Hide",
+          "de": "Ausblenden"
+        }
+      },
+      "loading": {
+        "label": {
+          "en": "Coordinations assigned episodes loading state",
+          "de": "Koordinationen Zugeordnete Episoden Ladezustand"
+        },
+        "text": {
+          "en": "Loading assigned episodes...",
+          "de": "Zugeordnete Episoden werden geladen..."
+        }
+      },
+      "empty": {
+        "label": {
+          "en": "Coordinations assigned episodes empty state",
+          "de": "Koordinationen Zugeordnete Episoden Leerzustand"
+        },
+        "text": {
+          "en": "No assigned episodes.",
+          "de": "Keine zugeordneten Episoden."
+        }
+      },
+      "toggle": {
+        "label": {
+          "en": "Coordinations assigned episodes toggle action",
+          "de": "Koordinationen Zugeordnete Episoden Umschalten Aktion"
+        },
+        "text": {
+          "en": "Toggle assigned episodes",
+          "de": "Zugeordnete Episoden umschalten"
+        }
+      },
+      "assignedOrgans": {
+        "label": {
+          "en": "Coordinations assigned episodes table header assigned organs",
+          "de": "Koordinationen Zugeordnete Episoden Tabelle Kopf Zugeordnete Organe"
+        },
+        "text": {
+          "en": "Assigned organs",
+          "de": "Zugeordnete Organe"
+        }
+      }
+    },
+    "filters": {
+      "searchPlaceholder": {
+        "label": {
+          "en": "Coordinations filter search placeholder",
+          "de": "Koordinationen Filter Suche Platzhalter"
+        },
+        "text": {
+          "en": "Search across coordinations",
+          "de": "Koordinationen durchsuchen"
         }
       }
     },
@@ -4709,6 +5051,88 @@
           "en": "Episode process tabs",
           "de": "Episode Prozess-Tabs"
         }
+      },
+      "progressDateLabel": {
+        "label": {
+          "en": "Episode workflow process date label",
+          "de": "Episode Workflow Prozessdatum Label"
+        },
+        "text": {
+          "en": "Process date",
+          "de": "Prozessdatum"
+        }
+      },
+      "editLocked": {
+        "label": {
+          "en": "Episode process edit locked info",
+          "de": "Episode Prozess Bearbeitung gesperrt Info"
+        },
+        "text": {
+          "en": "Editing is only available for the active process phase.",
+          "de": "Bearbeitung ist nur in der aktuell aktiven Prozessphase möglich."
+        }
+      },
+      "actions": {
+        "startListing": {
+          "label": {
+            "en": "Episode workflow start listing action",
+            "de": "Episode Workflow Listung starten Aktion"
+          },
+          "text": {
+            "en": "Start listing",
+            "de": "Listung starten"
+          }
+        },
+        "closeEpisode": {
+          "label": {
+            "en": "Episode workflow close action",
+            "de": "Episode Workflow Abschliessen Aktion"
+          },
+          "text": {
+            "en": "Close episode",
+            "de": "Episode abschliessen"
+          }
+        },
+        "rejectEpisode": {
+          "label": {
+            "en": "Episode workflow reject action",
+            "de": "Episode Workflow Ablehnen Aktion"
+          },
+          "text": {
+            "en": "Reject episode",
+            "de": "Episode ablehnen"
+          }
+        },
+        "cancelEpisode": {
+          "label": {
+            "en": "Episode workflow cancel action",
+            "de": "Episode Workflow Stornieren Aktion"
+          },
+          "text": {
+            "en": "Cancel episode",
+            "de": "Episode stornieren"
+          }
+        },
+        "rejectPrompt": {
+          "label": {
+            "en": "Episode workflow reject reason prompt",
+            "de": "Episode Workflow Ablehnungsgrund Prompt"
+          },
+          "text": {
+            "en": "Enter rejection reason (optional):",
+            "de": "Ablehnungsgrund eingeben (optional):"
+          }
+        },
+        "cancelPrompt": {
+          "label": {
+            "en": "Episode workflow cancel reason prompt",
+            "de": "Episode Workflow Stornierungsgrund Prompt"
+          },
+          "text": {
+            "en": "Enter cancellation reason (optional):",
+            "de": "Stornierungsgrund eingeben (optional):"
+          }
+        }
       }
     },
     "favorites": {
@@ -5677,6 +6101,16 @@
             "de": "Beschaffungs-/Protokolldatenstrukturen konfigurieren, z. B. gruppierte Felder, Scopes und Protokoll-Aufgabengruppenauswahl pro Organ."
           }
         },
+        "scheduler": {
+          "label": {
+            "en": "Admin overview tab explanation: scheduler",
+            "de": "Admin Uebersicht Tab-Erklaerung: Scheduler"
+          },
+          "text": {
+            "en": "Monitor scheduled jobs, inspect run history, and run or pause jobs manually.",
+            "de": "Geplante Jobs ueberwachen, Laufhistorie pruefen sowie Jobs manuell starten oder pausieren."
+          }
+        },
         "translations": {
           "label": {
             "en": "Admin overview tab explanation: translations",
@@ -5685,6 +6119,270 @@
           "text": {
             "en": "Edit UI text translations by locale, search keys/text, and review missing translations.",
             "de": "UI-Texte pro Sprache bearbeiten, Schluessel/Texte durchsuchen und fehlende Uebersetzungen pruefen."
+          }
+        }
+      }
+    },
+    "scheduler": {
+      "loading": {
+        "label": {
+          "en": "Admin scheduler loading text",
+          "de": "Admin Scheduler Ladehinweis"
+        },
+        "text": {
+          "en": "Loading scheduler jobs...",
+          "de": "Scheduler-Jobs werden geladen..."
+        }
+      },
+      "status": {
+        "triggered": {
+          "label": {
+            "en": "Admin scheduler status: triggered",
+            "de": "Admin Scheduler Status: gestartet"
+          },
+          "text": {
+            "en": "Job triggered successfully.",
+            "de": "Job erfolgreich gestartet."
+          }
+        },
+        "enabled": {
+          "label": {
+            "en": "Admin scheduler status: enabled",
+            "de": "Admin Scheduler Status: aktiviert"
+          },
+          "text": {
+            "en": "Job enabled.",
+            "de": "Job aktiviert."
+          }
+        },
+        "paused": {
+          "label": {
+            "en": "Admin scheduler status: paused",
+            "de": "Admin Scheduler Status: pausiert"
+          },
+          "text": {
+            "en": "Job paused.",
+            "de": "Job pausiert."
+          }
+        }
+      },
+      "jobs": {
+        "title": {
+          "label": {
+            "en": "Admin scheduler section title: jobs",
+            "de": "Admin Scheduler Abschnittstitel: Jobs"
+          },
+          "text": {
+            "en": "Jobs",
+            "de": "Jobs"
+          }
+        },
+        "columns": {
+          "key": {
+            "label": {
+              "en": "Admin scheduler jobs column: key",
+              "de": "Admin Scheduler Jobs Spalte: Schluessel"
+            },
+            "text": {
+              "en": "Key",
+              "de": "Schluessel"
+            }
+          },
+          "name": {
+            "label": {
+              "en": "Admin scheduler jobs column: name",
+              "de": "Admin Scheduler Jobs Spalte: Name"
+            },
+            "text": {
+              "en": "Name",
+              "de": "Name"
+            }
+          },
+          "enabled": {
+            "label": {
+              "en": "Admin scheduler jobs column: enabled",
+              "de": "Admin Scheduler Jobs Spalte: Aktiv"
+            },
+            "text": {
+              "en": "Enabled",
+              "de": "Aktiv"
+            }
+          },
+          "interval": {
+            "label": {
+              "en": "Admin scheduler jobs column: interval",
+              "de": "Admin Scheduler Jobs Spalte: Intervall"
+            },
+            "text": {
+              "en": "Interval (s)",
+              "de": "Intervall (s)"
+            }
+          },
+          "nextRun": {
+            "label": {
+              "en": "Admin scheduler jobs column: next run",
+              "de": "Admin Scheduler Jobs Spalte: Naechster Lauf"
+            },
+            "text": {
+              "en": "Next Run",
+              "de": "Naechster Lauf"
+            }
+          },
+          "lastStatus": {
+            "label": {
+              "en": "Admin scheduler jobs column: last status",
+              "de": "Admin Scheduler Jobs Spalte: Letzter Status"
+            },
+            "text": {
+              "en": "Last Status",
+              "de": "Letzter Status"
+            }
+          }
+        },
+        "empty": {
+          "label": {
+            "en": "Admin scheduler jobs empty state",
+            "de": "Admin Scheduler Jobs Leerzustand"
+          },
+          "text": {
+            "en": "No scheduler jobs configured.",
+            "de": "Keine Scheduler-Jobs konfiguriert."
+          }
+        }
+      },
+      "actions": {
+        "runNow": {
+          "label": {
+            "en": "Admin scheduler action button: run now",
+            "de": "Admin Scheduler Aktion: Jetzt ausfuehren"
+          },
+          "text": {
+            "en": "Run now",
+            "de": "Jetzt ausfuehren"
+          }
+        },
+        "pause": {
+          "label": {
+            "en": "Admin scheduler action button: pause",
+            "de": "Admin Scheduler Aktion: Pausieren"
+          },
+          "text": {
+            "en": "Pause",
+            "de": "Pausieren"
+          }
+        },
+        "enable": {
+          "label": {
+            "en": "Admin scheduler action button: enable",
+            "de": "Admin Scheduler Aktion: Aktivieren"
+          },
+          "text": {
+            "en": "Enable",
+            "de": "Aktivieren"
+          }
+        }
+      },
+      "runs": {
+        "title": {
+          "label": {
+            "en": "Admin scheduler section title: runs",
+            "de": "Admin Scheduler Abschnittstitel: Laeufe"
+          },
+          "text": {
+            "en": "Runs",
+            "de": "Laeufe"
+          }
+        },
+        "forJob": {
+          "label": {
+            "en": "Admin scheduler runs label: for job",
+            "de": "Admin Scheduler Laeufe Hinweis: fuer Job"
+          },
+          "text": {
+            "en": "Showing runs for",
+            "de": "Zeige Laeufe fuer"
+          }
+        },
+        "columns": {
+          "startedAt": {
+            "label": {
+              "en": "Admin scheduler runs column: started at",
+              "de": "Admin Scheduler Laeufe Spalte: Gestartet um"
+            },
+            "text": {
+              "en": "Started At",
+              "de": "Gestartet um"
+            }
+          },
+          "finishedAt": {
+            "label": {
+              "en": "Admin scheduler runs column: finished at",
+              "de": "Admin Scheduler Laeufe Spalte: Beendet um"
+            },
+            "text": {
+              "en": "Finished At",
+              "de": "Beendet um"
+            }
+          },
+          "status": {
+            "label": {
+              "en": "Admin scheduler runs column: status",
+              "de": "Admin Scheduler Laeufe Spalte: Status"
+            },
+            "text": {
+              "en": "Status",
+              "de": "Status"
+            }
+          },
+          "trigger": {
+            "label": {
+              "en": "Admin scheduler runs column: trigger",
+              "de": "Admin Scheduler Laeufe Spalte: Ausloeser"
+            },
+            "text": {
+              "en": "Trigger",
+              "de": "Ausloeser"
+            }
+          },
+          "duration": {
+            "label": {
+              "en": "Admin scheduler runs column: duration",
+              "de": "Admin Scheduler Laeufe Spalte: Dauer"
+            },
+            "text": {
+              "en": "Duration (ms)",
+              "de": "Dauer (ms)"
+            }
+          },
+          "summary": {
+            "label": {
+              "en": "Admin scheduler runs column: summary",
+              "de": "Admin Scheduler Laeufe Spalte: Zusammenfassung"
+            },
+            "text": {
+              "en": "Summary",
+              "de": "Zusammenfassung"
+            }
+          },
+          "metrics": {
+            "label": {
+              "en": "Admin scheduler runs column: metrics",
+              "de": "Admin Scheduler Laeufe Spalte: Metriken"
+            },
+            "text": {
+              "en": "Metrics",
+              "de": "Metriken"
+            }
+          }
+        },
+        "empty": {
+          "label": {
+            "en": "Admin scheduler runs empty state",
+            "de": "Admin Scheduler Laeufe Leerzustand"
+          },
+          "text": {
+            "en": "No job runs available yet.",
+            "de": "Noch keine Job-Laeufe verfuegbar."
           }
         }
       }

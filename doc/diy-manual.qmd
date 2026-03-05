@@ -12,6 +12,7 @@ This manual is intentionally a practical cookbook. Full API/option references li
 - Database tool CLI options (`db_schema`, `db_data`, `db_admin`): `doc/database-manual.qmd`
 - Seed categories/profiles/seed CLI options: `doc/seeding-manual.qmd`
 - i18n architecture and translation operations: `doc/i18n-manual.qmd`
+- Scheduler architecture and operations: `doc/scheduler-manual.qmd`
 
 Use this DIY file for runnable sequences and common operational flows.
 
@@ -207,6 +208,49 @@ python -m qa.spec_tools.run_all_tests
 cd /Users/stephan/Workspace/TPL-App
 python -m qa.spec_tools.run_suggestions --report qa/reports/latest-spec-report.md
 python -m qa.spec_tools.run_suggestions --report qa/reports/latest-partner-report.md
+```
+
+### 12) Scheduler quick operations (admin API)
+
+List jobs:
+
+```{bash}
+curl -s http://localhost:8000/api/admin/scheduler/jobs \
+  -H "Authorization: Bearer <ADMIN_TOKEN>"
+```
+
+List recent runs for one job:
+
+```{bash}
+curl -s "http://localhost:8000/api/admin/scheduler/jobs/coordination.explantation_24h_completeness_check/runs?limit=20" \
+  -H "Authorization: Bearer <ADMIN_TOKEN>"
+```
+
+Trigger job manually:
+
+```{bash}
+curl -s -X POST http://localhost:8000/api/admin/scheduler/jobs/coordination.explantation_24h_completeness_check/trigger \
+  -H "Authorization: Bearer <ADMIN_TOKEN>" \
+  -H "Content-Type: application/json" \
+  -d '{"correlation_id":"manual-dev-run"}'
+```
+
+Enable job:
+
+```{bash}
+curl -s -X PUT http://localhost:8000/api/admin/scheduler/jobs/coordination.explantation_24h_completeness_check/enabled \
+  -H "Authorization: Bearer <ADMIN_TOKEN>" \
+  -H "Content-Type: application/json" \
+  -d '{"is_enabled":true}'
+```
+
+Pause job:
+
+```{bash}
+curl -s -X PUT http://localhost:8000/api/admin/scheduler/jobs/coordination.explantation_24h_completeness_check/enabled \
+  -H "Authorization: Bearer <ADMIN_TOKEN>" \
+  -H "Content-Type: application/json" \
+  -d '{"is_enabled":false}'
 ```
 
 ------------------------------------------------------------------------

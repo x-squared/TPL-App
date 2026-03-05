@@ -6,6 +6,7 @@ For detailed seeding behavior (core/sample/test data), see `doc/seeding-manual.q
 For specification-to-test workflow, see `doc/specification-manual.qmd`.
 For end-to-end security architecture and controls, see `doc/security-manual.qmd`.
 For i18n architecture and translation runtime/admin flows, see `doc/i18n-manual.qmd`.
+For scheduler architecture and operations, see `doc/scheduler-manual.qmd`.
 
 ## 1) What "server" means in this project
 
@@ -97,6 +98,20 @@ Server endpoints:
 - Swagger UI: `http://localhost:8000/docs`
 - Translation runtime overrides (authenticated read): `GET /api/translations/overrides?locale=<key>`
 - Translation admin management (admin only): `GET/PUT /api/admin/translations/?locale=<key>`
+- Coordination rejected-workflow clear command: `POST /api/coordinations/{coordination_id}/procurement-flex/organs/{organ_id}/rejected-workflow/clear`
+- Coordination completion state (ensures completion blocks/tasks): `GET /api/coordinations/{coordination_id}/completion`
+- Coordination completion confirm command: `POST /api/coordinations/{coordination_id}/completion/confirm`
+- Episode workflow start-listing command: `POST /api/patients/{patient_id}/episodes/{episode_id}/workflow/start-listing`
+- Episode workflow close command: `POST /api/patients/{patient_id}/episodes/{episode_id}/workflow/close`
+- Episode workflow reject command: `POST /api/patients/{patient_id}/episodes/{episode_id}/workflow/reject`
+- Episode workflow cancel command: `POST /api/patients/{patient_id}/episodes/{episode_id}/workflow/cancel`
+- Coordination clock state: `GET /api/coordinations/{coordination_id}/time-logs/clock-state`
+- Coordination clock start command: `POST /api/coordinations/{coordination_id}/time-logs/clock/start`
+- Coordination clock stop command: `POST /api/coordinations/{coordination_id}/time-logs/clock/stop`
+- Scheduler jobs list: `GET /api/admin/scheduler/jobs`
+- Scheduler run history: `GET /api/admin/scheduler/jobs/{job_key}/runs`
+- Scheduler manual trigger: `POST /api/admin/scheduler/jobs/{job_key}/trigger`
+- Scheduler enable/disable: `PUT /api/admin/scheduler/jobs/{job_key}/enabled`
 
 ## 6) Typical startup examples
 
@@ -158,6 +173,13 @@ If running with `--reload`, code changes trigger automatic restart.
   - optional preflight check: `python -m app.db_schema --mode verify --check-level strict --env <ENV>`
   - optional procurement runtime backfill: `python -m app.db_data --mode migrate-procurement-runtime --env <ENV>`
 - Startup does not run seeding. Use DB/seed scripts explicitly when data refresh is required.
+- Episode workflow transition policy:
+  - New episodes start in Evaluation.
+  - Listing starts only via explicit workflow command.
+  - Assigning an episode to a coordination transitions it to coordination allocation (Transplantation phase + allocated status).
+  - Setting `tpl_date` on a coordination-episode transitions it to transplanted.
+  - Confirming coordination completion transitions linked episodes to Follow-Up.
+  - Generic `PATCH /episodes/{id}` edits are phase-scoped; terminal state transitions must use workflow commands.
 
 For all seed design and profile details, always refer to:
 

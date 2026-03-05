@@ -6,6 +6,7 @@ interface EpisodeChoice {
   episodeId: number;
   patientId: number;
   fallNr: string;
+  statusReference: string;
   start: string | null;
   end: string | null;
 }
@@ -100,6 +101,7 @@ export default function EpisodePickerDialog({
                   <th>{t('patients.table.pid', 'PID')}</th>
                   <th>{t('patients.table.dateOfBirth', 'Date of Birth')}</th>
                   <th>{t('episodePicker.episode', 'Episode')}</th>
+                  <th>{t('patients.episodes.status', 'Status')}</th>
                   <th>{t('patients.episodes.start', 'Start')}</th>
                   <th>{t('patients.episodes.end', 'End')}</th>
                 </tr>
@@ -127,6 +129,7 @@ export default function EpisodePickerDialog({
                       <td>{idx === 0 ? patient.pid : ''}</td>
                       <td>{idx === 0 ? formatDob(patient.date_of_birth) : ''}</td>
                       <td>{episode.fallNr || `#${episode.episodeId}`}</td>
+                      <td>{episode.statusReference}</td>
                       <td>{formatDate(episode.start)}</td>
                       <td>{formatDate(episode.end)}</td>
                     </tr>

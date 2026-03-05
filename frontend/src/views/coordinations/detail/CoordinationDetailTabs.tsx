@@ -1,11 +1,12 @@
 import type React from 'react';
 import { useEffect, useMemo, useState } from 'react';
-import type { Code, Coordination, CoordinationDonor, CoordinationEpisode, CoordinationOrigin, CoordinationProcurementFlex, Patient } from '../../../api';
+import type { Code, Coordination, CoordinationCompletionState, CoordinationDonor, CoordinationEpisode, CoordinationOrigin, CoordinationProcurementFlex, Patient } from '../../../api';
 import { ApiError, toUserErrorMessage } from '../../../api/error';
 import { translateCodeLabel } from '../../../i18n/codeTranslations';
 import { useI18n } from '../../../i18n/i18n';
 import { formatDateDdMmYyyy } from '../../layout/dateFormat';
 import CoordinationBasicDataSection from './CoordinationBasicDataSection';
+import CoordinationCompletionSection from './CoordinationCompletionSection';
 import CoordinationDonorDataSection from './CoordinationDonorDataSection';
 import CoordinationHospitalsSection from './CoordinationHospitalsSection';
 import CoordinationProtocolOverviewSection from './CoordinationProtocolOverviewSection';
@@ -76,6 +77,9 @@ interface Props {
   onRefresh: () => Promise<void>;
   onRefreshAssignments: () => Promise<void>;
   onOpenPatientEpisode: (patientId: number, episodeId: number) => void;
+  completionState: CoordinationCompletionState | null;
+  onRefreshCompletion: () => Promise<void>;
+  onConfirmCompletion: (comment: string) => Promise<void>;
 }
 
 const formatElapsed = (sec: number): string => {
@@ -129,6 +133,9 @@ export default function CoordinationDetailTabs({
   onRefresh,
   onRefreshAssignments,
   onOpenPatientEpisode,
+  completionState,
+  onRefreshCompletion,
+  onConfirmCompletion,
 }: Props) {
   const { t } = useI18n();
   const initialCoreDraft = useMemo(
@@ -498,25 +505,35 @@ export default function CoordinationDetailTabs({
       );
     }
 
+    if (tab === 'time-log') {
+      return (
+        <CoordinationTimeLogSection
+          timeLogs={timeLogs}
+          users={users}
+          addingLog={addingLog}
+          editingLogId={editingLogId}
+          logDraft={logDraft}
+          setLogDraft={setLogDraft}
+          logError={logError}
+          onOpenAddLog={onOpenAddLog}
+          onOpenEditLog={onOpenEditLog}
+          onCloseLogEditor={onCloseLogEditor}
+          onSaveLogDraft={onSaveLogDraft}
+          onDeleteLog={onDeleteLog}
+          confirmDeleteLogId={confirmDeleteLogId}
+          setConfirmDeleteLogId={setConfirmDeleteLogId}
+          hasEditorOpen={hasEditorOpen || running}
+          totalsByUser={totalsByUser}
+          formatElapsed={formatElapsed}
+        />
+      );
+    }
+
     return (
-      <CoordinationTimeLogSection
-        timeLogs={timeLogs}
-        users={users}
-        addingLog={addingLog}
-        editingLogId={editingLogId}
-        logDraft={logDraft}
-        setLogDraft={setLogDraft}
-        logError={logError}
-        onOpenAddLog={onOpenAddLog}
-        onOpenEditLog={onOpenEditLog}
-        onCloseLogEditor={onCloseLogEditor}
-        onSaveLogDraft={onSaveLogDraft}
-        onDeleteLog={onDeleteLog}
-        confirmDeleteLogId={confirmDeleteLogId}
-        setConfirmDeleteLogId={setConfirmDeleteLogId}
-        hasEditorOpen={hasEditorOpen || running}
-        totalsByUser={totalsByUser}
-        formatElapsed={formatElapsed}
+      <CoordinationCompletionSection
+        completionState={completionState}
+        onRefresh={onRefreshCompletion}
+        onConfirm={onConfirmCompletion}
       />
     );
   })();
@@ -532,6 +549,9 @@ export default function CoordinationDetailTabs({
         </button>
         <button className={`detail-tab ${tab === 'protocol' ? 'active' : ''}`} onClick={() => setTab('protocol')}>
           {t('coordination.tabs.protocol', 'Protocol')}
+        </button>
+        <button className={`detail-tab ${tab === 'completion' ? 'active' : ''}`} onClick={() => setTab('completion')}>
+          {t('coordination.tabs.completion', 'Completion')}
         </button>
         <button className={`detail-tab ${tab === 'time-log' ? 'active' : ''}`} onClick={() => setTab('time-log')}>
           {t('coordination.tabs.timeLog', 'Time Log')}

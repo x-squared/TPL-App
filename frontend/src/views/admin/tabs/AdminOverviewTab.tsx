@@ -14,6 +14,7 @@ export default function AdminOverviewTab() {
         <p><strong>{t('app.admin.tabs.peopleTeams', 'People & Teams')}:</strong> {t('admin.overview.tabs.peopleTeams', 'Create and update persons and teams, maintain memberships, and keep assignment data up to date for protocol/task workflows.')}</p>
         <p><strong>{t('app.admin.tabs.taskTemplates', 'Task Templates')}:</strong> {t('admin.overview.tabs.taskTemplates', 'Manage protocol task group templates and task templates, including order, defaults, and activation state.')}</p>
         <p><strong>{t('app.admin.tabs.protocolConfig', 'Protocol Config')}:</strong> {t('admin.overview.tabs.protocolConfig', 'Configure procurement/protocol data structures such as grouped fields, scopes, and protocol task-group selections per organ.')}</p>
+        <p><strong>{t('app.admin.tabs.scheduler', 'Scheduler')}:</strong> {t('admin.overview.tabs.scheduler', 'Monitor scheduled jobs, inspect run history, and run or pause jobs manually.')}</p>
         <p><strong>{t('app.admin.tabs.translations', 'Translations')}:</strong> {t('admin.overview.tabs.translations', 'Edit UI text translations by locale, search keys/text, and review missing translations.')}</p>
       </div>
     </section>

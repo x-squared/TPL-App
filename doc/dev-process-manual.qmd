@@ -1,0 +1,181 @@
+# Dev Process Manual
+
+Target workflow for delivering larger features from specification to automated deployment on DEV servers.
+
+This manual describes the intended process model (future-state), not only the current minimum workflow.
+
+## Goals
+
+- Keep one business specification source, while implementation can span backend, frontend, seed, and docs.
+- Split large work into independent slices that can run in parallel.
+- Use AI agents as execution accelerators with explicit handoff contracts.
+- Keep all code changes traceable via Git and quality gates.
+- Deploy to DEV automatically after passing required checks.
+
+## Process Overview
+
+1. Specification and acceptance criteria
+2. Work breakdown and parallel planning
+3. Implementation in short-lived branches
+4. Continuous verification (local + CI)
+5. Pull request review and merge
+6. Automatic deployment to DEV
+7. Post-deploy verification and feedback loop
+
+## 1) Specification First
+
+### Required artifacts
+
+- Business requirements in `spec/requirements/` (German, Topic -> Use Case -> Story -> Item).
+- Definition of Done per slice:
+  - behavior
+  - data/seed impact
+  - tests
+  - documentation impact
+
+### Rule
+
+- Do not start coding on large features before the spec items are at least `Ready`.
+
+## 2) Split Work Into Parallel Slices
+
+### Slice types
+
+- `Domain/API slice`: models, schemas, services, contracts.
+- `UI slice`: view-model hooks, components, i18n keys, UX states.
+- `Data slice`: seed datasets/loaders, migration/backfill.
+- `Quality slice`: tests, QA scripts, regression checks.
+- `Documentation slice`: relevant manuals and operational notes.
+
+### Parallelization pattern
+
+- Create one parent feature ticket/spec topic.
+- Create multiple child slices with explicit dependencies:
+  - `A` provides contract
+  - `B` and `C` implement in parallel against that contract
+  - `D` validates end-to-end behavior
+
+## 3) Agent and Human Collaboration Model
+
+### Recommended role lanes
+
+- `Spec lane`: clarify requirements and acceptance criteria.
+- `Backend lane`: service/domain implementation.
+- `Frontend lane`: UX/state and API consumption.
+- `QA lane`: test design, regression checks, evidence.
+- `Release lane`: merge readiness and deployment verification.
+
+### Agent usage rules
+
+- Use agents for:
+  - scaffolding and repetitive edits
+  - search/impact sweeps
+  - test matrix generation
+  - draft PR summaries and checklists
+- Keep human ownership for:
+  - domain decisions
+  - architecture trade-offs
+  - final approval and merge
+
+### Handoff contract (mandatory)
+
+Each lane handoff must include:
+
+- changed files/modules
+- assumptions and open questions
+- executed checks and results
+- remaining risks
+
+## 4) Git Workflow (Recommended Baseline)
+
+### Branch model
+
+- `main`: always releasable.
+- `feature/<topic>-<slice>`: short-lived implementation branches.
+- Optional integration branch only for very large cross-cutting work.
+
+### Commit and PR conventions
+
+- Small, coherent commits per slice.
+- PR description must include:
+  - why
+  - what changed
+  - test plan
+  - seed/doc impact
+
+### Example branch and PR flow
+
+```{bash}
+cd /Users/stephan/Workspace/TPL-App
+git checkout -b feature/coordination-organ-workflow-backend
+# implement slice
+git add .
+git commit -m "Implement organ workflow domain rules and sync handling"
+git push -u origin HEAD
+```
+
+## 5) Verification Gates
+
+### Local pre-PR checks (minimum)
+
+- Backend: type/lint/tests for touched modules.
+- Frontend: build/typecheck for touched flows.
+- Cross-layer checks if contracts changed.
+- Seed impact verification when model/config data changed.
+
+### Project-level command examples
+
+```{bash}
+cd /Users/stephan/Workspace/TPL-App
+python -m qa.spec_tools.run_specs
+python -m qa.spec_tools.run_client_server_specs
+```
+
+For environment and database commands, follow `doc/diy-manual.qmd`, `doc/database-manual.qmd`, and `doc/seeding-manual.qmd`.
+
+## 6) CI Pipeline and Automatic DEV Deployment (Target State)
+
+### Pipeline stages
+
+1. `validate`: lint, typecheck, unit/integration tests.
+2. `package`: build backend/frontend artifacts.
+3. `deploy-dev`: auto-deploy on merge to `main` (or `develop`, if used).
+4. `smoke-dev`: run smoke checks against DEV endpoints.
+
+### Deployment policy
+
+- Automatic DEV deployment only when required checks are green.
+- Rollback script/step must be available.
+- Deployment status must be posted to PR/release channel.
+
+## 7) Suggested Tooling Stack
+
+- Source control and reviews: GitHub (or equivalent Git platform).
+- Work planning: issue tracker with parent/child slice tickets.
+- Agent orchestration: Conductor-style workflow app for lane assignment and execution tracking.
+- CI/CD: GitHub Actions, GitLab CI, or similar.
+- Quality evidence: automated test reports + smoke logs.
+
+## 8) Definition of Done (Feature Level)
+
+A feature is done only if all are true:
+
+- Spec items updated and statuses moved appropriately.
+- Backend/frontend/data/doc changes are aligned.
+- Seed impact addressed (or explicitly documented as not required).
+- Tests and checks pass.
+- PR reviewed and merged.
+- DEV deployment succeeded and smoke checks passed.
+
+## 9) Minimal Operating Rhythm
+
+- Daily: short async lane updates (progress, blockers, risks).
+- Per slice: open PR as soon as behavior is testable.
+- Per feature: integration demo on DEV before closing the parent item.
+
+## 10) Adoption Plan
+
+1. Start with one pilot feature using this full process.
+2. Measure lead time, review time, and escaped defects.
+3. Tighten handoff contracts and CI gates based on findings.
+4. Roll out as default workflow for all medium/large features.

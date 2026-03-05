@@ -4,6 +4,7 @@ import {
   type AppUser,
   type Code,
   type Coordination,
+  type CoordinationCompletionState,
   type CoordinationDonor,
   type CoordinationEpisode,
   type CoordinationOrigin,
@@ -13,7 +14,7 @@ import {
 } from '../../../api';
 import { toUserErrorMessage } from '../../../api/error';
 
-export type CoordinationDetailTab = 'coordination' | 'protocol' | 'time-log';
+export type CoordinationDetailTab = 'coordination' | 'protocol' | 'time-log' | 'completion';
 
 interface TimeLogDraft {
   user_id: number;
@@ -49,6 +50,7 @@ export function useCoordinationDetailViewModel(
   const [timeLogs, setTimeLogs] = useState<CoordinationTimeLog[]>([]);
   const [coordinationEpisodes, setCoordinationEpisodes] = useState<CoordinationEpisode[]>([]);
   const [procurementFlex, setProcurementFlex] = useState<CoordinationProcurementFlex | null>(null);
+  const [completionState, setCompletionState] = useState<CoordinationCompletionState | null>(null);
   const [patientsById, setPatientsById] = useState<Record<number, Patient>>({});
   const [currentUser, setCurrentUser] = useState<AppUser | null>(null);
   const [users, setUsers] = useState<AppUser[]>([]);
@@ -60,11 +62,10 @@ export function useCoordinationDetailViewModel(
   const [hospitals, setHospitals] = useState<Code[]>([]);
   const [error, setError] = useState('');
 
-  const [runningStart, setRunningStart] = useState<Date | null>(null);
+  const [activeClockLog, setActiveClockLog] = useState<CoordinationTimeLog | null>(null);
   const [elapsedSec, setElapsedSec] = useState(0);
   const [stopDraftOpen, setStopDraftOpen] = useState(false);
   const [stopComment, setStopComment] = useState('');
-  const [pendingStopAt, setPendingStopAt] = useState<Date | null>(null);
 
   const [addingLog, setAddingLog] = useState(false);
   const [editingLogId, setEditingLogId] = useState<number | null>(null);
@@ -114,8 +115,10 @@ export function useCoordinationDetailViewModel(
       const hospitalsPromise = api.listCatalogues('HOSPITAL');
       const coordinationPromise = api.getCoordination(coordinationId);
       const timeLogsPromise = api.listCoordinationTimeLogs(coordinationId);
+      const clockStatePromise = api.getCoordinationClockState(coordinationId);
       const coordinationEpisodesPromise = api.listCoordinationEpisodes(coordinationId);
       const procurementFlexPromise = api.getCoordinationProcurementFlex(coordinationId);
+      const completionPromise = api.getCoordinationCompletion(coordinationId);
       const [
         me,
         userList,
@@ -127,8 +130,10 @@ export function useCoordinationDetailViewModel(
         hospitalCatalogues,
         coordinationData,
         logs,
+        clockState,
         coordinationEpisodeItems,
         loadedProcurementFlex,
+        loadedCompletionState,
       ] = await Promise.all([
         mePromise,
         usersPromise,
@@ -140,8 +145,10 @@ export function useCoordinationDetailViewModel(
         hospitalsPromise,
         coordinationPromise,
         timeLogsPromise,
+        clockStatePromise,
         coordinationEpisodesPromise,
         procurementFlexPromise,
+        completionPromise,
       ]);
       setCurrentUser(me);
       setUsers(userList);
@@ -153,8 +160,10 @@ export function useCoordinationDetailViewModel(
       setHospitals(hospitalCatalogues);
       setCoordination(coordinationData);
       setTimeLogs(logs);
+      setActiveClockLog(clockState.active_time_log);
       setCoordinationEpisodes(coordinationEpisodeItems);
       setProcurementFlex(loadedProcurementFlex);
+      setCompletionState(loadedCompletionState);
       await loadPatientsByEpisodes(coordinationEpisodeItems);
       try {
         setDonor(await api.getCoordinationDonor(coordinationId));
@@ -187,6 +196,53 @@ export function useCoordinationDetailViewModel(
     }
   }, [coordinationId, loadPatientsByEpisodes]);
 
+  const refreshCompletion = useCallback(async () => {
+    try {
+      const nextCompletionState = await api.getCoordinationCompletion(coordinationId);
+      setCompletionState(nextCompletionState);
+      setCoordination((prev) => (
+        prev
+          ? {
+            ...prev,
+            completion_confirmed: nextCompletionState.completion_confirmed,
+            completion_comment: nextCompletionState.completion_comment,
+            completion_confirmed_at: nextCompletionState.completion_confirmed_at,
+            completion_confirmed_by_id: nextCompletionState.completion_confirmed_by_id,
+            completion_confirmed_by_user: nextCompletionState.completion_confirmed_by_user,
+          }
+          : prev
+      ));
+    } catch (err) {
+      setError(toUserErrorMessage(err, 'Failed to load completion data'));
+    }
+  }, [coordinationId]);
+
+  const confirmCompletion = useCallback(async (comment: string) => {
+    const nextCompletionState = await api.confirmCoordinationCompletion(coordinationId, comment);
+    setCompletionState(nextCompletionState);
+    setCoordination((prev) => (
+      prev
+        ? {
+          ...prev,
+          completion_confirmed: nextCompletionState.completion_confirmed,
+          completion_comment: nextCompletionState.completion_comment,
+          completion_confirmed_at: nextCompletionState.completion_confirmed_at,
+          completion_confirmed_by_id: nextCompletionState.completion_confirmed_by_id,
+          completion_confirmed_by_user: nextCompletionState.completion_confirmed_by_user,
+        }
+        : prev
+    ));
+  }, [coordinationId]);
+
+  const refreshClockState = useCallback(async () => {
+    try {
+      const state = await api.getCoordinationClockState(coordinationId);
+      setActiveClockLog(state.active_time_log);
+    } catch {
+      // keep current state if polling fails
+    }
+  }, [coordinationId]);
+
   useEffect(() => {
     void loadAll();
   }, [loadAll]);
@@ -196,12 +252,27 @@ export function useCoordinationDetailViewModel(
   }, [coordinationId, initialTab]);
 
   useEffect(() => {
-    if (!runningStart) return;
+    const id = window.setInterval(() => {
+      void refreshClockState();
+    }, 5000);
+    return () => window.clearInterval(id);
+  }, [refreshClockState]);
+
+  useEffect(() => {
+    if (!activeClockLog?.start || activeClockLog.coordination_id !== coordinationId) {
+      setElapsedSec(0);
+      return;
+    }
+    const runningStart = new Date(activeClockLog.start);
+    if (Number.isNaN(runningStart.getTime())) {
+      setElapsedSec(0);
+      return;
+    }
     const id = window.setInterval(() => {
       setElapsedSec(Math.floor((Date.now() - runningStart.getTime()) / 1000));
     }, 250);
     return () => window.clearInterval(id);
-  }, [runningStart]);
+  }, [activeClockLog?.coordination_id, activeClockLog?.start, coordinationId]);
 
   const sortedLogs = useMemo(
     () =>
@@ -213,40 +284,37 @@ export function useCoordinationDetailViewModel(
     [timeLogs],
   );
 
-  const startClock = () => {
-    if (runningStart) return;
-    const now = new Date();
-    setRunningStart(now);
-    setElapsedSec(0);
-    setStopComment('');
+  const isClockRunningHere = activeClockLog?.coordination_id === coordinationId;
+
+  const startClock = async () => {
+    if (isClockRunningHere) return;
+    try {
+      const state = await api.startCoordinationClock(coordinationId);
+      setActiveClockLog(state.active_time_log);
+      setStopComment('');
+      setTimeLogs(await api.listCoordinationTimeLogs(coordinationId));
+    } catch (err) {
+      setLogError(toUserErrorMessage(err, 'Failed to save time log'));
+    }
   };
 
   const requestStopClock = () => {
-    if (!runningStart) return;
-    setPendingStopAt(new Date());
+    if (!isClockRunningHere) return;
     setStopDraftOpen(true);
   };
 
   const cancelStopClock = () => {
     setStopDraftOpen(false);
-    setPendingStopAt(null);
     setStopComment('');
   };
 
   const saveStoppedClock = async () => {
-    if (!runningStart || !pendingStopAt || !currentUser) return;
+    if (!isClockRunningHere) return;
     try {
-      await api.createCoordinationTimeLog(coordinationId, {
-        user_id: currentUser.id,
-        start: runningStart.toISOString(),
-        end: pendingStopAt.toISOString(),
-        comment: stopComment.trim(),
-      });
-      setRunningStart(null);
-      setElapsedSec(0);
+      const state = await api.stopCoordinationClock(coordinationId, stopComment.trim());
+      setActiveClockLog(state.active_time_log);
       setStopDraftOpen(false);
       setStopComment('');
-      setPendingStopAt(null);
       setTimeLogs(await api.listCoordinationTimeLogs(coordinationId));
     } catch (err) {
       setLogError(toUserErrorMessage(err, 'Failed to save time log'));
@@ -291,7 +359,7 @@ export function useCoordinationDetailViewModel(
   };
 
   const openAddLog = () => {
-    if (runningStart) {
+    if (isClockRunningHere) {
       setLogError('Stop the running clock before adding a new time log.');
       return;
     }
@@ -338,8 +406,8 @@ export function useCoordinationDetailViewModel(
     if (Number.isNaN(start) || Number.isNaN(end) || start >= end) {
       return 'Start must be before end.';
     }
-    if (runningStart) {
-      const runningStartMs = runningStart.getTime();
+    if (activeClockLog?.start && isClockRunningHere) {
+      const runningStartMs = new Date(activeClockLog.start).getTime();
       if (end > runningStartMs) {
         return 'End must not be after the start of the running clock.';
       }
@@ -356,7 +424,7 @@ export function useCoordinationDetailViewModel(
   };
 
   const saveLogDraft = async () => {
-    if (addingLog && runningStart) {
+    if (addingLog && isClockRunningHere) {
       setLogError('Stop the running clock before adding a new time log.');
       return;
     }
@@ -407,6 +475,7 @@ export function useCoordinationDetailViewModel(
     setOrigin,
     coordinationEpisodes,
     procurementFlex,
+    completionState,
     patientsById,
     deathKinds,
     sexCodes,
@@ -416,7 +485,7 @@ export function useCoordinationDetailViewModel(
     hospitals,
     users,
     currentUser,
-    runningStart,
+    runningStart: isClockRunningHere && activeClockLog?.start ? new Date(activeClockLog.start) : null,
     elapsedSec,
     stopDraftOpen,
     stopComment,
@@ -441,5 +510,7 @@ export function useCoordinationDetailViewModel(
     saveOrigin,
     refresh: loadAll,
     refreshAssignments,
+    refreshCompletion,
+    confirmCompletion,
   };
 }

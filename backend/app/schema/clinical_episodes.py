@@ -106,6 +106,24 @@ class EpisodeUpdate(BaseModel):
     fup_recipient_card_date: date | None = None
 
 
+class EpisodeStartListingRequest(BaseModel):
+    start: date
+
+
+class EpisodeCloseRequest(BaseModel):
+    end: date
+
+
+class EpisodeRejectRequest(BaseModel):
+    end: date | None = None
+    reason: str = ""
+
+
+class EpisodeCancelRequest(BaseModel):
+    end: date | None = None
+    reason: str = ""
+
+
 class EpisodeOrganBase(BaseModel):
     episode_id: int
     organ_id: int

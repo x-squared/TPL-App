@@ -134,3 +134,33 @@ export function formatDefaultEpisodeReference(parts: DefaultEpisodeReferencePart
   if (!caseToken) return `${patientName} (${birthDate}, ${pid})`;
   return `${patientName} (${birthDate}, ${pid}) - ${caseToken}`;
 }
+
+interface CoordinationReferenceParts {
+  coordinationId: number | null | undefined;
+  donorFullName?: string | null;
+  swtplNumber?: string | null;
+  emptySymbol?: string;
+}
+
+export function formatCoordinationReferenceName(parts: CoordinationReferenceParts): string {
+  const empty = clean(parts.emptySymbol, '–');
+  const donorName = (parts.donorFullName ?? '').trim();
+  const swtpl = (parts.swtplNumber ?? '').trim();
+  if (donorName && swtpl) return `${donorName} (${swtpl})`;
+  if (donorName) return donorName;
+  if (swtpl) return swtpl;
+  if (parts.coordinationId != null) return `#${parts.coordinationId}`;
+  return empty;
+}
+
+interface EpisodeStatusReferenceParts {
+  phaseLabel: string | null | undefined;
+  processInfo?: string | null | undefined;
+  emptySymbol?: string;
+}
+
+export function formatEpisodeStatusReference(parts: EpisodeStatusReferenceParts): string {
+  const phase = clean(parts.phaseLabel, clean(parts.emptySymbol, '–'));
+  const info = clean(parts.processInfo, '(-)');
+  return `${phase} ${info}`;
+}

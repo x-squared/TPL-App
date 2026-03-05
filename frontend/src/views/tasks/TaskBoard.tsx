@@ -217,6 +217,7 @@ const TaskBoard = forwardRef<TaskBoardHandle, TaskBoardProps>(function TaskBoard
     taskStatusByKey,
     allUsers,
     colloqiumAgendasById,
+    coordinationLabelsById,
     currentUserId,
     reload,
   } = useTaskBoardData(effectiveCriteria, statusKeysToLoad);
@@ -810,6 +811,7 @@ const TaskBoard = forwardRef<TaskBoardHandle, TaskBoardProps>(function TaskBoard
           priorityCodes={priorityCodes}
           allUserOptions={allUserOptions}
           colloqiumAgendasById={colloqiumAgendasById}
+          coordinationLabelsById={coordinationLabelsById}
           editingTaskId={editStateModel.editingTaskId}
           editForm={editStateModel.editForm}
           setEditForm={editStateModel.setEditForm}

@@ -65,7 +65,6 @@ export default function CoordinationProtocolDataPanel({
   const [savingFieldId, setSavingFieldId] = useState<number | null>(null);
   const [savingOrganRejection, setSavingOrganRejection] = useState(false);
   const [clearingOrganWorkflow, setClearingOrganWorkflow] = useState(false);
-  const [workflowClearedByOrganId, setWorkflowClearedByOrganId] = useState<Record<number, boolean>>({});
   const [selectingEpisode, setSelectingEpisode] = useState<{ fieldId: number; slotKey: ProcurementSlotKey } | null>(null);
   const [pickerLoading, setPickerLoading] = useState(false);
   const [patientById, setPatientById] = useState<Map<number, PatientListItem>>(new Map());
@@ -122,15 +121,10 @@ export default function CoordinationProtocolDataPanel({
     () => protocolState?.organs.find((entry) => entry.organ_id === organId) ?? null,
     [protocolState?.organs, organId],
   );
-  const organWorkflowCleared = Boolean(workflowClearedByOrganId[organId]);
+  const organWorkflowCleared = Boolean(activeOrgan?.organ_workflow_cleared);
   useEffect(() => {
     setOrganRejectionCommentDraft(activeOrgan?.organ_rejection_comment ?? '');
   }, [activeOrgan?.organ_rejection_comment, activeOrgan?.organ_id]);
-  useEffect(() => {
-    if (!activeOrgan?.organ_rejected) {
-      setWorkflowClearedByOrganId((prev) => ({ ...prev, [organId]: false }));
-    }
-  }, [activeOrgan?.organ_rejected, organId]);
 
   const groups = useMemo(() => {
     if (!flex) return [];
@@ -319,9 +313,6 @@ export default function CoordinationProtocolDataPanel({
         });
         await Promise.all([load(), refreshProtocolState()]);
       });
-      if (!rejected) {
-        setWorkflowClearedByOrganId((prev) => ({ ...prev, [organId]: false }));
-      }
       if (onAssignmentsChanged) {
         await onAssignmentsChanged();
       }
@@ -354,34 +345,9 @@ export default function CoordinationProtocolDataPanel({
     setClearingOrganWorkflow(true);
     try {
       await withPreservedMainContentScroll(async () => {
-        const statuses = await api.listCodes('TASK_STATUS');
-        const cancelledStatus = statuses.find((entry) => (entry.key ?? '').toUpperCase() === 'CANCELLED');
-        if (!cancelledStatus) {
-          throw new Error(t('coordinations.protocolData.organRejection.cancelledStatusMissing', 'Task status CANCELLED is missing.'));
-        }
-        const taskGroups = await api.listTaskGroups({ coordination_id: coordinationId, organ_id: organId });
-        const pendingTasksByGroup = await Promise.all(
-          taskGroups.map((group) =>
-            api.listTasks({
-              task_group_id: group.id,
-              status_key: ['PENDING'],
-            }),
-          ),
-        );
-        const pendingTasks = pendingTasksByGroup.flat();
-        await Promise.all(
-          pendingTasks.map((task) =>
-            api.updateTask(task.id, { status_id: cancelledStatus.id }),
-          ),
-        );
-        await api.upsertCoordinationProcurementOrgan(coordinationId, organId, {
-          procurement_surgeon: activeOrgan?.procurement_surgeon ?? '',
-          organ_rejected: true,
-          organ_rejection_comment: organRejectionCommentDraft.trim(),
-        });
+        await api.clearCoordinationRejectedOrganWorkflow(coordinationId, organId);
         await Promise.all([load(), refreshProtocolState()]);
       });
-      setWorkflowClearedByOrganId((prev) => ({ ...prev, [organId]: true }));
       if (onAssignmentsChanged) {
         await onAssignmentsChanged();
       }

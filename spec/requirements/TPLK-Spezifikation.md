@@ -56,3 +56,4 @@ Labels werden direkt als Status-Token am Ende der Überschrift gepflegt:
 - `STCS-Spezifikation.md`
 - `Interface-Spezifikation.md`
 - `LTPL-Spezifikation.md`
+- `TPL-Episode-Spezifikation.md`

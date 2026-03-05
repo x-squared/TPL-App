@@ -1,0 +1,25 @@
+---
+description: Language boundaries for code, specifications, and technical documentation
+alwaysApply: true
+---
+
+# Language Boundaries
+
+Use this rule to keep language usage consistent across implementation and documentation.
+
+## Code and machine artifacts
+
+- Write code artifacts in English.
+- This includes identifiers, constants, enum values, machine keys, API/schema field names, and code comments/docstrings.
+- Keep machine-readable keys ASCII and stable; do not introduce locale-specific keys.
+
+## Requirement specifications
+
+- Requirement specifications under `spec/requirements/` must be written in German.
+- Use proper German spelling with umlauts (`ä`, `ö`, `ü`, `Ä`, `Ö`, `Ü`) and `ß` where appropriate.
+- Technical identifiers may remain in English when needed for precision.
+
+## Technical documentation
+
+- Technical manuals and operational documentation under `doc/` may be written in German or English.
+- Choose one primary language per document and keep wording consistent within that document.

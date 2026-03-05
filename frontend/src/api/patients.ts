@@ -291,6 +291,24 @@ export interface EpisodeUpdate {
   fup_recipient_card_date?: string | null;
 }
 
+export interface EpisodeStartListingRequest {
+  start: string;
+}
+
+export interface EpisodeCloseRequest {
+  end: string;
+}
+
+export interface EpisodeRejectRequest {
+  end?: string | null;
+  reason?: string;
+}
+
+export interface EpisodeCancelRequest {
+  end?: string | null;
+  reason?: string;
+}
+
 /* ── Patient ── */
 
 export interface Patient {
@@ -453,6 +471,26 @@ export const patientsApi = {
   updateEpisode: (patientId: number, episodeId: number, data: EpisodeUpdate) =>
     request<Episode>(`/patients/${patientId}/episodes/${episodeId}`, {
       method: 'PATCH',
+      body: JSON.stringify(data),
+    }),
+  startEpisodeListing: (patientId: number, episodeId: number, data: EpisodeStartListingRequest) =>
+    request<Episode>(`/patients/${patientId}/episodes/${episodeId}/workflow/start-listing`, {
+      method: 'POST',
+      body: JSON.stringify(data),
+    }),
+  closeEpisodeWorkflow: (patientId: number, episodeId: number, data: EpisodeCloseRequest) =>
+    request<Episode>(`/patients/${patientId}/episodes/${episodeId}/workflow/close`, {
+      method: 'POST',
+      body: JSON.stringify(data),
+    }),
+  rejectEpisodeWorkflow: (patientId: number, episodeId: number, data: EpisodeRejectRequest) =>
+    request<Episode>(`/patients/${patientId}/episodes/${episodeId}/workflow/reject`, {
+      method: 'POST',
+      body: JSON.stringify(data),
+    }),
+  cancelEpisodeWorkflow: (patientId: number, episodeId: number, data: EpisodeCancelRequest) =>
+    request<Episode>(`/patients/${patientId}/episodes/${episodeId}/workflow/cancel`, {
+      method: 'POST',
       body: JSON.stringify(data),
     }),
   addEpisodeOrgan: (patientId: number, episodeId: number, data: EpisodeOrganCreate) =>

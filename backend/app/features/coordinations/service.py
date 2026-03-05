@@ -15,6 +15,7 @@ COORDINATION_STATUS_TYPE = "COORDINATION_STATUS"
 def _base_query(db: Session):
     return db.query(Coordination).options(
         joinedload(Coordination.status),
+        joinedload(Coordination.completion_confirmed_by_user),
         joinedload(Coordination.changed_by_user),
     )
 

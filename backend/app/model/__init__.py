@@ -35,6 +35,7 @@ from .patient import Absence, ContactInfo, Diagnosis, Patient
 from .person import Person, PersonTeam
 from .reference import Catalogue, Code, TranslationBundle
 from .rbac import AccessPermission
+from .scheduler import ScheduledJob, ScheduledJobRun
 from .tasks import Task, TaskGroup, TaskGroupTemplate, TaskTemplate
 from .user import User
 
@@ -90,4 +91,6 @@ __all__ = [
     "TaskTemplate",
     "TaskGroup",
     "Task",
+    "ScheduledJob",
+    "ScheduledJobRun",
 ]

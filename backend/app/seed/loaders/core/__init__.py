@@ -12,6 +12,8 @@ from .procurement_fields import (
 )
 from .translations import sync_translation_bundles_core
 from .users import sync_users, sync_users_core, sync_users_sample
+from .scheduler import sync_scheduled_jobs_core
+from .task_templates import sync_task_templates_core
 
 __all__ = [
     "sync_access_permissions",
@@ -29,4 +31,6 @@ __all__ = [
     "sync_coordination_procurement_field_templates",
     "sync_coordination_procurement_field_scopes",
     "sync_translation_bundles_core",
+    "sync_scheduled_jobs_core",
+    "sync_task_templates_core",
 ]

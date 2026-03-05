@@ -30,6 +30,8 @@ export interface EpisodeChoice {
   fallNr: string;
   organName: string;
   statusName: string;
+  phaseName: string;
+  statusReference: string;
   start: string | null;
   end: string | null;
 }
@@ -47,6 +49,8 @@ export interface EpisodePreview {
   fallNr: string;
   organName: string;
   statusName: string;
+  phaseName: string;
+  statusReference: string;
   start: string | null;
   end: string | null;
 }

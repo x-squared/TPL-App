@@ -265,6 +265,7 @@ function App() {
         setPatientInitialEpisodeId={setPatientInitialEpisodeId}
         onOpenFavorite={openFavorite}
         coordinationQuickCreateToken={coordinationQuickCreateToken}
+        onCoordinationQuickCreateHandled={() => setCoordinationQuickCreateToken(0)}
         preferences={preferences}
         startPageOptions={startViewOptions}
         onSavePreferences={async (payload) => {

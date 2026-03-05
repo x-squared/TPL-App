@@ -12,9 +12,11 @@ from .config import get_config
 from .database import Base, engine
 from .db_schema import SchemaRuntime, verify_schema_drift
 from .enums import CoordinationStatusKey, FavoriteTypeKey, PriorityKey, TaskScopeKey, TaskStatusKey
+from .features.scheduler import SchedulerRuntime
 from .routers import register_routers
 
 logger = logging.getLogger(__name__)
+scheduler_runtime = SchedulerRuntime(poll_interval_seconds=30)
 
 
 def ensure_strong_enum_code_alignment() -> None:
@@ -83,7 +85,9 @@ async def lifespan(app: FastAPI):
     ensure_database_schema_compatible()
     ensure_strong_enum_code_alignment()
     logger.info("Startup checks passed: schema compatibility and enum/code alignment verified.")
+    await scheduler_runtime.start()
     yield
+    await scheduler_runtime.stop()
 
 
 app = FastAPI(title="TPL App", version="0.1.0", lifespan=lifespan)

@@ -127,6 +127,9 @@ export default function CoordinationDetailView({
         onSaveOrigin={(patch) => model.saveOrigin(patch)}
         onRefresh={model.refresh}
         onRefreshAssignments={model.refreshAssignments}
+        completionState={model.completionState}
+        onRefreshCompletion={model.refreshCompletion}
+        onConfirmCompletion={(comment) => model.confirmCompletion(comment)}
         onOpenPatientEpisode={onOpenPatientEpisode}
       />
     </div>
