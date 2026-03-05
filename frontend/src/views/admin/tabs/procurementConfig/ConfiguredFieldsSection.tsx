@@ -321,6 +321,7 @@ export default function ConfiguredFieldsSection({
                                       }))}
                                   >
                                     <option value={0}>{t('admin.procurementConfig.fields.selectOrgan', 'Select organ')}</option>
+                                    <option value={-1}>{t('admin.procurementConfig.fields.all', 'All')}</option>
                                     {config.organs.map((organ) => (
                                       <option key={organ.id} value={organ.id}>{translateCodeLabel(t, organ)}</option>
                                     ))}
@@ -344,11 +345,11 @@ export default function ConfiguredFieldsSection({
                                   <button
                                     type="button"
                                     className="patients-save-btn"
-                                    disabled={saving || !currentScopeDraft.organ_id}
+                                    disabled={saving || currentScopeDraft.organ_id === 0}
                                     onClick={() => {
                                       void onCreateScope({
                                         field_template_id: field.id,
-                                        organ_id: currentScopeDraft.organ_id || null,
+                                        organ_id: currentScopeDraft.organ_id < 0 ? null : currentScopeDraft.organ_id,
                                         slot_key: currentScopeDraft.slot_key,
                                       });
                                     }}

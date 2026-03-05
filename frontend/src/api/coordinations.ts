@@ -202,6 +202,14 @@ export interface CoordinationProcurementFieldTemplate {
   datatype_definition: DatatypeDefinition | null;
 }
 
+export interface CoordinationProcurementFieldScopeTemplate {
+  id: number;
+  field_template_id: number;
+  organ_id: number | null;
+  organ: Code | null;
+  slot_key: ProcurementSlotKey;
+}
+
 export interface CoordinationProcurementValuePerson {
   id: number;
   pos: number;
@@ -250,6 +258,7 @@ export interface CoordinationProcurementOrgan {
 export interface CoordinationProcurementFlex {
   field_group_templates: CoordinationProcurementFieldGroupTemplate[];
   field_templates: CoordinationProcurementFieldTemplate[];
+  field_scope_templates: CoordinationProcurementFieldScopeTemplate[];
   protocol_task_group_selections: CoordinationProcurementProtocolTaskGroupSelection[];
   organs: CoordinationProcurementOrgan[];
 }

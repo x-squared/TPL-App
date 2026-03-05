@@ -20,6 +20,7 @@ from ...models import (
     Coordination,
     CoordinationEpisode,
     CoordinationProcurementFieldGroupTemplate,
+    CoordinationProcurementFieldScopeTemplate,
     CoordinationProcurementProtocolTaskGroupSelection,
     CoordinationProcurement,
     CoordinationProcurementOrganRejection,
@@ -38,6 +39,7 @@ from ...schemas import (
     CoordinationProcurementOrganUpdate,
     CoordinationProcurementValueCreate,
     CoordinationProcurementFieldTemplateResponse,
+    CoordinationProcurementFieldScopeTemplateResponse,
     CoordinationProcurementFieldGroupTemplateResponse,
     CoordinationProcurementOrganResponse,
     CoordinationProcurementSlotResponse,
@@ -276,6 +278,7 @@ def _build_flex_response_from_typed_data(
     coordination_id: int,
     procurement: CoordinationProcurement | None,
     field_templates: list[CoordinationProcurementFieldTemplate],
+    field_scope_templates: list[CoordinationProcurementFieldScopeTemplate],
     field_group_templates: list[CoordinationProcurementFieldGroupTemplate],
     protocol_task_group_selections: list[CoordinationProcurementProtocolTaskGroupSelection],
     typed_rows: list[CoordinationProcurementTypedData],
@@ -358,6 +361,10 @@ def _build_flex_response_from_typed_data(
             CoordinationProcurementFieldTemplateResponse.model_validate(template, from_attributes=True)
             for template in field_templates
         ],
+        field_scope_templates=[
+            CoordinationProcurementFieldScopeTemplateResponse.model_validate(scope, from_attributes=True)
+            for scope in field_scope_templates
+        ],
         protocol_task_group_selections=protocol_task_group_selections,
     )
 
@@ -387,6 +394,15 @@ def get_procurement_flex(*, coordination_id: int, db: Session) -> CoordinationPr
         .order_by(CoordinationProcurementFieldGroupTemplate.pos.asc(), CoordinationProcurementFieldGroupTemplate.id.asc())
         .all()
     )
+    field_scope_templates = (
+        db.query(CoordinationProcurementFieldScopeTemplate)
+        .options(
+            joinedload(CoordinationProcurementFieldScopeTemplate.organ),
+            joinedload(CoordinationProcurementFieldScopeTemplate.field_template),
+        )
+        .order_by(CoordinationProcurementFieldScopeTemplate.id.asc())
+        .all()
+    )
     protocol_task_group_selections = (
         db.query(CoordinationProcurementProtocolTaskGroupSelection)
         .options(
@@ -411,6 +427,7 @@ def get_procurement_flex(*, coordination_id: int, db: Session) -> CoordinationPr
         coordination_id=coordination_id,
         procurement=procurement,
         field_templates=field_templates,
+        field_scope_templates=field_scope_templates,
         field_group_templates=field_group_templates,
         protocol_task_group_selections=protocol_task_group_selections,
         typed_rows=typed_rows,

@@ -468,6 +468,7 @@ class CoordinationProcurementFlexResponse(BaseModel):
     organs: list[CoordinationProcurementOrganResponse] = []
     field_group_templates: list[CoordinationProcurementFieldGroupTemplateResponse] = []
     field_templates: list[CoordinationProcurementFieldTemplateResponse] = []
+    field_scope_templates: list[CoordinationProcurementFieldScopeTemplateResponse] = []
     protocol_task_group_selections: list[CoordinationProcurementProtocolTaskGroupSelectionResponse] = []
 
 

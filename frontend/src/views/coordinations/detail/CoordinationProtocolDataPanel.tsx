@@ -135,7 +135,18 @@ export default function CoordinationProtocolDataPanel({
   const groups = useMemo(() => {
     if (!flex) return [];
     const groupsById = new Map(flex.field_group_templates.map((group) => [group.id, group]));
+    const scopesByFieldId = new Map<number, (typeof flex.field_scope_templates)>();
+    for (const scope of flex.field_scope_templates ?? []) {
+      scopesByFieldId.set(scope.field_template_id, [...(scopesByFieldId.get(scope.field_template_id) ?? []), scope]);
+    }
     return [...flex.field_templates]
+      .filter((field) => {
+        const scopes = scopesByFieldId.get(field.id) ?? [];
+        if (scopes.length === 0) {
+          return true;
+        }
+        return scopes.some((scope) => scope.organ_id == null || scope.organ_id === organId);
+      })
       .sort((a, b) => {
         const ga = a.group_template_id ? groupsById.get(a.group_template_id)?.pos ?? 999 : 999;
         const gb = b.group_template_id ? groupsById.get(b.group_template_id)?.pos ?? 999 : 999;
