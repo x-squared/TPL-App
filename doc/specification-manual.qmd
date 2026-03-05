@@ -156,11 +156,9 @@ Item level should use the same heading-inline style:
 ##### Item: <Beschreibung> [QA]
 ```
 
-Rule: every Topic, Use Case, Story, and Item should carry exactly one status label.
-Do not place ` - ` before the status marker.
+Rules:
 
-Defaulting behavior:
-
+- Every Topic, Use Case, Story, or Item heading must have exactly one status marker. 
 - If a Topic, Use Case, Story, or Item heading has no status marker, default to `Spec`.
 - During edits, missing labels are normalized by adding `[Spec]`.
 

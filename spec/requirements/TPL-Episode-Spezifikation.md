@@ -26,6 +26,9 @@ Wenn die Episode auf irgend eine Weise abgeschlossen wird, dann ist dies der End
 #### Item: Bearbeitung während der Phasen
 Es könne stets nur die Daten einer Episode bearbeitet werden, die der Phase zugehören, die gerade aktiv ist. Das gilt nicht für übergeordnete und von der Phase unabhängig Daten.
 
+Regeln:
+- Organe können ausschliesslich in der Phase Abklärung hinzugefügt werden.
+
 ##### Item: Phase Abklärung starten
 Mit dem Anlegen der Episode wird die Phase Abklärung eröffnet.
 

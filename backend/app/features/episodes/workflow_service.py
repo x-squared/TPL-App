@@ -89,6 +89,10 @@ def _resolved_phase_key(episode: Episode) -> str:
     return PHASE_EVALUATION
 
 
+def resolved_phase_key(episode: Episode) -> str:
+    return _resolved_phase_key(episode)
+
+
 def _is_terminal(episode: Episode) -> bool:
     status_key = ((episode.status.key if episode.status else "") or "").strip().upper()
     return bool(episode.closed) or status_key in {STATUS_REJECTED, STATUS_CANCELLED}

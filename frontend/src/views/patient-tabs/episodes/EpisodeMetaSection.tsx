@@ -66,6 +66,7 @@ export default function EpisodeMetaSection({
     if (active.length > 0) return active.join(' / ');
     return translateCodeLabel(t, selectedEpisode.organ);
   }, [selectedEpisode, t]);
+  const isEvaluationPhase = ((selectedEpisode.phase?.key ?? '') || '').trim().toUpperCase() === 'EVALUATION';
 
   const currentOrganIds = new Set(selectedEpisode.episode_organs.map((row) => row.organ_id));
 
@@ -130,7 +131,7 @@ export default function EpisodeMetaSection({
               setNewOrganId(null);
               setNewOrganDateAdded(new Date().toISOString().slice(0, 10));
             }}
-            disabled={organActionLoading}
+            disabled={organActionLoading || !isEvaluationPhase}
           >
             {t('episode.meta.addOrgan', '+ Add organ')}
           </button>
@@ -229,7 +230,7 @@ export default function EpisodeMetaSection({
                             date_inactivated: row.is_active ? new Date().toISOString().slice(0, 10) : null,
                           })
                         }
-                        disabled={organActionLoading}
+                        disabled={organActionLoading || (!row.is_active && !isEvaluationPhase)}
                         title={row.is_active ? t('episode.meta.deactivate', 'Deactivate') : t('episode.meta.reactivate', 'Reactivate')}
                       >
                         {row.is_active ? '×' : '↺'}
@@ -291,7 +292,7 @@ export default function EpisodeMetaSection({
                     type="button"
                     className="ci-save-inline"
                     onClick={handleAdd}
-                    disabled={organActionLoading || !newOrganId}
+                    disabled={organActionLoading || !newOrganId || !isEvaluationPhase}
                     title={t('actions.save', 'Save')}
                   >
                     ✓

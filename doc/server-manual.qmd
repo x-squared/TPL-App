@@ -175,6 +175,7 @@ If running with `--reload`, code changes trigger automatic restart.
 - Startup does not run seeding. Use DB/seed scripts explicitly when data refresh is required.
 - Episode workflow transition policy:
   - New episodes start in Evaluation.
+  - Episode organs can only be added (or reactivated) while the episode is in Evaluation.
   - Listing starts only via explicit workflow command.
   - Assigning an episode to a coordination transitions it to coordination allocation (Transplantation phase + allocated status).
   - Setting `tpl_date` on a coordination-episode transitions it to transplanted.

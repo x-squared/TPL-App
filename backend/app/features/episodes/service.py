@@ -13,6 +13,7 @@ from .workflow_service import (
     enforce_phase_editability,
     initialize_episode_workflow,
     reject_episode,
+    resolved_phase_key,
     start_listing_phase,
     today_utc_date,
 )
@@ -313,6 +314,8 @@ def add_or_reactivate_episode_organ(
     )
     if not episode:
         raise HTTPException(status_code=404, detail="Episode not found")
+    if resolved_phase_key(episode) != "EVALUATION":
+        raise HTTPException(status_code=422, detail="Organs can only be added during evaluation phase")
     _validated_organ_ids(db, [payload.organ_id])
     now = date.today()
     existing = next((link for link in episode.organ_links if link.organ_id == payload.organ_id), None)
@@ -366,6 +369,8 @@ def update_episode_organ(
     )
     if not link:
         raise HTTPException(status_code=404, detail="Episode organ row not found")
+    if payload.is_active is True and not link.is_active and resolved_phase_key(episode) != "EVALUATION":
+        raise HTTPException(status_code=422, detail="Organs can only be added during evaluation phase")
     data = payload.model_dump(exclude_unset=True)
     for key, value in data.items():
         setattr(link, key, value)
