@@ -21,7 +21,7 @@ from .coordination_time_log import CoordinationTimeLog
 from .coordination_origin import CoordinationOrigin
 from .episode import Episode, EpisodeOrgan
 from .favorite import Favorite
-from .information import Information, InformationUser
+from .information import Information, InformationContext, InformationUser
 from .datatypes import DatatypeDefinition
 from .medical import (
     MedicalValue,
@@ -62,6 +62,7 @@ __all__ = [
     "EpisodeOrgan",
     "Favorite",
     "Information",
+    "InformationContext",
     "InformationUser",
     "ColloqiumType",
     "Colloqium",

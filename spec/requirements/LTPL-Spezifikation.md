@@ -1,22 +1,12 @@
-# LTPL-Spezifikation [Spec]
+# Feature: LTPL-Basis [Spec]
 
 Dieses Dokument wird schrittweise aus fachlichen Anforderungen aufgebaut.
 Du kannst Inhalte in Deutsch Abschnitt für Abschnitt liefern; ich überführe sie in das Standardformat.
 
-## Status-Legende [Ready]
+## Use Case: Anforderungen erfassen [Spec]
 
-- Spec = laufende Spezifikation
-- Ready = bereit für Implementierung
-- Impl = in Umsetzung
-- QA = Testdefinition/Ausführung offen
-- Done = abgeschlossen
+### Story: Iterative Spezifikation aus Fachtext [Spec]
 
-## Topic: LTPL-Basis [Spec]
+#### Item: Fachliche Texteingaben werden in die Struktur Feature -> Use Case -> Story -> Item mit Statuslabel überführt. [Spec]
 
-### Use Case: Anforderungen erfassen [Spec]
-
-#### Story: Iterative Spezifikation aus Fachtext [Spec]
-
-##### Item: Fachliche Texteingaben werden in die Struktur Topic -> Use Case -> Story -> Item mit Statuslabel überführt. [Spec]
-
-##### Item: Mehrdeutige Anforderungen werden als offene Punkte markiert, bis eine fachliche Klärung vorliegt. [Spec]
+#### Item: Mehrdeutige Anforderungen werden als offene Punkte markiert, bis eine fachliche Klärung vorliegt. [Spec]

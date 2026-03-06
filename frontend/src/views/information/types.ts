@@ -2,6 +2,8 @@ import type { Code, Information, InformationCreate, InformationUpdate } from '..
 
 export interface InformationDraft {
   context_id: number | null;
+  context_ids: number[];
+  area_context_id: number | null;
   text: string;
   author_id: number;
   date: string;
@@ -12,9 +14,11 @@ export interface InformationSectionModel {
   loading: boolean;
   saving: boolean;
   error: string;
+  totalCount: number;
   unreadCount: number;
   rows: Information[];
   organContexts: Code[];
+  areaContexts: Code[];
   authors: Array<{ id: number; name: string }>;
   adding: boolean;
   editingId: number | null;
@@ -37,7 +41,10 @@ export interface InformationSectionModel {
 }
 
 export const toCreatePayload = (draft: InformationDraft): InformationCreate => ({
-  context_id: draft.context_id,
+  context_id: draft.area_context_id ?? draft.context_ids[0] ?? draft.context_id,
+  context_ids: draft.area_context_id != null && !draft.context_ids.includes(draft.area_context_id)
+    ? [draft.area_context_id, ...draft.context_ids]
+    : draft.context_ids,
   text: draft.text,
   author_id: draft.author_id,
   date: draft.date,
@@ -45,7 +52,10 @@ export const toCreatePayload = (draft: InformationDraft): InformationCreate => (
 });
 
 export const toUpdatePayload = (draft: InformationDraft): InformationUpdate => ({
-  context_id: draft.context_id,
+  context_id: draft.area_context_id ?? draft.context_ids[0] ?? draft.context_id,
+  context_ids: draft.area_context_id != null && !draft.context_ids.includes(draft.area_context_id)
+    ? [draft.area_context_id, ...draft.context_ids]
+    : draft.context_ids,
   text: draft.text,
   author_id: draft.author_id,
   date: draft.date,

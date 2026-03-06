@@ -1,4 +1,4 @@
-# TPL-Koordination-Spezifikation [Spec]
+# Feature: TPL-Koordination [Spec]
 
 Dieses Dokument beschreibt den aktuell umgesetzten Stand der Koordinationsfunktionen an einer zentralen Stelle. Die fachlichen Anforderungen sind bewusst nicht nach UI/Backend getrennt, sondern nach Fachthemen strukturiert.
 
@@ -10,9 +10,9 @@ Dieses Dokument beschreibt den aktuell umgesetzten Stand der Koordinationsfunkti
 - QA = Testdefinition/Ausführung offen
 - Done = abgeschlossen
 
-## Topic: Koordination Laufzeitbetrieb (fachlich) [Done]
+## Use Case: Koordination Laufzeitbetrieb (fachlich) [Done]
 
-### Use Case: Organ pro Fall explizit ablehnen [Done]
+## Use Case: Organ pro Fall explizit ablehnen [Done]
 
 #### Story: Ablehnung ist von Empfänger-Entkopplung getrennt modelliert [Done]
 
@@ -67,7 +67,7 @@ Betroffene Aktionen: Zuordnung speichern, Ablehnung speichern, Workflow-Bereinig
 
 ##### Item: Die Aufgabe enthält einen klaren Bezug auf Koordination und Organ sowie den Hinweis, welche Explantationsdaten noch fehlen. [Ready]
 
-## Topic: Koordination Laufzeitbetrieb (Bedienung und Darstellung) [Done]
+## Use Case: Koordination Laufzeitbetrieb (Bedienung und Darstellung) [Done]
 
 ### Use Case: Arbeitsfortschritt pro Organ sichtbar machen [Done]
 
@@ -113,7 +113,7 @@ Betroffene Aktionen: Zuordnung speichern, Ablehnung speichern, Workflow-Bereinig
 
 ##### Item: Nach gültiger Auswahl bleibt kein roter Abschlussrahmen zurück. [Done]
 
-## Topic: Koordination Admin-Konfiguration (separates Fachthema) [Done]
+## Use Case: Koordination Admin-Konfiguration (separates Fachthema) [Done]
 
 ### Use Case: Gruppenkonfiguration vollständig im Admin pflegen [Done]
 
@@ -135,7 +135,7 @@ Betroffene Aktionen: Zuordnung speichern, Ablehnung speichern, Workflow-Bereinig
 
 ##### Item: Die Protokollansicht rendert Felder nur dann, wenn der Scope zum aktiven Organ passt. [Done]
 
-## Topic: Seed- und Konfigurationskonsistenz [Done]
+## Use Case: Seed- und Konfigurationskonsistenz [Done]
 
 ### Use Case: Aktuelle Gruppen-/Felddefinition als Core-Seed sichern [Done]
 

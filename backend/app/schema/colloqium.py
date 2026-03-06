@@ -2,7 +2,7 @@ from __future__ import annotations
 
 from datetime import date as dt_date, datetime
 
-from pydantic import BaseModel, ConfigDict
+from pydantic import BaseModel, ConfigDict, Field
 
 from .clinical import EpisodeResponse
 from .person import PersonResponse
@@ -72,9 +72,10 @@ class ColloqiumResponse(ColloqiumBase):
 class ColloqiumAgendaBase(BaseModel):
     colloqium_id: int
     episode_id: int
-    presented_by: str = ""
-    decision: str = ""
-    comment: str = ""
+    presented_by: str = Field(default="", max_length=64)
+    decision: str = Field(default="", max_length=64)
+    decision_reason: str = Field(default="", max_length=128)
+    comment: str = Field(default="", max_length=1024)
 
 
 class ColloqiumAgendaCreate(ColloqiumAgendaBase):
@@ -84,9 +85,10 @@ class ColloqiumAgendaCreate(ColloqiumAgendaBase):
 class ColloqiumAgendaUpdate(BaseModel):
     colloqium_id: int | None = None
     episode_id: int | None = None
-    presented_by: str | None = None
-    decision: str | None = None
-    comment: str | None = None
+    presented_by: str | None = Field(default=None, max_length=64)
+    decision: str | None = Field(default=None, max_length=64)
+    decision_reason: str | None = Field(default=None, max_length=128)
+    comment: str | None = Field(default=None, max_length=1024)
 
 
 class ColloqiumAgendaResponse(ColloqiumAgendaBase):

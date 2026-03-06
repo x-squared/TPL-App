@@ -1,19 +1,19 @@
-# Ziel [Spec]
+# Feature: TPLK-Spezifikationsstandard [Spec]
 
 Dieses Dokument ist die übergeordnete Spezifikation für fachliche TPLK-Dokumente unter `spec/requirements/`.
 
-# Strukturstandard für alle Spezifikationsdokumente [Ready]
+## Use Case: Strukturstandard für alle Spezifikationsdokumente [Ready]
 
 Jedes Spezifikationsdokument folgt derselben Hierarchie:
 
-1. Topic
+1. Feature
 2. Use Case
 3. Story
 4. Item
 
 Jede Ebene muss ein Label tragen.
 
-# Zulässige Labels [Ready]
+## Use Case: Zulässige Labels [Ready]
 
 - `Spec`: laufende Spezifikation, fachlich noch in Ausarbeitung
 - `Ready`: fachlich bereit für Implementierung
@@ -21,7 +21,7 @@ Jede Ebene muss ein Label tragen.
 - `QA`: Implementierung fertig, QA-Tests noch ausstehend
 - `Done`: abgeschlossen inklusive QA
 
-# Label-Darstellung (Markdown) [Ready]
+## Use Case: Label-Darstellung (Markdown) [Ready]
 
 Labels werden direkt als Status-Token am Ende der Überschrift gepflegt:
 
@@ -39,19 +39,17 @@ Labels werden direkt als Status-Token am Ende der Überschrift gepflegt:
 - QA = Testdefinition/Ausführung offen
 - Done = abgeschlossen
 
-# Vorlage (Skelett) [Spec]
+## Use Case: Vorlage (Skelett) [Spec]
 
-## Topic: <Topic-Name> [Spec]
+```md
+# Feature: <Feature-Name> [Spec]
+## Use Case: <Use-Case-Name> [Spec]
+### Story: <Story-Name> [Spec]
+#### Item: <konkrete Anforderung 1> [Spec]
+#### Item: <konkrete Anforderung 2> [Spec]
+```
 
-### Use Case: <Use-Case-Name> [Spec]
-
-#### Story: <Story-Name> [Spec]
-
-##### Item: <konkrete Anforderung 1> [Spec]
-
-##### Item: <konkrete Anforderung 2> [Spec]
-
-# Dokumente [Spec]
+## Use Case: Dokumente [Spec]
 
 - `STCS-Spezifikation.md`
 - `Interface-Spezifikation.md`

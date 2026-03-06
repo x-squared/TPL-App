@@ -64,6 +64,7 @@ export default function ColloquiumDetailView({
       draftParticipantsPeople={model.draftParticipantsPeople}
       loadingAgendas={model.loadingAgendas}
       agendas={model.agendas}
+      decisionOptions={model.decisionOptions}
       agendaDrafts={model.agendaDrafts}
       editingAgendaId={model.editingAgendaId}
       agendaSaving={model.agendaSaving}

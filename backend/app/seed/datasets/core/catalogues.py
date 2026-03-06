@@ -110,3 +110,12 @@ ORGAN_REJECTION_SEQUEL = [
 
 RECORDS = RECORDS + ORGAN_REJECTION_SEQUEL
 
+# ---- COLLOQUIUM_DECISION ----
+COLLOQUIUM_DECISION = [
+    {"type": "COLLOQUIUM_DECISION", "key": "APPROVED", "pos": 1, "ext_sys": "", "ext_key": "", "name_default": "Approved"},
+    {"type": "COLLOQUIUM_DECISION", "key": "REJECTED", "pos": 2, "ext_sys": "", "ext_key": "", "name_default": "Rejected"},
+    {"type": "COLLOQUIUM_DECISION", "key": "DEFERRED", "pos": 3, "ext_sys": "", "ext_key": "", "name_default": "Deferred"},
+]
+
+RECORDS = RECORDS + COLLOQUIUM_DECISION
+

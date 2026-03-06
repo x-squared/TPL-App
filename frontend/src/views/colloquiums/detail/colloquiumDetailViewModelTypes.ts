@@ -18,6 +18,7 @@ export interface AgendaEditForm {
   episode_ids: number[];
   presented_by: string;
   decision: string;
+  decision_reason: string;
   comment: string;
 }
 

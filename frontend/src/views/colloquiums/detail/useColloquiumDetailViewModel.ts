@@ -40,6 +40,7 @@ export function useColloquiumDetailViewModel(colloqiumId: number, initialTab?: C
     startGeneralEditing: general.startGeneralEditing,
     cancelGeneralEditing: general.cancelGeneralEditing,
     agendas: agendas.agendas,
+    decisionOptions: agendas.decisionOptions,
     loadingAgendas: agendas.loadingAgendas,
     agendaDrafts: agendas.agendaDrafts,
     setAgendaDrafts: agendas.setAgendaDrafts,

@@ -5,6 +5,7 @@ import { translateCodeLabel } from '../../../../i18n/codeTranslations';
 export interface ProtocolAgendaDraft {
   presented_by: string;
   decision: string;
+  decision_reason: string;
   comment: string;
 }
 
@@ -123,7 +124,7 @@ export function exportProtocolPdf({
   } else {
     writeWrapped('Agenda Items', { size: 12, style: 'bold', spacingAfter: 2 });
     agendas.forEach((agenda, index) => {
-      const draft = agendaDrafts[agenda.id] ?? { presented_by: '', decision: '', comment: '' };
+      const draft = agendaDrafts[agenda.id] ?? { presented_by: '', decision: '', decision_reason: '', comment: '' };
       const patient = agenda.episode ? patientsById[agenda.episode.patient_id] : undefined;
       const phase = resolvePhase(agenda);
       const patientLabel = patient
@@ -140,6 +141,7 @@ export function exportProtocolPdf({
         { text: `Phase: ${phaseLabel}`, indent: 2, spacingAfter: 1 },
         { text: `Presented by: ${safeValue(draft.presented_by)}`, spacingAfter: 1 },
         { text: `Decision: ${safeValue(draft.decision)}`, spacingAfter: 1 },
+        { text: `Decision reason: ${safeValue(draft.decision_reason)}`, spacingAfter: 1 },
         { text: `Comment: ${safeValue(draft.comment)}`, spacingAfter: 1 },
       ];
       const tasks = tasksByAgendaId[agenda.id] ?? [];
@@ -173,6 +175,7 @@ export function exportProtocolPdf({
       writeWrapped(`Phase: ${phaseLabel}`, { size: 10, indent: 2, spacingAfter: 1 });
       writeWrapped(`Presented by: ${safeValue(draft.presented_by)}`, { size: 11, spacingAfter: 1 });
       writeWrapped(`Decision: ${safeValue(draft.decision)}`, { size: 11, spacingAfter: 1 });
+      writeWrapped(`Decision reason: ${safeValue(draft.decision_reason)}`, { size: 11, spacingAfter: 1 });
       writeWrapped(`Comment: ${safeValue(draft.comment)}`, { size: 11, spacingAfter: 1 });
       if (tasks.length === 0) {
         writeWrapped('Tasks: none', { size: 10, indent: 2, spacingAfter: sectionGap });

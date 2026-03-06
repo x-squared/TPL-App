@@ -56,6 +56,7 @@ export interface ColloqiumAgenda {
   episode_id: number;
   presented_by: string;
   decision: string;
+  decision_reason: string;
   comment: string;
   episode: {
     id: number;
@@ -63,6 +64,7 @@ export interface ColloqiumAgenda {
     fall_nr: string;
     organ: Code | null;
     status: Code | null;
+    phase: Code | null;
     closed: boolean;
     start: string | null;
     end: string | null;
@@ -84,6 +86,7 @@ export interface ColloqiumAgendaCreate {
   episode_id: number;
   presented_by?: string;
   decision?: string;
+  decision_reason?: string;
   comment?: string;
 }
 
@@ -92,6 +95,7 @@ export interface ColloqiumAgendaUpdate {
   episode_id?: number;
   presented_by?: string;
   decision?: string;
+  decision_reason?: string;
   comment?: string;
 }
 

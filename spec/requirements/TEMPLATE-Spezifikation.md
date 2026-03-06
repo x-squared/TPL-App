@@ -1,14 +1,14 @@
-# TEMPLATE-Spezifikation [Spec]
+# Feature: TEMPLATE-Spezifikation [Spec]
 
 Dieses Dokument ist die aktuelle Vorlage für fachliche Spezifikationen im Projekt.
 
-## Topic: Struktur und Mindestregeln [Ready]
+## Use Case: Struktur und Mindestregeln [Ready]
 
-### Use Case: Eine neue Spezifikation wird erstellt [Ready]
+## Use Case: Eine neue Spezifikation wird erstellt [Ready]
 
 #### Story: Die Hierarchie wird konsistent verwendet [Ready]
 
-##### Item: Anforderungen werden in der Hierarchie `Topic -> Use Case -> Story -> Item` beschrieben. [Ready]
+##### Item: Anforderungen werden in der Hierarchie `Feature -> Use Case -> Story -> Item` beschrieben. [Ready]
 
 ##### Item: Statuslabels sind `[Spec]`, `[Ready]`, `[Impl]`, `[QA]` oder `[Done]`. [Ready]
 
@@ -22,13 +22,13 @@ Dieses Dokument ist die aktuelle Vorlage für fachliche Spezifikationen im Proje
 
 ##### Item: Ein Elternknoten darf nicht `[Done]` sein, solange untergeordnete Knoten nicht `[Done]` sind. [Ready]
 
-##### Item: `Topic [Done]` ist nur zulässig, wenn alle enthaltenen Use Cases, Stories und Items `[Done]` sind. [Ready]
+##### Item: `Feature [Done]` ist nur zulässig, wenn alle enthaltenen Use Cases, Stories und Items `[Done]` sind. [Ready]
 
 ##### Item: `Use Case [Done]` ist nur zulässig, wenn alle enthaltenen Stories und Items `[Done]` sind. [Ready]
 
 ##### Item: `Story [Done]` ist nur zulässig, wenn alle enthaltenen Items `[Done]` sind. [Ready]
 
-## Topic: Änderungsmodus für bestehende Features [Ready]
+## Use Case: Änderungsmodus für bestehende Features [Ready]
 
 ### Use Case: Eine bereits implementierte Funktion wird fachlich nachgezogen [Ready]
 
@@ -40,7 +40,7 @@ Dieses Dokument ist die aktuelle Vorlage für fachliche Spezifikationen im Proje
 
 ##### Item: Änderungen werden als neue Story oder klarer Änderungsblock dokumentiert, statt frühere Aussagen stillschweigend zu überschreiben. [Ready]
 
-## Topic: TODO-Markierung für offene Punkte [Ready]
+## Use Case: TODO-Markierung für offene Punkte [Ready]
 
 ### Use Case: Offene Diskussionen werden innerhalb der Spezifikation kenntlich gemacht [Ready]
 
@@ -52,7 +52,7 @@ Dieses Dokument ist die aktuelle Vorlage für fachliche Spezifikationen im Proje
 
 ##### Item: Bei Zeilenumbruch gehört der visuell überlaufende Fortsetzungstext weiterhin zum selben TODO-Hinweis. [Ready]
 
-## Topic: Beispiel A - Fachliche Entitäten definieren [Spec]
+## Use Case: Beispiel A - Fachliche Entitäten definieren [Spec]
 
 ### Use Case: Eine Spezifikation beschreibt neue Business-Entitäten [Spec]
 
@@ -67,7 +67,7 @@ Beispiel: `perfusionsart` (Enum, Pflicht), `startzeit` (Zeitstempel, optional), 
 ##### Item: Lebenszyklus und Änderungsregeln der Entität definieren. [Spec]
 Beispiel: Ein `Perfusionsprotokoll` darf nur im Status `offen` geändert werden; nach `abgeschlossen` nur über einen expliziten Korrekturprozess.
 
-## Topic: Beispiel B - Komplexe Logik mit Verzweigungen definieren [Spec]
+## Use Case: Beispiel B - Komplexe Logik mit Verzweigungen definieren [Spec]
 
 ### Use Case: Eine Spezifikation beschreibt regelbasierte Entscheidungen [Spec]
 
@@ -90,7 +90,7 @@ Beispiel-Layout:
 - Wenn `is_rejected = true`: stoppe weitere Empfängerzuordnung
 - Sonst: fahre mit Standardprozess fort
 
-## Topic: Beispiel C - Architekturelle Anforderungen definieren [Spec]
+## Use Case: Beispiel C - Architekturelle Anforderungen definieren [Spec]
 
 ### Use Case: Eine Spezifikation legt technische Leitplanken fest [Spec]
 

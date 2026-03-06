@@ -4,14 +4,14 @@ import { useI18n } from '../../i18n/i18n';
 interface MyWorkTabsProps {
   activeTab: MyWorkTabKey;
   setActiveTab: (tab: MyWorkTabKey) => void;
-  unreadInformationCount: number;
+  informationCount: number;
   openTaskCount: number;
 }
 
 export default function MyWorkTabs({
   activeTab,
   setActiveTab,
-  unreadInformationCount,
+  informationCount,
   openTaskCount,
 }: MyWorkTabsProps) {
   const { t } = useI18n();
@@ -36,7 +36,7 @@ export default function MyWorkTabs({
         onClick={() => setActiveTab('information')}
         type="button"
       >
-        {t('myWork.tabs.information', 'Information')} ({unreadInformationCount})
+        {t('myWork.tabs.information', 'Information')} ({informationCount})
       </button>
     </>
   );

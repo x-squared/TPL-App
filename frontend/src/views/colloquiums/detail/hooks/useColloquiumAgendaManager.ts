@@ -1,5 +1,5 @@
 import { useEffect, useMemo, useState } from 'react';
-import { api, type ColloqiumAgenda, type Patient, type PatientListItem } from '../../../../api';
+import { api, type Code, type ColloqiumAgenda, type Patient, type PatientListItem } from '../../../../api';
 import { translateCodeLabel } from '../../../../i18n/codeTranslations';
 import { useI18n } from '../../../../i18n/i18n';
 import { formatEpisodeDisplayName, formatEpisodeStatusReference } from '../../../layout/episodeDisplay';
@@ -14,11 +14,13 @@ export function useColloquiumAgendaManager(colloqiumId: number, organId: number 
   const [editingAgendaId, setEditingAgendaId] = useState<number | null>(null);
   const [agendaSaving, setAgendaSaving] = useState(false);
   const [agendaDeletingId, setAgendaDeletingId] = useState<number | null>(null);
+  const [decisionOptions, setDecisionOptions] = useState<Code[]>([]);
   const [agendaForm, setAgendaForm] = useState<AgendaEditForm>({
     episode_id: null,
     episode_ids: [],
     presented_by: '',
     decision: '',
+    decision_reason: '',
     comment: '',
   });
   const [pickerOpen, setPickerOpen] = useState(false);
@@ -67,11 +69,25 @@ export function useColloquiumAgendaManager(colloqiumId: number, organId: number 
   };
 
   useEffect(() => {
+    let isActive = true;
+    const loadDecisionOptions = async () => {
+      const options = await api.listCatalogues('COLLOQUIUM_DECISION');
+      if (!isActive) return;
+      setDecisionOptions(options);
+    };
+    void loadDecisionOptions();
+    return () => {
+      isActive = false;
+    };
+  }, []);
+
+  useEffect(() => {
     const next: Record<number, AgendaDraft> = {};
     agendas.forEach((agenda) => {
       next[agenda.id] = {
         presented_by: agenda.presented_by ?? '',
         decision: agenda.decision ?? '',
+        decision_reason: agenda.decision_reason ?? '',
         comment: agenda.comment ?? '',
       };
     });
@@ -85,9 +101,12 @@ export function useColloquiumAgendaManager(colloqiumId: number, organId: number 
         for (const agenda of agendas) {
           const draft = agendaDrafts[agenda.id];
           if (!draft) continue;
+          const isDecisionReasonInvalid = Boolean(draft.decision?.trim()) && !draft.decision_reason?.trim();
+          if (isDecisionReasonInvalid) continue;
           const payload: Partial<AgendaDraft> = {};
           if (draft.presented_by !== (agenda.presented_by ?? '')) payload.presented_by = draft.presented_by;
           if (draft.decision !== (agenda.decision ?? '')) payload.decision = draft.decision;
+          if (draft.decision_reason !== (agenda.decision_reason ?? '')) payload.decision_reason = draft.decision_reason;
           if (draft.comment !== (agenda.comment ?? '')) payload.comment = draft.comment;
           if (Object.keys(payload).length === 0) continue;
           const updated = await api.updateColloqiumAgenda(agenda.id, payload);
@@ -180,7 +199,7 @@ export function useColloquiumAgendaManager(colloqiumId: number, organId: number 
 
   const startAddAgenda = () => {
     setEditingAgendaId(0);
-    setAgendaForm({ episode_id: null, episode_ids: [], presented_by: '', decision: '', comment: '' });
+    setAgendaForm({ episode_id: null, episode_ids: [], presented_by: '', decision: '', decision_reason: '', comment: '' });
   };
 
   const startEditAgenda = (agenda: ColloqiumAgenda) => {
@@ -190,18 +209,22 @@ export function useColloquiumAgendaManager(colloqiumId: number, organId: number 
       episode_ids: [agenda.episode_id],
       presented_by: agenda.presented_by ?? '',
       decision: agenda.decision ?? '',
+      decision_reason: agenda.decision_reason ?? '',
       comment: agenda.comment ?? '',
     });
   };
 
   const cancelEditAgenda = () => {
     setEditingAgendaId(null);
-    setAgendaForm({ episode_id: null, episode_ids: [], presented_by: '', decision: '', comment: '' });
+    setAgendaForm({ episode_id: null, episode_ids: [], presented_by: '', decision: '', decision_reason: '', comment: '' });
     setPickerOpen(false);
   };
 
   const saveAgenda = async () => {
     if (editingAgendaId === null) return;
+    if (agendaForm.decision.trim() && !agendaForm.decision_reason.trim()) {
+      return;
+    }
     const existingEpisodeIds = new Set(
       agendas
         .filter((agenda) => editingAgendaId === 0 || agenda.id !== editingAgendaId)
@@ -210,25 +233,34 @@ export function useColloquiumAgendaManager(colloqiumId: number, organId: number 
     const selectedEpisodeIds = agendaForm.episode_ids.length > 0
       ? [...new Set(agendaForm.episode_ids)]
       : (agendaForm.episode_id ? [agendaForm.episode_id] : []);
-    const nonDuplicateEpisodeIds = selectedEpisodeIds.filter((episodeId) => !existingEpisodeIds.has(episodeId));
-    if (nonDuplicateEpisodeIds.length === 0) return;
     setAgendaSaving(true);
     try {
       if (editingAgendaId === 0) {
+        const nonDuplicateEpisodeIds = selectedEpisodeIds.filter((episodeId) => !existingEpisodeIds.has(episodeId));
+        if (nonDuplicateEpisodeIds.length === 0) return;
         for (const episodeId of nonDuplicateEpisodeIds) {
           await api.createColloqiumAgenda({
             colloqium_id: colloqiumId,
             episode_id: episodeId,
             presented_by: agendaForm.presented_by,
             decision: agendaForm.decision,
+            decision_reason: agendaForm.decision_reason,
             comment: agendaForm.comment,
           });
         }
       } else {
+        const currentAgenda = agendas.find((agenda) => agenda.id === editingAgendaId);
+        if (!currentAgenda) return;
+        const desiredEpisodeId = selectedEpisodeIds[0] ?? currentAgenda.episode_id;
+        const episodeChanged = desiredEpisodeId !== currentAgenda.episode_id;
+        if (episodeChanged && existingEpisodeIds.has(desiredEpisodeId)) {
+          return;
+        }
         await api.updateColloqiumAgenda(editingAgendaId, {
-          episode_id: nonDuplicateEpisodeIds[0],
+          episode_id: desiredEpisodeId,
           presented_by: agendaForm.presented_by,
           decision: agendaForm.decision,
+          decision_reason: agendaForm.decision_reason,
           comment: agendaForm.comment,
         });
       }
@@ -302,6 +334,7 @@ export function useColloquiumAgendaManager(colloqiumId: number, organId: number 
     editingAgendaId,
     agendaSaving,
     agendaDeletingId,
+    decisionOptions,
     agendaForm,
     setAgendaForm,
     pickerOpen,

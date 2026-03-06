@@ -3,10 +3,8 @@ import {
   api,
   type CoordinationEpisodeLinkedEpisode,
   type CoordinationProcurementFlex,
-  type CoordinationProcurementValue,
   type MedicalValue,
   type PatientListItem,
-  type Person,
   type PersonTeam,
   type ProcurementGroupDisplayLane,
   type ProcurementSlotKey,
@@ -14,13 +12,19 @@ import {
 import { toUserErrorMessage } from '../../../api/error';
 import { translateCodeLabel } from '../../../i18n/codeTranslations';
 import { useI18n } from '../../../i18n/i18n';
-import { formatDefaultEpisodeReference } from '../../layout/episodeDisplay';
 import { withPreservedMainContentScroll } from '../../layout/scrollPreservation';
-import { getConfigFromMetadata } from '../../../utils/datatypeFramework';
-import PersonMultiSelect from '../../layout/PersonMultiSelect';
 import CoordinationEpisodePickerDialog from './CoordinationEpisodePickerDialog';
 import { useCoordinationProtocolState } from './CoordinationProtocolStateContext';
 import { useCoordinationEpisodePickerModel } from './useCoordinationEpisodePickerModel';
+import CoordinationProtocolEpisodeFieldControl from './protocolData/CoordinationProtocolEpisodeFieldControl';
+import CoordinationProtocolFieldValueControl from './protocolData/CoordinationProtocolFieldValueControl';
+import {
+  getFieldStateClass,
+  isGroupTouched,
+  resolveValueForField,
+  resolveValueForFieldInSlot,
+  type DraftsByField,
+} from './protocolData/helpers';
 
 interface CoordinationProtocolDataPanelProps {
   coordinationId: number;
@@ -32,19 +36,6 @@ interface CoordinationProtocolDataPanelProps {
   onPendingDataChange?: (hasPendingData: boolean) => void;
   onAssignmentsChanged?: () => Promise<void>;
 }
-
-type DraftsByField = Record<number, string>;
-const FORCED_DATETIME_FIELD_KEYS = new Set([
-  'COLD_PERFUSION',
-  'COLD_PERFUSION_ABDOMINAL',
-]);
-const FORCED_BOOLEAN_FIELD_KEYS = new Set([
-  'NMP_USED',
-  'EVLP_USED',
-  'HOPE_USED',
-  'LIFEPORT_USED',
-]);
-const DUAL_RECIPIENT_ORGAN_KEYS = new Set(['KIDNEY', 'LUNG']);
 
 export default function CoordinationProtocolDataPanel({
   coordinationId,
@@ -382,367 +373,59 @@ export default function CoordinationProtocolDataPanel({
                 drafts,
                 Boolean(activeOrgan?.organ_rejected && organWorkflowCleared),
               );
-              const isImplantTeamField = field.key === 'IMPLANT_TEAM';
-              if (field.value_mode === 'PERSON_SINGLE') {
-                const selected = [...(valueRow?.persons ?? [])]
-                  .sort((a, b) => a.pos - b.pos)
-                  .map((entry) => entry.person)
-                  .filter((entry): entry is Person => !!entry)
-                  .slice(0, 1);
+              if (field.value_mode !== 'EPISODE') {
                 return (
-                  <div className="detail-field coord-proc-field-wide" key={field.id}>
-                    <span className="detail-label">{t(`coordinations.protocolData.fieldsByKey.${field.key}`, field.name_default)}</span>
-                    <div className={`coord-protocol-data-control ${stateClass}`}>
-                      <PersonMultiSelect
-                        selectedPeople={selected}
-                        onChange={(next) => {
-                          const single = next.slice(0, 1);
-                          void saveValue(field.id, { person_ids: single.map((person) => person.id), value: '' });
-                        }}
-                        disabled={savingFieldId === field.id}
-                        disableAdd={selected.length > 0}
-                      />
-                    </div>
-                  </div>
-                );
-              }
-              if (field.value_mode === 'PERSON_LIST') {
-                const selected = [...(valueRow?.persons ?? [])]
-                  .sort((a, b) => a.pos - b.pos)
-                  .map((entry) => entry.person)
-                  .filter((entry): entry is Person => !!entry);
-                return (
-                  <div className="detail-field coord-proc-field-wide" key={field.id}>
-                    <span className="detail-label">{t(`coordinations.protocolData.fieldsByKey.${field.key}`, field.name_default)}</span>
-                    <div className={`coord-protocol-data-control ${stateClass}`}>
-                      <PersonMultiSelect
-                        selectedPeople={selected}
-                        onChange={(next) => {
-                          void saveValue(field.id, { person_ids: next.map((person) => person.id), value: '' });
-                        }}
-                        disabled={savingFieldId === field.id}
-                      />
-                    </div>
-                  </div>
-                );
-              }
-              if (field.value_mode === 'TEAM_LIST' && !isImplantTeamField) {
-                const selectedTeams = [...(valueRow?.teams ?? [])]
-                  .sort((a, b) => a.pos - b.pos)
-                  .map((entry) => entry.team)
-                  .filter((entry): entry is PersonTeam => !!entry);
-                const selectedTeamIds = new Set(selectedTeams.map((team) => team.id));
-                return (
-                  <div className="detail-field coord-proc-field-wide" key={field.id}>
-                    <span className="detail-label">{t(`coordinations.protocolData.fieldsByKey.${field.key}`, field.name_default)}</span>
-                    <div className={`coord-proc-team-picker coord-protocol-data-control ${stateClass}`}>
-                      <div className="person-pill-list">
-                        {selectedTeams.length === 0 ? (
-                          <span className="detail-value">{t('common.emptySymbol', '–')}</span>
-                        ) : (
-                          selectedTeams.map((team) => (
-                            <span key={team.id} className="person-pill">
-                              {team.name}
-                              <button
-                                type="button"
-                                className="person-pill-remove"
-                                onClick={() => {
-                                  const nextIds = selectedTeams.filter((entry) => entry.id !== team.id).map((entry) => entry.id);
-                                  void saveValue(field.id, { team_ids: nextIds, value: '' });
-                                }}
-                                disabled={savingFieldId === field.id}
-                                title={t('actions.remove', 'Remove')}
-                              >
-                                ×
-                              </button>
-                            </span>
-                          ))
-                        )}
-                      </div>
-                      <select
-                        className="detail-input"
-                        defaultValue=""
-                        onChange={(event) => {
-                          const nextId = Number(event.target.value);
-                          if (!nextId || selectedTeamIds.has(nextId)) return;
-                          const nextIds = [...selectedTeams.map((team) => team.id), nextId];
-                          void saveValue(field.id, { team_ids: nextIds, value: '' });
-                          event.currentTarget.value = '';
-                        }}
-                        disabled={savingFieldId === field.id}
-                      >
-                        <option value="">{t('coordinations.protocolData.team.addTeam', 'Add team...')}</option>
-                        {teams
-                          .filter((team) => !selectedTeamIds.has(team.id))
-                          .map((team) => (
-                            <option key={team.id} value={team.id}>{team.name}</option>
-                          ))}
-                      </select>
-                    </div>
-                  </div>
-                );
-              }
-              if (field.value_mode === 'TEAM_SINGLE' || isImplantTeamField) {
-                const selectedTeams = [...(valueRow?.teams ?? [])]
-                  .sort((a, b) => a.pos - b.pos)
-                  .map((entry) => entry.team)
-                  .filter((entry): entry is PersonTeam => !!entry)
-                  .slice(0, 1);
-                const selectedTeamIds = new Set(selectedTeams.map((team) => team.id));
-                return (
-                  <div className="detail-field coord-proc-field-wide" key={field.id}>
-                    <span className="detail-label">{t(`coordinations.protocolData.fieldsByKey.${field.key}`, field.name_default)}</span>
-                    <div className={`coord-proc-team-picker coord-protocol-data-control ${stateClass}`}>
-                      <div className="person-pill-list">
-                        {selectedTeams.length === 0 ? (
-                          <span className="detail-value">{t('common.emptySymbol', '–')}</span>
-                        ) : (
-                          selectedTeams.map((team) => (
-                            <span key={team.id} className="person-pill">
-                              {team.name}
-                              <button
-                                type="button"
-                                className="person-pill-remove"
-                                onClick={() => {
-                                  void saveValue(field.id, { team_ids: [], value: '' });
-                                }}
-                                disabled={savingFieldId === field.id}
-                                title={t('actions.remove', 'Remove')}
-                              >
-                                ×
-                              </button>
-                            </span>
-                          ))
-                        )}
-                      </div>
-                      <select
-                        className="detail-input"
-                        value=""
-                        onChange={(event) => {
-                          const nextId = Number(event.target.value);
-                          if (!nextId) return;
-                          void saveValue(field.id, { team_ids: [nextId], value: '' });
-                        }}
-                        disabled={savingFieldId === field.id}
-                      >
-                        <option value="">{t('coordinations.protocolData.team.selectTeam', 'Select team...')}</option>
-                        {teams.map((team) => (
-                          <option key={team.id} value={team.id} disabled={selectedTeamIds.has(team.id)}>
-                            {team.name}
-                          </option>
-                        ))}
-                      </select>
-                    </div>
-                  </div>
+                  <CoordinationProtocolFieldValueControl
+                    key={field.id}
+                    field={field}
+                    valueRow={valueRow}
+                    stateClass={stateClass}
+                    savingFieldId={savingFieldId}
+                    teams={teams}
+                    drafts={drafts}
+                    setDrafts={setDrafts}
+                    saveValue={(fieldId, payload) => saveValue(fieldId, payload)}
+                    t={t}
+                  />
                 );
               }
               if (field.value_mode === 'EPISODE') {
-                const normalizedOrganKey = ((organKey ?? activeOrgan?.organ?.key ?? '') || '').trim().toUpperCase();
-                const organRejected = activeProtocolOrgan?.organ_rejected ?? Boolean(activeOrgan?.organ_rejected);
-                const slotOptions: ProcurementSlotKey[] = DUAL_RECIPIENT_ORGAN_KEYS.has(normalizedOrganKey)
-                  ? ['MAIN', 'LEFT', 'RIGHT']
-                  : ['MAIN'];
-                const linkedAssignmentsForOrgan = activeProtocolOrgan?.slots ?? [];
-                const labelBySlot: Record<ProcurementSlotKey, string> = {
-                  MAIN: t('admin.procurementConfig.slot.main', 'MAIN'),
-                  LEFT: t('admin.procurementConfig.slot.left', 'LEFT'),
-                  RIGHT: t('admin.procurementConfig.slot.right', 'RIGHT'),
-                };
-                const slotEntries = slotOptions.map((slotKey, index) => {
-                  const slotValue = resolveValueForFieldInSlot(flex, organId, slotKey, field.id);
-                  const linkedEpisode = linkedAssignmentsForOrgan[index] ?? null;
-                  const selectedEpisodeId = slotValue?.episode_ref?.episode_id ?? linkedEpisode?.episode_id ?? 0;
-                  const selectedEpisode = availableRecipientEpisodes.rows.find((episode) => episode.id === selectedEpisodeId)
-                    ?? (linkedEpisode ? {
-                      id: linkedEpisode.episode_id ?? 0,
-                      patient_id: linkedEpisode.patient_id ?? 0,
-                      fall_nr: linkedEpisode.episode_fall_nr ?? '',
-                      tpl_date: null,
-                      list_rs_nr: '',
-                    } : null)
-                    ?? null;
-                  const selectedEpisodeFromValue = slotValue?.episode_ref?.episode ?? null;
-                  const selectedEpisodeRow = episodePickerModel.rows.find((entry) => entry.episodeId === selectedEpisodeId) ?? null;
-                  const selectedPatient = (selectedEpisode?.patient_id != null ? patientById.get(selectedEpisode.patient_id) : null)
-                    ?? (selectedEpisodeFromValue?.patient_id != null ? patientById.get(selectedEpisodeFromValue.patient_id) : null)
-                    ?? (linkedEpisode?.patient_id != null ? patientById.get(linkedEpisode.patient_id) : null)
-                    ?? null;
-                  const selectedPatientName = selectedEpisodeRow?.patientName
-                    || linkedEpisode?.recipient_name
-                    || (selectedPatient ? `${selectedPatient.first_name} ${selectedPatient.name}`.trim() : '');
-                  const selectedEpisodeLabel = selectedEpisodeId > 0
-                    ? formatDefaultEpisodeReference({
-                      episodeId: selectedEpisodeId,
-                      episodeCaseNumber: selectedEpisode?.fall_nr ?? linkedEpisode?.episode_fall_nr ?? selectedEpisodeFromValue?.fall_nr ?? null,
-                      patientFullName: selectedPatientName,
-                      patientBirthDate: selectedEpisodeRow?.patientDateOfBirth ?? linkedEpisode?.patient_birth_date ?? selectedPatient?.date_of_birth ?? null,
-                      patientPid: selectedEpisodeRow?.patientPid ?? linkedEpisode?.patient_pid ?? selectedPatient?.pid ?? null,
-                      emptySymbol: t('common.emptySymbol', '–'),
-                    })
-                    : t('coordinations.protocolData.episode.noneSelected', 'No recipient episode selected');
-                  return { slotKey, selectedEpisodeId, selectedEpisodeLabel };
-                });
-                const selectedCount = slotEntries.filter((entry) => entry.selectedEpisodeId > 0).length;
-                const recipientStateClass = organRejected
-                  ? 'committed'
-                  : selectedCount > 0
-                    ? 'committed'
-                    : 'pending';
                 return (
-                  <div className="detail-field coord-proc-field-wide" key={field.id}>
-                    <span className="detail-label">{t(`coordinations.protocolData.fieldsByKey.${field.key}`, field.name_default)}</span>
-                    <div className={`coord-protocol-episode-control ${recipientStateClass}`}>
-                      <div className="coord-organ-rejection-box">
-                        <label className="coord-organ-rejection-toggle">
-                          <input
-                            type="checkbox"
-                            checked={organRejected}
-                            disabled={savingOrganRejection}
-                            onChange={(event) => {
-                              const nextRejected = event.target.checked;
-                              void saveOrganRejection(nextRejected, organRejectionCommentDraft.trim());
-                            }}
-                          />
-                          <span>{t('coordinations.protocolData.organRejection.toggle', 'Organ rejected')}</span>
-                        </label>
-                        <div className="coord-organ-rejection-comment-row">
-                          <input
-                            type="text"
-                            className="detail-input"
-                            value={organRejectionCommentDraft}
-                            placeholder={t('coordinations.protocolData.organRejection.commentPlaceholder', 'Reason for rejection')}
-                            disabled={savingOrganRejection}
-                            onChange={(event) => setOrganRejectionCommentDraft(event.target.value)}
-                            onBlur={saveOrganRejectionCommentIfChanged}
-                            onKeyDown={(event) => {
-                              if (event.key === 'Enter') {
-                                event.preventDefault();
-                                saveOrganRejectionCommentIfChanged();
-                              }
-                            }}
-                          />
-                        </div>
-                        {organRejected ? (
-                          <div className="coord-organ-rejection-clear-row">
-                            <button
-                              type="button"
-                              className="patients-cancel-btn coord-organ-clear-workflow-btn"
-                              disabled={clearingOrganWorkflow || savingOrganRejection}
-                              onClick={() => {
-                                void clearRejectedOrganWorkflow();
-                              }}
-                              title={t(
-                                'coordinations.protocolData.organRejection.clearWorkflowTitle',
-                                'Discard remaining tasks and force all open protocol fields to done for this rejected organ.',
-                              )}
-                            >
-                              {clearingOrganWorkflow
-                                ? t('coordinations.protocolData.organRejection.clearingWorkflow', 'Clearing...')
-                                : organWorkflowCleared
-                                  ? t('coordinations.protocolData.organRejection.workflowCleared', 'Workflow cleared')
-                                  : t('coordinations.protocolData.organRejection.clearWorkflowButton', 'Clear organ workflow')}
-                            </button>
-                          </div>
-                        ) : null}
-                      </div>
-                      {slotEntries.map((entry) => (
-                        <div className="coord-episode-select-row" key={entry.slotKey}>
-                          <div className="person-pill-list">
-                            {entry.selectedEpisodeId > 0 ? (
-                              <span className="person-pill coord-protocol-recipient-pill">{`${labelBySlot[entry.slotKey]}: ${entry.selectedEpisodeLabel}`}</span>
-                            ) : (
-                              <span className="detail-value">{`${labelBySlot[entry.slotKey]}: ${entry.selectedEpisodeLabel}`}</span>
-                            )}
-                          </div>
-                          <button
-                            type="button"
-                            className="patients-save-btn coord-episode-select-open-btn"
-                            onClick={() => {
-                              setSelectingEpisode({ fieldId: field.id, slotKey: entry.slotKey });
-                              void loadPickerData();
-                            }}
-                            disabled={organRejected || savingFieldId === field.id || (entry.selectedEpisodeId <= 0 && selectedCount >= 2 && DUAL_RECIPIENT_ORGAN_KEYS.has(normalizedOrganKey))}
-                          >
-                            {t('coordinations.protocolData.episode.openPicker', 'Open picker')}
-                          </button>
-                          {entry.selectedEpisodeId > 0 ? (
-                            <button
-                              type="button"
-                              className="patients-cancel-btn"
-                              onClick={() => {
-                                  void saveValue(field.id, { episode_id: null, value: '', person_ids: [], team_ids: [] }, entry.slotKey, true);
-                              }}
-                              disabled={organRejected || savingFieldId === field.id}
-                            >
-                              {t('coordinations.protocolData.episode.clearSelection', 'Clear')}
-                            </button>
-                          ) : null}
-                        </div>
-                      ))}
-                    </div>
-                  </div>
-                );
-              }
-              const cfg = getConfigFromMetadata(null, field.datatype_definition);
-              const isTimestampField = field.key.endsWith('_TIME') || FORCED_DATETIME_FIELD_KEYS.has(field.key);
-              const draftValue = drafts[field.id] ?? valueRow?.value ?? '';
-              const isBooleanField = !isTimestampField && (cfg.inputType === 'boolean' || FORCED_BOOLEAN_FIELD_KEYS.has(field.key));
-              if (isBooleanField) {
-                return (
-                  <div className="detail-field" key={field.id}>
-                    <span className="detail-label">{t(`coordinations.protocolData.fieldsByKey.${field.key}`, field.name_default)}</span>
-                    <div className={`coord-protocol-data-control coord-protocol-boolean-control ${stateClass}`}>
-                      <select
-                        className="detail-input"
-                        value={draftValue}
-                        disabled={savingFieldId === field.id}
-                        onChange={(event) => {
-                          const nextValue = event.target.value;
-                          setDrafts((prev) => ({ ...prev, [field.id]: nextValue }));
-                          if ((valueRow?.value ?? '') === nextValue) return;
-                          void saveValue(field.id, { value: nextValue, person_ids: [], team_ids: [] });
-                        }}
-                      >
-                        <option value="">{t('common.notSet', 'Not set')}</option>
-                        <option value="true">{t('common.yes', 'Yes')}</option>
-                        <option value="false">{t('common.no', 'No')}</option>
-                      </select>
-                    </div>
-                  </div>
-                );
-              }
-              const inputType = isTimestampField
-                ? 'datetime-local'
-                : cfg.inputType === 'number'
-                ? 'number'
-                : cfg.inputType === 'date'
-                  ? 'date'
-                  : cfg.inputType === 'datetime'
-                    ? 'datetime-local'
-                    : 'text';
-              return (
-                <div className="detail-field" key={field.id}>
-                  <span className="detail-label">{t(`coordinations.protocolData.fieldsByKey.${field.key}`, field.name_default)}</span>
-                  <input
-                    type={inputType}
-                    className={`detail-input coord-protocol-data-input ${stateClass}`}
-                    value={draftValue}
-                    step={cfg.step}
-                    placeholder={cfg.placeholder}
-                    onChange={(event) => setDrafts((prev) => ({ ...prev, [field.id]: event.target.value }))}
-                    onBlur={() => {
-                      if ((valueRow?.value ?? '') === draftValue) return;
-                      void saveValue(field.id, { value: draftValue, person_ids: [], team_ids: [] });
+                  <CoordinationProtocolEpisodeFieldControl
+                    key={field.id}
+                    field={field}
+                    flex={flex}
+                    organId={organId}
+                    organKey={organKey}
+                    activeOrgan={activeOrgan}
+                    activeProtocolOrgan={activeProtocolOrgan}
+                    organWorkflowCleared={organWorkflowCleared}
+                    savingFieldId={savingFieldId}
+                    savingOrganRejection={savingOrganRejection}
+                    clearingOrganWorkflow={clearingOrganWorkflow}
+                    organRejectionCommentDraft={organRejectionCommentDraft}
+                    setOrganRejectionCommentDraft={setOrganRejectionCommentDraft}
+                    availableRecipientEpisodesRows={availableRecipientEpisodes.rows}
+                    episodePickerRows={episodePickerModel.rows}
+                    patientById={patientById}
+                    onOpenPicker={(fieldId, slotKey) => {
+                      setSelectingEpisode({ fieldId, slotKey });
+                      void loadPickerData();
                     }}
-                    onKeyDown={(event) => {
-                      if (event.key === 'Enter') {
-                        event.preventDefault();
-                        event.currentTarget.blur();
-                      }
+                    onClearEpisode={(fieldId, slotKey) => {
+                      void saveValue(fieldId, { episode_id: null, value: '', person_ids: [], team_ids: [] }, slotKey, true);
                     }}
+                    onSaveOrganRejection={(rejected, comment) => {
+                      void saveOrganRejection(rejected, comment);
+                    }}
+                    onSaveOrganRejectionCommentIfChanged={saveOrganRejectionCommentIfChanged}
+                    onClearRejectedOrganWorkflow={() => {
+                      void clearRejectedOrganWorkflow();
+                    }}
+                    t={t}
                   />
-                </div>
-              );
+                );
+              }
             })}
           </div>
         </section>
@@ -770,88 +453,4 @@ export default function CoordinationProtocolDataPanel({
       />
     </section>
   );
-}
-
-function resolveValueForField(
-  flex: CoordinationProcurementFlex,
-  organId: number,
-  fieldTemplateId: number,
-): CoordinationProcurementValue | null {
-  const organ = flex.organs.find((entry) => entry.organ_id === organId);
-  if (!organ) return null;
-  for (const slot of organ.slots) {
-    const found = slot.values.find((value) => value.field_template_id === fieldTemplateId);
-    if (found) return found;
-  }
-  return null;
-}
-
-function resolveValueForFieldInSlot(
-  flex: CoordinationProcurementFlex | null,
-  organId: number,
-  slotKey: ProcurementSlotKey,
-  fieldTemplateId: number,
-): CoordinationProcurementValue | null {
-  if (!flex) return null;
-  const organ = flex.organs.find((entry) => entry.organ_id === organId);
-  if (!organ) return null;
-  const slot = organ.slots.find((entry) => entry.slot_key === slotKey);
-  if (!slot) return null;
-  return slot.values.find((value) => value.field_template_id === fieldTemplateId) ?? null;
-}
-
-function getFieldStateClass(
-  field: CoordinationProcurementFlex['field_templates'][number],
-  valueRow: CoordinationProcurementValue | null,
-  drafts: DraftsByField,
-  forceCommitted: boolean,
-): 'pending' | 'committed' | 'editing' {
-  if (forceCommitted) {
-    return 'committed';
-  }
-  if (field.value_mode === 'PERSON_SINGLE' || field.value_mode === 'PERSON_LIST') {
-    return (valueRow?.persons?.length ?? 0) > 0 ? 'committed' : 'pending';
-  }
-  if (field.value_mode === 'TEAM_SINGLE' || field.value_mode === 'TEAM_LIST') {
-    return (valueRow?.teams?.length ?? 0) > 0 ? 'committed' : 'pending';
-  }
-  if (field.value_mode === 'EPISODE') {
-    return valueRow?.episode_ref?.episode_id ? 'committed' : 'pending';
-  }
-  const draftValue = drafts[field.id] ?? valueRow?.value ?? '';
-  const committed = (valueRow?.value ?? '').trim().length > 0;
-  return committed ? 'committed' : draftValue.trim().length === 0 ? 'pending' : 'editing';
-}
-
-function isGroupTouched(
-  fields: CoordinationProcurementFlex['field_templates'],
-  flex: CoordinationProcurementFlex | null,
-  organId: number,
-  drafts: DraftsByField,
-  forceCommitted: boolean,
-): boolean {
-  if (forceCommitted) {
-    return true;
-  }
-  if (!flex) return false;
-  return fields.every((field) => {
-    const valueRow = resolveValueForField(flex, organId, field.id);
-    if (field.value_mode === 'PERSON_SINGLE') {
-      return (valueRow?.persons?.length ?? 0) > 0;
-    }
-    if (field.value_mode === 'PERSON_LIST') {
-      return (valueRow?.persons?.length ?? 0) > 0;
-    }
-    if (field.value_mode === 'TEAM_LIST') {
-      return (valueRow?.teams?.length ?? 0) > 0;
-    }
-    if (field.value_mode === 'TEAM_SINGLE') {
-      return (valueRow?.teams?.length ?? 0) > 0;
-    }
-    if (field.value_mode === 'EPISODE') {
-      return !!valueRow?.episode_ref?.episode_id;
-    }
-    const draftValue = drafts[field.id] ?? valueRow?.value ?? '';
-    return draftValue.trim().length > 0;
-  });
 }

@@ -151,3 +151,12 @@ FAVORITE_TYPE = [
 
 RECORDS = RECORDS + FAVORITE_TYPE
 
+# --- INFORMATION_AREA ----
+INFORMATION_AREA = [
+    {"type": "INFORMATION_AREA", "key": "GENERAL", "pos": 1, "ext_sys": "", "ext_key": "", "name_default": "Allgemein"},
+    {"type": "INFORMATION_AREA", "key": "COORDINATION", "pos": 2, "ext_sys": "", "ext_key": "", "name_default": "Koordination"},
+    {"type": "INFORMATION_AREA", "key": "ORGAN", "pos": 3, "ext_sys": "", "ext_key": "", "name_default": "Organ"},
+]
+
+RECORDS = RECORDS + INFORMATION_AREA
+

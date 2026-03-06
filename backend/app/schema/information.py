@@ -2,13 +2,14 @@ from __future__ import annotations
 
 import datetime as dt
 
-from pydantic import BaseModel, ConfigDict, field_validator
+from pydantic import BaseModel, ConfigDict, Field, field_validator
 
 from .reference import CodeResponse, UserResponse
 
 
 class InformationBase(BaseModel):
     context_id: int | None = None
+    context_ids: list[int] = Field(default_factory=list)
     text: str
     author_id: int
     date: dt.date
@@ -31,6 +32,7 @@ class InformationCreate(InformationBase):
 
 class InformationUpdate(BaseModel):
     context_id: int | None = None
+    context_ids: list[int] | None = None
     text: str | None = None
     author_id: int | None = None
     date: dt.date | None = None
@@ -54,6 +56,7 @@ class InformationResponse(InformationBase):
 
     id: int
     context: CodeResponse | None = None
+    contexts: list[CodeResponse] = []
     author: UserResponse | None = None
     current_user_read_at: dt.datetime | None = None
     withdrawn: bool = False

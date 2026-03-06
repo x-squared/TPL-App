@@ -18,7 +18,7 @@ When creating or updating requirement specifications, follow the project specifi
 
 Each specification document must use this hierarchy (as headings):
 
-1. Topic
+1. Feature
 2. Use Case
 3. Story
 4. Item
@@ -27,20 +27,21 @@ Do not skip levels when adding detailed requirements.
 
 ## Mandatory label on every level
 
-Every Topic, Use Case, Story, and Item should carry exactly one status label.
-Use plain Markdown status tokens in headings (for example `## Topic: ... [Spec]` and `##### Item: ... [Ready]`).
+Each specification file must contain exactly one Feature heading.
+Every Feature, Use Case, Story, and Item should carry exactly one status label.
+Use plain Markdown status tokens in headings (for example `# Feature: ... [Spec]` and `#### Item: ... [Ready]`).
 Do not use a dash before the status marker (write `Title [Ready]`, not `Title - [Ready]`).
 
 Defaulting rule:
 
-- If a Topic, Use Case, Story, or Item heading has no status label, assume `Spec` and insert `[Spec]` automatically when editing.
+- If a Feature, Use Case, Story, or Item heading has no status label, assume `Spec` and insert `[Spec]` automatically when editing.
 - Never leave specification headings unlabeled after an edit.
 
 ## Status hierarchy gate
 
 - A parent level cannot be marked `Done` while any direct or nested lower level is not `Done`.
 - Enforce top-down consistency before finishing edits:
- - Topic `Done` requires all Use Cases/Stories/Items below it to be `Done`.
+ - Feature `Done` requires all Use Cases/Stories/Items below it to be `Done`.
  - Use Case `Done` requires all Stories/Items below it to be `Done`.
  - Story `Done` requires all Items below it to be `Done`.
 - If any lower level is not `Done`, keep or downgrade the parent to the appropriate non-`Done` state.

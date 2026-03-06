@@ -5,7 +5,7 @@ import datetime as dt
 from fastapi import HTTPException
 from sqlalchemy.orm import Session, joinedload
 
-from ...models import Code, Information, InformationUser, User
+from ...models import Code, Information, InformationContext, InformationUser, User
 from ...schemas import InformationCreate, InformationUpdate
 
 
@@ -13,6 +13,7 @@ def _information_query(db: Session):
     return db.query(Information).options(
         joinedload(Information.context),
         joinedload(Information.author),
+        joinedload(Information.context_links).joinedload(InformationContext.context),
     )
 
 
@@ -27,8 +28,74 @@ def _ensure_context_valid(*, db: Session, context_id: int | None) -> None:
     context = db.query(Code).filter(Code.id == context_id).first()
     if not context:
         raise HTTPException(status_code=422, detail="context_id references unknown CODE")
-    if context.type != "ORGAN":
-        raise HTTPException(status_code=422, detail="context_id must reference CODE type ORGAN")
+    if context.type not in {"ORGAN", "INFORMATION_AREA"}:
+        raise HTTPException(status_code=422, detail="context_id must reference CODE type ORGAN or INFORMATION_AREA")
+
+
+def _normalize_context_ids(*, context_id: int | None, context_ids: list[int] | None) -> list[int]:
+    raw = list(context_ids or [])
+    if context_id is not None and context_id not in raw:
+        raw.insert(0, context_id)
+    normalized: list[int] = []
+    seen: set[int] = set()
+    for value in raw:
+        if value in seen:
+            continue
+        seen.add(value)
+        normalized.append(value)
+    return normalized
+
+
+def _ensure_contexts_valid(*, db: Session, context_ids: list[int]) -> None:
+    for context_id in context_ids:
+        _ensure_context_valid(db=db, context_id=context_id)
+
+
+def _enforce_area_context_rules(*, db: Session, context_ids: list[int]) -> list[int]:
+    has_information_area_codes = (
+        db.query(Code).filter(Code.type == "INFORMATION_AREA").first() is not None
+    )
+    if not has_information_area_codes:
+        return context_ids
+    if not context_ids:
+        general = db.query(Code).filter(Code.type == "INFORMATION_AREA", Code.key == "GENERAL").first()
+        return [general.id] if general is not None else context_ids
+    codes_by_id = {
+        code.id: code
+        for code in db.query(Code).filter(Code.id.in_(context_ids)).all()
+    }
+    area_codes = [
+        code
+        for context_id in context_ids
+        for code in [codes_by_id.get(context_id)]
+        if code is not None and code.type == "INFORMATION_AREA"
+    ]
+    organ_codes = [
+        code
+        for context_id in context_ids
+        for code in [codes_by_id.get(context_id)]
+        if code is not None and code.type == "ORGAN"
+    ]
+    if len(area_codes) > 1:
+        raise HTTPException(status_code=422, detail="Only one INFORMATION_AREA context can be set")
+    area_key = area_codes[0].key if area_codes else "GENERAL"
+    if area_key == "ORGAN" and len(organ_codes) == 0:
+        raise HTTPException(status_code=422, detail="At least one ORGAN context is required for INFORMATION_AREA.ORGAN")
+    if area_key != "ORGAN" and len(organ_codes) > 0:
+        raise HTTPException(status_code=422, detail="ORGAN contexts are only allowed for INFORMATION_AREA.ORGAN")
+    if not area_codes:
+        general = db.query(Code).filter(Code.type == "INFORMATION_AREA", Code.key == "GENERAL").first()
+        if general is not None:
+            return [general.id, *context_ids]
+    return context_ids
+
+
+def _sync_information_context_links(*, item: Information, context_ids: list[int]) -> None:
+    item.context_id = context_ids[0] if context_ids else None
+    item.context_links = [
+        InformationContext(context_id=context_id, pos=pos)
+        for pos, context_id in enumerate(context_ids)
+    ]
 
 
 def _next_working_day(today: dt.date | None = None) -> dt.date:
@@ -81,9 +148,19 @@ def _ensure_read_marker(*, db: Session, information_id: int, user_id: int) -> In
 
 
 def _to_response_row(*, row: Information, current_user_read_at: object | None, has_reads: bool) -> dict:
+    linked_contexts = [
+        link.context
+        for link in sorted(row.context_links or [], key=lambda link: link.pos)
+        if link.context is not None
+    ]
+    linked_context_ids = [context.id for context in linked_contexts]
+    if not linked_contexts and row.context is not None:
+        linked_contexts = [row.context]
+        linked_context_ids = [row.context.id]
     return {
         "id": row.id,
         "context_id": row.context_id,
+        "context_ids": linked_context_ids,
         "text": row.text,
         "author_id": row.author_id,
         "date": row.date,
@@ -91,6 +168,7 @@ def _to_response_row(*, row: Information, current_user_read_at: object | None, h
         "withdrawn": bool(row.withdrawn),
         "has_reads": has_reads,
         "context": row.context,
+        "contexts": linked_contexts,
         "author": row.author,
         "current_user_read_at": current_user_read_at,
     }
@@ -113,12 +191,16 @@ def list_information(*, db: Session, current_user_id: int) -> list[dict]:
 
 
 def create_information(*, payload: InformationCreate, db: Session, current_user_id: int) -> dict:
-    _ensure_context_valid(db=db, context_id=payload.context_id)
+    context_ids = _normalize_context_ids(context_id=payload.context_id, context_ids=payload.context_ids)
+    _ensure_contexts_valid(db=db, context_ids=context_ids)
+    context_ids = _enforce_area_context_rules(db=db, context_ids=context_ids)
     _ensure_author_exists(db=db, author_id=current_user_id)
     _validate_valid_from(valid_from=payload.valid_from)
-    data = payload.model_dump()
+    data = payload.model_dump(exclude={"context_ids"})
     data["author_id"] = current_user_id
+    data["context_id"] = context_ids[0] if context_ids else None
     item = Information(**data)
+    _sync_information_context_links(item=item, context_ids=context_ids)
     db.add(item)
     db.commit()
     author_read_marker = _ensure_read_marker(db=db, information_id=item.id, user_id=current_user_id)
@@ -140,8 +222,17 @@ def update_information(
     if item.author_id != current_user_id and not current_user_is_admin:
         raise HTTPException(status_code=403, detail="Only the author or an admin user can edit this information")
     data = payload.model_dump(exclude_unset=True)
-    if "context_id" in data:
-        _ensure_context_valid(db=db, context_id=data.get("context_id"))
+    if "context_ids" in data or "context_id" in data:
+        merged_context_ids = _normalize_context_ids(
+            context_id=data.get("context_id", item.context_id),
+            context_ids=data.get("context_ids"),
+        )
+        _ensure_contexts_valid(db=db, context_ids=merged_context_ids)
+        merged_context_ids = _enforce_area_context_rules(db=db, context_ids=merged_context_ids)
+        _sync_information_context_links(item=item, context_ids=merged_context_ids)
+        data["context_id"] = merged_context_ids[0] if merged_context_ids else None
+    if "context_ids" in data:
+        data.pop("context_ids", None)
     if "author_id" in data and data.get("author_id") is not None:
         _ensure_author_exists(db=db, author_id=data["author_id"])
     if "valid_from" in data and data.get("valid_from") is not None:

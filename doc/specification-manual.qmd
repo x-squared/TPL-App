@@ -119,7 +119,7 @@ The checker validates backend imports against `spec/architecture/dependency-rule
 
 All requirement specification documents under `spec/requirements/` must follow the same hierarchy:
 
-1. Topic
+1. Feature
 2. Use Case
 3. Story
 4. Item
@@ -145,28 +145,29 @@ Business requirement specifications in `spec/requirements/` use plain Markdown s
 Apply labels directly in headings (without a dash before the status):
 
 ```md
-## Topic: <Name> [Spec]
-### Use Case: <Name> [Ready]
-#### Story: <Name> [Impl]
+# Feature: <Name> [Spec]
+## Use Case: <Name> [Ready]
+### Story: <Name> [Impl]
 ```
 
 Item level should use the same heading-inline style:
 
 ```md
-##### Item: <Beschreibung> [QA]
+#### Item: <Beschreibung> [QA]
 ```
 
 Rules:
 
-- Every Topic, Use Case, Story, or Item heading must have exactly one status marker. 
-- If a Topic, Use Case, Story, or Item heading has no status marker, default to `Spec`.
+- Exactly one `Feature` heading is allowed per file.
+- Every Feature, Use Case, Story, or Item heading must have exactly one status marker. 
+- If a Feature, Use Case, Story, or Item heading has no status marker, default to `Spec`.
 - During edits, missing labels are normalized by adding `[Spec]`.
 
 Status hierarchy gate:
 
 - A parent level cannot be marked `Done` before all lower levels under it are also `Done`.
 - Therefore:
- - Topic `Done` only when all nested Use Cases/Stories/Items are `Done`.
+ - Feature `Done` only when all nested Use Cases/Stories/Items are `Done`.
  - Use Case `Done` only when all nested Stories/Items are `Done`.
  - Story `Done` only when all nested Items are `Done`.
 

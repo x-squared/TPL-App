@@ -1,5 +1,5 @@
-import { useMemo, useState } from 'react';
-import { type ColloqiumAgenda, type PatientListItem, type Person } from '../../../../api';
+import { useEffect, useMemo, useState } from 'react';
+import { type Code, type ColloqiumAgenda, type PatientListItem, type Person } from '../../../../api';
 import { translateCodeLabel } from '../../../../i18n/codeTranslations';
 import { useI18n } from '../../../../i18n/i18n';
 import { exportColloquiumProtocolPdf } from './exportColloquiumProtocol';
@@ -14,6 +14,7 @@ interface Props {
   agendas: ColloqiumAgenda[];
   agendaDrafts: Record<number, AgendaDraft>;
   loadingAgendas: boolean;
+  decisionOptions: Code[];
   patientsById: Record<number, PatientListItem>;
   onChangeAgendaDraft: (agendaId: number, patch: Partial<AgendaDraft>) => void;
   onChangeDraftParticipantsPeople: (next: Person[]) => void;
@@ -22,6 +23,7 @@ interface Props {
 export interface AgendaDraft {
   presented_by: string;
   decision: string;
+  decision_reason: string;
   comment: string;
 }
 
@@ -39,6 +41,7 @@ export default function ColloquiumProtocolTab({
   agendas,
   agendaDrafts,
   loadingAgendas,
+  decisionOptions,
   patientsById,
   onChangeAgendaDraft,
   onChangeDraftParticipantsPeople,
@@ -47,6 +50,7 @@ export default function ColloquiumProtocolTab({
   const [exportingPdf, setExportingPdf] = useState(false);
   const [visibleTaskListsByAgendaId, setVisibleTaskListsByAgendaId] = useState<Record<number, boolean>>({});
   const [taskAutoCreateTokenByAgendaId, setTaskAutoCreateTokenByAgendaId] = useState<Record<number, number>>({});
+  const [pendingAutoCreateAgendaId, setPendingAutoCreateAgendaId] = useState<number | null>(null);
   const sortedAgendas = useMemo(
     () => [...agendas].sort((a, b) => (a.episode?.start ?? '').localeCompare(b.episode?.start ?? '')),
     [agendas],
@@ -78,6 +82,16 @@ export default function ColloquiumProtocolTab({
       setExportingPdf(false);
     }
   };
+
+  useEffect(() => {
+    if (pendingAutoCreateAgendaId === null) return;
+    if (!visibleTaskListsByAgendaId[pendingAutoCreateAgendaId]) return;
+    setTaskAutoCreateTokenByAgendaId((prev) => ({
+      ...prev,
+      [pendingAutoCreateAgendaId]: (prev[pendingAutoCreateAgendaId] ?? 0) + 1,
+    }));
+    setPendingAutoCreateAgendaId(null);
+  }, [pendingAutoCreateAgendaId, visibleTaskListsByAgendaId]);
 
   return (
     <section className="colloquiums-protocol paper-layout">
@@ -117,7 +131,7 @@ export default function ColloquiumProtocolTab({
         ) : (
           <div className="colloquiums-protocol-agenda">
             {sortedAgendas.map((agenda, idx) => {
-              const draft = agendaDrafts[agenda.id] ?? { presented_by: '', decision: '', comment: '' };
+              const draft = agendaDrafts[agenda.id] ?? { presented_by: '', decision: '', decision_reason: '', comment: '' };
               const patient = agenda.episode ? patientsById[agenda.episode.patient_id] : undefined;
               const phase = resolvePhase(agenda);
               const tasksVisible = visibleTaskListsByAgendaId[agenda.id] ?? false;
@@ -153,10 +167,25 @@ export default function ColloquiumProtocolTab({
                     </label>
                     <label>
                       {t('colloquiums.protocol.decision', 'Decision')}
-                      <input
-                        type="text"
+                      <select
                         value={draft.decision}
                         onChange={(e) => onChangeAgendaDraft(agenda.id, { decision: e.target.value })}
+                      >
+                        <option value="">{t('colloquiums.protocol.decisionPlaceholder', 'Select decision')}</option>
+                        {decisionOptions.map((option) => (
+                          <option key={option.id} value={option.key}>
+                            {translateCodeLabel(t, option)}
+                          </option>
+                        ))}
+                      </select>
+                    </label>
+                    <label>
+                      {t('colloquiums.protocol.decisionReason', 'Begründung')}
+                      <input
+                        type="text"
+                        maxLength={128}
+                        value={draft.decision_reason}
+                        onChange={(e) => onChangeAgendaDraft(agenda.id, { decision_reason: e.target.value })}
                       />
                     </label>
                     <label>
@@ -185,11 +214,15 @@ export default function ColloquiumProtocolTab({
                           className="patients-add-btn"
                           disabled={!canOpenTasks}
                           onClick={() => {
+                            if (tasksVisible) {
+                              setTaskAutoCreateTokenByAgendaId((prev) => ({
+                                ...prev,
+                                [agenda.id]: (prev[agenda.id] ?? 0) + 1,
+                              }));
+                              return;
+                            }
                             setVisibleTaskListsByAgendaId((prev) => ({ ...prev, [agenda.id]: true }));
-                            setTaskAutoCreateTokenByAgendaId((prev) => ({
-                              ...prev,
-                              [agenda.id]: (prev[agenda.id] ?? 0) + 1,
-                            }));
+                            setPendingAutoCreateAgendaId(agenda.id);
                           }}
                         >
                           {t('colloquiums.protocol.addTask', '+ Add task')}

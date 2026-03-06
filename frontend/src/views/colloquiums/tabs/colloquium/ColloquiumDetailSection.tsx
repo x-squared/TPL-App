@@ -1,4 +1,4 @@
-import type { Colloqium, ColloqiumAgenda, PatientListItem, Person } from '../../../../api';
+import type { Code, Colloqium, ColloqiumAgenda, PatientListItem, Person } from '../../../../api';
 import { translateCodeLabel } from '../../../../i18n/codeTranslations';
 import { useI18n } from '../../../../i18n/i18n';
 import ColloquiumAgendaTable from './ColloquiumAgendaTable';
@@ -10,7 +10,14 @@ import PersonMultiSelect from '../../../layout/PersonMultiSelect';
 interface EpisodeChoice {
   episodeId: number;
   patientId: number;
+  patientName: string;
+  patientFirstName: string;
+  patientPid: string;
   fallNr: string;
+  organName: string;
+  statusName: string;
+  phaseName: string;
+  statusReference: string;
   start: string | null;
   end: string | null;
 }
@@ -28,6 +35,8 @@ interface EpisodePreview {
   fallNr: string;
   organName: string;
   statusName: string;
+  phaseName: string;
+  statusReference: string;
   start: string | null;
   end: string | null;
 }
@@ -43,11 +52,13 @@ interface Props {
   editingAgendaId: number | null;
   savingAgenda: boolean;
   deletingAgendaId: number | null;
+  decisionOptions: Code[];
   editingAgendaForm: {
     episode_id: number | null;
     episode_ids: number[];
     presented_by: string;
     decision: string;
+    decision_reason: string;
     comment: string;
   };
   selectedEpisodePreviews: EpisodePreview[];
@@ -71,6 +82,7 @@ interface Props {
     episode_ids: number[];
     presented_by: string;
     decision: string;
+    decision_reason: string;
     comment: string;
   }>) => void;
   onChangeName: (value: string) => void;
@@ -96,6 +108,7 @@ export default function ColloquiumDetailSection({
   editingAgendaId,
   savingAgenda,
   deletingAgendaId,
+  decisionOptions,
   editingAgendaForm,
   selectedEpisodePreviews,
   selectedEpisodeLabel,
@@ -200,6 +213,7 @@ export default function ColloquiumDetailSection({
             editingAgendaId={editingAgendaId}
             savingAgenda={savingAgenda}
             deletingAgendaId={deletingAgendaId}
+            decisionOptions={decisionOptions}
             editingForm={editingAgendaForm}
             selectedEpisodePreviews={selectedEpisodePreviews}
             patientsById={patientsById}

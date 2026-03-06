@@ -4852,6 +4852,26 @@
           "de": "Entscheid"
         }
       },
+      "decisionPlaceholder": {
+        "label": {
+          "en": "Colloquium protocol decision placeholder",
+          "de": "Kolloquium Protokoll Entscheid Platzhalter"
+        },
+        "text": {
+          "en": "Select decision",
+          "de": "Entscheid auswählen"
+        }
+      },
+      "decisionReason": {
+        "label": {
+          "en": "Colloquium protocol decision reason label",
+          "de": "Kolloquium Protokoll Entscheid Begründung Label"
+        },
+        "text": {
+          "en": "Begründung",
+          "de": "Begründung"
+        }
+      },
       "showTasks": {
         "label": {
           "en": "Colloquium protocol show tasks action",
@@ -5857,6 +5877,38 @@
         "de": "Nur ungelesene anzeigen"
       }
     },
+    "filters": {
+      "searchLabel": {
+        "label": {
+          "en": "Information filter field label",
+          "de": "Information Filter Feldbeschriftung"
+        },
+        "text": {
+          "en": "Filter",
+          "de": "Filter"
+        }
+      },
+      "searchPlaceholder": {
+        "label": {
+          "en": "Information filter search placeholder",
+          "de": "Information Filter Suchplatzhalter"
+        },
+        "text": {
+          "en": "Search in all fields...",
+          "de": "In allen Feldern suchen..."
+        }
+      },
+      "emptyFiltered": {
+        "label": {
+          "en": "Information filter empty result",
+          "de": "Information Filter leeres Ergebnis"
+        },
+        "text": {
+          "en": "No information entries match your filter.",
+          "de": "Keine Informationseinträge entsprechen Ihrem Filter."
+        }
+      }
+    },
     "help": {
       "markRead": {
         "label": {
@@ -5932,6 +5984,16 @@
       }
     },
     "context": {
+      "dropdownLabel": {
+        "label": {
+          "en": "Information context dropdown label",
+          "de": "Information Kontext Dropdown Beschriftung"
+        },
+        "text": {
+          "en": "Context organs",
+          "de": "Kontextorgane"
+        }
+      },
       "general": {
         "label": {
           "en": "Information context general",

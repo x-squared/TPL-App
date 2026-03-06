@@ -1,4 +1,4 @@
-# Interface-Spezifikation [Spec]
+# Feature: Schnittstellen [Spec]
 
 Dieses Dokument beschreibt fachliche und technische Anforderungen für externe Schnittstellen in TPL-App.
 
@@ -10,7 +10,7 @@ Dieses Dokument beschreibt fachliche und technische Anforderungen für externe S
 - QA = Testdefinition/Ausführung offen
 - Done = abgeschlossen
 
-## Topic: Schnittstellen-Architektur [Spec]
+## Use Case: Schnittstellen-Architektur [Spec]
 
 ### Use Case: Externes System anbinden [Ready]
 
@@ -32,7 +32,7 @@ Dieses Dokument beschreibt fachliche und technische Anforderungen für externe S
 
 ##### Item: Wiederholte Imports sind idempotent ausführbar (z. B. via idempotency key oder fachlichem Duplikatsschutz). [Spec]
 
-## Topic: Daten- und Fehlerverhalten [Spec]
+## Use Case: Daten- und Fehlerverhalten [Spec]
 
 ### Use Case: Externe Daten sicher übernehmen [Spec]
 
@@ -54,7 +54,7 @@ Dieses Dokument beschreibt fachliche und technische Anforderungen für externe S
 
 ##### Item: Teilfehler führen nicht zu stillen Datenverlusten; der Verarbeitungsstatus bleibt nachvollziehbar. [Spec]
 
-## Topic: Konfiguration und Sicherheit [Spec]
+## Use Case: Konfiguration und Sicherheit [Spec]
 
 ### Use Case: Laufzeitkonfiguration verwalten [Ready]
 
@@ -72,7 +72,7 @@ Dieses Dokument beschreibt fachliche und technische Anforderungen für externe S
 
 ##### Item: Schreiboperationen erfordern strengere Rechte als Lese-/Vorschauoperationen. [Spec]
 
-## Topic: Qualitätssicherung [Spec]
+## Use Case: Qualitätssicherung [Spec]
 
 ### Use Case: Schnittstellenänderungen verifizieren [Spec]
 

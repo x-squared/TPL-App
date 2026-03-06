@@ -192,10 +192,17 @@ class ColloqiumAgenda(Base):
     )
     decision = Column(
         "DECISION",
-        String(1024),
+        String(64),
         default="",
-        comment="Decision text captured for this agenda item.",
+        comment="Decision catalogue key captured for this agenda item.",
         info={"label": "Decision"},
+    )
+    decision_reason = Column(
+        "DECISION_REASON",
+        String(128),
+        default="",
+        comment="Reason/justification for the selected decision.",
+        info={"label": "Decision Reason"},
     )
     comment = Column(
         "COMMENT",

@@ -24,13 +24,13 @@ export default function MyWorkView({ onOpenFavorite, onOpenTaskContext, currentU
   return (
     <>
       <header className="patients-header">
-        <h1>{t('myWork.title', 'My Work')} ({model.tasks.openTaskCount} | {model.information.unreadCount})</h1>
+        <h1>{t('myWork.title', 'My Work')} ({model.tasks.openTaskCount} | {model.information.totalCount})</h1>
       </header>
       <div className="detail-tabs my-work-tabs">
         <MyWorkTabs
           activeTab={model.tabs.activeTab}
           setActiveTab={model.tabs.setActiveTab}
-          unreadInformationCount={model.information.unreadCount}
+          informationCount={model.information.totalCount}
           openTaskCount={model.tasks.openTaskCount}
         />
       </div>

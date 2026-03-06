@@ -67,6 +67,12 @@ class Information(Base):
     context = relationship("Code", foreign_keys=[context_id])
     author = relationship("User", foreign_keys=[author_id])
     user_reads = relationship("InformationUser", back_populates="information")
+    context_links = relationship(
+        "InformationContext",
+        back_populates="information",
+        cascade="all, delete-orphan",
+        order_by="InformationContext.pos",
+    )
 
 
 class InformationUser(Base):
@@ -101,3 +107,37 @@ class InformationUser(Base):
 
     information = relationship("Information", back_populates="user_reads")
     user = relationship("User", foreign_keys=[user_id])
+
+
+class InformationContext(Base):
+    """N:M relation between information rows and ORGAN context codes."""
+
+    __tablename__ = "INFORMATION_CONTEXT"
+
+    information_id = Column(
+        "INFORMATION_ID",
+        Integer,
+        ForeignKey("INFORMATION.ID"),
+        primary_key=True,
+        comment="Referenced information row.",
+        info={"label": "Information"},
+    )
+    context_id = Column(
+        "CONTEXT_ID",
+        Integer,
+        ForeignKey("CODE.ID"),
+        primary_key=True,
+        comment="Referenced context code (`CODE.ORGAN`).",
+        info={"label": "Context"},
+    )
+    pos = Column(
+        "POS",
+        Integer,
+        nullable=False,
+        default=0,
+        comment="Ordering position for context tags.",
+        info={"label": "Position"},
+    )
+
+    information = relationship("Information", back_populates="context_links")
+    context = relationship("Code", foreign_keys=[context_id])

@@ -1,66 +1,24 @@
-import { useEffect, useRef, useState } from 'react';
+import { useMemo, useState } from 'react';
 import { translateCodeLabel } from '../../i18n/codeTranslations';
 import ErrorBanner from '../layout/ErrorBanner';
 import { formatDateDdMmYyyy } from '../layout/dateFormat';
 import InlineDeleteActions from '../layout/InlineDeleteActions';
 import { useI18n } from '../../i18n/i18n';
+import RichTextEditor from '../layout/RichTextEditor';
+import InformationOrganContextDropdown from './InformationOrganContextDropdown';
 import type { InformationSectionModel } from './types';
 
 interface InformationRowsSectionProps {
   model: InformationSectionModel;
 }
 
-function TextEditor({
-  value,
-  onChange,
-}: {
-  value: string;
-  onChange: (next: string) => void;
-}) {
-  const { t } = useI18n();
-  const editorRef = useRef<HTMLDivElement | null>(null);
-  useEffect(() => {
-    const editor = editorRef.current;
-    if (!editor) return;
-    if (editor.innerHTML !== value) {
-      editor.innerHTML = value;
-    }
-  }, [value]);
-  const apply = (command: 'bold' | 'italic' | 'underline') => {
-    editorRef.current?.focus();
-    document.execCommand(command);
-    onChange(editorRef.current?.innerHTML ?? '');
-  };
-  return (
-    <div className="info-editor">
-      <div className="info-editor-toolbar">
-        <button type="button" className="info-editor-btn" onClick={() => apply('bold')} title={t('information.editor.bold', 'Bold')}>
-          B
-        </button>
-        <button type="button" className="info-editor-btn" onClick={() => apply('italic')} title={t('information.editor.italic', 'Italic')}>
-          I
-        </button>
-        <button type="button" className="info-editor-btn" onClick={() => apply('underline')} title={t('information.editor.underline', 'Underline')}>
-          U
-        </button>
-      </div>
-      <div
-        ref={editorRef}
-        className="info-editor-area"
-        contentEditable
-        dir="ltr"
-        suppressContentEditableWarning
-        onInput={(event) => onChange((event.currentTarget as HTMLDivElement).innerHTML)}
-      />
-    </div>
-  );
-}
-
 export default function InformationRowsSection({ model }: InformationRowsSectionProps) {
   const { t } = useI18n();
   const [confirmingDeleteId, setConfirmingDeleteId] = useState<number | null>(null);
   const [pendingWithdrawId, setPendingWithdrawId] = useState<number | null>(null);
+  const [filterQuery, setFilterQuery] = useState('');
   const today = new Date().toISOString().slice(0, 10);
+  const normalizedFilterQuery = filterQuery.trim().toLowerCase();
   const canManageRow = (row: { author_id: number }) => row.author_id === model.currentUserId || model.currentUserIsAdmin;
   const badgeClassForRow = (row: { current_user_read_at: string | null; valid_from: string; withdrawn: boolean }) => {
     if (row.withdrawn) return row.current_user_read_at ? 'info-read-badge-withdrawn-read' : 'info-read-badge-withdrawn-unread';
@@ -68,10 +26,38 @@ export default function InformationRowsSection({ model }: InformationRowsSection
     if (row.valid_from <= today) return 'info-read-badge-unread-valid';
     return 'info-read-badge-unread-future';
   };
+  const filterTokens = useMemo(
+    () =>
+      [...model.areaContexts, ...model.organContexts]
+        .map((context) => translateCodeLabel(t, context).trim())
+        .filter((entry) => entry.length > 0),
+    [model.areaContexts, model.organContexts, t],
+  );
+  const filteredRows = useMemo(() => {
+    if (!normalizedFilterQuery) return model.rows;
+    return model.rows.filter((row) => {
+      const contextLabels = (row.contexts ?? [])
+        .map((context) => translateCodeLabel(t, context))
+        .join(' ');
+      const rowSearchBlob = [
+        `${row.id}`,
+        row.text.replace(/<[^>]*>/g, ' '),
+        row.author?.name ?? `#${row.author_id}`,
+        row.date,
+        row.valid_from,
+        contextLabels || (row.context ? translateCodeLabel(t, row.context) : t('information.context.general', 'General')),
+        row.withdrawn ? t('information.actions.withdraw', 'Withdraw') : '',
+      ]
+        .join(' ')
+        .toLowerCase();
+      return rowSearchBlob.includes(normalizedFilterQuery);
+    });
+  }, [model.rows, normalizedFilterQuery, t]);
+
   return (
     <section className="detail-section ui-panel-section">
       <div className="detail-section-heading">
-        <h2>{`${t('information.title', 'Information')} (${model.unreadCount})`}</h2>
+        <h2>{`${t('information.title', 'Information')} (${model.totalCount})`}</h2>
         {!model.adding && model.editingId == null && (
           <button className="ci-add-btn" onClick={model.startAdd}>
             {t('information.actions.add', '+ Add')}
@@ -86,6 +72,22 @@ export default function InformationRowsSection({ model }: InformationRowsSection
         />
         {t('information.showUnreadOnly', 'Show unread only')}
       </label>
+      <label className="info-search-filter">
+        <span>{t('information.filters.searchLabel', 'Filter')}</span>
+        <input
+          className="detail-input"
+          type="search"
+          list="information-organ-filter-suggestions"
+          value={filterQuery}
+          onChange={(event) => setFilterQuery(event.target.value)}
+          placeholder={t('information.filters.searchPlaceholder', 'Search in all fields...')}
+        />
+      </label>
+      <datalist id="information-organ-filter-suggestions">
+        {filterTokens.map((label) => (
+          <option key={label} value={label} />
+        ))}
+      </datalist>
       <p className="detail-help info-read-help">{t('information.help.markRead', 'Click a badge in the first column to mark information as read.')}</p>
       {pendingWithdrawId != null ? (
         <p className="detail-help info-read-help">{t('information.help.withdrawRead', 'This information was already read. You can edit the text and then click Withdraw.')}</p>
@@ -115,7 +117,14 @@ export default function InformationRowsSection({ model }: InformationRowsSection
                   />
                 </td>
                 <td>
-                  <TextEditor value={model.draft.text} onChange={model.setDraftText} />
+                  <RichTextEditor
+                    value={model.draft.text}
+                    onChange={model.setDraftText}
+                    ariaLabel={t('information.table.text', 'Text')}
+                    boldTitle={t('information.editor.bold', 'Bold')}
+                    italicTitle={t('information.editor.italic', 'Italic')}
+                    underlineTitle={t('information.editor.underline', 'Underline')}
+                  />
                   <small className="info-editor-count">{model.draftTextLength} / 1024</small>
                 </td>
                 <td className="info-valid-from-col">
@@ -131,22 +140,54 @@ export default function InformationRowsSection({ model }: InformationRowsSection
                   {model.authors.find((author) => author.id === model.draft.author_id)?.name ?? `#${model.draft.author_id}`}
                 </td>
                 <td>
-                  <select
-                    className="detail-input ci-inline-input"
-                    value={model.draft.context_id ?? ''}
-                    onChange={(event) =>
-                      model.setDraft({
-                        ...model.draft,
-                        context_id: event.target.value ? Number(event.target.value) : null,
-                      })}
-                  >
-                    <option value="">{t('information.context.general', 'General')}</option>
-                    {model.organContexts.map((context) => (
-                      <option key={context.id} value={context.id}>
-                        {translateCodeLabel(t, context)}
-                      </option>
-                    ))}
-                  </select>
+                  <div className="info-context-edit-grid">
+                    {model.areaContexts.length > 0 ? (
+                      <select
+                        className="detail-input ci-inline-input"
+                        value={model.draft.area_context_id ?? ''}
+                        onChange={(event) => {
+                          const nextAreaId = event.target.value ? Number(event.target.value) : null;
+                          const organIds = model.draft.context_ids.filter((contextId) =>
+                            model.organContexts.some((context) => context.id === contextId));
+                          const isOrganArea = model.areaContexts.find((context) => context.id === nextAreaId)?.key === 'ORGAN';
+                          const nextContextIds = nextAreaId == null
+                            ? []
+                            : isOrganArea
+                              ? [nextAreaId, ...organIds]
+                              : [nextAreaId];
+                          model.setDraft({
+                            ...model.draft,
+                            area_context_id: nextAreaId,
+                            context_ids: nextContextIds,
+                            context_id: nextContextIds[0] ?? null,
+                          });
+                        }}
+                      >
+                        {model.areaContexts.map((context) => (
+                          <option key={context.id} value={context.id}>
+                            {translateCodeLabel(t, context)}
+                          </option>
+                        ))}
+                      </select>
+                    ) : null}
+                    {(model.areaContexts.length === 0 || model.areaContexts.find((context) => context.id === model.draft.area_context_id)?.key === 'ORGAN') ? (
+                      <InformationOrganContextDropdown
+                        organContexts={model.organContexts}
+                        selectedContextIds={model.draft.context_ids.filter((contextId) =>
+                          model.organContexts.some((context) => context.id === contextId))}
+                        onChange={(nextOrgans) => {
+                          const nextAreaId = model.draft.area_context_id;
+                          const nextContextIds = nextAreaId == null ? nextOrgans : [nextAreaId, ...nextOrgans];
+                          model.setDraft({
+                            ...model.draft,
+                            context_ids: nextContextIds,
+                            context_id: nextContextIds[0] ?? null,
+                          });
+                        }}
+                        disabled={model.saving}
+                      />
+                    ) : null}
+                  </div>
                 </td>
                 <td className="detail-ci-actions">
                   <button
@@ -191,12 +232,16 @@ export default function InformationRowsSection({ model }: InformationRowsSection
                 </td>
               </tr>
             )}
-            {model.rows.length === 0 && !model.loading ? (
+            {filteredRows.length === 0 && !model.loading ? (
               <tr>
-                <td colSpan={6} className="status">{t('information.empty', 'No information rows yet.')}</td>
+                <td colSpan={6} className="status">
+                  {normalizedFilterQuery
+                    ? t('information.filters.emptyFiltered', 'No information entries match your filter.')
+                    : t('information.empty', 'No information rows yet.')}
+                </td>
               </tr>
             ) : null}
-            {model.rows.map((row) => (
+            {filteredRows.map((row) => (
               <tr key={row.id} className={row.current_user_read_at && !row.withdrawn ? 'info-row-read' : ''}>
                 <td className="info-read-col">
                   {row.current_user_read_at ? (
@@ -224,7 +269,37 @@ export default function InformationRowsSection({ model }: InformationRowsSection
                 </td>
                 <td className="info-valid-from-col">{formatDateDdMmYyyy(row.valid_from)}</td>
                 <td className="info-author-col">{row.author?.name ?? `#${row.author_id}`}</td>
-                <td>{row.context ? translateCodeLabel(t, row.context) : t('information.context.general', 'General')}</td>
+                <td>
+                  {(() => {
+                    const areaContext = (row.contexts ?? []).find((context) => context.type === 'INFORMATION_AREA');
+                    const organContexts = (row.contexts ?? []).filter((context) => context.type === 'ORGAN');
+                    if (areaContext || organContexts.length > 0) {
+                      return (
+                        <div className="person-pill-list">
+                          {areaContext ? (
+                            <span className="person-pill">
+                              {translateCodeLabel(t, areaContext)}
+                            </span>
+                          ) : (
+                            <span className="person-pill">
+                              {t('information.context.general', 'General')}
+                            </span>
+                          )}
+                          {organContexts.map((context) => (
+                            <span key={`${row.id}-${context.id}`} className="person-pill">
+                              {translateCodeLabel(t, context)}
+                            </span>
+                          ))}
+                        </div>
+                      );
+                    }
+                    return (
+                      <span className="person-pill">
+                        {t('information.context.general', 'General')}
+                      </span>
+                    );
+                  })()}
+                </td>
                 <td className="detail-ci-actions">
                   {canManageRow(row) ? (
                     row.withdrawn ? (

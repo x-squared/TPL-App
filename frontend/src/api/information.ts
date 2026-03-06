@@ -3,7 +3,9 @@ import { request, type AppUser, type Code } from './core';
 export interface Information {
   id: number;
   context_id: number | null;
+  context_ids: number[];
   context: Code | null;
+  contexts: Code[];
   text: string;
   author_id: number;
   author: AppUser | null;
@@ -16,6 +18,7 @@ export interface Information {
 
 export interface InformationCreate {
   context_id?: number | null;
+  context_ids?: number[];
   text: string;
   author_id: number;
   date: string;
@@ -24,6 +27,7 @@ export interface InformationCreate {
 
 export interface InformationUpdate {
   context_id?: number | null;
+  context_ids?: number[];
   text?: string;
   author_id?: number;
   date?: string;

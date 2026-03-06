@@ -1,5 +1,5 @@
 import type React from 'react';
-import type { Colloqium, ColloqiumAgenda, PatientListItem, Person } from '../../../api';
+import type { Code, Colloqium, ColloqiumAgenda, PatientListItem, Person } from '../../../api';
 import { useI18n } from '../../../i18n/i18n';
 import type { AgendaDraft } from '../tabs/protocol/ColloquiumProtocolTab';
 import ColloquiumProtocolTab from '../tabs/protocol/ColloquiumProtocolTab';
@@ -22,6 +22,7 @@ interface Props {
   draftParticipantsPeople: Person[];
   loadingAgendas: boolean;
   agendas: ColloqiumAgenda[];
+  decisionOptions: Code[];
   agendaDrafts: Record<number, AgendaDraft>;
   editingAgendaId: number | null;
   agendaSaving: boolean;
@@ -31,6 +32,7 @@ interface Props {
     episode_ids: number[];
     presented_by: string;
     decision: string;
+    decision_reason: string;
     comment: string;
   };
   selectedEpisodePreviews: Array<{
@@ -82,6 +84,7 @@ interface Props {
     episode_ids: number[];
     presented_by: string;
     decision: string;
+    decision_reason: string;
     comment: string;
   }>>;
   setAgendaDrafts: React.Dispatch<React.SetStateAction<Record<number, AgendaDraft>>>;
@@ -102,6 +105,7 @@ export default function ColloquiumDetailTabs({
   draftParticipantsPeople,
   loadingAgendas,
   agendas,
+  decisionOptions,
   agendaDrafts,
   editingAgendaId,
   agendaSaving,
@@ -186,6 +190,7 @@ export default function ColloquiumDetailTabs({
           editingAgendaId={editingAgendaId}
           savingAgenda={agendaSaving}
           deletingAgendaId={agendaDeletingId}
+          decisionOptions={decisionOptions}
           editingAgendaForm={agendaForm}
           selectedEpisodePreviews={selectedEpisodePreviews}
           selectedEpisodeLabel={selectedEpisodeLabel}
@@ -232,6 +237,7 @@ export default function ColloquiumDetailTabs({
             draftParticipants={draftParticipants}
             draftParticipantsPeople={draftParticipantsPeople}
             loadingAgendas={loadingAgendas}
+            decisionOptions={decisionOptions}
             agendas={agendas}
             agendaDrafts={agendaDrafts}
             patientsById={patientsById}
@@ -239,7 +245,7 @@ export default function ColloquiumDetailTabs({
             onChangeAgendaDraft={(agendaId, patch) =>
               setAgendaDrafts((prev) => ({
                 ...prev,
-                [agendaId]: { ...(prev[agendaId] ?? { presented_by: '', decision: '', comment: '' }), ...patch },
+                [agendaId]: { ...(prev[agendaId] ?? { presented_by: '', decision: '', decision_reason: '', comment: '' }), ...patch },
               }))
             }
           />
