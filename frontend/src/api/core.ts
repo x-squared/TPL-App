@@ -120,6 +120,8 @@ export interface MedicalValueTemplate {
   id: number;
   lab_key: string;
   kis_key: string;
+  loinc_code: string | null;
+  loinc_display_name: string | null;
   datatype_id: number;
   datatype: Code | null;
   datatype_def_id: number | null;
@@ -180,6 +182,9 @@ export interface DatatypeDefinition {
   code: Code | null;
   primitive_kind: string;
   unit: string | null;
+  canonical_unit_ucum: string | null;
+  allowed_units_ucum_json: string | null;
+  conversion_group: string | null;
   format_pattern: string | null;
   validation_regex: string | null;
   min_value: string | null;

@@ -22,10 +22,12 @@ class ScheduledJob(Base):
     last_finished_at = Column("LAST_FINISHED_AT", DateTime(timezone=True), nullable=True)
     last_status = Column("LAST_STATUS", String(32), nullable=True)
     changed_by_id = Column("CHANGED_BY", Integer, ForeignKey("USER.ID"), nullable=True)
+    created_by_id = Column("CREATED_BY", Integer, ForeignKey("USER.ID"), nullable=True)
     created_at = Column("CREATED_AT", DateTime(timezone=True), server_default=func.now())
     updated_at = Column("UPDATED_AT", DateTime(timezone=True), onupdate=func.now())
 
     changed_by_user = relationship("User", foreign_keys=[changed_by_id])
+    created_by_user = relationship("User", foreign_keys=[created_by_id])
     runs = relationship("ScheduledJobRun", back_populates="job", cascade="all, delete-orphan")
 
 
@@ -45,8 +47,10 @@ class ScheduledJobRun(Base):
     finished_at = Column("FINISHED_AT", DateTime(timezone=True), nullable=True)
     duration_ms = Column("DURATION_MS", Integer, nullable=True)
     changed_by_id = Column("CHANGED_BY", Integer, ForeignKey("USER.ID"), nullable=True)
+    created_by_id = Column("CREATED_BY", Integer, ForeignKey("USER.ID"), nullable=True)
     created_at = Column("CREATED_AT", DateTime(timezone=True), server_default=func.now())
     updated_at = Column("UPDATED_AT", DateTime(timezone=True), onupdate=func.now())
 
     job = relationship("ScheduledJob", back_populates="runs")
     changed_by_user = relationship("User", foreign_keys=[changed_by_id])
+    created_by_user = relationship("User", foreign_keys=[created_by_id])

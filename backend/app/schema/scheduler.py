@@ -24,7 +24,10 @@ class ScheduledJobResponse(BaseModel):
     last_status: str | None = None
     changed_by_id: int | None = None
     changed_by_user: UserResponse | None = None
+    created_by_id: int | None = None
+    created_by_user: UserResponse | None = None
     created_at: datetime
+    changed_at: datetime | None = None
     updated_at: datetime | None = None
 
 
@@ -45,7 +48,10 @@ class ScheduledJobRunResponse(BaseModel):
     duration_ms: int | None = None
     changed_by_id: int | None = None
     changed_by_user: UserResponse | None = None
+    created_by_id: int | None = None
+    created_by_user: UserResponse | None = None
     created_at: datetime
+    changed_at: datetime | None = None
     updated_at: datetime | None = None
 
 

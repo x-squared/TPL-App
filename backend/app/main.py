@@ -8,6 +8,8 @@ from sqlalchemy import text
 from sqlalchemy.orm.exc import StaleDataError
 
 from . import models
+from .audit_context import clear_current_changed_by_id
+from .audit_hooks import register_audit_hooks
 from .config import get_config
 from .database import Base, engine
 from .db_schema import SchemaRuntime, verify_schema_drift
@@ -82,6 +84,7 @@ def ensure_database_schema_compatible() -> None:
 @asynccontextmanager
 async def lifespan(app: FastAPI):
     _ = models
+    register_audit_hooks()
     ensure_database_schema_compatible()
     ensure_strong_enum_code_alignment()
     logger.info("Startup checks passed: schema compatibility and enum/code alignment verified.")
@@ -101,6 +104,15 @@ app.add_middleware(
 )
 
 register_routers(app)
+
+
+@app.middleware("http")
+async def reset_audit_user_context(request: Request, call_next):
+    clear_current_changed_by_id()
+    try:
+        return await call_next(request)
+    finally:
+        clear_current_changed_by_id()
 
 
 @app.exception_handler(StaleDataError)

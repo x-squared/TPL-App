@@ -1,25 +1,20 @@
-# Feature: Episoden [Spec]
+# Feature-of [TPLK]: Koordination Transplantation
 
-## Use Case: Episoden [Spec]
-Der Use case ist Teil der Gesamtstory Patienten als Empfänger.
+Feature-Datei: `TPLK-Koordination-Transplantation.md`
 
-### Story: Episoden Tab
-Das Tab für Episoden beseht aus diesen Teilen:
-- Liste aller Episoden eines Patienten
-- Pro ausgewählter Episode werden alle Details der episode angezeigt
-Details werden in der Folge angegeben. 
+## Use Case: Episode [Spec]
 
 ### Story: Episode Prozess abbilden [Spec]
 
 #### Item: Phasen einer Episode
 Episoden haben folgende Phasen
-1. Abklärung (EN: Evaluation)
-2. Listung (EN: Listing)
-3. Koordination (EN: Coordination)
-   1. Allocation (EN: Allocation)
-   2. Transplantation (EN: Transplantation)
-4. Nachbetreuung (EN: Follow-Up)
-5. Abgeschlossen (EN: Closed)
+1. Abklärung [EN: Evaluation]
+2. Listung [EN: Listing]
+3. Koordination [EN: Coordination]
+   1. Allokation [EN: Allocation]
+   2. Transplantation [EN: Transplantation]
+4. Nachbetreuung [EN: Follow-Up]
+5. Abgeschlossen (EN: Closed]
 
 #### Item: Start- und Endtermine der Phasen
 Jede Phase hat einen Start- und Endtermin. Dies gilt jedoch nicht für die Subphasen wie Allokation. Die Start- und Endtermine werden je nach Kontext erfasst.
@@ -91,3 +86,11 @@ In der Übersicht kann wie folgt gefiltert werden:
 - Zusätzlich abgeschlossene Episoden anzeigen
 - Zusätzlich stornierte Episoden anzeigen
 
+## Use Case: Episoden GUI [Spec]
+Der Use case ist Teil der Gesamtstory Patienten als Empfänger.
+
+### Story: Episoden Tab
+Das Tab für Episoden beseht aus diesen Teilen:
+- Liste aller Episoden eines Patienten
+- Pro ausgewählter Episode werden alle Details der episode angezeigt
+Details werden in der Folge angegeben.

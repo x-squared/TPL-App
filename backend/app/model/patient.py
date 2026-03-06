@@ -100,6 +100,14 @@ class Patient(Base):
         comment="Last user who changed the patient.",
         info={"label": "Changed By"},
     )
+    created_by_id = Column(
+        "CREATED_BY",
+        Integer,
+        ForeignKey("USER.ID"),
+        nullable=True,
+        comment="User who created the patient.",
+        info={"label": "Created By"},
+    )
     created_at = Column(
         "CREATED_AT",
         DateTime(timezone=True),
@@ -116,6 +124,7 @@ class Patient(Base):
     )
 
     changed_by_user = relationship("User", foreign_keys=[changed_by_id])
+    created_by_user = relationship("User", foreign_keys=[created_by_id])
     sex = relationship("Code", foreign_keys=[sex_id])
     resp_coord = relationship("User", foreign_keys=[resp_coord_id])
     contact_infos = relationship("ContactInfo", back_populates="patient", cascade="all, delete-orphan")
@@ -177,6 +186,14 @@ class Absence(Base):
         comment="Last user who changed the absence.",
         info={"label": "Changed By"},
     )
+    created_by_id = Column(
+        "CREATED_BY",
+        Integer,
+        ForeignKey("USER.ID"),
+        nullable=True,
+        comment="User who created the absence.",
+        info={"label": "Created By"},
+    )
     created_at = Column(
         "CREATED_AT",
         DateTime(timezone=True),
@@ -193,7 +210,8 @@ class Absence(Base):
     )
 
     patient = relationship("Patient", back_populates="absences")
-    changed_by_user = relationship("User")
+    changed_by_user = relationship("User", foreign_keys=[changed_by_id])
+    created_by_user = relationship("User", foreign_keys=[created_by_id])
 
 
 class Diagnosis(Base):
@@ -249,6 +267,14 @@ class Diagnosis(Base):
         comment="Last user who changed the diagnosis.",
         info={"label": "Changed By"},
     )
+    created_by_id = Column(
+        "CREATED_BY",
+        Integer,
+        ForeignKey("USER.ID"),
+        nullable=True,
+        comment="User who created the diagnosis.",
+        info={"label": "Created By"},
+    )
     created_at = Column(
         "CREATED_AT",
         DateTime(timezone=True),
@@ -266,7 +292,8 @@ class Diagnosis(Base):
 
     patient = relationship("Patient", back_populates="diagnoses")
     catalogue = relationship("Catalogue")
-    changed_by_user = relationship("User")
+    changed_by_user = relationship("User", foreign_keys=[changed_by_id])
+    created_by_user = relationship("User", foreign_keys=[created_by_id])
 
 
 class ContactInfo(Base):
@@ -335,6 +362,14 @@ class ContactInfo(Base):
         comment="Last user who changed the contact info.",
         info={"label": "Changed By"},
     )
+    created_by_id = Column(
+        "CREATED_BY",
+        Integer,
+        ForeignKey("USER.ID"),
+        nullable=True,
+        comment="User who created the contact info.",
+        info={"label": "Created By"},
+    )
     created_at = Column(
         "CREATED_AT",
         DateTime(timezone=True),
@@ -352,4 +387,5 @@ class ContactInfo(Base):
 
     patient = relationship("Patient", back_populates="contact_infos")
     type = relationship("Code")
-    changed_by_user = relationship("User")
+    changed_by_user = relationship("User", foreign_keys=[changed_by_id])
+    created_by_user = relationship("User", foreign_keys=[created_by_id])

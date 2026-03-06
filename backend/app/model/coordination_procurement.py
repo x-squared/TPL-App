@@ -93,6 +93,14 @@ class CoordinationProcurement(Base):
         comment="Last user who changed the coordination procurement row.",
         info={"label": "Changed By"},
     )
+    created_by_id = Column(
+        "CREATED_BY",
+        Integer,
+        ForeignKey("USER.ID"),
+        nullable=True,
+        comment="User who created the coordination procurement row.",
+        info={"label": "Created By"},
+    )
     created_at = Column(
         "CREATED_AT",
         DateTime(timezone=True),
@@ -109,7 +117,8 @@ class CoordinationProcurement(Base):
     )
 
     coordination = relationship("Coordination", back_populates="procurement")
-    changed_by_user = relationship("User")
+    changed_by_user = relationship("User", foreign_keys=[changed_by_id])
+    created_by_user = relationship("User", foreign_keys=[created_by_id])
 
 
 class CoordinationProcurementOrganRejection(Base):
@@ -130,11 +139,13 @@ class CoordinationProcurementOrganRejection(Base):
     is_rejected = Column("IS_REJECTED", Boolean, nullable=False, default=False)
     rejection_comment = Column("REJECTION_COMMENT", String(1024), nullable=False, default="")
     changed_by_id = Column("CHANGED_BY", Integer, ForeignKey("USER.ID"), nullable=True)
+    created_by_id = Column("CREATED_BY", Integer, ForeignKey("USER.ID"), nullable=True)
     created_at = Column("CREATED_AT", DateTime(timezone=True), server_default=func.now())
     updated_at = Column("UPDATED_AT", DateTime(timezone=True), onupdate=func.now())
 
     organ = relationship("Code", foreign_keys=[organ_id])
-    changed_by_user = relationship("User")
+    changed_by_user = relationship("User", foreign_keys=[changed_by_id])
+    created_by_user = relationship("User", foreign_keys=[created_by_id])
 
 
 class CoordinationProcurementFieldTemplate(Base):
@@ -169,12 +180,14 @@ class CoordinationProcurementFieldTemplate(Base):
     )
     datatype_def_id = Column("DATATYPE_DEF_ID", Integer, ForeignKey("MEDICAL_VALUE_DATATYPE.ID"), nullable=False, index=True)
     changed_by_id = Column("CHANGED_BY", Integer, ForeignKey("USER.ID"), nullable=True)
+    created_by_id = Column("CREATED_BY", Integer, ForeignKey("USER.ID"), nullable=True)
     created_at = Column("CREATED_AT", DateTime(timezone=True), server_default=func.now())
     updated_at = Column("UPDATED_AT", DateTime(timezone=True), onupdate=func.now())
 
     datatype_definition = relationship("DatatypeDefinition")
     group_template = relationship("CoordinationProcurementFieldGroupTemplate", back_populates="field_templates")
-    changed_by_user = relationship("User")
+    changed_by_user = relationship("User", foreign_keys=[changed_by_id])
+    created_by_user = relationship("User", foreign_keys=[created_by_id])
     scopes = relationship(
         "CoordinationProcurementFieldScopeTemplate",
         back_populates="field_template",
@@ -206,12 +219,14 @@ class CoordinationProcurementFieldScopeTemplate(Base):
         default=ProcurementSlotKey.MAIN.value,
     )
     changed_by_id = Column("CHANGED_BY", Integer, ForeignKey("USER.ID"), nullable=True)
+    created_by_id = Column("CREATED_BY", Integer, ForeignKey("USER.ID"), nullable=True)
     created_at = Column("CREATED_AT", DateTime(timezone=True), server_default=func.now())
     updated_at = Column("UPDATED_AT", DateTime(timezone=True), onupdate=func.now())
 
     field_template = relationship("CoordinationProcurementFieldTemplate", back_populates="scopes")
     organ = relationship("Code", foreign_keys=[organ_id])
-    changed_by_user = relationship("User")
+    changed_by_user = relationship("User", foreign_keys=[changed_by_id])
+    created_by_user = relationship("User", foreign_keys=[created_by_id])
 
 
 class CoordinationProcurementData(Base):
@@ -253,6 +268,7 @@ class CoordinationProcurementData(Base):
     value = Column("VALUE", String, nullable=False, default="")
     episode_id = Column("EPISODE_ID", Integer, ForeignKey("EPISODE.ID"), nullable=True, index=True)
     changed_by_id = Column("CHANGED_BY", Integer, ForeignKey("USER.ID"), nullable=True)
+    created_by_id = Column("CREATED_BY", Integer, ForeignKey("USER.ID"), nullable=True)
     created_at = Column("CREATED_AT", DateTime(timezone=True), server_default=func.now())
     updated_at = Column("UPDATED_AT", DateTime(timezone=True), onupdate=func.now())
 
@@ -260,7 +276,8 @@ class CoordinationProcurementData(Base):
     organ = relationship("Code", foreign_keys=[organ_id])
     field_template = relationship("CoordinationProcurementFieldTemplate")
     episode = relationship("Episode", foreign_keys=[episode_id])
-    changed_by_user = relationship("User")
+    changed_by_user = relationship("User", foreign_keys=[changed_by_id])
+    created_by_user = relationship("User", foreign_keys=[created_by_id])
     persons = relationship(
         "CoordinationProcurementDataPerson",
         back_populates="data_row",
@@ -286,12 +303,14 @@ class CoordinationProcurementDataPerson(Base):
     person_id = Column("PERSON_ID", Integer, ForeignKey("PERSON.ID"), nullable=False, index=True)
     pos = Column("POS", Integer, nullable=False, default=0)
     changed_by_id = Column("CHANGED_BY", Integer, ForeignKey("USER.ID"), nullable=True)
+    created_by_id = Column("CREATED_BY", Integer, ForeignKey("USER.ID"), nullable=True)
     created_at = Column("CREATED_AT", DateTime(timezone=True), server_default=func.now())
     updated_at = Column("UPDATED_AT", DateTime(timezone=True), onupdate=func.now())
 
     data_row = relationship("CoordinationProcurementData", back_populates="persons")
     person = relationship("Person")
-    changed_by_user = relationship("User")
+    changed_by_user = relationship("User", foreign_keys=[changed_by_id])
+    created_by_user = relationship("User", foreign_keys=[created_by_id])
 
 
 class CoordinationProcurementDataTeam(Base):
@@ -307,12 +326,14 @@ class CoordinationProcurementDataTeam(Base):
     team_id = Column("TEAM_ID", Integer, ForeignKey("PERSON_TEAM.ID"), nullable=False, index=True)
     pos = Column("POS", Integer, nullable=False, default=0)
     changed_by_id = Column("CHANGED_BY", Integer, ForeignKey("USER.ID"), nullable=True)
+    created_by_id = Column("CREATED_BY", Integer, ForeignKey("USER.ID"), nullable=True)
     created_at = Column("CREATED_AT", DateTime(timezone=True), server_default=func.now())
     updated_at = Column("UPDATED_AT", DateTime(timezone=True), onupdate=func.now())
 
     data_row = relationship("CoordinationProcurementData", back_populates="teams")
     team = relationship("PersonTeam")
-    changed_by_user = relationship("User")
+    changed_by_user = relationship("User", foreign_keys=[changed_by_id])
+    created_by_user = relationship("User", foreign_keys=[created_by_id])
 
 
 class CoordinationProcurementTypedData(Base):
@@ -368,6 +389,7 @@ class CoordinationProcurementTypedData(Base):
     recipient_episode_id = Column("RECIPIENT_EPISODE_ID", Integer, ForeignKey("EPISODE.ID"), nullable=True, index=True)
 
     changed_by_id = Column("CHANGED_BY", Integer, ForeignKey("USER.ID"), nullable=True)
+    created_by_id = Column("CREATED_BY", Integer, ForeignKey("USER.ID"), nullable=True)
     created_at = Column("CREATED_AT", DateTime(timezone=True), server_default=func.now())
     updated_at = Column("UPDATED_AT", DateTime(timezone=True), onupdate=func.now())
 
@@ -377,7 +399,8 @@ class CoordinationProcurementTypedData(Base):
     chirurg_responsible_person = relationship("Person", foreign_keys=[chirurg_responsible_person_id])
     procurment_team_team = relationship("PersonTeam", foreign_keys=[procurment_team_team_id])
     recipient_episode = relationship("Episode", foreign_keys=[recipient_episode_id])
-    changed_by_user = relationship("User")
+    changed_by_user = relationship("User", foreign_keys=[changed_by_id])
+    created_by_user = relationship("User", foreign_keys=[created_by_id])
     person_lists = relationship(
         "CoordinationProcurementTypedDataPersonList",
         back_populates="data_row",
@@ -414,12 +437,14 @@ class CoordinationProcurementTypedDataPersonList(Base):
     person_id = Column("PERSON_ID", Integer, ForeignKey("PERSON.ID"), nullable=False, index=True)
     pos = Column("POS", Integer, nullable=False, default=0)
     changed_by_id = Column("CHANGED_BY", Integer, ForeignKey("USER.ID"), nullable=True)
+    created_by_id = Column("CREATED_BY", Integer, ForeignKey("USER.ID"), nullable=True)
     created_at = Column("CREATED_AT", DateTime(timezone=True), server_default=func.now())
     updated_at = Column("UPDATED_AT", DateTime(timezone=True), onupdate=func.now())
 
     data_row = relationship("CoordinationProcurementTypedData", back_populates="person_lists")
     person = relationship("Person")
-    changed_by_user = relationship("User")
+    changed_by_user = relationship("User", foreign_keys=[changed_by_id])
+    created_by_user = relationship("User", foreign_keys=[created_by_id])
 
 
 class CoordinationProcurementTypedDataTeamList(Base):
@@ -446,12 +471,14 @@ class CoordinationProcurementTypedDataTeamList(Base):
     team_id = Column("TEAM_ID", Integer, ForeignKey("PERSON_TEAM.ID"), nullable=False, index=True)
     pos = Column("POS", Integer, nullable=False, default=0)
     changed_by_id = Column("CHANGED_BY", Integer, ForeignKey("USER.ID"), nullable=True)
+    created_by_id = Column("CREATED_BY", Integer, ForeignKey("USER.ID"), nullable=True)
     created_at = Column("CREATED_AT", DateTime(timezone=True), server_default=func.now())
     updated_at = Column("UPDATED_AT", DateTime(timezone=True), onupdate=func.now())
 
     data_row = relationship("CoordinationProcurementTypedData", back_populates="team_lists")
     team = relationship("PersonTeam")
-    changed_by_user = relationship("User")
+    changed_by_user = relationship("User", foreign_keys=[changed_by_id])
+    created_by_user = relationship("User", foreign_keys=[created_by_id])
 
 
 class CoordinationProcurementFieldGroupTemplate(Base):
@@ -467,10 +494,12 @@ class CoordinationProcurementFieldGroupTemplate(Base):
     display_lane = Column("DISPLAY_LANE", String(16), nullable=False, default="PRIMARY")
     pos = Column("POS", Integer, nullable=False, default=0)
     changed_by_id = Column("CHANGED_BY", Integer, ForeignKey("USER.ID"), nullable=True)
+    created_by_id = Column("CREATED_BY", Integer, ForeignKey("USER.ID"), nullable=True)
     created_at = Column("CREATED_AT", DateTime(timezone=True), server_default=func.now())
     updated_at = Column("UPDATED_AT", DateTime(timezone=True), onupdate=func.now())
 
-    changed_by_user = relationship("User")
+    changed_by_user = relationship("User", foreign_keys=[changed_by_id])
+    created_by_user = relationship("User", foreign_keys=[created_by_id])
     field_templates = relationship("CoordinationProcurementFieldTemplate", back_populates="group_template")
 
 
@@ -497,9 +526,11 @@ class CoordinationProcurementProtocolTaskGroupSelection(Base):
     organ_id = Column("ORGAN_ID", Integer, ForeignKey("CODE.ID"), nullable=True, index=True)
     pos = Column("POS", Integer, nullable=False, default=0)
     changed_by_id = Column("CHANGED_BY", Integer, ForeignKey("USER.ID"), nullable=True)
+    created_by_id = Column("CREATED_BY", Integer, ForeignKey("USER.ID"), nullable=True)
     created_at = Column("CREATED_AT", DateTime(timezone=True), server_default=func.now())
     updated_at = Column("UPDATED_AT", DateTime(timezone=True), onupdate=func.now())
 
     task_group_template = relationship("TaskGroupTemplate")
     organ = relationship("Code", foreign_keys=[organ_id])
-    changed_by_user = relationship("User")
+    changed_by_user = relationship("User", foreign_keys=[changed_by_id])
+    created_by_user = relationship("User", foreign_keys=[created_by_id])

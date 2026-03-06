@@ -7,6 +7,7 @@ from sqlalchemy.orm import Session, joinedload
 
 from ...models import Code, Information, InformationContext, InformationUser, User
 from ...schemas import InformationCreate, InformationUpdate
+from .access import can_manage_information, resolve_current_user_read_at
 
 
 def _information_query(db: Session):
@@ -181,10 +182,13 @@ def list_information(*, db: Session, current_user_id: int) -> list[dict]:
     now_utc = dt.datetime.now(dt.timezone.utc)
     response: list[dict] = []
     for row in rows:
-        read_at = read_map.get(row.id)
-        if read_at is None and row.author_id == current_user_id and not row.withdrawn:
-            # Authors always see their own information as read.
-            read_at = now_utc
+        read_at = resolve_current_user_read_at(
+            explicit_read_at=read_map.get(row.id),
+            current_user_id=current_user_id,
+            author_id=row.author_id,
+            withdrawn=bool(row.withdrawn),
+            now_utc=now_utc,
+        )
         has_reads = row.id in read_information_ids or not row.withdrawn
         response.append(_to_response_row(row=row, current_user_read_at=read_at, has_reads=has_reads))
     return response
@@ -219,7 +223,11 @@ def update_information(
     item = db.query(Information).filter(Information.id == information_id).first()
     if not item:
         raise HTTPException(status_code=404, detail="Information not found")
-    if item.author_id != current_user_id and not current_user_is_admin:
+    if not can_manage_information(
+        current_user_id=current_user_id,
+        author_id=item.author_id,
+        current_user_is_admin=current_user_is_admin,
+    ):
         raise HTTPException(status_code=403, detail="Only the author or an admin user can edit this information")
     data = payload.model_dump(exclude_unset=True)
     if "context_ids" in data or "context_id" in data:
@@ -278,7 +286,11 @@ def delete_information(*, information_id: int, db: Session, current_user_id: int
         raise HTTPException(status_code=404, detail="Information not found")
     if item.withdrawn:
         raise HTTPException(status_code=409, detail="Withdrawn information cannot be deleted")
-    if item.author_id != current_user_id and not current_user_is_admin:
+    if not can_manage_information(
+        current_user_id=current_user_id,
+        author_id=item.author_id,
+        current_user_is_admin=current_user_is_admin,
+    ):
         raise HTTPException(status_code=403, detail="Only the author or an admin user can delete this information")
     had_persisted_reads = (
         db.query(InformationUser)

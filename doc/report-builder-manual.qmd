@@ -12,6 +12,7 @@ Current source entities:
 - `EPISODE`
 - `COORDINATION`
 - `COORDINATION_PROCUREMENT`
+- `MEDICAL_VALUE`
 
 For each source, you can:
 
@@ -86,6 +87,8 @@ The backend validates operator/value compatibility and returns `422` for invalid
 - Date/datetime values are serialized in ISO format.
 - Row count shown in UI is count of returned rows after filtering/sorting/limit.
 - For multi-organ episodes, the episode source provides both `Primary Organ` and aggregated `Organs`.
+- For `MEDICAL_VALUE`, field `value` prefers canonical normalized values (`value_canonical`) and only falls back to legacy raw values (`value`) when canonical is missing.
+- `MEDICAL_VALUE` also exposes normalization trace fields (`value_input`, `unit_input_ucum`, `unit_canonical_ucum`, `normalization_status`) for auditable analytics.
 
 ## 6) Where to find the relevant sources
 
@@ -115,6 +118,7 @@ The backend validates operator/value compatibility and returns `422` for invalid
   - `backend/app/features/reports/sources/episode.py`
   - `backend/app/features/reports/sources/coordination.py`
   - `backend/app/features/reports/sources/coordination_procurement.py`
+  - `backend/app/features/reports/sources/medical_value.py`
   - `backend/app/features/reports/sources/__init__.py`
 - Schemas (request/response + metadata contracts):
   - `backend/app/schema/report.py`

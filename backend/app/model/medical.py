@@ -57,6 +57,14 @@ class MedicalValueGroupTemplate(Base):
         comment="Last user who changed the medical value group.",
         info={"label": "Changed By"},
     )
+    created_by_id = Column(
+        "CREATED_BY",
+        Integer,
+        ForeignKey("USER.ID"),
+        nullable=True,
+        comment="User who created the medical value group.",
+        info={"label": "Created By"},
+    )
     created_at = Column(
         "CREATED_AT",
         DateTime(timezone=True),
@@ -72,7 +80,8 @@ class MedicalValueGroupTemplate(Base):
         info={"label": "Updated At"},
     )
 
-    changed_by_user = relationship("User")
+    changed_by_user = relationship("User", foreign_keys=[changed_by_id])
+    created_by_user = relationship("User", foreign_keys=[created_by_id])
     context_templates = relationship(
         "MedicalValueGroupContextTemplate",
         back_populates="medical_value_group_template",
@@ -106,6 +115,21 @@ class MedicalValueTemplate(Base):
         nullable=False,
         comment="KIS key used to map values from clinical systems.",
         info={"label": "KIS Key"},
+    )
+    loinc_code = Column(
+        "LOINC_CODE",
+        String(32),
+        nullable=True,
+        index=True,
+        comment="Optional LOINC code identifying the observation concept.",
+        info={"label": "LOINC Code"},
+    )
+    loinc_display_name = Column(
+        "LOINC_DISPLAY_NAME",
+        String(128),
+        nullable=True,
+        comment="Optional display title for the configured LOINC code.",
+        info={"label": "LOINC Display Name"},
     )
     datatype_id = Column(
         "DATATYPE_ID",
@@ -177,12 +201,14 @@ class MedicalValueGroupContextTemplate(Base):
     context_kind = Column("CONTEXT_KIND", String(16), nullable=False)
     organ_id = Column("ORGAN_ID", Integer, ForeignKey("CODE.ID"), nullable=True, index=True)
     changed_by_id = Column("CHANGED_BY", Integer, ForeignKey("USER.ID"), nullable=True)
+    created_by_id = Column("CREATED_BY", Integer, ForeignKey("USER.ID"), nullable=True)
     created_at = Column("CREATED_AT", DateTime(timezone=True), server_default=func.now())
     updated_at = Column("UPDATED_AT", DateTime(timezone=True), onupdate=func.now())
 
     medical_value_group_template = relationship("MedicalValueGroupTemplate", back_populates="context_templates")
     organ = relationship("Code", foreign_keys=[organ_id])
-    changed_by_user = relationship("User")
+    changed_by_user = relationship("User", foreign_keys=[changed_by_id])
+    created_by_user = relationship("User", foreign_keys=[created_by_id])
 
 
 class MedicalValueTemplateContextTemplate(Base):
@@ -198,12 +224,14 @@ class MedicalValueTemplateContextTemplate(Base):
     context_kind = Column("CONTEXT_KIND", String(16), nullable=False)
     organ_id = Column("ORGAN_ID", Integer, ForeignKey("CODE.ID"), nullable=True, index=True)
     changed_by_id = Column("CHANGED_BY", Integer, ForeignKey("USER.ID"), nullable=True)
+    created_by_id = Column("CREATED_BY", Integer, ForeignKey("USER.ID"), nullable=True)
     created_at = Column("CREATED_AT", DateTime(timezone=True), server_default=func.now())
     updated_at = Column("UPDATED_AT", DateTime(timezone=True), onupdate=func.now())
 
     medical_value_template = relationship("MedicalValueTemplate", back_populates="context_templates")
     organ = relationship("Code", foreign_keys=[organ_id])
-    changed_by_user = relationship("User")
+    changed_by_user = relationship("User", foreign_keys=[changed_by_id])
+    created_by_user = relationship("User", foreign_keys=[created_by_id])
 
 
 class MedicalValueGroup(Base):
@@ -223,6 +251,7 @@ class MedicalValueGroup(Base):
     is_donor_context = Column("IS_DONOR_CONTEXT", Boolean, nullable=False, default=False)
     renew_date = Column("RENEW_DATE", Date, nullable=True)
     changed_by_id = Column("CHANGED_BY", Integer, ForeignKey("USER.ID"), nullable=True)
+    created_by_id = Column("CREATED_BY", Integer, ForeignKey("USER.ID"), nullable=True)
     created_at = Column("CREATED_AT", DateTime(timezone=True), server_default=func.now())
     updated_at = Column("UPDATED_AT", DateTime(timezone=True), onupdate=func.now())
 
@@ -230,7 +259,8 @@ class MedicalValueGroup(Base):
     medical_value_group_template = relationship("MedicalValueGroupTemplate")
     episode = relationship("Episode")
     organ = relationship("Code", foreign_keys=[organ_id])
-    changed_by_user = relationship("User")
+    changed_by_user = relationship("User", foreign_keys=[changed_by_id])
+    created_by_user = relationship("User", foreign_keys=[created_by_id])
 
 
 class MedicalValue(Base):
@@ -291,6 +321,50 @@ class MedicalValue(Base):
         default="",
         comment="Stored value payload as text.",
         info={"label": "Value"},
+    )
+    value_input = Column(
+        "VALUE_INPUT",
+        String,
+        default="",
+        comment="Raw user-entered value before normalization.",
+        info={"label": "Value Input"},
+    )
+    unit_input_ucum = Column(
+        "UNIT_INPUT_UCUM",
+        String(32),
+        nullable=True,
+        comment="UCUM unit used during value input.",
+        info={"label": "Input Unit UCUM"},
+    )
+    value_canonical = Column(
+        "VALUE_CANONICAL",
+        String,
+        default="",
+        comment="Canonical value payload used for computations.",
+        info={"label": "Canonical Value"},
+    )
+    unit_canonical_ucum = Column(
+        "UNIT_CANONICAL_UCUM",
+        String(32),
+        nullable=True,
+        comment="Canonical UCUM unit used for computations.",
+        info={"label": "Canonical Unit UCUM"},
+    )
+    normalization_status = Column(
+        "NORMALIZATION_STATUS",
+        String(32),
+        nullable=False,
+        default="UNSPECIFIED",
+        comment="Normalization state for this value payload.",
+        info={"label": "Normalization Status"},
+    )
+    normalization_error = Column(
+        "NORMALIZATION_ERROR",
+        String(512),
+        nullable=False,
+        default="",
+        comment="Normalization error details if normalization failed.",
+        info={"label": "Normalization Error"},
     )
     renew_date = Column(
         "RENEW_DATE",
@@ -358,6 +432,14 @@ class MedicalValue(Base):
         comment="Last user who changed the medical value.",
         info={"label": "Changed By"},
     )
+    created_by_id = Column(
+        "CREATED_BY",
+        Integer,
+        ForeignKey("USER.ID"),
+        nullable=True,
+        comment="User who created the medical value.",
+        info={"label": "Created By"},
+    )
     created_at = Column(
         "CREATED_AT",
         DateTime(timezone=True),
@@ -380,4 +462,5 @@ class MedicalValue(Base):
     datatype = relationship("Code", foreign_keys=[datatype_id])
     episode = relationship("Episode")
     organ = relationship("Code", foreign_keys=[organ_id])
-    changed_by_user = relationship("User")
+    changed_by_user = relationship("User", foreign_keys=[changed_by_id])
+    created_by_user = relationship("User", foreign_keys=[created_by_id])

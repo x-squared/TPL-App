@@ -66,9 +66,12 @@ class DiagnosisResponse(DiagnosisBase):
 
     id: int
     catalogue: CatalogueResponse | None = None
+    created_by_id: int | None = None
+    created_by_user: UserResponse | None = None
     changed_by_id: int | None = None
     changed_by_user: UserResponse | None = None
     created_at: datetime
+    changed_at: datetime | None = None
     updated_at: datetime | None = None
 
 
@@ -107,9 +110,12 @@ class AbsenceResponse(AbsenceBase):
     model_config = ConfigDict(from_attributes=True)
 
     id: int
+    created_by_id: int | None = None
+    created_by_user: UserResponse | None = None
     changed_by_id: int | None = None
     changed_by_user: UserResponse | None = None
     created_at: datetime
+    changed_at: datetime | None = None
     updated_at: datetime | None = None
 
 
@@ -142,9 +148,12 @@ class ContactInfoResponse(ContactInfoBase):
 
     id: int
     type: CodeResponse | None = None
+    created_by_id: int | None = None
+    created_by_user: UserResponse | None = None
     changed_by_id: int | None = None
     changed_by_user: UserResponse | None = None
     created_at: datetime
+    changed_at: datetime | None = None
     updated_at: datetime | None = None
 
 

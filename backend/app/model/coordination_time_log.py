@@ -65,6 +65,14 @@ class CoordinationTimeLog(Base):
         comment="Last user who changed the coordination time log row.",
         info={"label": "Changed By"},
     )
+    created_by_id = Column(
+        "CREATED_BY",
+        Integer,
+        ForeignKey("USER.ID"),
+        nullable=True,
+        comment="User who created the coordination time log row.",
+        info={"label": "Created By"},
+    )
     created_at = Column(
         "CREATED_AT",
         DateTime(timezone=True),
@@ -83,3 +91,4 @@ class CoordinationTimeLog(Base):
     coordination = relationship("Coordination", back_populates="time_logs")
     user = relationship("User", foreign_keys=[user_id])
     changed_by_user = relationship("User", foreign_keys=[changed_by_id])
+    created_by_user = relationship("User", foreign_keys=[created_by_id])

@@ -58,6 +58,26 @@ _PHASE_EDITABLE_KEYS: dict[str, set[str]] = {
     },
 }
 
+_WORKFLOW_ACTION_LABELS = {
+    "START_LISTING": "start listing",
+    "ALLOCATE_COORDINATION": "start coordination allocation",
+    "MARK_TRANSPLANTATION": "mark transplantation",
+    "START_FOLLOW_UP": "start follow-up",
+    "CLOSE": "close episode",
+    "REJECT": "reject episode",
+    "CANCEL": "cancel episode",
+}
+
+_ALLOWED_PHASES_BY_ACTION: dict[str, set[str]] = {
+    "START_LISTING": {PHASE_EVALUATION, PHASE_LISTING},
+    "ALLOCATE_COORDINATION": {PHASE_LISTING, PHASE_TRANSPLANTATION, PHASE_FOLLOW_UP},
+    "MARK_TRANSPLANTATION": {PHASE_EVALUATION, PHASE_LISTING, PHASE_TRANSPLANTATION, PHASE_FOLLOW_UP},
+    "START_FOLLOW_UP": {PHASE_EVALUATION, PHASE_LISTING, PHASE_TRANSPLANTATION, PHASE_FOLLOW_UP},
+    "CLOSE": {PHASE_FOLLOW_UP},
+    "REJECT": {PHASE_EVALUATION, PHASE_LISTING, PHASE_TRANSPLANTATION, PHASE_FOLLOW_UP},
+    "CANCEL": {PHASE_EVALUATION, PHASE_LISTING, PHASE_TRANSPLANTATION, PHASE_FOLLOW_UP},
+}
+
 
 def _code_or_500(*, db: Session, code_type: str, code_key: str) -> Code:
     code = db.query(Code).filter(Code.type == code_type, Code.key == code_key).first()
@@ -91,6 +111,24 @@ def _resolved_phase_key(episode: Episode) -> str:
 
 def resolved_phase_key(episode: Episode) -> str:
     return _resolved_phase_key(episode)
+
+
+def _assert_action_phase_allowed(*, episode: Episode, action: str, detail: str | None = None) -> str:
+    phase_key = _resolved_phase_key(episode)
+    allowed = _ALLOWED_PHASES_BY_ACTION.get(action, set())
+    if phase_key not in allowed:
+        if detail:
+            raise HTTPException(status_code=422, detail=detail)
+        action_label = _WORKFLOW_ACTION_LABELS.get(action, action.lower())
+        allowed_label = ", ".join(sorted(allowed))
+        raise HTTPException(
+            status_code=422,
+            detail=(
+                f"Cannot {action_label} from episode phase {phase_key}. "
+                f"Allowed phases: {allowed_label}"
+            ),
+        )
+    return phase_key
 
 
 def _is_terminal(episode: Episode) -> bool:
@@ -152,9 +190,11 @@ def start_listing_phase(
 ) -> None:
     if _is_terminal(episode):
         raise HTTPException(status_code=422, detail="Cannot start listing for a closed/cancelled/rejected episode")
-    phase_key = _resolved_phase_key(episode)
-    if phase_key not in {PHASE_EVALUATION, PHASE_LISTING}:
-        raise HTTPException(status_code=422, detail="Listing can only be started from evaluation")
+    phase_key = _assert_action_phase_allowed(
+        episode=episode,
+        action="START_LISTING",
+        detail="Listing can only be started from evaluation",
+    )
     if episode.eval_start and start_date < episode.eval_start:
         raise HTTPException(status_code=422, detail="Listing start cannot be before evaluation start")
     episode.list_start = start_date
@@ -174,7 +214,10 @@ def mark_coordination_allocation_started(
 ) -> None:
     if _is_terminal(episode):
         raise HTTPException(status_code=422, detail="Cannot allocate a closed/cancelled/rejected episode")
-    phase_key = _resolved_phase_key(episode)
+    phase_key = _assert_action_phase_allowed(
+        episode=episode,
+        action="ALLOCATE_COORDINATION",
+    )
     if phase_key == PHASE_EVALUATION:
         raise HTTPException(status_code=422, detail="Episode must be in listing before coordination allocation")
     if coordination_start is not None and (episode.list_end is None or episode.list_end < coordination_start):
@@ -193,6 +236,7 @@ def mark_transplantation_started(
 ) -> None:
     if _is_terminal(episode):
         raise HTTPException(status_code=422, detail="Cannot transplant a closed/cancelled/rejected episode")
+    _assert_action_phase_allowed(episode=episode, action="MARK_TRANSPLANTATION")
     if episode.tpl_date is None or transplant_date < episode.tpl_date:
         episode.tpl_date = transplant_date
     _set_phase(episode=episode, phase_key=PHASE_TRANSPLANTATION, db=db)
@@ -209,6 +253,7 @@ def mark_follow_up_started(
 ) -> None:
     if _is_terminal(episode):
         return
+    _assert_action_phase_allowed(episode=episode, action="START_FOLLOW_UP")
     _set_phase(episode=episode, phase_key=PHASE_FOLLOW_UP, db=db)
     episode.changed_by_id = changed_by_id
     if episode.tpl_date is None:
@@ -224,9 +269,11 @@ def close_episode(
 ) -> None:
     if _is_terminal(episode):
         raise HTTPException(status_code=422, detail="Episode is already terminal")
-    phase_key = _resolved_phase_key(episode)
-    if phase_key != PHASE_FOLLOW_UP:
-        raise HTTPException(status_code=422, detail="Episode can only be closed from follow-up phase")
+    _assert_action_phase_allowed(
+        episode=episode,
+        action="CLOSE",
+        detail="Episode can only be closed from follow-up phase",
+    )
     episode.end = end_date
     episode.closed = True
     episode.changed_by_id = changed_by_id
@@ -242,6 +289,7 @@ def reject_episode(
 ) -> None:
     if _is_terminal(episode):
         raise HTTPException(status_code=422, detail="Episode is already terminal")
+    _assert_action_phase_allowed(episode=episode, action="REJECT")
     has_coordination = (
         db.query(CoordinationEpisode.id)
         .filter(CoordinationEpisode.episode_id == episode.id)
@@ -268,6 +316,7 @@ def cancel_episode(
 ) -> None:
     if _is_terminal(episode):
         raise HTTPException(status_code=422, detail="Episode is already terminal")
+    _assert_action_phase_allowed(episode=episode, action="CANCEL")
     episode.end = end_date
     episode.closed = True
     _set_status(episode=episode, status_key=STATUS_CANCELLED, db=db)

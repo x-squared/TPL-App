@@ -10,13 +10,16 @@ Every new entity (SQLAlchemy model) must include these audit columns:
 
 ```python
 changed_by_id = Column("CHANGED_BY", Integer, ForeignKey("USER.ID"), nullable=True)
+created_by_id = Column("CREATED_BY", Integer, ForeignKey("USER.ID"), nullable=True)
 created_at = Column("CREATED_AT", DateTime(timezone=True), server_default=func.now())
 updated_at = Column("UPDATED_AT", DateTime(timezone=True), onupdate=func.now())
 
 changed_by_user = relationship("User")
+created_by_user = relationship("User")
 ```
 
-- The corresponding Pydantic `*Response` schema must include `changed_by_id`, `changed_by_user`, `created_at`, and `updated_at`.
+- Expose `changed_at` as compatibility alias to `updated_at` during phased rename.
+- The corresponding Pydantic `*Response` schema must include `created_by_id`, `created_by_user`, `changed_by_id`, `changed_by_user`, `created_at`, and `changed_at` (plus legacy `updated_at` during transition).
 - Create/update API endpoints must accept `current_user` via `Depends(get_current_user)` and set `changed_by_id = current_user.id`.
 
 ## Seed Data

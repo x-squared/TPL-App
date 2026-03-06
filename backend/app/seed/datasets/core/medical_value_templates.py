@@ -19,6 +19,8 @@ RECORDS = [
     {
         "lab_key": "STATIC_BLOOD_TYPE",
         "kis_key": "STATIC_BLOOD_TYPE",
+        "loinc_code": "883-9",
+        "loinc_display_name": "ABO group [Type] in Blood",
         "datatype_key": "BLOOD_TYPE",
         "name_default": "Blood Type",
         "pos": 2,
@@ -72,6 +74,8 @@ RECORDS = [
     {
         "lab_key": "?",
         "kis_key": "?",
+        "loinc_code": "35266-6",
+        "loinc_display_name": "MELD score",
         "datatype_key": "INTEGER",
         "name_default": "MELD",
         "pos": 20,

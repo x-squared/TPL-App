@@ -2,9 +2,14 @@
 
 This area contains business requirements and specification documents.
 
-- [TPLK-Spezifikation](./TPLK-Spezifikation.md)
 - [STCS-Spezifikation](./STCS-Spezifikation.md)
-- [Interface-Spezifikation](./Interface-Spezifikation.md)
+- [GEN-Interface-Spezifikation](./GEN-Interface-Spezifikation.md)
 - [LTPL-Spezifikation](./LTPL-Spezifikation.md)
-- [TPL-Koordination-Spezifikation](./TPL-Koordination-Spezifikation.md)
-- [TPL-Episode-Spezifikation](./TPL-Episode-Spezifikation.md)
+- [TPLK-Koordination-Transplantation](./TPLK-Koordination-Transplantation.md)
+- [TPLK-Koordination-Spezifikation](./TPLK-Koordination-Spezifikation.md)
+- [TPLK-Episode-Spezifikation](./TPLK-Episode-Spezifikation.md)
+- [TPLK-Medical-Values-Spezifikation](./TPLK-Medical-Values-Spezifikation.md)
+- [GEN-Spec-Spezifikation](./GEN-Spec-Spezifikation.md)
+- [GEN-Architektur-Spezifikation](./GEN-Architektur-Spezifikation.md)
+- [GEN-Architektur-Backlog](./GEN-Architektur-Backlog.md)
+- [TEMPLATE-Spezifikation](./TEMPLATE-Spezifikation.md)

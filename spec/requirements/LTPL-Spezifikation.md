@@ -1,4 +1,4 @@
-# Feature: LTPL-Basis [Spec]
+# Feature [LTPL]: Basis
 
 Dieses Dokument wird schrittweise aus fachlichen Anforderungen aufgebaut.
 Du kannst Inhalte in Deutsch Abschnitt für Abschnitt liefern; ich überführe sie in das Standardformat.

@@ -65,6 +65,8 @@ export default function MedicalValuesSection({
         medical_value_group_id: group.id,
         name: '',
         value: '',
+        value_input: '',
+        unit_input_ucum: null,
         renew_date: '',
       });
     } else {
@@ -75,6 +77,8 @@ export default function MedicalValuesSection({
         medical_value_group_id: group.id,
         name: '',
         value: '',
+        value_input: '',
+        unit_input_ucum: null,
         renew_date: '',
       });
     }
@@ -150,6 +154,8 @@ export default function MedicalValuesSection({
                         medical_value_group_id: group.id,
                         name: tpl?.name_default ?? f.name ?? '',
                         value: '',
+                        value_input: '',
+                        unit_input_ucum: tpl?.datatype_definition?.canonical_unit_ucum ?? tpl?.datatype_definition?.unit ?? null,
                       }));
                     }}
                   >
@@ -186,8 +192,10 @@ export default function MedicalValuesSection({
                     effectiveAddMode === 'template'
                       ? resolveDt(mvForm.medical_value_template_id)
                       : resolveDt(null, mvForm.datatype_id),
-                    (v: string) => setMvForm((f) => ({ ...f, value: v })),
+                    (v: string) => setMvForm((f) => ({ ...f, value: v, value_input: v })),
                     'detail-input',
+                    mvForm.unit_input_ucum ?? null,
+                    (u: string | null) => setMvForm((f) => ({ ...f, unit_input_ucum: u })),
                   )
                 )}
                 <div className="mv-renew-capture-field">
@@ -252,6 +260,7 @@ export default function MedicalValuesSection({
                                 medical_value_template_id: tplId,
                                 medical_value_group_id: tpl?.medical_value_group_id ?? f.medical_value_group_id ?? null,
                                 name: tpl?.name_default ?? f.name,
+                                unit_input_ucum: tpl?.datatype_definition?.canonical_unit_ucum ?? tpl?.datatype_definition?.unit ?? f.unit_input_ucum ?? null,
                               }));
                             }}
                           >
@@ -264,8 +273,10 @@ export default function MedicalValuesSection({
                           {renderValueInput(
                             mvEditForm.value ?? '',
                             resolveDt(mvEditForm.medical_value_template_id, mv.datatype_id),
-                            (v: string) => setMvEditForm((f) => ({ ...f, value: v })),
+                            (v: string) => setMvEditForm((f) => ({ ...f, value: v, value_input: v })),
                             'detail-input ci-inline-input',
+                            mvEditForm.unit_input_ucum ?? null,
+                            (u: string | null) => setMvEditForm((f) => ({ ...f, unit_input_ucum: u })),
                           )}
                         </td>
                         <td className="mv-renew-date">
@@ -297,6 +308,8 @@ export default function MedicalValuesSection({
                           medical_value_group_id: mv.medical_value_group_id,
                           name: mv.name,
                           value: mv.value,
+                          value_input: mv.value_input,
+                          unit_input_ucum: mv.unit_input_ucum,
                           renew_date: mv.renew_date,
                         })}
                         className={mvDragId === mv.id ? 'mv-dragging' : mvDragOverId === mv.id ? 'mv-drag-over' : ''}
@@ -308,7 +321,7 @@ export default function MedicalValuesSection({
                           ) : null}
                           {mv.name || mv.medical_value_template?.name_default || t('common.emptySymbol', '–')}
                         </td>
-                        <td className="mv-value">{formatValue(mv.value, mv.datatype, catalogueCache[getCatalogueType(mv.datatype)])}</td>
+                        <td className="mv-value">{formatValue(mv.value_canonical || mv.value, mv.datatype, catalogueCache[getCatalogueType(mv.datatype)])}</td>
                         <td className="mv-renew-date">{formatDate(mv.renew_date)}</td>
                         <td className="diag-date">{formatDate(mv.updated_at ?? mv.created_at)}</td>
                         <td className="detail-ci-actions">
@@ -320,6 +333,8 @@ export default function MedicalValuesSection({
                               medical_value_group_id: mv.medical_value_group_id,
                               name: mv.name,
                               value: mv.value,
+                              value_input: mv.value_input,
+                              unit_input_ucum: mv.unit_input_ucum,
                               renew_date: mv.renew_date,
                             })}
                             onRequestDelete={() => setConfirmDeleteMvId(mv.id)}

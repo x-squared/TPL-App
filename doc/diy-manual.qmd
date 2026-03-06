@@ -115,6 +115,32 @@ source .venv/bin/activate
 python -m app.db_data --mode migrate-procurement-runtime --env DEV
 ```
 
+Migration modes run a post-migration schema verification automatically (`--migration-check-level strict` by default).
+
+**E2) Backfill audit fields (idempotent):**
+
+```{bash}
+cd /Users/stephan/Workspace/TPL-App/backend
+source .venv/bin/activate
+python -m app.db_data --mode migrate-audit-fields --env DEV
+```
+
+**E3) Backfill medical-value LOINC/UCUM fields (idempotent):**
+
+```{bash}
+cd /Users/stephan/Workspace/TPL-App/backend
+source .venv/bin/activate
+python -m app.db_data --mode migrate-medical-value-units --env DEV
+```
+
+**E4) Verify medical-value LOINC/UCUM rollout completeness (read-only):**
+
+```{bash}
+cd /Users/stephan/Workspace/TPL-App/backend
+source .venv/bin/activate
+python -m app.db_data --mode verify-medical-value-units --env DEV
+```
+
 **F) Capture current DB translations into `translations.json`:**
 
 ```{bash}
@@ -156,6 +182,15 @@ npm run dev
 ```{bash}
 cd /Users/stephan/Workspace/TPL-App
 python -m qa.spec_tools.run_specs
+```
+
+### 5a) Run backend unit tests (pytest)
+
+```{bash}
+cd /Users/stephan/Workspace/TPL-App/backend
+source .venv/bin/activate
+python -m pip install -r requirements-dev.txt
+python -m pytest tests -q
 ```
 
 ### 6) Run conceptual spec suite (`conceptual-case`)

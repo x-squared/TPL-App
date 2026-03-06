@@ -46,6 +46,14 @@ class ColloqiumType(Base):
         comment="Last user who changed the colloquium type.",
         info={"label": "Changed By"},
     )
+    created_by_id = Column(
+        "CREATED_BY",
+        Integer,
+        ForeignKey("USER.ID"),
+        nullable=True,
+        comment="User who created the colloquium type.",
+        info={"label": "Created By"},
+    )
     created_at = Column(
         "CREATED_AT",
         DateTime(timezone=True),
@@ -63,6 +71,7 @@ class ColloqiumType(Base):
 
     organ = relationship("Code", foreign_keys=[organ_id])
     changed_by_user = relationship("User", foreign_keys=[changed_by_id])
+    created_by_user = relationship("User", foreign_keys=[created_by_id])
     colloqiums = relationship("Colloqium", back_populates="colloqium_type")
     participant_links = relationship(
         "ColloqiumTypeParticipant",
@@ -122,6 +131,14 @@ class Colloqium(Base):
         comment="Last user who changed the colloquium.",
         info={"label": "Changed By"},
     )
+    created_by_id = Column(
+        "CREATED_BY",
+        Integer,
+        ForeignKey("USER.ID"),
+        nullable=True,
+        comment="User who created the colloquium.",
+        info={"label": "Created By"},
+    )
     created_at = Column(
         "CREATED_AT",
         DateTime(timezone=True),
@@ -139,6 +156,7 @@ class Colloqium(Base):
 
     colloqium_type = relationship("ColloqiumType", back_populates="colloqiums")
     changed_by_user = relationship("User", foreign_keys=[changed_by_id])
+    created_by_user = relationship("User", foreign_keys=[created_by_id])
     agendas = relationship("ColloqiumAgenda", back_populates="colloqium", cascade="all, delete-orphan")
     participant_links = relationship(
         "ColloqiumParticipant",
@@ -219,6 +237,14 @@ class ColloqiumAgenda(Base):
         comment="Last user who changed the agenda entry.",
         info={"label": "Changed By"},
     )
+    created_by_id = Column(
+        "CREATED_BY",
+        Integer,
+        ForeignKey("USER.ID"),
+        nullable=True,
+        comment="User who created the agenda entry.",
+        info={"label": "Created By"},
+    )
     created_at = Column(
         "CREATED_AT",
         DateTime(timezone=True),
@@ -237,6 +263,7 @@ class ColloqiumAgenda(Base):
     colloqium = relationship("Colloqium", back_populates="agendas")
     episode = relationship("Episode")
     changed_by_user = relationship("User", foreign_keys=[changed_by_id])
+    created_by_user = relationship("User", foreign_keys=[created_by_id])
 
 
 class ColloqiumTypeParticipant(Base):

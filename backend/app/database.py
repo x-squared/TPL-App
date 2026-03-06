@@ -11,6 +11,15 @@ SessionLocal = sessionmaker(autocommit=False, autoflush=False, bind=engine)
 
 class Base(DeclarativeBase):
     row_version = Column("ROW_VERSION", Integer, nullable=False, default=1)
+    @property
+    def changed_at(self):
+        """Compatibility alias for legacy updated_at field during phased rename."""
+        return getattr(self, "updated_at", None)
+
+    @changed_at.setter
+    def changed_at(self, value):
+        if hasattr(self, "updated_at"):
+            setattr(self, "updated_at", value)
 
 
 def get_db():

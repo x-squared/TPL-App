@@ -729,6 +729,64 @@ def _migrate_procurement_to_typed() -> dict[str, int]:
     }
 
 
+def _verify_schema_after_migration(*, check_level: str = "strict") -> int:
+    from .db_schema import _load_runtime, _print_drift, verify_schema_drift
+
+    runtime = _load_runtime()
+    drift = verify_schema_drift(runtime, strict=check_level == "strict")
+    if drift.has_drift:
+        print(
+            "Post-migration schema verification failed: database still differs from current model metadata "
+            f"(check-level={check_level})."
+        )
+        _print_drift(drift)
+        return 2
+    print(f"Post-migration schema verification OK (check-level={check_level}).")
+    return 0
+
+
+def _verify_audit_field_integrity() -> int:
+    from .database import engine
+    from .features.audit_fields import verify_created_by_consistency
+
+    result = verify_created_by_consistency(engine=engine)
+    if result.issue_count > 0:
+        print(
+            "Audit-field integrity verification failed: "
+            + f"tables_with_changed_by={result.tables_with_changed_by} "
+            + f"tables_missing_created_by={result.tables_missing_created_by} "
+            + f"rows_missing_created_by_backfill={result.rows_missing_created_by_backfill}"
+        )
+        return 2
+    print(
+        "Audit-field integrity verification OK: "
+        + f"tables_with_changed_by={result.tables_with_changed_by}"
+    )
+    return 0
+
+
+def _verify_medical_value_unit_integrity() -> int:
+    from .database import engine
+    from .features.medical_values import verify_medical_value_unit_coverage
+
+    result = verify_medical_value_unit_coverage(engine=engine)
+    if result.issue_count > 0:
+        print(
+            "Medical-value unit verification failed: "
+            + f"tables_checked={result.tables_checked} "
+            + f"template_rows_missing_loinc={result.template_rows_missing_loinc} "
+            + f"numeric_datatypes_missing_canonical_unit={result.numeric_datatypes_missing_canonical_unit} "
+            + f"value_rows_missing_normalization_status={result.value_rows_missing_normalization_status} "
+            + f"value_rows_missing_canonical_value={result.value_rows_missing_canonical_value}"
+        )
+        return 2
+    print(
+        "Medical-value unit verification OK: "
+        + f"tables_checked={result.tables_checked}"
+    )
+    return 0
+
+
 def main() -> int:
     parser = argparse.ArgumentParser(description="Data management (DML only).")
     parser.add_argument(
@@ -737,6 +795,9 @@ def main() -> int:
             "clean",
             "seed",
             "refresh",
+            "migrate-audit-fields",
+            "migrate-medical-value-units",
+            "verify-medical-value-units",
             "migrate-procurement-runtime",
             "migrate-procurement-typed",
             "export-translations-json",
@@ -745,6 +806,9 @@ def main() -> int:
         default="refresh",
         help=(
             "clean=wipe data, seed=seed only, refresh=clean+seed, "
+            "migrate-audit-fields=add missing CREATED_BY columns and backfill values from CHANGED_BY, "
+            "migrate-medical-value-units=add/backfill LOINC+UCUM medical value columns, "
+            "verify-medical-value-units=read-only coverage check for LOINC/UCUM rollout, "
             "migrate-procurement-runtime=backfill legacy procurement runtime, "
             "migrate-procurement-typed=backfill typed procurement model from generic runtime rows, "
             "export-translations-json=write DB translations to frontend/src/i18n/translations.json, "
@@ -754,6 +818,15 @@ def main() -> int:
     parser.add_argument("--env", default=os.getenv("TPL_ENV", "DEV"), help="Application env (DEV/TEST/PROD)")
     parser.add_argument("--seed-profile", default=os.getenv("TPL_SEED_PROFILE"), help="Optional seed profile override")
     parser.add_argument("--db-url", default=None, help="Optional DB URL override")
+    parser.add_argument(
+        "--migration-check-level",
+        choices=("basic", "strict"),
+        default="strict",
+        help=(
+            "Schema verification depth after migration modes: "
+            "basic=tables+columns, strict=includes types/nullability/indexes/constraints/FKs"
+        ),
+    )
     args = parser.parse_args()
 
     _configure_env(app_env=args.env, database_url=args.db_url, seed_profile=args.seed_profile)
@@ -781,6 +854,9 @@ def main() -> int:
             + f"person_links={result['migrated_person_links']} "
             + f"team_links={result['migrated_team_links']}"
         )
+        verification_exit = _verify_schema_after_migration(check_level=args.migration_check_level)
+        if verification_exit != 0:
+            return verification_exit
 
     if args.mode == "migrate-procurement-typed":
         result = _migrate_procurement_to_typed()
@@ -791,6 +867,49 @@ def main() -> int:
             + f"person_links={result['migrated_person_links']} "
             + f"team_links={result['migrated_team_links']}"
         )
+        verification_exit = _verify_schema_after_migration(check_level=args.migration_check_level)
+        if verification_exit != 0:
+            return verification_exit
+
+    if args.mode == "migrate-audit-fields":
+        from .database import engine
+        from .features.audit_fields import migrate_created_by_columns
+
+        result = migrate_created_by_columns(engine=engine)
+        print(
+            "Audit-field migration complete: "
+            + f"tables_scanned={result.tables_scanned} "
+            + f"tables_with_changed_by={result.tables_with_changed_by} "
+            + f"created_by_columns_added={result.created_by_columns_added} "
+            + f"created_by_values_backfilled={result.created_by_values_backfilled}"
+        )
+        verification_exit = _verify_schema_after_migration(check_level=args.migration_check_level)
+        if verification_exit != 0:
+            return verification_exit
+        integrity_exit = _verify_audit_field_integrity()
+        if integrity_exit != 0:
+            return integrity_exit
+
+    if args.mode == "migrate-medical-value-units":
+        from .database import engine
+        from .features.medical_values import migrate_medical_value_unit_fields
+
+        result = migrate_medical_value_unit_fields(engine=engine)
+        print(
+            "Medical-value unit migration complete: "
+            + f"tables_scanned={result.tables_scanned} "
+            + f"columns_added={result.columns_added} "
+            + f"rows_backfilled={result.rows_backfilled}"
+        )
+        verification_exit = _verify_schema_after_migration(check_level=args.migration_check_level)
+        if verification_exit != 0:
+            return verification_exit
+        integrity_exit = _verify_medical_value_unit_integrity()
+        if integrity_exit != 0:
+            return integrity_exit
+
+    if args.mode == "verify-medical-value-units":
+        return _verify_medical_value_unit_integrity()
 
     if args.mode == "export-translations-json":
         output_path, key_count = _export_translation_json_from_db()

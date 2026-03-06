@@ -32,10 +32,13 @@ class ColloqiumTypeResponse(ColloqiumTypeBase):
 
     id: int
     organ: CodeResponse | None = None
+    created_by_id: int | None = None
+    created_by_user: UserResponse | None = None
     changed_by_id: int | None = None
     changed_by_user: UserResponse | None = None
     participants_people: list[PersonResponse] = []
     created_at: datetime
+    changed_at: datetime | None = None
     updated_at: datetime | None = None
 
 
@@ -62,10 +65,13 @@ class ColloqiumResponse(ColloqiumBase):
 
     id: int
     colloqium_type: ColloqiumTypeResponse | None = None
+    created_by_id: int | None = None
+    created_by_user: UserResponse | None = None
     changed_by_id: int | None = None
     changed_by_user: UserResponse | None = None
     participants_people: list[PersonResponse] = []
     created_at: datetime
+    changed_at: datetime | None = None
     updated_at: datetime | None = None
 
 
@@ -97,7 +103,10 @@ class ColloqiumAgendaResponse(ColloqiumAgendaBase):
     id: int
     colloqium: ColloqiumResponse | None = None
     episode: EpisodeResponse | None = None
+    created_by_id: int | None = None
+    created_by_user: UserResponse | None = None
     changed_by_id: int | None = None
     changed_by_user: UserResponse | None = None
     created_at: datetime
+    changed_at: datetime | None = None
     updated_at: datetime | None = None

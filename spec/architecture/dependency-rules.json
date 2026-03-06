@@ -43,6 +43,40 @@
       "exclude_files": [
         "backend/app/model/__init__.py"
       ]
+    },
+    {
+      "id": "ARCH-R5",
+      "description": "Schema modules must stay transport-contract focused and not import router layer",
+      "source_glob": "backend/app/schema/*.py",
+      "deny_module_prefixes": [
+        "app.routers."
+      ],
+      "exclude_files": [
+        "backend/app/schema/__init__.py"
+      ]
+    },
+    {
+      "id": "ARCH-R6",
+      "description": "Schema modules must not depend on feature-service orchestration",
+      "source_glob": "backend/app/schema/*.py",
+      "deny_module_prefixes": [
+        "app.features."
+      ],
+      "exclude_files": [
+        "backend/app/schema/__init__.py"
+      ]
+    },
+    {
+      "id": "ARCH-R7",
+      "description": "Runtime routers must not import seed infrastructure",
+      "source_glob": "backend/app/routers/*.py",
+      "deny_module_prefixes": [
+        "app.seed."
+      ],
+      "exclude_files": [
+        "backend/app/routers/__init__.py",
+        "backend/app/routers/registry.py"
+      ]
     }
   ]
 }

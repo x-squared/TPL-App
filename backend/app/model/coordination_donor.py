@@ -103,6 +103,14 @@ class CoordinationDonor(Base):
         comment="Last user who changed the coordination donor row.",
         info={"label": "Changed By"},
     )
+    created_by_id = Column(
+        "CREATED_BY",
+        Integer,
+        ForeignKey("USER.ID"),
+        nullable=True,
+        comment="User who created the coordination donor row.",
+        info={"label": "Created By"},
+    )
     created_at = Column(
         "CREATED_AT",
         DateTime(timezone=True),
@@ -123,4 +131,5 @@ class CoordinationDonor(Base):
     blood_type = relationship("Catalogue", foreign_keys=[blood_type_id])
     diagnosis = relationship("Catalogue", foreign_keys=[diagnosis_id])
     death_kind = relationship("Code", foreign_keys=[death_kind_id])
-    changed_by_user = relationship("User")
+    changed_by_user = relationship("User", foreign_keys=[changed_by_id])
+    created_by_user = relationship("User", foreign_keys=[created_by_id])

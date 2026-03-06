@@ -52,6 +52,14 @@ class CoordinationOrigin(Base):
         comment="Last user who changed the coordination origin row.",
         info={"label": "Changed By"},
     )
+    created_by_id = Column(
+        "CREATED_BY",
+        Integer,
+        ForeignKey("USER.ID"),
+        nullable=True,
+        comment="User who created the coordination origin row.",
+        info={"label": "Created By"},
+    )
     created_at = Column(
         "CREATED_AT",
         DateTime(timezone=True),
@@ -70,4 +78,5 @@ class CoordinationOrigin(Base):
     coordination = relationship("Coordination", back_populates="origin")
     detection_hospital = relationship("Catalogue", foreign_keys=[detection_hospital_id])
     procurement_hospital = relationship("Catalogue", foreign_keys=[procurement_hospital_id])
-    changed_by_user = relationship("User")
+    changed_by_user = relationship("User", foreign_keys=[changed_by_id])
+    created_by_user = relationship("User", foreign_keys=[created_by_id])

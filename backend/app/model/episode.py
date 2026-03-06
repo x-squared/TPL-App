@@ -213,6 +213,14 @@ class Episode(Base):
         comment="Last user who changed the episode.",
         info={"label": "Changed By"},
     )
+    created_by_id = Column(
+        "CREATED_BY",
+        Integer,
+        ForeignKey("USER.ID"),
+        nullable=True,
+        comment="User who created the episode.",
+        info={"label": "Created By"},
+    )
     created_at = Column(
         "CREATED_AT",
         DateTime(timezone=True),
@@ -232,7 +240,8 @@ class Episode(Base):
     organ = relationship("Code", foreign_keys=[organ_id])
     status = relationship("Code", foreign_keys=[status_id])
     phase = relationship("Code", foreign_keys=[phase_id])
-    changed_by_user = relationship("User")
+    changed_by_user = relationship("User", foreign_keys=[changed_by_id])
+    created_by_user = relationship("User", foreign_keys=[created_by_id])
     coordination_episodes = relationship("CoordinationEpisode", back_populates="episode")
     task_groups = relationship("TaskGroup", back_populates="episode")
     organ_links = relationship("EpisodeOrgan", back_populates="episode", cascade="all, delete-orphan")

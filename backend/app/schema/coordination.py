@@ -53,9 +53,12 @@ class CoordinationResponse(CoordinationBase):
     completion_confirmed_at: datetime | None = None
     completion_confirmed_by_id: int | None = None
     completion_confirmed_by_user: UserResponse | None = None
+    created_by_id: int | None = None
+    created_by_user: UserResponse | None = None
     changed_by_id: int | None = None
     changed_by_user: UserResponse | None = None
     created_at: datetime
+    changed_at: datetime | None = None
     updated_at: datetime | None = None
 
 
@@ -129,7 +132,10 @@ class CoordinationDonorResponse(CoordinationDonorBase):
     death_kind: CodeResponse | None = None
     changed_by_id: int | None = None
     changed_by_user: UserResponse | None = None
+    created_by_id: int | None = None
+    created_by_user: UserResponse | None = None
     created_at: datetime
+    changed_at: datetime | None = None
     updated_at: datetime | None = None
 
 
@@ -162,7 +168,10 @@ class CoordinationTimeLogResponse(CoordinationTimeLogBase):
     user: UserResponse | None = None
     changed_by_id: int | None = None
     changed_by_user: UserResponse | None = None
+    created_by_id: int | None = None
+    created_by_user: UserResponse | None = None
     created_at: datetime
+    changed_at: datetime | None = None
     updated_at: datetime | None = None
 
 
@@ -220,7 +229,10 @@ class CoordinationProtocolEventLogResponse(CoordinationProtocolEventLogBase):
     task: TaskResponse | None = None
     changed_by_id: int | None = None
     changed_by_user: UserResponse | None = None
+    created_by_id: int | None = None
+    created_by_user: UserResponse | None = None
     created_at: datetime
+    changed_at: datetime | None = None
     updated_at: datetime | None = None
 
 
@@ -264,7 +276,10 @@ class CoordinationEpisodeResponse(CoordinationEpisodeBase):
     organ_rejection_sequel: CatalogueResponse | None = None
     changed_by_id: int | None = None
     changed_by_user: UserResponse | None = None
+    created_by_id: int | None = None
+    created_by_user: UserResponse | None = None
     created_at: datetime
+    changed_at: datetime | None = None
     updated_at: datetime | None = None
 
 
@@ -302,7 +317,10 @@ class CoordinationProcurementResponse(CoordinationProcurementBase):
     id: int
     changed_by_id: int | None = None
     changed_by_user: UserResponse | None = None
+    created_by_id: int | None = None
+    created_by_user: UserResponse | None = None
     created_at: datetime
+    changed_at: datetime | None = None
     updated_at: datetime | None = None
 
 
@@ -323,7 +341,10 @@ class CoordinationProcurementFieldTemplateResponse(CoordinationProcurementFieldT
     id: int
     changed_by_id: int | None = None
     changed_by_user: UserResponse | None = None
+    created_by_id: int | None = None
+    created_by_user: UserResponse | None = None
     created_at: datetime
+    changed_at: datetime | None = None
     updated_at: datetime | None = None
 
 
@@ -342,7 +363,10 @@ class CoordinationProcurementFieldGroupTemplateResponse(CoordinationProcurementF
     id: int
     changed_by_id: int | None = None
     changed_by_user: UserResponse | None = None
+    created_by_id: int | None = None
+    created_by_user: UserResponse | None = None
     created_at: datetime
+    changed_at: datetime | None = None
     updated_at: datetime | None = None
 
 
@@ -372,7 +396,10 @@ class CoordinationProcurementFieldScopeTemplateResponse(CoordinationProcurementF
     organ: CodeResponse | None = None
     changed_by_id: int | None = None
     changed_by_user: UserResponse | None = None
+    created_by_id: int | None = None
+    created_by_user: UserResponse | None = None
     created_at: datetime
+    changed_at: datetime | None = None
     updated_at: datetime | None = None
 
 
@@ -394,7 +421,10 @@ class CoordinationProcurementProtocolTaskGroupSelectionResponse(CoordinationProc
     organ: CodeResponse | None = None
     changed_by_id: int | None = None
     changed_by_user: UserResponse | None = None
+    created_by_id: int | None = None
+    created_by_user: UserResponse | None = None
     created_at: datetime
+    changed_at: datetime | None = None
     updated_at: datetime | None = None
 
 
@@ -451,7 +481,10 @@ class CoordinationProcurementValueResponse(CoordinationProcurementValueBase):
     field_template: CoordinationProcurementFieldTemplateResponse | None = None
     changed_by_id: int | None = None
     changed_by_user: UserResponse | None = None
+    created_by_id: int | None = None
+    created_by_user: UserResponse | None = None
     created_at: datetime
+    changed_at: datetime | None = None
     updated_at: datetime | None = None
     persons: list[CoordinationProcurementValuePersonResponse] = []
     teams: list[CoordinationProcurementValueTeamResponse] = []
@@ -470,7 +503,10 @@ class CoordinationProcurementSlotResponse(CoordinationProcurementSlotBase):
     values: list[CoordinationProcurementValueResponse] = []
     changed_by_id: int | None = None
     changed_by_user: UserResponse | None = None
+    created_by_id: int | None = None
+    created_by_user: UserResponse | None = None
     created_at: datetime
+    changed_at: datetime | None = None
     updated_at: datetime | None = None
 
 
@@ -503,7 +539,10 @@ class CoordinationProcurementOrganResponse(CoordinationProcurementOrganBase):
     slots: list[CoordinationProcurementSlotResponse] = []
     changed_by_id: int | None = None
     changed_by_user: UserResponse | None = None
+    created_by_id: int | None = None
+    created_by_user: UserResponse | None = None
     created_at: datetime
+    changed_at: datetime | None = None
     updated_at: datetime | None = None
 
 
@@ -593,7 +632,10 @@ class CoordinationOrganEffectResponse(CoordinationOrganEffectBase):
     procurement_effect: CatalogueResponse | None = None
     changed_by_id: int | None = None
     changed_by_user: UserResponse | None = None
+    created_by_id: int | None = None
+    created_by_user: UserResponse | None = None
     created_at: datetime
+    changed_at: datetime | None = None
     updated_at: datetime | None = None
 
 
@@ -622,5 +664,8 @@ class CoordinationOriginResponse(CoordinationOriginBase):
     organs_declined: bool = False
     changed_by_id: int | None = None
     changed_by_user: UserResponse | None = None
+    created_by_id: int | None = None
+    created_by_user: UserResponse | None = None
     created_at: datetime
+    changed_at: datetime | None = None
     updated_at: datetime | None = None

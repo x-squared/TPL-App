@@ -120,6 +120,14 @@ class Coordination(Base):
         comment="Last user who changed the coordination row.",
         info={"label": "Changed By"},
     )
+    created_by_id = Column(
+        "CREATED_BY",
+        Integer,
+        ForeignKey("USER.ID"),
+        nullable=True,
+        comment="User who created the coordination row.",
+        info={"label": "Created By"},
+    )
     created_at = Column(
         "CREATED_AT",
         DateTime(timezone=True),
@@ -137,6 +145,7 @@ class Coordination(Base):
 
     status = relationship("Code", foreign_keys=[status_id])
     changed_by_user = relationship("User", foreign_keys=[changed_by_id])
+    created_by_user = relationship("User", foreign_keys=[created_by_id])
     completion_confirmed_by_user = relationship("User", foreign_keys=[completion_confirmed_by_id])
     donor = relationship(
         "CoordinationDonor",
@@ -197,6 +206,7 @@ class CoordinationProtocolEventLog(Base):
     task_text = Column("TASK_TEXT", String(512), nullable=True)
     task_comment = Column("TASK_COMMENT", String(512), nullable=True)
     changed_by_id = Column("CHANGED_BY", Integer, ForeignKey("USER.ID"), nullable=True)
+    created_by_id = Column("CREATED_BY", Integer, ForeignKey("USER.ID"), nullable=True)
     created_at = Column("CREATED_AT", DateTime(timezone=True), server_default=func.now())
     updated_at = Column("UPDATED_AT", DateTime(timezone=True), onupdate=func.now())
 
@@ -204,3 +214,4 @@ class CoordinationProtocolEventLog(Base):
     organ = relationship("Code", foreign_keys=[organ_id])
     task = relationship("Task", foreign_keys=[task_id])
     changed_by_user = relationship("User", foreign_keys=[changed_by_id])
+    created_by_user = relationship("User", foreign_keys=[created_by_id])

@@ -17,6 +17,7 @@ from ...models import (
     Patient,
 )
 from ...schemas import MedicalValueCreate, MedicalValueUpdate
+from .normalization import normalize_medical_value
 
 
 def build_context_key(
@@ -158,6 +159,12 @@ def instantiate_templates_for_patient(
                         name=template.name_default or "",
                         pos=template.pos or 0,
                         value="",
+                        value_input="",
+                        unit_input_ucum=None,
+                        value_canonical="",
+                        unit_canonical_ucum=None,
+                        normalization_status="UNSPECIFIED",
+                        normalization_error="",
                         renew_date=None,
                         organ_id=None,
                         is_donor_context=False,
@@ -190,6 +197,12 @@ def instantiate_templates_for_patient(
                         name=template.name_default or "",
                         pos=template.pos or 0,
                         value="",
+                        value_input="",
+                        unit_input_ucum=None,
+                        value_canonical="",
+                        unit_canonical_ucum=None,
+                        normalization_status="UNSPECIFIED",
+                        normalization_error="",
                         renew_date=None,
                         organ_id=None,
                         is_donor_context=True,
@@ -218,6 +231,28 @@ def _get_default_group_id(db: Session) -> int | None:
         .first()
     )
     return group.id if group else None
+
+
+def _resolve_datatype_definition_for_value(
+    *,
+    template_id: int | None,
+    datatype_id: int | None,
+    db: Session,
+) -> DatatypeDefinition | None:
+    if template_id is not None:
+        template = (
+            db.query(MedicalValueTemplate)
+            .options(joinedload(MedicalValueTemplate.datatype_definition))
+            .filter(MedicalValueTemplate.id == template_id)
+            .first()
+        )
+        if template and template.datatype_definition is not None:
+            return template.datatype_definition
+        if template and template.datatype_id is not None:
+            return db.query(DatatypeDefinition).filter(DatatypeDefinition.code_id == template.datatype_id).first()
+    if datatype_id is not None:
+        return db.query(DatatypeDefinition).filter(DatatypeDefinition.code_id == datatype_id).first()
+    return None
 
 
 def _group_key_for_id(db: Session, group_id: int | None) -> str | None:
@@ -268,6 +303,7 @@ def list_medical_values_for_patient(*, patient_id: int, db: Session) -> list[Med
         db.query(MedicalValue)
         .options(
             joinedload(MedicalValue.medical_value_template).joinedload(MedicalValueTemplate.datatype),
+            joinedload(MedicalValue.medical_value_template).joinedload(MedicalValueTemplate.datatype_definition),
             joinedload(MedicalValue.medical_value_template).joinedload(MedicalValueTemplate.medical_value_group_template),
             joinedload(MedicalValue.medical_value_group_template),
             joinedload(MedicalValue.medical_value_group).joinedload(MedicalValueGroup.medical_value_group_template),
@@ -298,6 +334,27 @@ def create_medical_value_for_patient(
             data["medical_value_group_id"] = template.medical_value_group_id
         else:
             data["medical_value_group_id"] = _get_default_group_id(db)
+    datatype_definition = _resolve_datatype_definition_for_value(
+        template_id=data.get("medical_value_template_id"),
+        datatype_id=data.get("datatype_id"),
+        db=db,
+    )
+    normalized = normalize_medical_value(
+        raw_value=(
+            data.get("value_input")
+            if (data.get("value_input") not in (None, ""))
+            else (data.get("value") or "")
+        ),
+        unit_input_ucum=data.get("unit_input_ucum"),
+        datatype_definition=datatype_definition,
+    )
+    data["value"] = normalized.value_legacy
+    data["value_input"] = normalized.value_input
+    data["unit_input_ucum"] = normalized.unit_input_ucum
+    data["value_canonical"] = normalized.value_canonical
+    data["unit_canonical_ucum"] = normalized.unit_canonical_ucum
+    data["normalization_status"] = normalized.normalization_status
+    data["normalization_error"] = normalized.normalization_error
     data.pop("episode_id", None)
     context_key = data.get("context_key") or build_context_key(
         organ_id=data.get("organ_id"),
@@ -364,6 +421,32 @@ def update_medical_value_for_patient(
             if template and template.medical_value_group_id is not None
             else _get_default_group_id(db)
         )
+    if any(key in update_data for key in ("value", "value_input", "unit_input_ucum", "medical_value_template_id", "datatype_id")):
+        datatype_definition = _resolve_datatype_definition_for_value(
+            template_id=mv.medical_value_template_id,
+            datatype_id=mv.datatype_id,
+            db=db,
+        )
+        normalized = normalize_medical_value(
+            raw_value=(
+                update_data.get("value_input")
+                if ("value_input" in update_data and update_data.get("value_input") not in (None, ""))
+                else (update_data.get("value") if "value" in update_data else mv.value_input or mv.value or "")
+            ),
+            unit_input_ucum=(
+                update_data.get("unit_input_ucum")
+                if "unit_input_ucum" in update_data
+                else mv.unit_input_ucum
+            ),
+            datatype_definition=datatype_definition,
+        )
+        mv.value = normalized.value_legacy
+        mv.value_input = normalized.value_input
+        mv.unit_input_ucum = normalized.unit_input_ucum
+        mv.value_canonical = normalized.value_canonical
+        mv.unit_canonical_ucum = normalized.unit_canonical_ucum
+        mv.normalization_status = normalized.normalization_status
+        mv.normalization_error = normalized.normalization_error
     if any(key in update_data for key in ("organ_id", "is_donor_context", "context_key", "medical_value_group_id")):
         mv.episode_id = None
         mv.context_key = update_data.get("context_key") or build_context_key(

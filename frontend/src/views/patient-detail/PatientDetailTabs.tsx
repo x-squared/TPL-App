@@ -151,7 +151,14 @@ export interface PatientMedicalValuesModel {
   mvEditForm: MedicalValueUpdate;
   setMvEditForm: React.Dispatch<React.SetStateAction<MedicalValueUpdate>>;
   mvTemplates: MedicalValueTemplate[];
-  renderValueInput: (value: string, dt: Code | null, onChange: (v: string) => void, className: string) => React.ReactNode;
+  renderValueInput: (
+    value: string,
+    dt: Code | null,
+    onChange: (v: string) => void,
+    className: string,
+    unitValue?: string | null,
+    onUnitChange?: (unit: string | null) => void,
+  ) => React.ReactNode;
   resolveDt: (templateId?: number | null, datatypeId?: number | null) => Code | null;
   handleSaveMv: () => Promise<void>;
   cancelEditingMv: () => void;
@@ -165,6 +172,8 @@ export interface PatientMedicalValuesModel {
     medical_value_group_id?: number | null;
     name: string;
     value: string;
+    value_input?: string | null;
+    unit_input_ucum?: string | null;
     renew_date: string | null;
   }) => void;
   mvSortKey: 'pos' | 'name' | 'renew_date';

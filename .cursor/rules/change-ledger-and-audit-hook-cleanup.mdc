@@ -1,0 +1,30 @@
+---
+description: Keep a touched-file change ledger and progressively remove redundant changed_by plumbing
+alwaysApply: true
+---
+
+# Change Ledger + Audit Hook Cleanup
+
+For every non-trivial implementation, keep a concise touched-file change ledger in the final response:
+
+- list each touched file path
+- summarize the behavior change in one short line per file
+- call out follow-up items not done yet
+
+## Changed-User Migration Rule
+
+The project now has a global audit hook for `changed_by_id`.
+
+- When touching router/service code, remove redundant manual `changed_by_id` propagation where safe.
+- Keep explicit `changed_by_id` only where needed:
+  - background jobs / scheduler flows
+  - seed/admin scripts
+  - explicit impersonation/system-user behavior
+- Preserve behavior and API contracts while removing redundant plumbing.
+
+## Safety Check
+
+Before finishing a change that removes manual `changed_by_id` passing:
+
+- verify request-authenticated write paths still stamp `changed_by_id`
+- do not remove explicit stamping from non-request contexts unless equivalent context is set

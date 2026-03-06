@@ -89,11 +89,14 @@ export function usePatientMedicalValues(
   const resetMvForm = () => {
     if (mvAddMode === 'template') {
       const first = mvTemplates[0];
+      const firstDt = resolveDatatypeMetadata(first?.id ?? null, first?.datatype_id ?? null);
       setMvForm({
         medical_value_template_id: first?.id ?? null,
         medical_value_group_id: first?.medical_value_group_id ?? null,
         name: first?.name_default ?? '',
         value: '',
+        value_input: '',
+        unit_input_ucum: firstDt?.canonical_unit_ucum ?? firstDt?.unit ?? null,
         renew_date: '',
       });
     } else {
@@ -103,6 +106,8 @@ export function usePatientMedicalValues(
         medical_value_group_id: userCapturedGroupId,
         name: '',
         value: '',
+        value_input: '',
+        unit_input_ucum: null,
         renew_date: '',
       });
     }
@@ -134,6 +139,8 @@ export function usePatientMedicalValues(
           name: tpl?.name_default ?? '',
           pos: tpl?.pos ?? 0,
           value: mvForm.value,
+          value_input: mvForm.value_input ?? mvForm.value ?? '',
+          unit_input_ucum: mvForm.unit_input_ucum ?? null,
           renew_date: mvForm.renew_date || null,
         });
       } else {
@@ -143,6 +150,8 @@ export function usePatientMedicalValues(
           medical_value_group_id: mvForm.medical_value_group_id ?? userCapturedGroupId,
           name: mvForm.name,
           value: mvForm.value,
+          value_input: mvForm.value_input ?? mvForm.value ?? '',
+          unit_input_ucum: mvForm.unit_input_ucum ?? null,
           renew_date: mvForm.renew_date || null,
         });
       }
@@ -167,6 +176,8 @@ export function usePatientMedicalValues(
     medical_value_group_id?: number | null;
     name: string;
     value: string;
+      value_input?: string | null;
+      unit_input_ucum?: string | null;
     renew_date: string | null;
   }) => {
     setEditingMvId(mv.id);
@@ -175,6 +186,8 @@ export function usePatientMedicalValues(
       medical_value_group_id: mv.medical_value_group_id ?? null,
       name: mv.name,
       value: mv.value,
+      value_input: mv.value_input ?? mv.value ?? '',
+      unit_input_ucum: mv.unit_input_ucum ?? null,
       renew_date: mv.renew_date,
     });
     setConfirmDeleteMvId(null);
@@ -191,6 +204,8 @@ export function usePatientMedicalValues(
       const tpl = mvTemplates.find((t) => t.id === mvEditForm.medical_value_template_id);
       await api.updateMedicalValue(patient.id, editingMvId, {
         ...mvEditForm,
+        value_input: mvEditForm.value_input ?? mvEditForm.value ?? undefined,
+        unit_input_ucum: mvEditForm.unit_input_ucum ?? null,
         datatype_id: tpl?.datatype_id ?? undefined,
         medical_value_group_id: tpl?.medical_value_group_id ?? mvEditForm.medical_value_group_id ?? userCapturedGroupId,
       });
@@ -229,29 +244,44 @@ export function usePatientMedicalValues(
     dt: Code | null,
     onChange: (v: string) => void,
     className: string,
+    unitValue?: string | null,
+    onUnitChange?: (unit: string | null) => void,
   ) => {
     const cfg = getConfigFromMetadata(dt, resolveDatatypeMetadata(undefined, dt?.id ?? null));
+    const unitSelect = cfg.inputType === 'number' && onUnitChange && cfg.allowedUnitsUcum && cfg.allowedUnitsUcum.length > 0
+      ? createElement(
+          'select',
+          {
+            className,
+            value: unitValue ?? cfg.canonicalUnitUcum ?? cfg.allowedUnitsUcum[0] ?? '',
+            onChange: (e: Event) => onUnitChange((e.target as HTMLSelectElement).value || null),
+          },
+          ...cfg.allowedUnitsUcum.map((unit) => createElement('option', { key: unit, value: unit }, unit)),
+        )
+      : null;
 
     if (cfg.inputType === 'catalogue') {
       const catType = getCatalogueType(dt);
       const entries = catalogueCache[catType] ?? [];
-      return createElement(
+      const input = createElement(
         'select',
         { className, value, onChange: (e: Event) => onChange((e.target as HTMLSelectElement).value) },
         createElement('option', { value: '' }, '-'),
         ...entries.map((c) => createElement('option', { key: c.id, value: c.key }, c.name_default)),
       );
+      return unitSelect ? createElement('div', { className: 'mv-input-with-unit' }, input, unitSelect) : input;
     }
     if (cfg.inputType === 'boolean') {
-      return createElement(
+      const input = createElement(
         'select',
         { className, value, onChange: (e: Event) => onChange((e.target as HTMLSelectElement).value) },
         createElement('option', { value: '' }, '-'),
         createElement('option', { value: 'true' }, 'Yes'),
         createElement('option', { value: 'false' }, 'No'),
       );
+      return unitSelect ? createElement('div', { className: 'mv-input-with-unit' }, input, unitSelect) : input;
     }
-    return createElement('input', {
+    const input = createElement('input', {
       className,
       type: cfg.inputType === 'number'
         ? 'number'
@@ -265,6 +295,7 @@ export function usePatientMedicalValues(
       value,
       onChange: (e: Event) => onChange((e.target as HTMLInputElement).value),
     });
+    return unitSelect ? createElement('div', { className: 'mv-input-with-unit' }, input, unitSelect) : input;
   };
 
   const toggleMvSort = (key: 'pos' | 'name' | 'renew_date') => {

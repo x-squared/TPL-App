@@ -1,0 +1,22 @@
+# Backend Pytest Clarity
+
+Apply this when creating or editing backend test files (`backend/tests/**/*.py`).
+
+- Add a short docstring to every test function that states the behavior under test.
+- Use explanatory `assert` messages by default: explain what is asserted and why it should hold.
+- Keep assertion messages intent-focused; do not just repeat the expression verbatim.
+- Prefer one behavior per test; if testing multiple checks, keep them tightly related to the same behavior.
+- For expected failures/exceptions, use explicit `pytest.raises(..., match="...")` with meaningful message matching.
+
+## Example assertion style
+
+```python
+assert created.changed_by_id == actor.id, (
+    "Person.changed_by_id should be auto-stamped from audit context during insert commit."
+)
+```
+
+## Required check before finish
+
+- Scan changed backend test files for missing test docstrings.
+- Scan changed backend test files for bare asserts without an explanatory message and add one where useful.

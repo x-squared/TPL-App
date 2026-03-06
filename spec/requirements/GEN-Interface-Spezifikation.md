@@ -1,4 +1,4 @@
-# Feature: Schnittstellen [Spec]
+# Feature [GEN]: Schnittstellen
 
 Dieses Dokument beschreibt fachliche und technische Anforderungen für externe Schnittstellen in TPL-App.
 

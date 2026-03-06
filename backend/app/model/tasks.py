@@ -100,6 +100,14 @@ class TaskGroupTemplate(Base):
         comment="Last user who changed the task group template.",
         info={"label": "Changed By"},
     )
+    created_by_id = Column(
+        "CREATED_BY",
+        Integer,
+        ForeignKey("USER.ID"),
+        nullable=True,
+        comment="User who created the task group template.",
+        info={"label": "Created By"},
+    )
     created_at = Column(
         "CREATED_AT",
         DateTime(timezone=True),
@@ -119,6 +127,7 @@ class TaskGroupTemplate(Base):
     organ = relationship("Code", foreign_keys=[organ_id])
     tpl_phase = relationship("Code", foreign_keys=[tpl_phase_id])
     changed_by_user = relationship("User", foreign_keys=[changed_by_id])
+    created_by_user = relationship("User", foreign_keys=[created_by_id])
     task_templates = relationship("TaskTemplate", back_populates="task_group_template", cascade="all, delete-orphan")
     task_groups = relationship("TaskGroup", back_populates="task_group_template")
 
@@ -225,6 +234,14 @@ class TaskTemplate(Base):
         comment="Last user who changed the task template.",
         info={"label": "Changed By"},
     )
+    created_by_id = Column(
+        "CREATED_BY",
+        Integer,
+        ForeignKey("USER.ID"),
+        nullable=True,
+        comment="User who created the task template.",
+        info={"label": "Created By"},
+    )
     created_at = Column(
         "CREATED_AT",
         DateTime(timezone=True),
@@ -243,6 +260,7 @@ class TaskTemplate(Base):
     task_group_template = relationship("TaskGroupTemplate", back_populates="task_templates")
     priority = relationship("Code", foreign_keys=[priority_id])
     changed_by_user = relationship("User", foreign_keys=[changed_by_id])
+    created_by_user = relationship("User", foreign_keys=[created_by_id])
 
 
 class TaskGroup(Base):
@@ -336,6 +354,14 @@ class TaskGroup(Base):
         comment="Last user who changed the task group.",
         info={"label": "Changed By"},
     )
+    created_by_id = Column(
+        "CREATED_BY",
+        Integer,
+        ForeignKey("USER.ID"),
+        nullable=True,
+        comment="User who created the task group.",
+        info={"label": "Created By"},
+    )
     created_at = Column(
         "CREATED_AT",
         DateTime(timezone=True),
@@ -359,6 +385,7 @@ class TaskGroup(Base):
     organ = relationship("Code", foreign_keys=[organ_id])
     tpl_phase = relationship("Code", foreign_keys=[tpl_phase_id])
     changed_by_user = relationship("User", foreign_keys=[changed_by_id])
+    created_by_user = relationship("User", foreign_keys=[created_by_id])
     tasks = relationship("Task", back_populates="task_group", cascade="all, delete-orphan")
 
 
@@ -507,6 +534,14 @@ class Task(Base):
         comment="Last user who changed the task.",
         info={"label": "Changed By"},
     )
+    created_by_id = Column(
+        "CREATED_BY",
+        Integer,
+        ForeignKey("USER.ID"),
+        nullable=True,
+        comment="User who created the task.",
+        info={"label": "Created By"},
+    )
     created_at = Column(
         "CREATED_AT",
         DateTime(timezone=True),
@@ -528,6 +563,7 @@ class Task(Base):
     assigned_to = relationship("User", foreign_keys=[assigned_to_id], back_populates="assigned_tasks")
     closed_by = relationship("User", foreign_keys=[closed_by_id], back_populates="closed_tasks")
     changed_by_user = relationship("User", foreign_keys=[changed_by_id])
+    created_by_user = relationship("User", foreign_keys=[created_by_id])
 
     @property
     def closed(self) -> bool:

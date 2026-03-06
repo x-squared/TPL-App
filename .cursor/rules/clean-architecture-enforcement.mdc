@@ -16,6 +16,19 @@ Before finishing, explicitly check for architectural drift in touched flows:
 - router logic that should live in feature services
 - ad-hoc UI implementations where a shared component already exists
 - expanding monolith files that should be decomposed
+- concept drift: current solution no longer matches better-fitting domain/architecture concepts
+- standards-fit gaps: established standards would reduce ambiguity/risk in touched domains
+
+## 1a) Concept-Fit Sweep (required for non-trivial domain flows)
+
+Before finishing, explicitly evaluate whether the touched domain should adopt a clearer concept model:
+
+- process/case modeling fit for complex, stateful workflows (for example explicit process framework)
+- terminology and interoperability fit (for example LOINC for observation semantics)
+- unit/measurement safety fit (for example UCUM for unit encoding/conversion)
+- explicit state/event model fit for implicit transition logic
+
+If the concept-fit sweep suggests a better architectural pattern, propose it as a change story (do not silently reshape behavior).
 
 ## 2) Shared-First Rule
 
@@ -42,3 +55,16 @@ In the final note, include:
 - what drift was reduced
 - what was intentionally not refactored (and why)
 - where follow-up decomposition is still recommended
+- which concept-fit candidates were evaluated and why they were accepted/deferred/rejected
+
+## 6) Change-Story Protocol (required)
+
+When architectural improvements are identified, propose explicit change stories with:
+
+- why (risk/drift)
+- target architecture state
+- impacted files/modules
+- effort (`S`/`M`/`L`)
+- migration risk and compatibility notes
+
+Implement only after explicit user acceptance.

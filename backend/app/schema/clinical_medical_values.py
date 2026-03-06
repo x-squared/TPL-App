@@ -10,6 +10,8 @@ from .reference import CodeResponse, UserResponse
 class MedicalValueTemplateBase(BaseModel):
     lab_key: str
     kis_key: str
+    loinc_code: str | None = None
+    loinc_display_name: str | None = None
     datatype_id: int
     name_default: str = ""
     pos: int
@@ -36,6 +38,9 @@ class DatatypeDefinitionBase(BaseModel):
     code_id: int
     primitive_kind: str = "text"
     unit: str | None = None
+    canonical_unit_ucum: str | None = None
+    allowed_units_ucum_json: str | None = None
+    conversion_group: str | None = None
     format_pattern: str | None = None
     validation_regex: str | None = None
     min_value: str | None = None
@@ -49,6 +54,13 @@ class DatatypeDefinitionResponse(DatatypeDefinitionBase):
 
     id: int
     code: CodeResponse | None = None
+    changed_by_id: int | None = None
+    changed_by_user: UserResponse | None = None
+    created_by_id: int | None = None
+    created_by_user: UserResponse | None = None
+    created_at: datetime
+    changed_at: datetime | None = None
+    updated_at: datetime | None = None
 
 
 class MedicalValueGroupTemplateBase(BaseModel):
@@ -77,7 +89,10 @@ class MedicalValueGroupContextTemplateResponse(MedicalValueGroupContextTemplateB
     organ: CodeResponse | None = None
     changed_by_id: int | None = None
     changed_by_user: UserResponse | None = None
+    created_by_id: int | None = None
+    created_by_user: UserResponse | None = None
     created_at: datetime
+    changed_at: datetime | None = None
     updated_at: datetime | None = None
 
 
@@ -94,7 +109,10 @@ class MedicalValueTemplateContextTemplateResponse(MedicalValueTemplateContextTem
     organ: CodeResponse | None = None
     changed_by_id: int | None = None
     changed_by_user: UserResponse | None = None
+    created_by_id: int | None = None
+    created_by_user: UserResponse | None = None
     created_at: datetime
+    changed_at: datetime | None = None
     updated_at: datetime | None = None
 
 
@@ -104,8 +122,11 @@ class MedicalValueGroupTemplateResponse(MedicalValueGroupTemplateBase):
     id: int
     changed_by_id: int | None = None
     changed_by_user: UserResponse | None = None
+    created_by_id: int | None = None
+    created_by_user: UserResponse | None = None
     context_templates: list[MedicalValueGroupContextTemplateResponse] = []
     created_at: datetime
+    changed_at: datetime | None = None
     updated_at: datetime | None = None
 
 
@@ -125,7 +146,10 @@ class MedicalValueGroupResponse(MedicalValueGroupBase):
     medical_value_group_template: MedicalValueGroupTemplateResponse | None = None
     changed_by_id: int | None = None
     changed_by_user: UserResponse | None = None
+    created_by_id: int | None = None
+    created_by_user: UserResponse | None = None
     created_at: datetime
+    changed_at: datetime | None = None
     updated_at: datetime | None = None
 
 
@@ -136,6 +160,12 @@ class MedicalValueBase(BaseModel):
     name: str = ""
     pos: int = 0
     value: str = ""
+    value_input: str = ""
+    unit_input_ucum: str | None = None
+    value_canonical: str = ""
+    unit_canonical_ucum: str | None = None
+    normalization_status: str = "UNSPECIFIED"
+    normalization_error: str = ""
     renew_date: date | None = None
     medical_value_group_id: int | None = None
     medical_value_group_instance_id: int | None = None
@@ -150,6 +180,12 @@ class MedicalValueCreate(BaseModel):
     name: str = ""
     pos: int = 0
     value: str = ""
+    value_input: str = ""
+    unit_input_ucum: str | None = None
+    value_canonical: str = ""
+    unit_canonical_ucum: str | None = None
+    normalization_status: str = "UNSPECIFIED"
+    normalization_error: str = ""
     renew_date: date | None = None
     medical_value_group_id: int | None = None
     medical_value_group_instance_id: int | None = None
@@ -164,6 +200,12 @@ class MedicalValueUpdate(BaseModel):
     name: str | None = None
     pos: int | None = None
     value: str | None = None
+    value_input: str | None = None
+    unit_input_ucum: str | None = None
+    value_canonical: str | None = None
+    unit_canonical_ucum: str | None = None
+    normalization_status: str | None = None
+    normalization_error: str | None = None
     renew_date: date | None = None
     medical_value_group_id: int | None = None
     medical_value_group_instance_id: int | None = None
@@ -182,5 +224,8 @@ class MedicalValueResponse(MedicalValueBase):
     datatype: CodeResponse | None = None
     changed_by_id: int | None = None
     changed_by_user: UserResponse | None = None
+    created_by_id: int | None = None
+    created_by_user: UserResponse | None = None
     created_at: datetime
+    changed_at: datetime | None = None
     updated_at: datetime | None = None

@@ -55,9 +55,12 @@ class PatientResponse(PatientBase):
     diagnoses: list[DiagnosisResponse] = []
     medical_values: list[MedicalValueResponse] = []
     episodes: list[EpisodeResponse] = []
+    created_by_id: int | None = None
+    created_by_user: UserResponse | None = None
     changed_by_id: int | None = None
     changed_by_user: UserResponse | None = None
     created_at: datetime
+    changed_at: datetime | None = None
     updated_at: datetime | None = None
 
 

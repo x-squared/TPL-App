@@ -108,6 +108,12 @@ export interface MedicalValue {
   name: string;
   pos: number;
   value: string;
+  value_input: string;
+  unit_input_ucum: string | null;
+  value_canonical: string;
+  unit_canonical_ucum: string | null;
+  normalization_status: string;
+  normalization_error: string;
   renew_date: string | null;
   organ_id: number | null;
   is_donor_context: boolean;
@@ -126,6 +132,8 @@ export interface MedicalValueCreate {
   name?: string;
   pos?: number;
   value?: string;
+  value_input?: string;
+  unit_input_ucum?: string | null;
   renew_date?: string | null;
   organ_id?: number | null;
   is_donor_context?: boolean;
@@ -140,6 +148,8 @@ export interface MedicalValueUpdate {
   name?: string;
   pos?: number;
   value?: string;
+  value_input?: string;
+  unit_input_ucum?: string | null;
   renew_date?: string | null;
   organ_id?: number | null;
   is_donor_context?: boolean;

@@ -98,6 +98,14 @@ class CoordinationEpisode(Base):
         comment="Last user who changed the coordination episode row.",
         info={"label": "Changed By"},
     )
+    created_by_id = Column(
+        "CREATED_BY",
+        Integer,
+        ForeignKey("USER.ID"),
+        nullable=True,
+        comment="User who created the coordination episode row.",
+        info={"label": "Created By"},
+    )
     created_at = Column(
         "CREATED_AT",
         DateTime(timezone=True),
@@ -117,4 +125,5 @@ class CoordinationEpisode(Base):
     episode = relationship("Episode", back_populates="coordination_episodes")
     organ = relationship("Code", foreign_keys=[organ_id])
     organ_rejection_sequel = relationship("Catalogue", foreign_keys=[organ_rejection_sequel_id])
-    changed_by_user = relationship("User")
+    changed_by_user = relationship("User", foreign_keys=[changed_by_id])
+    created_by_user = relationship("User", foreign_keys=[created_by_id])

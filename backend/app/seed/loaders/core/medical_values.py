@@ -68,6 +68,8 @@ def sync_medical_value_templates(db: Session) -> None:
         contexts = context_rows_from_flags(raw, include_static_flag=False)
         datatype_key = raw.pop("datatype_key")
         group_key = infer_group_key(raw)
+        raw.setdefault("loinc_code", None)
+        raw.setdefault("loinc_display_name", None)
         raw.pop("use_liver", None)
         raw.pop("use_kidney", None)
         raw.pop("use_heart", None)

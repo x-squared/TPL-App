@@ -61,14 +61,20 @@ Use `verify` in CI or before release checks.
 ## `app.db_data` (DML only)
 
 ```{bash}
-python -m app.db_data --mode <clean|seed|refresh|migrate-procurement-runtime|export-translations-json> --env <DEV|TEST|PROD> [--seed-profile <PROFILE>] [--db-url <URL>]
+python -m app.db_data --mode <clean|seed|refresh|migrate-audit-fields|migrate-medical-value-units|verify-medical-value-units|migrate-procurement-runtime|migrate-procurement-typed|export-translations-json> --env <DEV|TEST|PROD> [--seed-profile <PROFILE>] [--db-url <URL>] [--migration-check-level <basic|strict>]
 ```
 
 - `clean`: wipes row data, keeps schema.
 - `seed`: loads seed jobs resolved by env/profile.
 - `refresh`: `clean + seed`.
+- `migrate-audit-fields`: idempotent audit backfill helper that adds missing `CREATED_BY` columns on tables with `CHANGED_BY` and backfills `CREATED_BY <- CHANGED_BY` where empty.
+- `migrate-medical-value-units`: idempotent helper that adds missing LOINC/UCUM medical-value columns and backfills compatibility values.
+- `verify-medical-value-units`: read-only rollout verification (LOINC template coverage, UCUM canonical-unit completeness for numeric datatypes, runtime normalization completeness).
 - `migrate-procurement-runtime`: idempotent backfill from legacy procurement runtime tables (`COORDINATION_PROCUREMENT_VALUE*`) into unified runtime tables (`COORDINATION_PROCUREMENT_DATA*`).
+- `migrate-procurement-typed`: idempotent backfill from unified runtime rows into typed procurement runtime tables.
 - `export-translations-json`: writes current DB translation bundles back to `frontend/src/i18n/translations.json` (preserves existing labels, updates text values).
+- `--migration-check-level strict` (default): after every migration mode, run strict schema verification and fail on drift (`exit code 2`).
+- `--migration-check-level basic`: after every migration mode, verify only table/column presence.
 
 ### Seed profile resolution
 
@@ -91,6 +97,30 @@ Explicit procurement runtime backfill:
 python -m app.db_data --mode migrate-procurement-runtime --env DEV
 ```
 
+Explicit typed procurement backfill:
+
+```{bash}
+python -m app.db_data --mode migrate-procurement-typed --env DEV
+```
+
+Explicit audit-field backfill:
+
+```{bash}
+python -m app.db_data --mode migrate-audit-fields --env DEV
+```
+
+Explicit medical-value unit backfill:
+
+```{bash}
+python -m app.db_data --mode migrate-medical-value-units --env DEV
+```
+
+Read-only LOINC/UCUM coverage verification:
+
+```{bash}
+python -m app.db_data --mode verify-medical-value-units --env DEV
+```
+
 Export current translations from DB to frontend baseline file:
 
 ```{bash}
@@ -100,7 +130,7 @@ python -m app.db_data --mode export-translations-json --env DEV
 ## `app.db_admin` (wrapper)
 
 ```{bash}
-python -m app.db_admin --mode <recreate|migrate|refresh|clean|migrate-procurement-runtime> --env <DEV|TEST|PROD> [--seed-profile <PROFILE>] [--db-url <URL>]
+python -m app.db_admin --mode <recreate|migrate|refresh|clean|migrate-audit-fields|migrate-medical-value-units|verify-medical-value-units|migrate-procurement-runtime|migrate-procurement-typed> --env <DEV|TEST|PROD> [--seed-profile <PROFILE>] [--db-url <URL>] [--migration-check-level <basic|strict>]
 ```
 
 Mode behavior:
@@ -109,7 +139,11 @@ Mode behavior:
 - `migrate` = `db_schema migrate`
 - `refresh` = `db_schema migrate` + `db_data refresh` (default)
 - `clean` = `db_data clean`
+- `migrate-audit-fields` = `db_data migrate-audit-fields`
+- `migrate-medical-value-units` = `db_data migrate-medical-value-units`
+- `verify-medical-value-units` = `db_data verify-medical-value-units`
 - `migrate-procurement-runtime` = `db_data migrate-procurement-runtime`
+- `migrate-procurement-typed` = `db_data migrate-procurement-typed`
 
 For `refresh`, if `migrate` cannot reconcile schema drift, the wrapper automatically falls back to `db_schema recreate` before data refresh.
 

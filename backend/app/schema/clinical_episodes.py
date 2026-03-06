@@ -166,9 +166,12 @@ class EpisodeResponse(EpisodeBase):
     episode_organs: list[EpisodeOrganResponse] = []
     status: CodeResponse | None = None
     phase: CodeResponse | None = None
+    created_by_id: int | None = None
+    created_by_user: UserResponse | None = None
     changed_by_id: int | None = None
     changed_by_user: UserResponse | None = None
     created_at: datetime
+    changed_at: datetime | None = None
     updated_at: datetime | None = None
 
 

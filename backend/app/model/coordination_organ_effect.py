@@ -58,6 +58,14 @@ class CoordinationOrganEffect(Base):
         comment="Last user who changed the coordination organ effect row.",
         info={"label": "Changed By"},
     )
+    created_by_id = Column(
+        "CREATED_BY",
+        Integer,
+        ForeignKey("USER.ID"),
+        nullable=True,
+        comment="User who created the coordination organ effect row.",
+        info={"label": "Created By"},
+    )
     created_at = Column(
         "CREATED_AT",
         DateTime(timezone=True),
@@ -76,4 +84,5 @@ class CoordinationOrganEffect(Base):
     coordination = relationship("Coordination", back_populates="organ_effects")
     organ = relationship("Code", foreign_keys=[organ_id])
     procurement_effect = relationship("Catalogue", foreign_keys=[procurement_effect_id])
-    changed_by_user = relationship("User")
+    changed_by_user = relationship("User", foreign_keys=[changed_by_id])
+    created_by_user = relationship("User", foreign_keys=[created_by_id])

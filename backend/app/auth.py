@@ -3,6 +3,7 @@ from fastapi.security import HTTPAuthorizationCredentials, HTTPBearer
 from jose import JWTError, jwt
 from sqlalchemy.orm import Session, joinedload
 
+from .audit_context import set_current_changed_by_id
 from .database import get_db
 from .models import AccessPermission, Code, User
 
@@ -47,6 +48,7 @@ def get_current_user(
             status_code=status.HTTP_401_UNAUTHORIZED,
             detail="User not found",
         )
+    set_current_changed_by_id(user.id)
     return user
 
 

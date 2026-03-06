@@ -4,6 +4,8 @@ interface DatatypeConfig {
   inputType: 'number' | 'text' | 'date' | 'datetime' | 'boolean' | 'catalogue';
   step?: string;
   unit?: string;
+  canonicalUnitUcum?: string;
+  allowedUnitsUcum?: string[];
   placeholder?: string;
 }
 
@@ -43,6 +45,19 @@ export function getConfigFromMetadata(
   return {
     inputType,
     unit: metadata.unit ?? undefined,
+    canonicalUnitUcum: metadata.canonical_unit_ucum ?? metadata.unit ?? undefined,
+    allowedUnitsUcum: (() => {
+      const raw = metadata.allowed_units_ucum_json;
+      if (!raw) return undefined;
+      try {
+        const parsed = JSON.parse(raw);
+        if (!Array.isArray(parsed)) return undefined;
+        const items = parsed.filter((item): item is string => typeof item === 'string' && item.trim().length > 0);
+        return items.length ? items : undefined;
+      } catch {
+        return undefined;
+      }
+    })(),
     placeholder: metadata.format_pattern ?? undefined,
     step: inputType === 'number' && metadata.precision !== null ? 'any' : undefined,
   };

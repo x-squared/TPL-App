@@ -40,9 +40,12 @@ class TaskGroupTemplateResponse(TaskGroupTemplateBase):
     scope: CodeResponse | None = None
     organ: CodeResponse | None = None
     tpl_phase: CodeResponse | None = None
+    created_by_id: int | None = None
+    created_by_user: UserResponse | None = None
     changed_by_id: int | None = None
     changed_by_user: UserResponse | None = None
     created_at: datetime
+    changed_at: datetime | None = None
     updated_at: datetime | None = None
 
 
@@ -78,9 +81,12 @@ class TaskTemplateResponse(TaskTemplateBase):
     id: int
     task_group_template: TaskGroupTemplateResponse | None = None
     priority: CodeResponse | None = None
+    created_by_id: int | None = None
+    created_by_user: UserResponse | None = None
     changed_by_id: int | None = None
     changed_by_user: UserResponse | None = None
     created_at: datetime
+    changed_at: datetime | None = None
     updated_at: datetime | None = None
 
 
@@ -135,9 +141,12 @@ class TaskGroupResponse(TaskGroupBase):
     id: int
     organ: CodeResponse | None = None
     tpl_phase: CodeResponse | None = None
+    created_by_id: int | None = None
+    created_by_user: UserResponse | None = None
     changed_by_id: int | None = None
     changed_by_user: UserResponse | None = None
     created_at: datetime
+    changed_at: datetime | None = None
     updated_at: datetime | None = None
 
 
@@ -193,8 +202,11 @@ class TaskResponse(TaskBase):
     status: CodeResponse | None = None
     assigned_to: UserResponse | None = None
     closed_by: UserResponse | None = None
+    created_by_id: int | None = None
+    created_by_user: UserResponse | None = None
     changed_by_id: int | None = None
     changed_by_user: UserResponse | None = None
     closed: bool = False
     created_at: datetime
+    changed_at: datetime | None = None
     updated_at: datetime | None = None

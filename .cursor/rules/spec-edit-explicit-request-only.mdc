@@ -14,5 +14,5 @@ Requirement specifications under `spec/requirements/` are user-owned artifacts.
 - Never silently overwrite user wording; if conflicts exist, ask for clarification.
 
 Examples:
-- Allowed: "Update `TPL-Koordination-Spezifikation.md` with a new Story..."
+- Allowed: "Update `TPLK-Koordination-Spezifikation.md` with a new Story..."
 - Not allowed without confirmation: "Implement feature X" -> auto-editing `spec/requirements/*.md`

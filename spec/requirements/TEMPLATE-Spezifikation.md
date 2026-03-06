@@ -1,106 +1,54 @@
-# Feature: TEMPLATE-Spezifikation [Spec]
+# Feature [GEN]: TEMPLATE-Spezifikation
 
-Dieses Dokument ist die aktuelle Vorlage für fachliche Spezifikationen im Projekt.
+Kurzvorlage für neue fachliche Spezifikationen. Für die vollständigen Regeln siehe `GEN-Spec-Spezifikation.md`.
 
-## Use Case: Struktur und Mindestregeln [Ready]
+## Use Case: Feature-Label und Dateimuster festlegen [Spec]
 
-## Use Case: Eine neue Spezifikation wird erstellt [Ready]
+### Story: Neues Feature ist eindeutig benannt [Spec]
 
-#### Story: Die Hierarchie wird konsistent verwendet [Ready]
+#### Item: Jedes Feature hat ein Label (z. B. `TPLK`) und eine zentrale Feature-Datei `<LABEL>-<Feature-Name>.md`. [Spec]
+Beispiel: `TPLK-Koordination-Transplantation.md` mit Kopf `# Feature [TPLK]: Koordination Transplantation`.
 
-##### Item: Anforderungen werden in der Hierarchie `Feature -> Use Case -> Story -> Item` beschrieben. [Ready]
+#### Item: Direkt unter dem Feature-Kopf steht die Section `## Spezifikationen` mit der Liste der Teil-Dateien. [Spec]
+Beispiel: Unter `# Feature [TPLK]: ...` folgt unmittelbar `## Spezifikationen` und danach die Dateiliste.
 
-##### Item: Statuslabels sind `[Spec]`, `[Ready]`, `[Impl]`, `[QA]` oder `[Done]`. [Ready]
+#### Item: Teil-Spezifikationen verwenden dasselbe Label-Präfix und den Kopf `# Feature-of [<LABEL>]: <Feature-Name>`. [Spec]
+Beispiel: `TPLK-Episode-Spezifikation.md` mit Kopf `# Feature-of [TPLK]: Koordination Transplantation`.
 
-##### Item: Fehlt ein Statuslabel, wird standardmäßig `[Spec]` angenommen. [Ready]
+#### Item: Überschriften dürfen optionale Übersetzungshinweise im Format `[<LANG>: <text>]` tragen. [Spec]
+Beispiel: `### Story: Koordinationsprotokoll [EN: Coordination Protocol] [Spec]`.
 
-##### Item: Formulierungen sind fachlich präzise und überprüfbar. [Ready]
+#### Item: Überschriften dürfen optionale semantische Hinweislabels im Format `{name}` oder `{name1, name2, ...}` tragen (z. B. `{view}`, `{tab}`, `{panel}`, `{process}`, `{function}`, `{structure}`, `{design}`, `{architecture}`, `{data}`). [Spec]
+Beispiel: `### Story: Koordinationsprotokoll {process} [EN: Coordination Protocol] [Spec]`.
+Beispiel mit mehreren Hints: `### Story: Koordinationsprotokoll {design, function} [EN: Coordination Protocol] [Spec]`.
 
-### Use Case: Der Fortschritt wird über Status geführt [Ready]
+#### Item: Hinweislabels werden kurz interpretiert: `{view}` Seite/View, `{tab}` Tab, `{panel}` Panel/Section, `{process}` Ablauf, `{function}` Funktionalität, `{structure}` Struktur, `{design}` visuelle Gestaltung/UX, `{architecture}` Architekturbelange, `{data}` Datenhandling/Seed-Daten. [Spec]
 
-#### Story: Statushierarchie bleibt logisch konsistent [Ready]
+## Use Case: Neue Funktion wird beschrieben [Spec]
 
-##### Item: Ein Elternknoten darf nicht `[Done]` sein, solange untergeordnete Knoten nicht `[Done]` sind. [Ready]
+### Story: Ziel und fachlicher Ablauf sind klar [Spec]
 
-##### Item: `Feature [Done]` ist nur zulässig, wenn alle enthaltenen Use Cases, Stories und Items `[Done]` sind. [Ready]
+#### Item: Zielbild der Funktion in 1-2 Sätzen beschreiben. [Spec]
+Beispiel: Eine Koordination kann als abgeschlossen markiert werden und speichert eine Abschlussbemerkung.
 
-##### Item: `Use Case [Done]` ist nur zulässig, wenn alle enthaltenen Stories und Items `[Done]` sind. [Ready]
+#### Item: Fachliche Regeln und Grenzen explizit nennen. [Spec]
+Beispiel: Abschluss ist nur erlaubt, wenn alle Pflichtdaten vorhanden sind.
 
-##### Item: `Story [Done]` ist nur zulässig, wenn alle enthaltenen Items `[Done]` sind. [Ready]
+#### Item: Sichtbares Verhalten im UI benennen. [Spec]
+Beispiel: Der Abschlussstatus wird im Detailkopf angezeigt.
 
-## Use Case: Änderungsmodus für bestehende Features [Ready]
+## Use Case: Akzeptanzkriterien werden prüfbar festgelegt [Spec]
 
-### Use Case: Eine bereits implementierte Funktion wird fachlich nachgezogen [Ready]
+### Story: Umsetzung ist testbar und eindeutig [Spec]
 
-#### Story: Statusstart wird korrekt gesetzt [Ready]
+#### Item: Mindestens ein positiver Akzeptanzfall. [Spec]
+Beispiel: Bei vollständigen Daten wird der Abschluss gespeichert.
 
-##### Item: Bei normalen Spezifikationsupdates ist der Startstatus `[Spec]`. [Ready]
+#### Item: Mindestens ein negativer Akzeptanzfall. [Spec]
+Beispiel: Bei fehlenden Pflichtdaten wird der Abschluss mit klarer Fehlermeldung abgelehnt.
 
-##### Item: Bei Reverse-Engineering aus bestehendem Code ist der Startstatus `[Impl]`. [Ready]
+## Use Case: Optionaler Änderungsmodus mit Markern [Spec]
 
-##### Item: Änderungen werden als neue Story oder klarer Änderungsblock dokumentiert, statt frühere Aussagen stillschweigend zu überschreiben. [Ready]
+### Story: Änderungen werden minimal-invasiv markiert [Spec]
 
-## Use Case: TODO-Markierung für offene Punkte [Ready]
-
-### Use Case: Offene Diskussionen werden innerhalb der Spezifikation kenntlich gemacht [Ready]
-
-#### Story: TODO wird als Diskussionsmarker verwendet [Ready]
-
-##### Item: Das Inline-Label `TODO` markiert Inhalte als noch zu diskutieren und nicht final entschieden. [Ready]
-
-##### Item: Alles, was nach `TODO` auf derselben Zeile steht, gilt als offener Diskussionsinhalt. [Ready]
-
-##### Item: Bei Zeilenumbruch gehört der visuell überlaufende Fortsetzungstext weiterhin zum selben TODO-Hinweis. [Ready]
-
-## Use Case: Beispiel A - Fachliche Entitäten definieren [Spec]
-
-### Use Case: Eine Spezifikation beschreibt neue Business-Entitäten [Spec]
-
-#### Story: Das Domänenmodell wird verständlich und konsistent beschrieben [Spec]
-
-##### Item: Entität mit Zweck, Schlüsseln und Beziehungen definieren. [Spec]
-Beispiel: Die Entität `Perfusionsprotokoll` wird über `ID` eindeutig identifiziert, gehört genau zu einer `Koordination` und referenziert optional ein `Organ`.
-
-##### Item: Attribute mit Datentyp, Pflichtgrad und Bedeutung definieren. [Spec]
-Beispiel: `perfusionsart` (Enum, Pflicht), `startzeit` (Zeitstempel, optional), `kommentar` (Text, optional).
-
-##### Item: Lebenszyklus und Änderungsregeln der Entität definieren. [Spec]
-Beispiel: Ein `Perfusionsprotokoll` darf nur im Status `offen` geändert werden; nach `abgeschlossen` nur über einen expliziten Korrekturprozess.
-
-## Use Case: Beispiel B - Komplexe Logik mit Verzweigungen definieren [Spec]
-
-### Use Case: Eine Spezifikation beschreibt regelbasierte Entscheidungen [Spec]
-
-#### Story: Fachliche Bedingungen werden deterministisch dokumentiert [Spec]
-
-##### Item: Verzweigungslogik mit klaren Wenn-Dann-Regeln definieren. [Spec]
-Beispiel: Wenn `Organ = Lunge`, dann ist `perfusionsart` aus `{EVLP, keine}` wählbar; wenn `Organ = Leber`, dann aus `{HOPE, NMP, keine}`.
-
-##### Item: Prioritäten und Konfliktauflösung bei mehreren Regeln definieren. [Spec]
-Beispiel: Eine organspezifische Regel hat Vorrang vor einer allgemeinen Regel.
-
-##### Item: Fehler- und Grenzfälle explizit beschreiben. [Spec]
-Beispiel: Bei fehlenden Pflichtangaben wird der Vorgang fachlich abgelehnt.
-
-##### Item: Verzweigungen zusätzlich als Bullet-Layout darstellen, wenn dies die Lesbarkeit erhöht. [Spec]
-Beispiel-Layout:
-- Eingangszustand: `Organ`, `Status`, `Pflichtfelder`
-- Wenn `Organ = Lunge`: erlaube `EVLP`
-- Wenn `Organ = Leber`: erlaube `HOPE` oder `NMP`
-- Wenn `is_rejected = true`: stoppe weitere Empfängerzuordnung
-- Sonst: fahre mit Standardprozess fort
-
-## Use Case: Beispiel C - Architekturelle Anforderungen definieren [Spec]
-
-### Use Case: Eine Spezifikation legt technische Leitplanken fest [Spec]
-
-#### Story: Die Umsetzung bleibt über Module hinweg konsistent [Spec]
-
-##### Item: Verantwortlichkeiten pro Schicht festlegen. [Spec]
-Beispiel: Router-Schicht validiert Transport und Rechte, Service-Schicht enthält Geschäftslogik, Persistenzschicht verwaltet Integrität und Beziehungen.
-
-##### Item: Integrations- und Schnittstellenregeln festlegen. [Spec]
-Beispiel: Externe Systeme werden über dedizierte Adapter-Module angebunden; externe Feldnamen werden nicht ungeprüft in interne API-Verträge übernommen.
-
-##### Item: Qualitäts- und Nachweisanforderungen festlegen. [Spec]
-Beispiel: Für jede neue fachliche Regel werden mindestens ein positiver und ein negativer Testfall spezifiziert.
+#### Item: Einfügungen mit `[[ADD]] ... [[/ADD]]`, Ersetzungen mit `[[REPLACE: "..."]] ... [[/REPLACE]]`, Löschungen mit `[[DELETE: "..."]]`. [Spec]

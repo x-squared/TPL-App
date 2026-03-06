@@ -45,6 +45,7 @@ class FavoriteResponse(FavoriteBase):
 
     id: int
     created_at: datetime
+    changed_at: datetime | None = None
     updated_at: datetime | None = None
     sort_pos: int
 

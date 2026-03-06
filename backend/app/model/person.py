@@ -57,6 +57,14 @@ class Person(Base):
         comment="Last user who changed the person.",
         info={"label": "Changed By"},
     )
+    created_by_id = Column(
+        "CREATED_BY",
+        Integer,
+        ForeignKey("USER.ID"),
+        nullable=True,
+        comment="User who created the person.",
+        info={"label": "Created By"},
+    )
     created_at = Column(
         "CREATED_AT",
         DateTime(timezone=True),
@@ -73,6 +81,7 @@ class Person(Base):
     )
 
     changed_by_user = relationship("User", foreign_keys=[changed_by_id])
+    created_by_user = relationship("User", foreign_keys=[created_by_id])
     user = relationship("User", back_populates="person", foreign_keys="User.person_id", uselist=False)
     teams = relationship("PersonTeam", secondary=person_team_member_table, back_populates="members")
 
@@ -107,6 +116,14 @@ class PersonTeam(Base):
         comment="Last user who changed the team.",
         info={"label": "Changed By"},
     )
+    created_by_id = Column(
+        "CREATED_BY",
+        Integer,
+        ForeignKey("USER.ID"),
+        nullable=True,
+        comment="User who created the team.",
+        info={"label": "Created By"},
+    )
     created_at = Column(
         "CREATED_AT",
         DateTime(timezone=True),
@@ -123,4 +140,5 @@ class PersonTeam(Base):
     )
 
     changed_by_user = relationship("User", foreign_keys=[changed_by_id])
+    created_by_user = relationship("User", foreign_keys=[created_by_id])
     members = relationship("Person", secondary=person_team_member_table, back_populates="teams")

@@ -1,4 +1,4 @@
-# Feature: STCS-Patientenverwaltung [Spec]
+# Feature [STCS]: Patientenverwaltung
 
 Dieses Dokument beschreibt erste fachliche Anforderungen für STCS.
 

@@ -1,0 +1,20 @@
+# Specification Change Markers Workflow
+
+Apply this when working in requirement specifications under `spec/requirements/*.md`.
+
+- Accept inline change markers from the user anywhere in the document (Feature, Use Case, Story, Item, or free text).
+- Supported markers:
+ - `[[ADD]] ... [[/ADD]]` for inserted text
+ - `[[REPLACE: "<old snippet>"]] ... [[/REPLACE]]` for targeted replacement
+ - `[[DELETE: "<old snippet>"]]` for targeted deletion
+ - `[[NOTE]] ... [[/NOTE]]` for implementation hints that must not remain in final spec text
+- When the user says "implement", first implement code changes from marked spec content, then integrate markers into clean final specification text.
+- Keep wording changes minimal outside marked regions; do not rewrite unaffected sections.
+- Preserve heading hierarchy and status labels unless the user explicitly asks to change them.
+- Remove all change markers after integration, so the final specification reads seamlessly.
+- If a marker target is ambiguous, ask one focused clarification question before implementation.
+
+## Required check before finish
+
+- Scan changed specification files for remaining `[[...]]` markers and resolve/remove them.
+- Confirm affected specification file(s) remain valid under `Feature -> Use Case -> Story -> Item`.
