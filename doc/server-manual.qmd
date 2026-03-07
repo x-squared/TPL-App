@@ -72,6 +72,7 @@ Expected shape:
 ```
 
 This address is exposed to the frontend via `GET /api/support-ticket/config` and used by the "Open Ticket" action in error banners.
+When a user opens a ticket draft, the frontend also stores the captured error context into `DEV_REQUEST` via `POST /api/support-ticket/capture-dev-forum` (available in all environments).
 
 Seed profile semantics and allowed values are documented in:
 
@@ -112,6 +113,7 @@ Server endpoints:
 - Scheduler run history: `GET /api/admin/scheduler/jobs/{job_key}/runs`
 - Scheduler manual trigger: `POST /api/admin/scheduler/jobs/{job_key}/trigger`
 - Scheduler enable/disable: `PUT /api/admin/scheduler/jobs/{job_key}/enabled`
+- Support ticket -> dev-forum capture bridge: `POST /api/support-ticket/capture-dev-forum`
 
 ## 6) Typical startup examples
 

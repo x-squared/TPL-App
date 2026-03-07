@@ -7,6 +7,7 @@ import CoordinationDetailView from '../views/CoordinationDetailView';
 import CoordinationsView from '../views/CoordinationsView';
 import DonorsView from '../views/DonorsView';
 import E2ETestsView from '../views/E2ETestsView';
+import DevForumView from '../views/DevForumView';
 import MyWorkView from '../views/MyWorkView';
 import PatientDetailView from '../views/PatientDetailView';
 import PatientsView from '../views/PatientsView';
@@ -17,7 +18,7 @@ import type { ColloquiumDetailTab } from '../views/colloquiums/detail/colloquium
 import type { CoordinationDetailTab } from '../views/coordinations/detail/useCoordinationDetailViewModel';
 import type { PatientDetailTab } from '../views/patient-detail/PatientDetailTabs';
 
-type Page = 'my-work' | 'patients' | 'donors' | 'colloquiums' | 'coordinations' | 'reports' | 'admin' | 'e2e-tests' | 'preferences';
+type Page = 'my-work' | 'patients' | 'donors' | 'colloquiums' | 'coordinations' | 'reports' | 'admin' | 'e2e-tests' | 'dev-forum' | 'preferences';
 
 interface AppMainRouterProps {
   page: Page;
@@ -243,6 +244,7 @@ export default function AppMainRouter({
         />
       )}
       {page === 'e2e-tests' && devToolsEnabled && <E2ETestsView />}
+      {page === 'dev-forum' && devToolsEnabled && <DevForumView />}
     </main>
   );
 }

@@ -6,7 +6,7 @@ KOORD = [
         "name": "Test All",
         "first_name": "Test",
         "surname": "All",
-        "role_keys": ["KOORD", "KOORD_DONOR", "ARZT", "SYSTEM", "ADMIN"],
+        "role_keys": ["KOORD", "KOORD_DONOR", "ARZT", "SYSTEM", "ADMIN", "DEV"],
         "preferences": {
             "locale": "en",
             "start_page": "patients",

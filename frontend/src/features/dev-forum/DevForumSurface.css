@@ -1,0 +1,94 @@
+.dev-forum-surface {
+  display: flex;
+  flex-direction: column;
+  gap: 0.7rem;
+}
+
+.dev-forum-surface.compact .detail-tabs {
+  width: 100%;
+  margin-left: 0;
+}
+
+.dev-forum-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  gap: 0.6rem;
+}
+
+.dev-forum-panel {
+  display: flex;
+  flex-direction: column;
+  gap: 0.6rem;
+}
+
+.dev-forum-capture-actions {
+  display: flex;
+  justify-content: flex-start;
+  flex-wrap: wrap;
+  gap: 0.45rem;
+}
+
+.dev-forum-list {
+  display: flex;
+  flex-direction: column;
+  gap: 0.8rem;
+}
+
+.dev-forum-item {
+  display: flex;
+  flex-direction: column;
+  gap: 0.5rem;
+}
+
+.dev-forum-meta {
+  margin: 0;
+  color: #4f5678;
+  font-size: 0.85rem;
+}
+
+.dev-forum-text {
+  margin: 0;
+  color: #222;
+}
+
+.dev-forum-actions-row {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.45rem;
+}
+
+.dev-forum-error {
+  margin: 0;
+  color: #a01111;
+  font-size: 0.9rem;
+}
+
+.dev-forum-capture-json {
+  margin: 0;
+  border: 1px solid #d2d5e3;
+  border-radius: 6px;
+  background: #f7f8ff;
+  color: #202640;
+  font-size: 0.78rem;
+  padding: 0.45rem;
+  white-space: pre-wrap;
+  word-break: break-word;
+}
+
+.dev-forum-filter {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+}
+
+.dev-forum-filter label {
+  font-size: 0.86rem;
+}
+
+.dev-forum-filter select {
+  border: 1px solid #ccd0e1;
+  border-radius: 6px;
+  padding: 0.28rem 0.45rem;
+  background: #fff;
+}

@@ -70,4 +70,18 @@ ROLE_PERMISSIONS: dict[str, list[str]] = {
         "view.reports",
         "view.admin",
     ],
+    "DEV": [
+        "view.patients",
+        "edit.patients",
+        "view.colloquiums",
+        "edit.colloquiums",
+        "view.coordinations",
+        "view.donors",
+        "edit.donors",
+        "view.tasks",
+        "edit.tasks",
+        "view.information",
+        "edit.information",
+        "view.reports",
+    ],
 }

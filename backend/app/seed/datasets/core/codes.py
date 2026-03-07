@@ -27,6 +27,7 @@ ROLES = [
     {"type": "ROLE", "key": "ARZT", "pos": 3, "ext_sys": "", "ext_key": "", "name_default": "Arzt"},
     {"type": "ROLE", "key": "SYSTEM", "pos": 4, "ext_sys": "", "ext_key": "", "name_default": "System"},
     {"type": "ROLE", "key": "ADMIN", "pos": 5, "ext_sys": "", "ext_key": "", "name_default": "Admin"},
+    {"type": "ROLE", "key": "DEV", "pos": 6, "ext_sys": "", "ext_key": "", "name_default": "Developer"},
 ]
 
 RECORDS = RECORDS + ROLES

@@ -5,6 +5,7 @@ import re
 import subprocess
 import sys
 
+from .case_results import collect_case_results, source_link_from_report
 from .generate_tests import PROJECT_ROOT, generate
 
 
@@ -57,7 +58,12 @@ def _collect_suggestions(output: str, exit_code: int) -> list[tuple[str, str, st
     return suggestions
 
 
-def _write_report(exit_code: int, output: str, generated_summary: dict[str, int]) -> None:
+def _write_report(
+    exit_code: int,
+    output: str,
+    generated_summary: dict[str, int],
+    case_results: list,
+) -> None:
     REPORT_DIR.mkdir(parents=True, exist_ok=True)
     now = dt.datetime.now().strftime("%Y-%m-%d %H:%M:%S")
     suggestions = _collect_suggestions(output, exit_code)
@@ -75,6 +81,15 @@ def _write_report(exit_code: int, output: str, generated_summary: dict[str, int]
     for action_id, title, details in suggestions:
         lines.append(f"- `{action_id}`: **{title}** - {details}")
     lines.append("")
+    lines.append("## Test Case Results")
+    lines.append("")
+    for result in case_results:
+        source_link = source_link_from_report(result.source_file)
+        details = f" - {result.message}" if result.message else ""
+        lines.append(
+            f"- `{result.case_id}` | **{result.status}** | {result.name}{details} | [Testcase document]({source_link})"
+        )
+    lines.append("")
     lines.append("## Test Output Excerpt")
     lines.append("")
     excerpt = output[-4000:] if len(output) > 4000 else output
@@ -86,10 +101,11 @@ def _write_report(exit_code: int, output: str, generated_summary: dict[str, int]
 
 def main() -> int:
     generated_summary = generate()
+    case_results = collect_case_results(scope="client_server")
     cmd = [sys.executable, "-m", "unittest", "qa.tests.generated.test_client_server_specs", "-v"]
     proc = subprocess.run(cmd, cwd=PROJECT_ROOT, capture_output=True, text=True)
     output = (proc.stdout or "") + "\n" + (proc.stderr or "")
-    _write_report(proc.returncode, output, generated_summary)
+    _write_report(proc.returncode, output, generated_summary, case_results)
     print(f"Report written: {LATEST_REPORT}")
     print(output)
     return proc.returncode

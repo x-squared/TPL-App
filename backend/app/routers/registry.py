@@ -11,6 +11,7 @@ from . import (
     auth,
     catalogues,
     e2e_tests,
+    dev_forum,
     colloqium_agendas,
     colloqium_types,
     colloqiums,
@@ -57,6 +58,7 @@ def register_routers(app: FastAPI) -> None:
     app.include_router(admin_procurement_config.router, prefix="/api")
     app.include_router(admin_people.router, prefix="/api")
     app.include_router(e2e_tests.router, prefix="/api")
+    app.include_router(dev_forum.router, prefix="/api")
     app.include_router(patients.router, prefix="/api")
     app.include_router(reports.router, prefix="/api")
     app.include_router(contact_infos.router, prefix="/api")

@@ -147,6 +147,7 @@ Reports are written to:
 Each report includes:
 
 - execution summary
+- test-case result list (name, status, optional message, link to testcase document)
 - failure excerpt
 - suggestion list with action IDs
 

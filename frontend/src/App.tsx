@@ -1,7 +1,8 @@
-import { useEffect, useMemo, useState } from 'react';
+import { useEffect, useMemo, useState, type MouseEvent as ReactMouseEvent } from 'react';
 import { api, type UserPreferences } from './api';
 import AppMainRouter from './app/AppMainRouter';
 import AppSidebar from './app/AppSidebar';
+import DevForumPanel from './app/DevForumPanel';
 import { useInformationUnreadCount } from './app/useInformationUnreadCount';
 import { useMyWorkOpenTaskCount } from './app/useMyWorkOpenTaskCount';
 import { useAppNavigation } from './app/useAppNavigation';
@@ -10,6 +11,8 @@ import type { Page } from './app/useAppNavigation';
 import { useAppPermissions } from './app/useAppPermissions';
 import { useAppSession } from './app/useAppSession';
 import { useI18n } from './i18n/i18n';
+import { applyDevForumHighlightFromLocation } from './views/layout/devForumHighlight';
+import { initializeErrorContextCapture } from './views/layout/errorContextCapture';
 import './App.css';
 import './styles/TableStyles.css';
 import ColloquiumDetailView from './views/ColloquiumDetailView';
@@ -29,6 +32,8 @@ function App() {
   const [sidebarOpen, setSidebarOpen] = useState(true);
   const [userMenuOpen, setUserMenuOpen] = useState(false);
   const [coordinationQuickCreateToken, setCoordinationQuickCreateToken] = useState(0);
+  const [devForumPanelOpen, setDevForumPanelOpen] = useState(false);
+  const [devForumPanelWidth, setDevForumPanelWidth] = useState(420);
   const {
     user,
     authLoading,
@@ -47,6 +52,11 @@ function App() {
     canViewReports,
     canViewAdmin,
   } = useAppPermissions(user);
+  const hasDevRole = useMemo(() => {
+    if (!user) return false;
+    if (user.role?.type === 'ROLE' && user.role.key === 'DEV') return true;
+    return (user.roles ?? []).some((role) => role.type === 'ROLE' && role.key === 'DEV');
+  }, [user]);
   const [preferencesLoading, setPreferencesLoading] = useState(false);
   const [preferences, setPreferences] = useState<UserPreferences>({
     locale: 'en',
@@ -85,6 +95,11 @@ function App() {
       })
       .finally(() => setPreferencesLoading(false));
   }, [setLocale, setRuntimeTranslations, user]);
+
+  useEffect(() => {
+    applyDevForumHighlightFromLocation();
+    initializeErrorContextCapture();
+  }, []);
 
   const {
     page,
@@ -133,6 +148,23 @@ function App() {
     setPage('coordinations');
     resetSelection();
     setCoordinationQuickCreateToken((prev) => prev + 1);
+  };
+
+  const startDevForumResize = (event: ReactMouseEvent<HTMLDivElement>) => {
+    event.preventDefault();
+    const startX = event.clientX;
+    const startWidth = devForumPanelWidth;
+    const onMouseMove = (moveEvent: MouseEvent) => {
+      const deltaX = startX - moveEvent.clientX;
+      const next = Math.min(700, Math.max(320, startWidth + deltaX));
+      setDevForumPanelWidth(next);
+    };
+    const onMouseUp = () => {
+      window.removeEventListener('mousemove', onMouseMove);
+      window.removeEventListener('mouseup', onMouseUp);
+    };
+    window.addEventListener('mousemove', onMouseMove);
+    window.addEventListener('mouseup', onMouseUp);
   };
 
   /* ── Auth loading ── */
@@ -237,49 +269,61 @@ function App() {
           setUserMenuOpen(false);
         }}
         onLogout={handleLogout}
+        devForumPanelOpen={devForumPanelOpen}
+        onToggleDevForumPanel={() => setDevForumPanelOpen((prev) => !prev)}
       />
-      <AppMainRouter
-        page={page}
-        canViewPatients={canViewPatients}
-        canViewDonors={canViewDonors}
-        canViewColloquiums={canViewColloquiums}
-        canViewCoordinations={canViewCoordinations}
-        canViewReports={canViewReports}
-        canViewAdmin={canViewAdmin}
-        devToolsEnabled={devToolsEnabled}
-        currentUserId={user.id}
-        selectedPatientId={selectedPatientId}
-        setSelectedPatientId={setSelectedPatientId}
-        selectedColloqiumId={selectedColloqiumId}
-        setSelectedColloqiumId={setSelectedColloqiumId}
-        selectedColloqiumTab={selectedColloqiumTab}
-        setSelectedColloqiumTab={setSelectedColloqiumTab}
-        selectedCoordinationId={selectedCoordinationId}
-        setSelectedCoordinationId={setSelectedCoordinationId}
-        selectedCoordinationTab={selectedCoordinationTab}
-        setSelectedCoordinationTab={setSelectedCoordinationTab}
-        setPage={setPage}
-        patientInitialTab={patientInitialTab}
-        setPatientInitialTab={setPatientInitialTab}
-        patientInitialEpisodeId={patientInitialEpisodeId}
-        setPatientInitialEpisodeId={setPatientInitialEpisodeId}
-        onOpenFavorite={openFavorite}
-        coordinationQuickCreateToken={coordinationQuickCreateToken}
-        onCoordinationQuickCreateHandled={() => setCoordinationQuickCreateToken(0)}
-        preferences={preferences}
-        startPageOptions={startViewOptions}
-        onSavePreferences={async (payload) => {
-          const saved = await api.updateMyUserPreferences(payload);
-          setPreferences(saved);
-          setLocale(saved.locale);
-          try {
-            const overrides = await api.getTranslationOverrides(saved.locale);
-            setRuntimeTranslations(overrides.entries ?? {});
-          } catch {
-            setRuntimeTranslations({});
-          }
-        }}
-      />
+      <div className="app-main-stack">
+        <AppMainRouter
+          page={page}
+          canViewPatients={canViewPatients}
+          canViewDonors={canViewDonors}
+          canViewColloquiums={canViewColloquiums}
+          canViewCoordinations={canViewCoordinations}
+          canViewReports={canViewReports}
+          canViewAdmin={canViewAdmin}
+          devToolsEnabled={devToolsEnabled}
+          currentUserId={user.id}
+          selectedPatientId={selectedPatientId}
+          setSelectedPatientId={setSelectedPatientId}
+          selectedColloqiumId={selectedColloqiumId}
+          setSelectedColloqiumId={setSelectedColloqiumId}
+          selectedColloqiumTab={selectedColloqiumTab}
+          setSelectedColloqiumTab={setSelectedColloqiumTab}
+          selectedCoordinationId={selectedCoordinationId}
+          setSelectedCoordinationId={setSelectedCoordinationId}
+          selectedCoordinationTab={selectedCoordinationTab}
+          setSelectedCoordinationTab={setSelectedCoordinationTab}
+          setPage={setPage}
+          patientInitialTab={patientInitialTab}
+          setPatientInitialTab={setPatientInitialTab}
+          patientInitialEpisodeId={patientInitialEpisodeId}
+          setPatientInitialEpisodeId={setPatientInitialEpisodeId}
+          onOpenFavorite={openFavorite}
+          coordinationQuickCreateToken={coordinationQuickCreateToken}
+          onCoordinationQuickCreateHandled={() => setCoordinationQuickCreateToken(0)}
+          preferences={preferences}
+          startPageOptions={startViewOptions}
+          onSavePreferences={async (payload) => {
+            const saved = await api.updateMyUserPreferences(payload);
+            setPreferences(saved);
+            setLocale(saved.locale);
+            try {
+              const overrides = await api.getTranslationOverrides(saved.locale);
+              setRuntimeTranslations(overrides.entries ?? {});
+            } catch {
+              setRuntimeTranslations({});
+            }
+          }}
+        />
+        {devToolsEnabled && devForumPanelOpen ? (
+          <>
+            <div className="dev-forum-resize-handle" onMouseDown={startDevForumResize} />
+            <aside className="dev-forum-panel-shell" style={{ width: `${devForumPanelWidth}px` }}>
+              <DevForumPanel hasDevRole={hasDevRole} />
+            </aside>
+          </>
+        ) : null}
+      </div>
     </div>
   );
 }

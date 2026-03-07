@@ -1,7 +1,7 @@
 import type { AppUser } from '../api';
 import { useI18n } from '../i18n/i18n';
 
-type Page = 'my-work' | 'patients' | 'donors' | 'colloquiums' | 'coordinations' | 'reports' | 'admin' | 'e2e-tests' | 'preferences';
+type Page = 'my-work' | 'patients' | 'donors' | 'colloquiums' | 'coordinations' | 'reports' | 'admin' | 'e2e-tests' | 'dev-forum' | 'preferences';
 
 interface AppSidebarProps {
   user: AppUser;
@@ -30,6 +30,8 @@ interface AppSidebarProps {
   onQuickCreateCoordination: () => void;
   onOpenPreferences: () => void;
   onLogout: () => void;
+  devForumPanelOpen: boolean;
+  onToggleDevForumPanel: () => void;
 }
 
 export default function AppSidebar({
@@ -59,6 +61,8 @@ export default function AppSidebar({
   onQuickCreateCoordination,
   onOpenPreferences,
   onLogout,
+  devForumPanelOpen,
+  onToggleDevForumPanel,
 }: AppSidebarProps) {
   const { t } = useI18n();
 
@@ -198,6 +202,29 @@ export default function AppSidebar({
             >
               <span className="nav-icon">{'\u2699'}</span>
               {sidebarOpen && <span className="nav-label">{t('navigation.dev.e2eTests', 'E2E Tests')}</span>}
+            </button>
+            <button
+              className={`nav-item ${page === 'dev-forum' ? 'active' : ''}`}
+              onClick={() => {
+                setPage('dev-forum');
+                onResetSelection();
+              }}
+              title={t('navigation.dev.devForum', 'Dev-Forum')}
+            >
+              <span className="nav-icon">{'\u270E'}</span>
+              {sidebarOpen && <span className="nav-label">{t('navigation.dev.devForum', 'Dev-Forum')}</span>}
+            </button>
+            <button
+              className="nav-item"
+              onClick={onToggleDevForumPanel}
+              title={devForumPanelOpen
+                ? t('devForum.panel.hide', 'Hide Dev-Forum panel')
+                : t('devForum.panel.show', 'Show Dev-Forum panel')}
+            >
+              <span className="nav-icon">{devForumPanelOpen ? '\u25C2' : '\u25B8'}</span>
+              {sidebarOpen && <span className="nav-label">{devForumPanelOpen
+                ? t('devForum.panel.hide', 'Hide Dev-Forum panel')
+                : t('devForum.panel.show', 'Show Dev-Forum panel')}</span>}
             </button>
           </>
         )}

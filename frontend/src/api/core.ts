@@ -15,7 +15,7 @@ export interface AppUser {
   permissions: string[];
 }
 
-export type AppStartPage = 'my-work' | 'patients' | 'donors' | 'colloquiums' | 'coordinations' | 'reports' | 'admin' | 'e2e-tests';
+export type AppStartPage = 'my-work' | 'patients' | 'donors' | 'colloquiums' | 'coordinations' | 'reports' | 'admin' | 'e2e-tests' | 'dev-forum';
 
 export interface UserPreferences {
   locale: 'en' | 'de';
@@ -30,6 +30,34 @@ export interface HealthInfo {
 
 export interface SupportTicketConfig {
   support_email: string;
+}
+
+export interface SupportTicketDevForumCaptureResponse {
+  request_id: number;
+}
+
+export interface DevRequest {
+  id: number;
+  parent_request_id: number | null;
+  submitter_user_id: number;
+  claimed_by_user_id: number | null;
+  decided_by_user_id: number | null;
+  status: string;
+  decision: string | null;
+  capture_url: string;
+  capture_gui_part: string;
+  capture_state_json: string;
+  request_text: string;
+  developer_note_text: string | null;
+  developer_response_text: string | null;
+  user_review_text: string | null;
+  closed_at: string | null;
+  created_at: string;
+  changed_at: string | null;
+  updated_at: string | null;
+  submitter_user: AppUser | null;
+  claimed_by_user: AppUser | null;
+  decided_by_user: AppUser | null;
 }
 
 export interface TranslationOverridesResponse {
@@ -429,6 +457,66 @@ export const translationsApi = {
 
 export const supportTicketApi = {
   getSupportTicketConfig: () => request<SupportTicketConfig>('/support-ticket/config'),
+  captureSupportTicketInDevForum: (data: {
+    capture_url: string;
+    capture_gui_part: string;
+    capture_state_json: string;
+    request_text: string;
+  }) =>
+    request<SupportTicketDevForumCaptureResponse>('/support-ticket/capture-dev-forum', {
+      method: 'POST',
+      body: JSON.stringify(data),
+    }),
+};
+
+export const devForumApi = {
+  createDevRequest: (data: {
+    capture_url: string;
+    capture_gui_part: string;
+    capture_state_json: string;
+    request_text: string;
+  }) =>
+    request<DevRequest>('/dev-forum/requests/', {
+      method: 'POST',
+      body: JSON.stringify(data),
+    }),
+  listReviewDevRequests: () =>
+    request<DevRequest[]>('/dev-forum/requests/review'),
+  listDevelopmentDevRequests: (params?: {
+    include_claimed_by_other_developers?: boolean;
+    filter_claimed_by_user_id?: number | null;
+  }) => {
+    const query = new URLSearchParams();
+    if (params?.include_claimed_by_other_developers) query.set('include_claimed_by_other_developers', 'true');
+    if (typeof params?.filter_claimed_by_user_id === 'number') query.set('filter_claimed_by_user_id', String(params.filter_claimed_by_user_id));
+    const suffix = query.toString();
+    return request<DevRequest[]>(`/dev-forum/requests/development${suffix ? `?${suffix}` : ''}`);
+  },
+  claimDevRequest: (requestId: number) =>
+    request<DevRequest>(`/dev-forum/requests/${requestId}/claim`, {
+      method: 'POST',
+    }),
+  decideDevRequest: (
+    requestId: number,
+    data: {
+      decision: 'REJECTED' | 'IMPLEMENTED';
+      developer_note_text: string;
+      developer_response_text: string;
+    },
+  ) =>
+    request<DevRequest>(`/dev-forum/requests/${requestId}/decision`, {
+      method: 'POST',
+      body: JSON.stringify(data),
+    }),
+  acceptDevRequestReview: (requestId: number) =>
+    request<DevRequest>(`/dev-forum/requests/${requestId}/review-accept`, {
+      method: 'POST',
+    }),
+  rejectDevRequestReview: (requestId: number, review_text: string) =>
+    request<DevRequest>(`/dev-forum/requests/${requestId}/review-reject`, {
+      method: 'POST',
+      body: JSON.stringify({ review_text }),
+    }),
 };
 
 export const adminAccessApi = {

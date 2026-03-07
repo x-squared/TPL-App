@@ -445,6 +445,30 @@ rm -rf frontend/playwright-report/*
 
 ------------------------------------------------------------------------
 
+## Dev-Forum (DEV/TEST mode)
+
+The Dev-Forum API/UI is active only in `DEV` and `TEST` environments.  
+The `Development` tab is restricted to users with role key `DEV`; `Capturing` and `Review` remain available to all authenticated users.
+
+Typical bootstrap command (refresh DB + seed role data):
+
+```{bash}
+cd /Users/stephan/Workspace/TPL-App/backend
+source .venv/bin/activate
+python -m app.db_admin --mode refresh --env DEV
+```
+
+Then start backend/frontend as usual and use:
+
+- Sidebar DEV section:
+  - `Dev-Forum` page (Review + Development, with developer filter)
+  - `Show Dev-Forum panel` toggle (right-side Capturing/Review/Development forum)
+- Capturing creates `DEV_REQUEST` rows with structured context (`capture_url`, `capture_gui_part`, `capture_state_json`).
+- Development decisions (`REJECTED` or `IMPLEMENTED`) move requests to user `Review`.
+- User `Not accepted` creates a linked follow-up request.
+
+------------------------------------------------------------------------
+
 ## Repo Cleaning (Use With Care)
 
 ### Update dependencies and rebuild

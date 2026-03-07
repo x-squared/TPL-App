@@ -1,4 +1,4 @@
-export { getToken, setToken, clearToken, authApi, codesApi, medicalValueTemplatesApi, medicalValueGroupsApi, usersApi, translationsApi, adminAccessApi, adminSchedulerApi, personsApi, adminPeopleApi, adminProcurementConfigApi, adminCatalogueApi, supportTicketApi } from './core';
+export { getToken, setToken, clearToken, authApi, codesApi, medicalValueTemplatesApi, medicalValueGroupsApi, usersApi, translationsApi, adminAccessApi, adminSchedulerApi, personsApi, adminPeopleApi, adminProcurementConfigApi, adminCatalogueApi, supportTicketApi, devForumApi } from './core';
 export type {
   AppUser,
   AccessControlMatrix,
@@ -14,6 +14,8 @@ export type {
   CatalogueTypeSummary,
   HealthInfo,
   SupportTicketConfig,
+  SupportTicketDevForumCaptureResponse,
+  DevRequest,
   TranslationOverridesResponse,
   UserPreferences,
   AppStartPage,
@@ -125,7 +127,7 @@ export type {
   E2ETestRunResponse,
 } from './e2eTests';
 
-import { authApi, codesApi, medicalValueTemplatesApi, medicalValueGroupsApi, usersApi, translationsApi, adminAccessApi, adminSchedulerApi, personsApi, adminPeopleApi, adminProcurementConfigApi, adminCatalogueApi, supportTicketApi } from './core';
+import { authApi, codesApi, medicalValueTemplatesApi, medicalValueGroupsApi, usersApi, translationsApi, adminAccessApi, adminSchedulerApi, personsApi, adminPeopleApi, adminProcurementConfigApi, adminCatalogueApi, supportTicketApi, devForumApi } from './core';
 import { patientsApi } from './patients';
 import { tasksApi } from './tasks';
 import { colloqiumsApi } from './colloqiums';
@@ -149,6 +151,7 @@ export const api = {
   ...adminProcurementConfigApi,
   ...adminCatalogueApi,
   ...supportTicketApi,
+  ...devForumApi,
   ...patientsApi,
   ...tasksApi,
   ...colloqiumsApi,

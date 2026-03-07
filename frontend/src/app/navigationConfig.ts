@@ -25,6 +25,7 @@ const START_VIEW_LABELS: Record<AppStartPage, { labelKey: string; englishDefault
   reports: { labelKey: 'sidebar.nav.reports', englishDefault: 'Reports' },
   admin: { labelKey: 'sidebar.nav.admin', englishDefault: 'Admin' },
   'e2e-tests': { labelKey: 'navigation.dev.e2eTests', englishDefault: 'E2E Tests' },
+  'dev-forum': { labelKey: 'navigation.dev.devForum', englishDefault: 'Dev-Forum' },
 };
 
 export function buildStartViewOptions(access: NavigationAccess): StartViewOption[] {
@@ -36,5 +37,6 @@ export function buildStartViewOptions(access: NavigationAccess): StartViewOption
   if (access.canViewReports) options.push({ key: 'reports', ...START_VIEW_LABELS.reports });
   if (access.canViewAdmin) options.push({ key: 'admin', ...START_VIEW_LABELS.admin });
   if (access.devToolsEnabled) options.push({ key: 'e2e-tests', ...START_VIEW_LABELS['e2e-tests'] });
+  if (access.devToolsEnabled) options.push({ key: 'dev-forum', ...START_VIEW_LABELS['dev-forum'] });
   return options;
 }

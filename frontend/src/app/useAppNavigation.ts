@@ -5,7 +5,7 @@ import type { PatientDetailTab } from '../views/patient-detail/PatientDetailTabs
 import type { ColloquiumDetailTab } from '../views/colloquiums/detail/colloquiumDetailViewModelTypes';
 import type { CoordinationDetailTab } from '../views/coordinations/detail/useCoordinationDetailViewModel';
 
-export type Page = 'my-work' | 'patients' | 'donors' | 'colloquiums' | 'coordinations' | 'reports' | 'admin' | 'e2e-tests' | 'preferences';
+export type Page = 'my-work' | 'patients' | 'donors' | 'colloquiums' | 'coordinations' | 'reports' | 'admin' | 'e2e-tests' | 'dev-forum' | 'preferences';
 
 interface UseAppNavigationArgs {
   canViewPatients: boolean;
@@ -118,7 +118,7 @@ export function useAppNavigation({
   }, [startPagePreference]);
 
   useEffect(() => {
-    if (!devToolsEnabled && page === 'e2e-tests') {
+    if (!devToolsEnabled && (page === 'e2e-tests' || page === 'dev-forum')) {
       setPage('patients');
     }
   }, [devToolsEnabled, page]);

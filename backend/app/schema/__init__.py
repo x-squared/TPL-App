@@ -126,6 +126,12 @@ from .coordination import (
     CoordinationUpdate,
 )
 from .favorite import FavoriteBase, FavoriteCreate, FavoriteReorderRequest, FavoriteResponse
+from .dev_forum import (
+    DevRequestCaptureCreate,
+    DevRequestDecisionUpdate,
+    DevRequestResponse,
+    DevRequestReviewRejectCreate,
+)
 from .information import InformationBase, InformationCreate, InformationResponse, InformationUpdate
 from .e2e_tests import (
     E2ETestMetadataResponse,
@@ -173,7 +179,11 @@ from .reference import (
     UserCreate,
     UserResponse,
 )
-from .support_ticket import SupportTicketConfigResponse
+from .support_ticket import (
+    SupportTicketConfigResponse,
+    SupportTicketDevForumCaptureRequest,
+    SupportTicketDevForumCaptureResponse,
+)
 from .scheduler import (
     ScheduledJobEnabledUpdate,
     ScheduledJobResponse,
