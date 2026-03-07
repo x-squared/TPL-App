@@ -9,7 +9,7 @@ from pathlib import Path
 
 
 PROJECT_ROOT = Path(__file__).resolve().parents[2]
-DEFAULT_DIAGRAM = PROJECT_ROOT / "spec" / "domain" / "conceptual-domain-model.puml"
+DEFAULT_DIAGRAM = PROJECT_ROOT / "spec" / "domain" / "gen-domain.puml"
 DEFAULT_MAPPING = PROJECT_ROOT / "spec" / "domain" / "domain-sync-mapping.json"
 BACKEND_ROOT = PROJECT_ROOT / "backend"
 
@@ -166,7 +166,7 @@ def main() -> int:
         "--diagram",
         type=Path,
         default=DEFAULT_DIAGRAM,
-        help="Path to conceptual PlantUML diagram (default: spec/domain/conceptual-domain-model.puml).",
+        help="Path to conceptual PlantUML diagram (default: spec/domain/gen-domain.puml).",
     )
     parser.add_argument(
         "--mapping",

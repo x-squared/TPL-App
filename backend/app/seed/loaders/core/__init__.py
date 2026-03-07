@@ -1,5 +1,4 @@
 from .access_permissions import sync_access_permissions
-from .catalogues import sync_catalogues
 from .colloqium_types import sync_colloqium_types_core
 from .codes import sync_codes
 from .datatype_definitions import sync_datatype_definitions
@@ -18,7 +17,6 @@ from .task_templates import sync_task_templates_core
 __all__ = [
     "sync_access_permissions",
     "sync_codes",
-    "sync_catalogues",
     "sync_users_core",
     "sync_users_sample",
     "sync_users",

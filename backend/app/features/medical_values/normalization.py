@@ -21,6 +21,7 @@ class NormalizedMedicalValue:
 
 
 _UNIT_FACTORS: dict[str, tuple[str, Decimal]] = {
+    "1": ("dimensionless", Decimal("1")),
     "kg": ("mass", Decimal("1")),
     "g": ("mass", Decimal("0.001")),
     "cm": ("length", Decimal("1")),

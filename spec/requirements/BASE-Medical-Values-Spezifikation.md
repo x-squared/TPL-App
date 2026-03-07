@@ -1,8 +1,8 @@
-# Feature-of [GEN]: Architektur
+# Feature-of [BASE]: Basis
 
 Feature-Datei: `GEN-Architektur-Spezifikation.md`
 
-## Use Case: {data} Medizinische Werte im GEN-Kontext [Spec]
+## Use Case: {data} Medizinische Werte [Spec]
 
 ### Story: {data} Typen von Einheiten [Spec]
 

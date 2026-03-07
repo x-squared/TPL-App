@@ -53,9 +53,9 @@ class CoordinationDonor(Base):
     blood_type_id = Column(
         "BLOOD_TYPE",
         Integer,
-        ForeignKey("CATALOGUE.ID"),
+        ForeignKey("CODE.ID"),
         nullable=True,
-        comment="Blood type reference (`CATALOGUE.BLOOD_TYPE`).",
+        comment="Blood type reference (`CODE.BLOOD_TYPE`).",
         info={"label": "Blood Type"},
     )
     height = Column(
@@ -82,9 +82,9 @@ class CoordinationDonor(Base):
     diagnosis_id = Column(
         "DIAGNOSIS",
         Integer,
-        ForeignKey("CATALOGUE.ID"),
+        ForeignKey("CODE.ID"),
         nullable=True,
-        comment="Diagnosis reference (`CATALOGUE.DIAGNOSIS_DONOR`).",
+        comment="Diagnosis reference (`CODE.DIAGNOSIS_DONOR`).",
         info={"label": "Diagnosis"},
     )
     death_kind_id = Column(
@@ -128,8 +128,8 @@ class CoordinationDonor(Base):
 
     coordination = relationship("Coordination", back_populates="donor")
     sex = relationship("Code", foreign_keys=[sex_id])
-    blood_type = relationship("Catalogue", foreign_keys=[blood_type_id])
-    diagnosis = relationship("Catalogue", foreign_keys=[diagnosis_id])
+    blood_type = relationship("Code", foreign_keys=[blood_type_id])
+    diagnosis = relationship("Code", foreign_keys=[diagnosis_id])
     death_kind = relationship("Code", foreign_keys=[death_kind_id])
     changed_by_user = relationship("User", foreign_keys=[changed_by_id])
     created_by_user = relationship("User", foreign_keys=[created_by_id])

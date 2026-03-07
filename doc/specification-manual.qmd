@@ -33,15 +33,13 @@ These files describe business concepts and conceptual relationships independentl
 
 ### Artifacts and purpose
 
-- `spec/domain/conceptual-domain-model.puml`: integrated overview across domains
-- `spec/domain/conceptual-paths.puml`: path/scenario view (`P1..P6`) for cross-domain journeys
-- `spec/domain/identity-access-domain.puml`: users, roles, permissions
-- `spec/domain/patient-care-domain.puml`: patient, episode, medical values
-- `spec/domain/colloquiums-domain.puml`: colloquiums and agenda relationships
-- `spec/domain/coordinations-domain.puml`: coordination and donor workflow concepts
-- `spec/domain/tasking-domain.puml`: task templates, groups, and runtime tasks
-- `spec/domain/communication-ux-domain.puml`: information and favorites concepts
-- `spec/domain/architecture-cross-domain-flows.puml`: high-level cross-domain process/data flow
+- `spec/domain/gen-domain.puml`: integrated overview across all architecture domains
+- `spec/domain/gen-paths-domain.puml`: path/scenario view (`P1..P6`) for cross-domain journeys
+- `spec/domain/pat-domain.puml`: PAT patient and medical-values concepts
+- `spec/domain/tplk-domain.puml`: TPLK episode/coordination/procurement concepts
+- `spec/domain/koll-domain.puml`: KOLL colloquium and agenda relationships
+- `spec/domain/ltpl-domain.puml`: LTPL domain boundary/status in current model
+- `spec/domain/stcs-domain.puml`: STCS domain boundary/status in current model
 - `spec/domain/domain-sync-mapping.json`: alias/exception config for conceptual-vs-model checks
 
 ### How to work with these files
@@ -54,7 +52,7 @@ These files describe business concepts and conceptual relationships independentl
 Render example:
 
 ```{bash}
-plantuml spec/domain/conceptual-domain-model.puml
+plantuml spec/domain/gen-domain.puml
 ```
 
 ### Automated conceptual/model sync check
@@ -70,7 +68,7 @@ python -m qa.spec_tools.check_domain_sync
 
 Default check inputs:
 
-- diagram: `spec/domain/conceptual-domain-model.puml`
+- diagram: `spec/domain/gen-domain.puml`
 - mapping config: `spec/domain/domain-sync-mapping.json`
 
 If the checker fails, update the conceptual diagrams and/or mapping config in the same change set as the model change.
@@ -82,7 +80,7 @@ Update affected `spec/domain/*.puml` files in the same change set when any of th
 - a conceptual entity is added/removed/renamed
 - a conceptual relationship or cardinality changes
 - a key domain invariant or ownership intent changes
-- a primary path in `conceptual-paths.puml` changes (`P1..P6`)
+- a primary path in `gen-paths-domain.puml` changes (`P1..P6`)
 
 Usually no conceptual diagram update is required for implementation-only technical changes (for example index changes or internal column refactors) when concept intent is unchanged.
 
@@ -374,7 +372,7 @@ Tip: copy an existing partner case and adapt values incrementally.
   "id": "domain-database-consistency",
   "name": "Conceptual model and SQLAlchemy model stay aligned",
   "checker": "domain_database_sync",
-  "diagram": "spec/domain/conceptual-domain-model.puml",
+  "diagram": "spec/domain/gen-domain.puml",
   "mapping": "spec/domain/domain-sync-mapping.json"
 }
 ```

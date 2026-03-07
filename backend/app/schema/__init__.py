@@ -164,6 +164,8 @@ from .reference import (
     CatalogueBase,
     CatalogueCreate,
     CatalogueResponse,
+    CatalogueTypeSummaryResponse,
+    CatalogueUpdate,
     CodeBase,
     CodeCreate,
     CodeResponse,

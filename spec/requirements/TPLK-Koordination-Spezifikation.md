@@ -1,15 +1,13 @@
-# Feature-of [TPLK]: Koordination Transplantation
+# Feature-of [TPLK]: Koordination von Organspenden
 
 Feature-Datei: `TPLK-Koordination-Transplantation.md`
 
 ## Use Case: {process} Koordination [Spec]
 
-
 ### Story: {structure} Phasen einer Koordination [Spec]
 Eine Koordination besteht aus diesen Phasen:
 1. Koordination: Ein Organangebot wird auf Empfänger zugewiesen.
 2. Abschluss [EN: Completion]: Nacharbeit bis zum Abschluss der Koordination.
- 
 
 ### Story: {data} Daten der Koordination [Spec]
 

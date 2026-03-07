@@ -2,30 +2,28 @@ RECORDS = [
     {
         "code_key": "INTEGER",
         "primitive_kind": "number",
-        "unit": None,
-        "canonical_unit_ucum": None,
-        "allowed_units_ucum_json": None,
-        "conversion_group": None,
+        "unit": "1",
+        "canonical_unit_ucum": "1",
+        "allowed_units_ucum_json": "[\"1\"]",
+        "conversion_group": "dimensionless",
         "format_pattern": None,
         "validation_regex": r"^-?\d+$",
         "min_value": None,
         "max_value": None,
         "precision": 0,
-        "catalogue_type": None,
     },
     {
         "code_key": "DECIMAL",
         "primitive_kind": "number",
-        "unit": None,
-        "canonical_unit_ucum": None,
-        "allowed_units_ucum_json": None,
-        "conversion_group": None,
+        "unit": "1",
+        "canonical_unit_ucum": "1",
+        "allowed_units_ucum_json": "[\"1\"]",
+        "conversion_group": "dimensionless",
         "format_pattern": None,
         "validation_regex": r"^-?\d+(\.\d+)?$",
         "min_value": None,
         "max_value": None,
         "precision": 3,
-        "catalogue_type": None,
     },
     {
         "code_key": "STRING",
@@ -36,7 +34,6 @@ RECORDS = [
         "min_value": None,
         "max_value": None,
         "precision": None,
-        "catalogue_type": None,
     },
     {
         "code_key": "DATE",
@@ -47,7 +44,6 @@ RECORDS = [
         "min_value": None,
         "max_value": None,
         "precision": None,
-        "catalogue_type": None,
     },
     {
         "code_key": "TIMESTAMP",
@@ -58,7 +54,6 @@ RECORDS = [
         "min_value": None,
         "max_value": None,
         "precision": None,
-        "catalogue_type": None,
     },
     {
         "code_key": "BOOLEAN",
@@ -69,7 +64,6 @@ RECORDS = [
         "min_value": None,
         "max_value": None,
         "precision": None,
-        "catalogue_type": None,
     },
     {
         "code_key": "KG",
@@ -83,7 +77,6 @@ RECORDS = [
         "min_value": None,
         "max_value": None,
         "precision": 3,
-        "catalogue_type": None,
     },
     {
         "code_key": "CM",
@@ -97,7 +90,6 @@ RECORDS = [
         "min_value": None,
         "max_value": None,
         "precision": 1,
-        "catalogue_type": None,
     },
     {
         "code_key": "BLOOD_TYPE",
@@ -108,7 +100,6 @@ RECORDS = [
         "min_value": None,
         "max_value": None,
         "precision": None,
-        "catalogue_type": "BLOOD_TYPE",
     },
     {
         "code_key": "BP",
@@ -119,7 +110,6 @@ RECORDS = [
         "min_value": None,
         "max_value": None,
         "precision": None,
-        "catalogue_type": None,
     },
     {
         "code_key": "POS_NEG",
@@ -130,6 +120,5 @@ RECORDS = [
         "min_value": None,
         "max_value": None,
         "precision": None,
-        "catalogue_type": "POS_NEG",
     },
 ]

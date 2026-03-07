@@ -110,8 +110,8 @@ export function useCoordinationDetailViewModel(
       const deathKindsPromise = api.listCodes('DEATH_KIND');
       const sexCodesPromise = api.listCodes('SEX');
       const organCodesPromise = api.listCodes('ORGAN');
-      const bloodTypesPromise = api.listCatalogues('BLOOD_TYPE');
-      const diagnosisDonorPromise = api.listCatalogues('DIAGNOSIS_DONOR');
+      const bloodTypesPromise = api.listCodes('BLOOD_TYPE');
+      const diagnosisDonorPromise = api.listCodes('DIAGNOSIS_DONOR');
       const hospitalsPromise = api.listCatalogues('HOSPITAL');
       const coordinationPromise = api.getCoordination(coordinationId);
       const timeLogsPromise = api.listCoordinationTimeLogs(coordinationId);

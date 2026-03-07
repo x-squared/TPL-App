@@ -5,16 +5,17 @@ from typing import Final
 DEFAULT_ENV: Final[str] = "DEV"
 
 ENV_CATEGORIES: Final[dict[str, tuple[str, ...]]] = {
-    "PROD": ("core",),
-    "DEV": ("core", "sample"),
-    "TEST": ("core", "test"),
+    "PROD": ("core", "init"),
+    "DEV": ("core", "init", "sample"),
+    "TEST": ("core", "init", "test"),
 }
 
 PROFILE_CATEGORIES: Final[dict[str, tuple[str, ...]]] = {
     "NONE": (),
-    "CORE": ("core",),
-    "CORE_SAMPLE": ("core", "sample"),
-    "CORE_TEST": ("core", "test"),
+    "INIT": ("init",),
+    "CORE": ("core", "init"),
+    "CORE_SAMPLE": ("core", "init", "sample"),
+    "CORE_TEST": ("core", "init", "test"),
 }
 
 

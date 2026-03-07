@@ -52,6 +52,8 @@ class CatalogueBase(BaseModel):
     ext_sys: str = ""
     ext_key: str = ""
     name_default: str = ""
+    name_en: str = ""
+    name_de: str = ""
 
 
 class CatalogueCreate(CatalogueBase):
@@ -62,3 +64,17 @@ class CatalogueResponse(CatalogueBase):
     model_config = ConfigDict(from_attributes=True)
 
     id: int
+
+
+class CatalogueUpdate(BaseModel):
+    pos: int | None = None
+    ext_sys: str | None = None
+    ext_key: str | None = None
+    name_default: str | None = None
+    name_en: str | None = None
+    name_de: str | None = None
+
+
+class CatalogueTypeSummaryResponse(BaseModel):
+    type: str
+    item_count: int

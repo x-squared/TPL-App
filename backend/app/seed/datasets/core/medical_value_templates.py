@@ -6,6 +6,8 @@ RECORDS = [
     {
         "lab_key": "?",
         "kis_key": "?",
+        "loinc_code": "8302-2",
+        "loinc_display_name": "Body height",
         "datatype_key": "CM",
         "name_default": "Grösse",
         "pos": 1,
@@ -35,6 +37,8 @@ RECORDS = [
     {
         "lab_key": "?",
         "kis_key": "?",
+        "loinc_code": "29463-7",
+        "loinc_display_name": "Body weight",
         "datatype_key": "KG",
         "name_default": "Gewicht",
         "pos": 3,
@@ -48,6 +52,8 @@ RECORDS = [
     {
         "lab_key": "?",
         "kis_key": "?",
+        "loinc_code": "8280-0",
+        "loinc_display_name": "Waist Circumference at umbilicus by Tape measure",
         "datatype_key": "CM",
         "name_default": "BUX",
         "pos": 4,
@@ -61,6 +67,8 @@ RECORDS = [
     {
         "lab_key": "?",
         "kis_key": "?",
+        "loinc_code": "39156-5",
+        "loinc_display_name": "Body mass index (BMI) [Ratio]",
         "datatype_key": "DECIMAL",
         "name_default": "BMI",
         "pos": 5,
@@ -89,6 +97,8 @@ RECORDS = [
     {
         "lab_key": "?",
         "kis_key": "?",
+        "loinc_code": "13949-3",
+        "loinc_display_name": "Cytomegalovirus IgG Ab [Presence] in Serum or Plasma by Immunoassay",
         "datatype_key": "POS_NEG",
         "name_default": "CMV IgG",
         "pos": 21,
@@ -101,6 +111,8 @@ RECORDS = [
     {
         "lab_key": "?",
         "kis_key": "?",
+        "loinc_code": "30339-6",
+        "loinc_display_name": "Epstein Barr virus capsid IgG Ab [Presence] in Serum",
         "datatype_key": "POS_NEG",
         "name_default": "EBV IgG",
         "pos": 22,
@@ -113,6 +125,8 @@ RECORDS = [
     {
         "lab_key": "?",
         "kis_key": "?",
+        "loinc_code": "5195-3",
+        "loinc_display_name": "Hepatitis B virus surface Ag [Presence] in Serum",
         "datatype_key": "POS_NEG",
         "name_default": "HbsAg",
         "pos": 23,
@@ -125,6 +139,8 @@ RECORDS = [
     {
         "lab_key": "?",
         "kis_key": "?",
+        "loinc_code": "5195-3",
+        "loinc_display_name": "Hepatitis B virus surface Ag [Presence] in Serum",
         "datatype_key": "POS_NEG",
         "name_default": "HgsAg",
         "pos": 24,
@@ -137,6 +153,8 @@ RECORDS = [
     {
         "lab_key": "?",
         "kis_key": "?",
+        "loinc_code": "5192-0",
+        "loinc_display_name": "Hepatitis B virus e Ag [Presence] in Serum by Radioimmunoassay",
         "datatype_key": "POS_NEG",
         "name_default": "HbeAg",
         "pos": 25,
@@ -149,6 +167,8 @@ RECORDS = [
     {
         "lab_key": "?",
         "kis_key": "?",
+        "loinc_code": "16933-4",
+        "loinc_display_name": "Hepatitis B virus core Ab [Presence] in Serum",
         "datatype_key": "POS_NEG",
         "name_default": "AntiHBc",
         "pos": 26,
@@ -161,6 +181,8 @@ RECORDS = [
     {
         "lab_key": "?",
         "kis_key": "?",
+        "loinc_code": "24113-3",
+        "loinc_display_name": "Hepatitis B virus core IgM Ab [Presence] in Serum or Plasma by Immunoassay",
         "datatype_key": "POS_NEG",
         "name_default": "AntiHB o",
         "pos": 27,
@@ -173,6 +195,8 @@ RECORDS = [
     {
         "lab_key": "?",
         "kis_key": "?",
+        "loinc_code": "22322-2",
+        "loinc_display_name": "Hepatitis B virus surface Ab [Presence] in Serum",
         "datatype_key": "POS_NEG",
         "name_default": "AntiHB s",
         "pos": 28,
@@ -185,6 +209,8 @@ RECORDS = [
     {
         "lab_key": "?",
         "kis_key": "?",
+        "loinc_code": "16128-1",
+        "loinc_display_name": "Hepatitis C virus Ab [Presence] in Serum",
         "datatype_key": "POS_NEG",
         "name_default": "Anti HCV",
         "pos": 29,
@@ -197,6 +223,8 @@ RECORDS = [
     {
         "lab_key": "?",
         "kis_key": "?",
+        "loinc_code": "16128-1",
+        "loinc_display_name": "Hepatitis C virus Ab [Presence] in Serum",
         "datatype_key": "POS_NEG",
         "name_default": "HCV",
         "pos": 30,
@@ -209,6 +237,8 @@ RECORDS = [
     {
         "lab_key": "?",
         "kis_key": "?",
+        "loinc_code": "11011-4",
+        "loinc_display_name": "Hepatitis C virus RNA [Units/volume] (viral load) in Serum or Plasma by NAA with probe detection",
         "datatype_key": "DECIMAL",
         "name_default": "HCV RNA",
         "pos": 31,
@@ -221,6 +251,8 @@ RECORDS = [
     {
         "lab_key": "?",
         "kis_key": "?",
+        "loinc_code": "56888-1",
+        "loinc_display_name": "HIV 1+2 Ab+HIV1 p24 Ag [Presence] in Serum or Plasma by Immunoassay",
         "datatype_key": "POS_NEG",
         "name_default": "HIV",
         "pos": 32,
@@ -233,6 +265,8 @@ RECORDS = [
     {
         "lab_key": "?",
         "kis_key": "?",
+        "loinc_code": "16982-1",
+        "loinc_display_name": "HTLV I+II Ab [Presence] in Serum by Immunoblot",
         "datatype_key": "POS_NEG",
         "name_default": "HLTV",
         "pos": 33,
@@ -245,6 +279,8 @@ RECORDS = [
     {
         "lab_key": "?",
         "kis_key": "?",
+        "loinc_code": "22587-0",
+        "loinc_display_name": "Treponema pallidum Ab [Presence] in Serum",
         "datatype_key": "POS_NEG",
         "name_default": "Lues",
         "pos": 34,
@@ -257,6 +293,8 @@ RECORDS = [
     {
         "lab_key": "?",
         "kis_key": "?",
+        "loinc_code": "24315-4",
+        "loinc_display_name": "Cytomegalovirus IgG and IgM panel - Serum or Plasma",
         "datatype_key": "STRING",
         "name_default": "CMV IgG/iGm",
         "pos": 35,
@@ -269,6 +307,8 @@ RECORDS = [
     {
         "lab_key": "?",
         "kis_key": "?",
+        "loinc_code": "83123-0",
+        "loinc_display_name": "Toxoplasma gondii IgG+IgM Ab [Presence] in Serum or Plasma by Immunoassay",
         "datatype_key": "STRING",
         "name_default": "Toxo IgG / IgM",
         "pos": 36,
@@ -281,6 +321,8 @@ RECORDS = [
     {
         "lab_key": "?",
         "kis_key": "?",
+        "loinc_code": "87554-2",
+        "loinc_display_name": "Epstein Barr virus Ab panel - Serum",
         "datatype_key": "STRING",
         "name_default": "EBV IgG / IgM",
         "pos": 37,

@@ -9,11 +9,11 @@ export async function withPreservedMainContentScroll<T>(task: () => Promise<T>):
       requestAnimationFrame(() => {
         scrollContainer.scrollTop = scrollTopBefore;
       });
-      return;
-    }
-    window.scrollTo({ top: scrollTopBefore });
-    requestAnimationFrame(() => {
+    } else {
       window.scrollTo({ top: scrollTopBefore });
-    });
+      requestAnimationFrame(() => {
+        window.scrollTo({ top: scrollTopBefore });
+      });
+    }
   }
 }

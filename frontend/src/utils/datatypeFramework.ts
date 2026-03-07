@@ -64,11 +64,18 @@ export function getConfigFromMetadata(
 }
 
 export function isCatalogueDatatype(dt: Code | null | undefined): boolean {
-  return dt?.ext_sys === 'CATALOGUE' && !!dt.ext_key;
+  return (dt?.ext_sys === 'CATALOGUE' || dt?.ext_sys === 'CODE') && !!dt.ext_key;
 }
 
 export function getCatalogueType(dt: Code | null | undefined): string {
   return dt?.ext_key ?? '';
+}
+
+export function getDatatypeValueSetSource(dt: Code | null | undefined): 'CATALOGUE' | 'CODE' | null {
+  if (!dt?.ext_key) return null;
+  if (dt.ext_sys === 'CATALOGUE') return 'CATALOGUE';
+  if (dt.ext_sys === 'CODE') return 'CODE';
+  return null;
 }
 
 function formatDateValue(iso: string): string {

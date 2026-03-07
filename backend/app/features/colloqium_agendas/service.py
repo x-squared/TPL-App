@@ -3,10 +3,10 @@ from __future__ import annotations
 from fastapi import HTTPException
 from sqlalchemy.orm import Session, joinedload
 
-from ...models import Catalogue, Colloqium, ColloqiumAgenda, ColloqiumType, Episode
+from ...models import Code, Colloqium, ColloqiumAgenda, ColloqiumType, Episode
 from ...schemas import ColloqiumAgendaCreate, ColloqiumAgendaUpdate
 
-_DECISION_CATALOGUE_TYPE = "COLLOQUIUM_DECISION"
+_DECISION_CODE_TYPE = "COLLOQUIUM_DECISION"
 
 
 def _validate_colloqium_or_422(*, db: Session, colloqium_id: int) -> None:
@@ -53,14 +53,14 @@ def _normalize_agenda_text_fields(data: dict[str, object]) -> dict[str, object]:
 def _validate_decision_catalogue_or_422(*, db: Session, decision_key: str) -> None:
     if not decision_key:
         return
-    existing = db.query(Catalogue).filter(
-        Catalogue.type == _DECISION_CATALOGUE_TYPE,
-        Catalogue.key == decision_key,
+    existing = db.query(Code).filter(
+        Code.type == _DECISION_CODE_TYPE,
+        Code.key == decision_key,
     ).first()
     if not existing:
         raise HTTPException(
             status_code=422,
-            detail=f"decision must reference CATALOGUE.{_DECISION_CATALOGUE_TYPE}",
+            detail=f"decision must reference CODE.{_DECISION_CODE_TYPE}",
         )
 
 

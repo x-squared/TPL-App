@@ -10,7 +10,7 @@ from ...features.episodes.workflow_service import (
     mark_transplantation_started,
 )
 from ...features.tasks import ensure_coordination_protocol_task_groups
-from ...models import Catalogue, Code, Coordination, CoordinationEpisode, Episode
+from ...models import Code, Coordination, CoordinationEpisode, Episode
 from ...schemas import CoordinationEpisodeCreate, CoordinationEpisodeUpdate
 
 _DUAL_ASSIGNMENT_ORGAN_KEYS = {"KIDNEY", "LUNG"}
@@ -37,12 +37,12 @@ def _validate_code(code_id: int, expected_type: str, field_name: str, db: Sessio
         raise HTTPException(status_code=422, detail=f"{field_name} must reference CODE.{expected_type}")
 
 
-def _validate_catalogue(catalogue_id: int | None, expected_type: str, field_name: str, db: Session) -> None:
-    if catalogue_id is None:
+def _validate_code_optional(code_id: int | None, expected_type: str, field_name: str, db: Session) -> None:
+    if code_id is None:
         return
-    entry = db.query(Catalogue).filter(Catalogue.id == catalogue_id, Catalogue.type == expected_type).first()
+    entry = db.query(Code).filter(Code.id == code_id, Code.type == expected_type).first()
     if not entry:
-        raise HTTPException(status_code=422, detail=f"{field_name} must reference CATALOGUE.{expected_type}")
+        raise HTTPException(status_code=422, detail=f"{field_name} must reference CODE.{expected_type}")
 
 
 def _validate_episode_exists(episode_id: int, db: Session) -> None:
@@ -88,7 +88,7 @@ def _validate_payload(
 ) -> None:
     _validate_episode_exists(episode_id, db)
     _validate_code(organ_id, "ORGAN", "organ_id", db)
-    _validate_catalogue(
+    _validate_code_optional(
         organ_rejection_sequel_id,
         "ORGAN_REJECTION_SEQUEL",
         "organ_rejection_sequel_id",

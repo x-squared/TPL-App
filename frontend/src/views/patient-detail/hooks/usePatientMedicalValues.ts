@@ -10,7 +10,14 @@ import {
   type MedicalValueUpdate,
   type Patient,
 } from '../../../api';
-import { formatValue, getCatalogueType, getConfigFromMetadata, isCatalogueDatatype, validateValue } from '../../../utils/datatypeFramework';
+import {
+  formatValue,
+  getCatalogueType,
+  getConfigFromMetadata,
+  getDatatypeValueSetSource,
+  isCatalogueDatatype,
+  validateValue,
+} from '../../../utils/datatypeFramework';
 
 export function usePatientMedicalValues(
   patientId: number,
@@ -56,10 +63,12 @@ export function usePatientMedicalValues(
       setDatatypeCodes(codes);
       codes.filter(isCatalogueDatatype).forEach((dt) => {
         const catType = getCatalogueType(dt);
-        if (catType) {
-          api.listCatalogues(catType).then((entries) =>
-            setCatalogueCache((prev) => ({ ...prev, [catType]: entries }))
-          );
+        const source = getDatatypeValueSetSource(dt);
+        if (catType && source === 'CATALOGUE') {
+          api.listCatalogues(catType).then((entries) => setCatalogueCache((prev) => ({ ...prev, [catType]: entries })));
+        }
+        if (catType && source === 'CODE') {
+          api.listCodes(catType).then((entries) => setCatalogueCache((prev) => ({ ...prev, [catType]: entries })));
         }
       });
     });

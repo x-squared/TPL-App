@@ -1,5 +1,4 @@
 import type {
-  Code,
   CoordinationEpisodeLinkedEpisode,
   CoordinationProcurementFlex,
   CoordinationProtocolStateOrgan,

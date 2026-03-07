@@ -84,3 +84,30 @@ def test_medical_value_service_persists_normalized_fields(db_session: Session, u
     )
     assert updated.value_canonical == "3", "Update should recompute canonical value when input payload changes."
     assert updated.unit_canonical_ucum == "kg", "Canonical unit should remain configured datatype unit."
+
+
+def test_normalize_dimensionless_numeric_value_with_ucum_one() -> None:
+    """Verify dimensionless UCUM unit `1` normalizes deterministically for generic numeric datatypes."""
+    datatype = DatatypeDefinition(
+        code_id=1,
+        primitive_kind="number",
+        unit="1",
+        canonical_unit_ucum="1",
+        allowed_units_ucum_json='["1"]',
+        conversion_group="dimensionless",
+        precision=3,
+    )
+    normalized = normalize_medical_value(
+        raw_value="12.340",
+        unit_input_ucum=None,
+        datatype_definition=datatype,
+    )
+    assert normalized.value_canonical == "12.34", (
+        "Dimensionless numbers should be rounded/trimmed using datatype precision."
+    )
+    assert normalized.unit_canonical_ucum == "1", (
+        "Generic numeric datatypes should now persist canonical UCUM unit `1`."
+    )
+    assert normalized.normalization_status == "NORMALIZED", (
+        "Dimensionless normalization should still report successful normalization status."
+    )

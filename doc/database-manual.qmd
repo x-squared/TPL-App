@@ -80,6 +80,7 @@ python -m app.db_data --mode <clean|seed|refresh|migrate-audit-fields|migrate-me
 
 - no profile: resolved from env (`DEV`, `TEST`, `PROD`)
 - explicit profile examples:
+  - `INIT`
   - `CORE`
   - `CORE_SAMPLE`
   - `CORE_TEST`
@@ -120,6 +121,12 @@ Read-only LOINC/UCUM coverage verification:
 ```{bash}
 python -m app.db_data --mode verify-medical-value-units --env DEV
 ```
+
+Strict completion contract for the LOINC/UCUM rollout:
+
+- treat this verifier as a quality gate for completed migrations
+- expected outcome for a fully migrated seed/runtime baseline is `issue_count = 0`
+- any non-zero result means rollout gaps remain in templates, datatype metadata, or runtime normalization fields
 
 Export current translations from DB to frontend baseline file:
 

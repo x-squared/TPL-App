@@ -45,9 +45,9 @@ class CoordinationOrganEffect(Base):
     procurement_effect_id = Column(
         "PROCUREMENT_EFFECT",
         Integer,
-        ForeignKey("CATALOGUE.ID"),
+        ForeignKey("CODE.ID"),
         nullable=True,
-        comment="Procurement effect reference (`CATALOGUE.PROCUREMENT_EFFECT`).",
+        comment="Procurement effect reference (`CODE.PROCUREMENT_EFFECT`).",
         info={"label": "Procurement Effect"},
     )
     changed_by_id = Column(
@@ -83,6 +83,6 @@ class CoordinationOrganEffect(Base):
 
     coordination = relationship("Coordination", back_populates="organ_effects")
     organ = relationship("Code", foreign_keys=[organ_id])
-    procurement_effect = relationship("Catalogue", foreign_keys=[procurement_effect_id])
+    procurement_effect = relationship("Code", foreign_keys=[procurement_effect_id])
     changed_by_user = relationship("User", foreign_keys=[changed_by_id])
     created_by_user = relationship("User", foreign_keys=[created_by_id])

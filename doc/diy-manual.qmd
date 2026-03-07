@@ -141,6 +141,11 @@ source .venv/bin/activate
 python -m app.db_data --mode verify-medical-value-units --env DEV
 ```
 
+Expected success condition for completed migration work:
+
+- command exits successfully
+- verifier reports `issue_count = 0`
+
 **F) Capture current DB translations into `translations.json`:**
 
 ```{bash}

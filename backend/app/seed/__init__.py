@@ -5,7 +5,6 @@ from sqlalchemy.orm import Session
 from .loader import SeedJob, SeedRunner
 from .loaders.core import (
     sync_access_permissions,
-    sync_catalogues,
     sync_codes,
     sync_colloqium_types_core,
     sync_coordination_procurement_field_scopes,
@@ -21,6 +20,7 @@ from .loaders.core import (
     sync_users_core,
     sync_users_sample,
 )
+from .loaders.init import sync_catalogues_init
 from .loaders.sample import (
     sync_colloqiums,
     sync_patients,
@@ -40,10 +40,10 @@ def get_seed_jobs() -> tuple[SeedJob, ...]:
             loader=sync_codes,
         ),
         SeedJob(
-            key="core.catalogues",
-            category="core",
-            description="Load CATALOGUE reference data",
-            loader=sync_catalogues,
+            key="init.catalogues",
+            category="init",
+            description="Load initial CATALOGUE reference data",
+            loader=sync_catalogues_init,
         ),
         SeedJob(
             key="core.users",

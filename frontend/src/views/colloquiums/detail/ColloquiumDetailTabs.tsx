@@ -4,6 +4,7 @@ import { useI18n } from '../../../i18n/i18n';
 import type { AgendaDraft } from '../tabs/protocol/ColloquiumProtocolTab';
 import ColloquiumProtocolTab from '../tabs/protocol/ColloquiumProtocolTab';
 import ColloquiumDetailSection from '../tabs/colloquium/ColloquiumDetailSection';
+import type { EpisodePreview, PickerRow } from './colloquiumDetailViewModelTypes';
 
 type Tab = 'colloquium' | 'protocol';
 
@@ -35,29 +36,10 @@ interface Props {
     decision_reason: string;
     comment: string;
   };
-  selectedEpisodePreviews: Array<{
-    episodeId: number;
-    patientName: string;
-    patientFirstName: string;
-    patientPid: string;
-    fallNr: string;
-    organName: string;
-    statusName: string;
-    start: string | null;
-    end: string | null;
-  }>;
+  selectedEpisodePreviews: EpisodePreview[];
   selectedEpisodeLabel: string;
   pickerOpen: boolean;
-  pickerRows: Array<{
-    patient: PatientListItem;
-    episodes: Array<{
-      episodeId: number;
-      patientId: number;
-      fallNr: string;
-      start: string | null;
-      end: string | null;
-    }>;
-  }>;
+  pickerRows: PickerRow[];
   pickerLoading: boolean;
   pickerNonSelectableEpisodeIds: number[];
   patientsById: Record<number, PatientListItem>;

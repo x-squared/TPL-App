@@ -1,12 +1,14 @@
 import { useEffect, useState } from 'react';
 
 import { useAdminAccessRules } from './admin/hooks/useAdminAccessRules';
+import { useAdminCatalogues } from './admin/hooks/useAdminCatalogues';
 import { useAdminPeopleTeams } from './admin/hooks/useAdminPeopleTeams';
 import { useAdminProcurementConfig } from './admin/hooks/useAdminProcurementConfig';
 import { useAdminScheduler } from './admin/hooks/useAdminScheduler';
 import { useAdminTaskTemplates } from './admin/hooks/useAdminTaskTemplates';
 import AdminOverviewTab from './admin/tabs/AdminOverviewTab';
 import AdminAccessRulesTab from './admin/tabs/AdminAccessRulesTab';
+import AdminCataloguesTab from './admin/tabs/AdminCataloguesTab';
 import AdminPeopleTeamsTab from './admin/tabs/AdminPeopleTeamsTab';
 import AdminProcurementConfigTab from './admin/tabs/AdminProcurementConfigTab';
 import AdminSchedulerTab from './admin/tabs/AdminSchedulerTab';
@@ -15,13 +17,14 @@ import AdminTranslationsTab from './admin/tabs/AdminTranslationsTab';
 import { useI18n } from '../i18n/i18n';
 import './AdminView.css';
 
-type AdminTabKey = 'overview' | 'access-rules' | 'people-teams' | 'task-templates' | 'procurement-config' | 'scheduler' | 'translations';
+type AdminTabKey = 'overview' | 'access-rules' | 'people-teams' | 'catalogues' | 'task-templates' | 'procurement-config' | 'scheduler' | 'translations';
 
 export default function AdminView() {
   const { t } = useI18n();
   const [activeTab, setActiveTab] = useState<AdminTabKey>('overview');
   const accessRules = useAdminAccessRules();
   const peopleTeams = useAdminPeopleTeams();
+  const catalogues = useAdminCatalogues();
   const taskTemplates = useAdminTaskTemplates();
   const procurementConfig = useAdminProcurementConfig();
   const scheduler = useAdminScheduler();
@@ -59,6 +62,13 @@ export default function AdminView() {
           type="button"
         >
           {t('app.admin.tabs.peopleTeams', 'People & Teams')}
+        </button>
+        <button
+          className={`detail-tab ${activeTab === 'catalogues' ? 'active' : ''}`}
+          onClick={() => setActiveTab('catalogues')}
+          type="button"
+        >
+          {t('app.admin.tabs.catalogues', 'Catalogues')}
         </button>
         <button
           className={`detail-tab ${activeTab === 'task-templates' ? 'active' : ''}`}
@@ -122,6 +132,18 @@ export default function AdminView() {
           onDeleteTeam={peopleTeams.deleteTeam}
           onEnsureTeamMembersLoaded={peopleTeams.ensureTeamMembersLoaded}
           onSetTeamMembers={peopleTeams.setTeamMembers}
+        />
+      )}
+      {activeTab === 'catalogues' && (
+        <AdminCataloguesTab
+          catalogueTypes={catalogues.catalogueTypes}
+          selectedType={catalogues.selectedType}
+          catalogues={catalogues.catalogues}
+          loading={catalogues.loading}
+          saving={catalogues.saving}
+          error={catalogues.error}
+          onSelectType={catalogues.selectType}
+          onUpdateCatalogue={catalogues.updateCatalogue}
         />
       )}
       {activeTab === 'task-templates' && (

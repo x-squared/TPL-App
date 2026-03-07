@@ -71,7 +71,7 @@ export function useColloquiumAgendaManager(colloqiumId: number, organId: number 
   useEffect(() => {
     let isActive = true;
     const loadDecisionOptions = async () => {
-      const options = await api.listCatalogues('COLLOQUIUM_DECISION');
+      const options = await api.listCodes('COLLOQUIUM_DECISION');
       if (!isActive) return;
       setDecisionOptions(options);
     };

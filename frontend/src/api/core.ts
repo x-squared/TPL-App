@@ -47,6 +47,23 @@ export interface Code {
   name_default: string;
 }
 
+export interface Catalogue {
+  id: number;
+  type: string;
+  key: string;
+  pos: number;
+  ext_sys: string;
+  ext_key: string;
+  name_default: string;
+  name_en: string;
+  name_de: string;
+}
+
+export interface CatalogueTypeSummary {
+  type: string;
+  item_count: number;
+}
+
 export function getToken(): string | null {
   return localStorage.getItem(TOKEN_KEY);
 }
@@ -190,7 +207,6 @@ export interface DatatypeDefinition {
   min_value: string | null;
   max_value: string | null;
   precision: number | null;
-  catalogue_type: string | null;
 }
 
 export interface AccessPermission {
@@ -355,7 +371,22 @@ export const codesApi = {
   listCodes: (type?: string) =>
     request<Code[]>(`/codes/${type ? `?type=${encodeURIComponent(type)}` : ''}`),
   listCatalogues: (type?: string) =>
-    request<Code[]>(`/catalogues/${type ? `?type=${encodeURIComponent(type)}` : ''}`),
+    request<Catalogue[]>(`/catalogues/${type ? `?type=${encodeURIComponent(type)}` : ''}`),
+};
+
+export const adminCatalogueApi = {
+  listAdminCatalogueTypes: () =>
+    request<CatalogueTypeSummary[]>('/admin/catalogues/types'),
+  listAdminCatalogues: (type?: string) =>
+    request<Catalogue[]>(`/admin/catalogues/${type ? `?type=${encodeURIComponent(type)}` : ''}`),
+  updateAdminCatalogue: (
+    id: number,
+    data: Partial<Pick<Catalogue, 'pos' | 'ext_sys' | 'ext_key' | 'name_default' | 'name_en' | 'name_de'>>,
+  ) =>
+    request<Catalogue>(`/admin/catalogues/${id}`, {
+      method: 'PATCH',
+      body: JSON.stringify(data),
+    }),
 };
 
 export const medicalValueTemplatesApi = {

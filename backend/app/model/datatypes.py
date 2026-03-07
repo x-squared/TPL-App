@@ -22,7 +22,6 @@ class DatatypeDefinition(Base):
     min_value = Column("MIN_VALUE", String(64), nullable=True)
     max_value = Column("MAX_VALUE", String(64), nullable=True)
     precision = Column("PRECISION", Integer, nullable=True)
-    catalogue_type = Column("CATALOGUE_TYPE", String(64), nullable=True)
     changed_by_id = Column("CHANGED_BY", Integer, ForeignKey("USER.ID"), nullable=True)
     created_by_id = Column("CREATED_BY", Integer, ForeignKey("USER.ID"), nullable=True)
     created_at = Column("CREATED_AT", DateTime(timezone=True), server_default=func.now())

@@ -123,6 +123,20 @@ class Catalogue(Base):
         comment="Default display name for the catalogue entry.",
         info={"label": "Name"},
     )
+    name_en = Column(
+        "NAME_EN",
+        String,
+        default="",
+        comment="English display name for the catalogue entry.",
+        info={"label": "Name (EN)"},
+    )
+    name_de = Column(
+        "NAME_DE",
+        String,
+        default="",
+        comment="German display name for the catalogue entry.",
+        info={"label": "Name (DE)"},
+    )
 
 
 class TranslationBundle(Base):

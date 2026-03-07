@@ -1,5 +1,5 @@
 import jsPDF from 'jspdf';
-import type { ColloqiumAgenda, PatientListItem, Task } from '../../../../api';
+import type { Code, ColloqiumAgenda, PatientListItem, Task } from '../../../../api';
 import { translateCodeLabel } from '../../../../i18n/codeTranslations';
 
 export interface ProtocolAgendaDraft {
@@ -61,7 +61,16 @@ export function exportProtocolPdf({
       key?: string | null;
       name_default?: string | null;
     } | null | undefined,
-  ): string => translateCodeLabel((_key, englishDefault) => englishDefault, code);
+  ): string => translateCodeLabel(
+    (_key, englishDefault) => englishDefault,
+    code
+      ? {
+        type: code.type ?? '',
+        key: code.key ?? '',
+        name_default: code.name_default ?? '',
+      } satisfies Pick<Code, 'type' | 'key' | 'name_default'>
+      : null,
+  );
   let y = margin;
 
   const ensureSpace = (heightNeeded: number) => {

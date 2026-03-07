@@ -184,17 +184,6 @@ def build_medical_value_source() -> SourceDef:
                         else ""
                     ),
                 ),
-                FieldDef(
-                    "datatype_catalogue_type",
-                    "Datatype Catalogue Type",
-                    "string",
-                    ("eq", "contains"),
-                    lambda row: (
-                        row.medical_value_template.datatype_definition.catalogue_type
-                        if row.medical_value_template and row.medical_value_template.datatype_definition
-                        else ""
-                    ),
-                ),
             ),
         ),
         JoinDef(

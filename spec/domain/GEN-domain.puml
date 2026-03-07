@@ -1,5 +1,5 @@
 @startuml
-title TPL Conceptual Domain Model (Intent-Level)
+title TPL Domain - GEN (Foundations and Cross-Domain Overview)
 
 hide methods
 hide stereotypes
@@ -7,35 +7,35 @@ skinparam shadowing false
 skinparam classAttributeIconSize 0
 left to right direction
 
-package "Identity and Access" {
+package "GEN Foundations" {
   class User
   class Person
   class PersonTeam
   class Role
   class Permission
+  class Code
+  class Catalogue
+  class AccessPermission
+  class DatatypeDefinition
+  class TranslationBundle
+  class ScheduledJob
+  class ScheduledJobRun
 }
 
-package "Patient Care" {
+package "PAT Domain" {
   class Patient
-  class Episode
-  class EpisodeOrgan
   class ContactInfo
   class Absence
   class Diagnosis
-
   class MedicalValueTemplate
   class MedicalValueGroupTemplate
   class MedicalValueGroup
   class MedicalValue
 }
 
-package "Colloquiums" {
-  class ColloqiumType
-  class Colloqium
-  class ColloqiumAgenda
-}
-
-package "Coordinations (Donor Domain)" {
+package "TPLK Domain" {
+  class Episode
+  class EpisodeOrgan
   class Coordination
   class CoordinationDonor
   class CoordinationEpisode
@@ -44,14 +44,17 @@ package "Coordinations (Donor Domain)" {
   class CoordinationProtocolEventLog
 }
 
-package "Tasking" {
+package "KOLL Domain" {
+  class ColloqiumType
+  class Colloqium
+  class ColloqiumAgenda
+}
+
+package "Cross-Cutting Runtime" {
   class TaskGroupTemplate
   class TaskTemplate
   class TaskGroup
   class Task
-}
-
-package "Communication and UX" {
   class Information
   class InformationRead
   class Favorite
@@ -63,29 +66,21 @@ PersonTeam "*" -- "*" Person : members
 User "*" -- "*" Role : has >
 Role "*" -- "*" Permission : grants >
 
-' Patient care
-Patient "1" -- "0..*" Episode
-Episode "1" -- "0..*" EpisodeOrgan
+' Patient and values
 Patient "1" -- "0..*" ContactInfo
 Patient "1" -- "0..*" Absence
 Patient "1" -- "0..*" Diagnosis
-
 MedicalValueGroupTemplate "1" -- "0..*" MedicalValueTemplate
 MedicalValueGroupTemplate "1" -- "0..*" MedicalValueGroup
 Patient "1" -- "0..*" MedicalValueGroup
 Patient "1" -- "0..*" MedicalValue
 MedicalValueTemplate "1" -- "0..*" MedicalValue
 MedicalValueGroup "1" -- "0..*" MedicalValue
+
+' TPLK flow
+Patient "1" -- "0..*" Episode
+Episode "1" -- "0..*" EpisodeOrgan
 Episode "1" <-- "0..*" MedicalValue : context (optional)
-
-' Colloquiums
-ColloqiumType "1" -- "0..*" Colloqium
-ColloqiumType "*" -- "*" Person : default participants
-Colloqium "*" -- "*" Person : participants
-Colloqium "1" -- "0..*" ColloqiumAgenda
-Episode "1" <-- "0..*" ColloqiumAgenda : references >
-
-' Coordinations
 Coordination "1" -- "0..1" CoordinationDonor
 Coordination "1" -- "0..1" CoordinationProcurement
 Coordination "1" -- "0..*" CoordinationEpisode
@@ -94,7 +89,14 @@ Coordination "1" -- "0..*" CoordinationTimeLog
 Coordination "1" -- "0..*" CoordinationProtocolEventLog
 Task "1" <-- "0..*" CoordinationProtocolEventLog : optional task reference
 
-' Tasking
+' KOLL
+ColloqiumType "1" -- "0..*" Colloqium
+ColloqiumType "*" -- "*" Person : default participants
+Colloqium "*" -- "*" Person : participants
+Colloqium "1" -- "0..*" ColloqiumAgenda
+Episode "1" <-- "0..*" ColloqiumAgenda : references >
+
+' Tasking + communication
 TaskGroupTemplate "1" -- "0..*" TaskTemplate
 TaskGroupTemplate "1" -- "0..*" TaskGroup
 TaskGroup "1" -- "0..*" Task
@@ -104,35 +106,9 @@ ColloqiumAgenda "1" <-- "0..*" TaskGroup : context (optional)
 Coordination "1" <-- "0..*" TaskGroup : context (optional)
 User "1" <-- "0..*" Task : assigned to (optional)
 User "1" <-- "0..*" Task : closed by (optional)
-
-' Communication and UX
 Information "1" -- "0..*" InformationRead
 User "1" <-- "0..*" InformationRead : read state
 User "1" <-- "0..*" Information : authored by
 User "1" <-- "0..*" Favorite : owner
-
-note bottom of TaskGroup
-Exactly one domain context is typically active:
-Patient OR Episode OR ColloqiumAgenda OR Coordination.
-This is a conceptual intent, even if represented
-with multiple nullable references in persistence.
-end note
-
-note bottom of MedicalValue
-Medical values are context-aware:
-always linked to a patient, optionally linked
-to an episode (and organ context when applicable).
-end note
-
-note right of Permission
-Permissions are intent-level rights.
-View rights and edit rights are separated
-by domain (for example view.patients/edit.patients).
-end note
-
-note right of Favorite
-Favorites can target different domain objects
-(patient, episode, colloquium, coordination).
-end note
 
 @enduml

@@ -4,14 +4,13 @@ This directory contains intent-level domain specifications that are independent 
 
 ## Artifacts
 
-- `conceptual-domain-model.puml`: high-level integrated conceptual model.
-- `conceptual-paths.puml`: scenario/path-centric conceptual view across domains.
-- `identity-access-domain.puml`: identity, role, and permission concepts.
-- `patient-care-domain.puml`: patient, episode, and medical value concepts.
-- `colloquiums-domain.puml`: colloquium type, colloquium, agenda, and participant concepts.
-- `coordinations-domain.puml`: coordination, donor/procurement, episode links, and logs.
-- `tasking-domain.puml`: task templates, task groups, tasks, and context links.
-- `communication-ux-domain.puml`: information/read-state and favorites concepts.
+- `gen-domain.puml`: integrated GEN-centric overview across all defined domains.
+- `gen-paths-domain.puml`: scenario/path-centric view (`P1..P6`) across domains.
+- `pat-domain.puml`: PAT patient and medical-values domain concepts.
+- `tplk-domain.puml`: TPLK episode/coordination/procurement workflow concepts.
+- `koll-domain.puml`: KOLL colloquium, agenda, and participant concepts.
+- `ltpl-domain.puml`: LTPL domain boundary/status in current model.
+- `stcs-domain.puml`: STCS domain boundary/status in current model.
 - `domain-sync-mapping.json`: conceptual-to-model alias and checker configuration.
 
 ## Scope
@@ -34,7 +33,7 @@ The conceptual model intentionally does not capture:
 Example with PlantUML installed locally:
 
 ```bash
-plantuml spec/domain/conceptual-domain-model.puml
+plantuml spec/domain/gen-domain.puml
 ```
 
 ## Domain sync check

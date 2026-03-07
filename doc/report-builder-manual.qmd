@@ -89,6 +89,7 @@ The backend validates operator/value compatibility and returns `422` for invalid
 - For multi-organ episodes, the episode source provides both `Primary Organ` and aggregated `Organs`.
 - For `MEDICAL_VALUE`, field `value` prefers canonical normalized values (`value_canonical`) and only falls back to legacy raw values (`value`) when canonical is missing.
 - `MEDICAL_VALUE` also exposes normalization trace fields (`value_input`, `unit_input_ucum`, `unit_canonical_ucum`, `normalization_status`) for auditable analytics.
+- Operationally, report correctness for medical values depends on a clean LOINC/UCUM rollout (`python -m app.db_data --mode verify-medical-value-units --env DEV` with `issue_count = 0`).
 
 ## 6) Where to find the relevant sources
 

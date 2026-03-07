@@ -85,9 +85,9 @@ class CoordinationEpisode(Base):
     organ_rejection_sequel_id = Column(
         "ORGAN_REJECTION_SEQUEL",
         Integer,
-        ForeignKey("CATALOGUE.ID"),
+        ForeignKey("CODE.ID"),
         nullable=True,
-        comment="Organ rejection sequel (`CATALOGUE.ORGAN_REJECTION_SEQUEL`).",
+        comment="Organ rejection sequel (`CODE.ORGAN_REJECTION_SEQUEL`).",
         info={"label": "Organ Rejection Sequel"},
     )
     changed_by_id = Column(
@@ -124,6 +124,6 @@ class CoordinationEpisode(Base):
     coordination = relationship("Coordination", back_populates="coordination_episodes")
     episode = relationship("Episode", back_populates="coordination_episodes")
     organ = relationship("Code", foreign_keys=[organ_id])
-    organ_rejection_sequel = relationship("Catalogue", foreign_keys=[organ_rejection_sequel_id])
+    organ_rejection_sequel = relationship("Code", foreign_keys=[organ_rejection_sequel_id])
     changed_by_user = relationship("User", foreign_keys=[changed_by_id])
     created_by_user = relationship("User", foreign_keys=[created_by_id])

@@ -1,4 +1,4 @@
-export { getToken, setToken, clearToken, authApi, codesApi, medicalValueTemplatesApi, medicalValueGroupsApi, usersApi, translationsApi, adminAccessApi, adminSchedulerApi, personsApi, adminPeopleApi, adminProcurementConfigApi, supportTicketApi } from './core';
+export { getToken, setToken, clearToken, authApi, codesApi, medicalValueTemplatesApi, medicalValueGroupsApi, usersApi, translationsApi, adminAccessApi, adminSchedulerApi, personsApi, adminPeopleApi, adminProcurementConfigApi, adminCatalogueApi, supportTicketApi } from './core';
 export type {
   AppUser,
   AccessControlMatrix,
@@ -10,6 +10,8 @@ export type {
   PersonUpdate,
   PersonTeam,
   Code,
+  Catalogue,
+  CatalogueTypeSummary,
   HealthInfo,
   SupportTicketConfig,
   TranslationOverridesResponse,
@@ -123,7 +125,7 @@ export type {
   E2ETestRunResponse,
 } from './e2eTests';
 
-import { authApi, codesApi, medicalValueTemplatesApi, medicalValueGroupsApi, usersApi, translationsApi, adminAccessApi, adminSchedulerApi, personsApi, adminPeopleApi, adminProcurementConfigApi, supportTicketApi } from './core';
+import { authApi, codesApi, medicalValueTemplatesApi, medicalValueGroupsApi, usersApi, translationsApi, adminAccessApi, adminSchedulerApi, personsApi, adminPeopleApi, adminProcurementConfigApi, adminCatalogueApi, supportTicketApi } from './core';
 import { patientsApi } from './patients';
 import { tasksApi } from './tasks';
 import { colloqiumsApi } from './colloqiums';
@@ -145,6 +147,7 @@ export const api = {
   ...personsApi,
   ...adminPeopleApi,
   ...adminProcurementConfigApi,
+  ...adminCatalogueApi,
   ...supportTicketApi,
   ...patientsApi,
   ...tasksApi,

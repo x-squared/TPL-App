@@ -3,7 +3,7 @@ from __future__ import annotations
 from fastapi import HTTPException
 from sqlalchemy.orm import Session, joinedload
 
-from ...models import Catalogue, Code, Coordination, CoordinationDonor
+from ...models import Code, Coordination, CoordinationDonor
 from ...schemas import CoordinationDonorCreate, CoordinationDonorUpdate
 
 
@@ -31,12 +31,12 @@ def _validate_code(code_id: int | None, expected_type: str, field_name: str, db:
         raise HTTPException(status_code=422, detail=f"{field_name} must reference CODE.{expected_type}")
 
 
-def _validate_catalogue(catalogue_id: int | None, expected_type: str, field_name: str, db: Session) -> None:
-    if catalogue_id is None:
+def _validate_code_optional(code_id: int | None, expected_type: str, field_name: str, db: Session) -> None:
+    if code_id is None:
         return
-    entry = db.query(Catalogue).filter(Catalogue.id == catalogue_id, Catalogue.type == expected_type).first()
+    entry = db.query(Code).filter(Code.id == code_id, Code.type == expected_type).first()
     if not entry:
-        raise HTTPException(status_code=422, detail=f"{field_name} must reference CATALOGUE.{expected_type}")
+        raise HTTPException(status_code=422, detail=f"{field_name} must reference CODE.{expected_type}")
 
 
 def _validate_payload(
@@ -48,8 +48,8 @@ def _validate_payload(
     db: Session,
 ) -> None:
     _validate_code(sex_id, "SEX", "sex_id", db)
-    _validate_catalogue(blood_type_id, "BLOOD_TYPE", "blood_type_id", db)
-    _validate_catalogue(diagnosis_id, "DIAGNOSIS_DONOR", "diagnosis_id", db)
+    _validate_code_optional(blood_type_id, "BLOOD_TYPE", "blood_type_id", db)
+    _validate_code_optional(diagnosis_id, "DIAGNOSIS_DONOR", "diagnosis_id", db)
     _validate_code(death_kind_id, "DEATH_KIND", "death_kind_id", db)
 
 

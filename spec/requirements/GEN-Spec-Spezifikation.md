@@ -1,4 +1,4 @@
-# Feature [GEN]: Spec-Spezifikation
+# Feature-of [GEN]: Spec-Spezifikation
 
 Dieses Dokument beschreibt das Spezifikationssystem und dessen Regeln im Projekt.
 

@@ -1,4 +1,4 @@
-# Feature [GEN]: Architektur
+# Feature-of [GEN]: Architektur
 
 ## Spezifikationen
 
@@ -11,13 +11,15 @@ Dieses Feature macht die Vorgaben an die Architektur der App.
  
 ### Story: {architecture} Domänen folgen Prinzipien [Spec]
 
-#### Item: {architecture, specification} Die Spezifikation ist gemäss der dDomänen aufgeteilt [Spec]
-
-### Story: {architecture, specification} Domänen erlauben Konfigurationen durch den ADMIN-Domäne [Spec]
+#### Item: {architecture, specification} Die Spezifikation ist gemäss der Domänen aufgeteilt [Spec]
 
 ### Story: {architecture} Domäne: PAT Patient [Spec]
 
 ### Story: {architecture} Domäne: TPLK Transplantationskoordination [Spec]
+
+#### Item: {architecture} Subdomäne: TPLK Episoden: TPL-Episoden der Patienten [Spec]
+
+#### Item: {architecture} Subdomäne: TPLK Koordination: Zuweisungen der Organe von Spendern auf Empänger [Spec]
 
 ### Story: {architecture} Domäne: LTPL Lebenspende [Spec]
 
@@ -26,8 +28,6 @@ Dieses Feature macht die Vorgaben an die Architektur der App.
 ### Story: {architecture} Domäne: STCS Transplant-Kohortenstudie [Spec]
 
 ### Story: {architecture} Domäne: GEN Grundlagen [Spec]
-
-### Story: {architecture} Domäne: ADMIN Administration [Spec]
 
 ## Use Case: {architecture} Datenarchitektur [Spec]
 

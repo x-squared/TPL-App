@@ -127,8 +127,8 @@ class CoordinationDonorResponse(CoordinationDonorBase):
 
     id: int
     sex: CodeResponse | None = None
-    blood_type: CatalogueResponse | None = None
-    diagnosis: CatalogueResponse | None = None
+    blood_type: CodeResponse | None = None
+    diagnosis: CodeResponse | None = None
     death_kind: CodeResponse | None = None
     changed_by_id: int | None = None
     changed_by_user: UserResponse | None = None
@@ -273,7 +273,7 @@ class CoordinationEpisodeResponse(CoordinationEpisodeBase):
     id: int
     episode: EpisodeResponse | None = None
     organ: CodeResponse | None = None
-    organ_rejection_sequel: CatalogueResponse | None = None
+    organ_rejection_sequel: CodeResponse | None = None
     changed_by_id: int | None = None
     changed_by_user: UserResponse | None = None
     created_by_id: int | None = None
@@ -629,7 +629,7 @@ class CoordinationOrganEffectResponse(CoordinationOrganEffectBase):
 
     id: int
     organ: CodeResponse | None = None
-    procurement_effect: CatalogueResponse | None = None
+    procurement_effect: CodeResponse | None = None
     changed_by_id: int | None = None
     changed_by_user: UserResponse | None = None
     created_by_id: int | None = None

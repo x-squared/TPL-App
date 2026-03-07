@@ -1,4 +1,4 @@
-# Feature-of [TPLK]: Koordination Transplantation
+# Feature-of [TPLK]: Episoden einer Transplantation
 
 Feature-Datei: `TPLK-Koordination-Transplantation.md`
 

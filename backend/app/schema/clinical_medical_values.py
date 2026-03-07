@@ -46,7 +46,6 @@ class DatatypeDefinitionBase(BaseModel):
     min_value: str | None = None
     max_value: str | None = None
     precision: int | None = None
-    catalogue_type: str | None = None
 
 
 class DatatypeDefinitionResponse(DatatypeDefinitionBase):

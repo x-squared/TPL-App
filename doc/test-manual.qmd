@@ -101,7 +101,7 @@ cd ..
 python -m qa.spec_tools.check_domain_sync
 ```
 
-This verifies that conceptual entities/relations in `spec/domain/conceptual-domain-model.puml` still map to backend SQLAlchemy model intent, using `spec/domain/domain-sync-mapping.json`.
+This verifies that conceptual entities/relations in `spec/domain/gen-domain.puml` still map to backend SQLAlchemy model intent, using `spec/domain/domain-sync-mapping.json`.
 
 ### Architecture dependency check
 

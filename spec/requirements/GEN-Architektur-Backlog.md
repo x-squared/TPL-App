@@ -1,4 +1,4 @@
-# Feature [GEN]: Architektur-Backlog
+# Feature-of [GEN]: Architektur-Backlog
 
 Dieses Dokument beschreibt den wiederkehrenden Architektur-Review-Prozess sowie die aktuell vorgeschlagenen Änderungsstories.
 

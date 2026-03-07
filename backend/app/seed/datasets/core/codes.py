@@ -13,9 +13,9 @@ DATATYPE = [
     {"type": "DATATYPE", "key": "BOOLEAN", "pos": 6, "ext_sys": "", "ext_key": "", "name_default": "Boolsch"},
     {"type": "DATATYPE", "key": "KG", "pos": 7, "ext_sys": "", "ext_key": "", "name_default": "Kilogramm"},
     {"type": "DATATYPE", "key": "CM", "pos": 8, "ext_sys": "", "ext_key": "", "name_default": "Zentimeter"},
-    {"type": "DATATYPE", "key": "BLOOD_TYPE", "pos": 9, "ext_sys": "CATALOGUE", "ext_key": "BLOOD_TYPE", "name_default": "Blutgruppe"},
+    {"type": "DATATYPE", "key": "BLOOD_TYPE", "pos": 9, "ext_sys": "CODE", "ext_key": "BLOOD_TYPE", "name_default": "Blutgruppe"},
     {"type": "DATATYPE", "key": "BP", "pos": 10, "ext_sys": "", "ext_key": "", "name_default": "Blutdruck"},
-    {"type": "DATATYPE", "key": "POS_NEG", "pos": 11, "ext_sys": "CATALOGUE", "ext_key": "POS_NEG", "name_default": "Positiv/Negativ"},
+    {"type": "DATATYPE", "key": "POS_NEG", "pos": 11, "ext_sys": "CODE", "ext_key": "POS_NEG", "name_default": "Positiv/Negativ"},
 ]
 
 RECORDS = RECORDS + DATATYPE
@@ -140,6 +140,65 @@ DEATH_KIND = [
 ]
 
 RECORDS = RECORDS + DEATH_KIND
+
+# --- BLOOD TYPE ----
+BLOOD_TYPE = [
+    {"type": "BLOOD_TYPE", "key": "O-", "pos": 1, "ext_sys": "", "ext_key": "", "name_default": "O-"},
+    {"type": "BLOOD_TYPE", "key": "O+", "pos": 2, "ext_sys": "", "ext_key": "", "name_default": "O+"},
+    {"type": "BLOOD_TYPE", "key": "A-", "pos": 3, "ext_sys": "", "ext_key": "", "name_default": "A-"},
+    {"type": "BLOOD_TYPE", "key": "A+", "pos": 4, "ext_sys": "", "ext_key": "", "name_default": "A+"},
+    {"type": "BLOOD_TYPE", "key": "B-", "pos": 5, "ext_sys": "", "ext_key": "", "name_default": "B-"},
+    {"type": "BLOOD_TYPE", "key": "B+", "pos": 6, "ext_sys": "", "ext_key": "", "name_default": "B+"},
+    {"type": "BLOOD_TYPE", "key": "AB-", "pos": 7, "ext_sys": "", "ext_key": "", "name_default": "AB-"},
+    {"type": "BLOOD_TYPE", "key": "AB+", "pos": 8, "ext_sys": "", "ext_key": "", "name_default": "AB+"},
+]
+
+RECORDS = RECORDS + BLOOD_TYPE
+
+# --- POS / NEG ----
+POS_NEG = [
+    {"type": "POS_NEG", "key": "POS", "pos": 1, "ext_sys": "", "ext_key": "", "name_default": "Positive"},
+    {"type": "POS_NEG", "key": "NEG", "pos": 2, "ext_sys": "", "ext_key": "", "name_default": "Negative"},
+    {"type": "POS_NEG", "key": "BOUNDARY", "pos": 3, "ext_sys": "", "ext_key": "", "name_default": "Grenzwertig"},
+]
+
+RECORDS = RECORDS + POS_NEG
+
+# ---- DIAGNOSIS_DONOR ----
+DIAGNOSIS_DONOR = [
+    {"type": "DIAGNOSIS_DONOR", "key": "DCD", "pos": 1, "ext_sys": "", "ext_key": "DCD", "name_default": "DCD"},
+    {"type": "DIAGNOSIS_DONOR", "key": "CTR", "pos": 2, "ext_sys": "", "ext_key": "CTR", "name_default": "CTR"},
+    {"type": "DIAGNOSIS_DONOR", "key": "CHE", "pos": 3, "ext_sys": "", "ext_key": "CHE", "name_default": "CHE"},
+]
+
+RECORDS = RECORDS + DIAGNOSIS_DONOR
+
+# ---- PROCUREMENT_EFFECT ----
+PROCUREMENT_EFFECT = [
+    {"type": "PROCUREMENT_EFFECT", "key": "1", "pos": 1, "ext_sys": "", "ext_key": "1", "name_default": "Procured and transplanted"},
+    {"type": "PROCUREMENT_EFFECT", "key": "2", "pos": 2, "ext_sys": "", "ext_key": "2", "name_default": "Procured, not transplanted"},
+    {"type": "PROCUREMENT_EFFECT", "key": "3", "pos": 3, "ext_sys": "", "ext_key": "3", "name_default": "Not procured"},
+]
+
+RECORDS = RECORDS + PROCUREMENT_EFFECT
+
+# ---- ORGAN_REJECTION_SEQUEL ----
+ORGAN_REJECTION_SEQUEL = [
+    {"type": "ORGAN_REJECTION_SEQUEL", "key": "DISCARDED", "pos": 1, "ext_sys": "", "ext_key": "DISCARDED", "name_default": "Discarded"},
+    {"type": "ORGAN_REJECTION_SEQUEL", "key": "RESEARCH", "pos": 2, "ext_sys": "", "ext_key": "RESEARCH", "name_default": "Used for research"},
+    {"type": "ORGAN_REJECTION_SEQUEL", "key": "TRAINING", "pos": 3, "ext_sys": "", "ext_key": "TRAINING", "name_default": "Used for training"},
+]
+
+RECORDS = RECORDS + ORGAN_REJECTION_SEQUEL
+
+# ---- COLLOQUIUM_DECISION ----
+COLLOQUIUM_DECISION = [
+    {"type": "COLLOQUIUM_DECISION", "key": "APPROVED", "pos": 1, "ext_sys": "", "ext_key": "", "name_default": "Approved"},
+    {"type": "COLLOQUIUM_DECISION", "key": "REJECTED", "pos": 2, "ext_sys": "", "ext_key": "", "name_default": "Rejected"},
+    {"type": "COLLOQUIUM_DECISION", "key": "DEFERRED", "pos": 3, "ext_sys": "", "ext_key": "", "name_default": "Deferred"},
+]
+
+RECORDS = RECORDS + COLLOQUIUM_DECISION
 
 # --- FAVORITE_TYPE ----
 FAVORITE_TYPE = [

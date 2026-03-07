@@ -44,7 +44,7 @@ Canonical supporting architecture artifacts:
 
 - `doc/adr/ADR-TEMPLATE.qmd` and `doc/adr/ADR-*.qmd` (architecture decision records)
 - `doc/architecture-glossary.qmd` (shared process/state/data terms)
-- `spec/domain/architecture-cross-domain-flows.puml` (high-level process/data flow visualization)
+- `spec/domain/gen-domain.puml` and `spec/domain/gen-paths-domain.puml` (high-level structure and path visualization)
 
 ## Expanded trigger set (concept-level + structural)
 
