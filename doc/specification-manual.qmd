@@ -35,6 +35,8 @@ These files describe business concepts and conceptual relationships independentl
 
 - `spec/domain/gen-domain.puml`: integrated overview across all architecture domains
 - `spec/domain/gen-paths-domain.puml`: path/scenario view (`P1..P6`) for cross-domain journeys
+- `spec/domain/BASE-domain.puml`: BASE foundations (identity/reference/scheduler/translation)
+- `spec/domain/CROSS-domain.puml`: CROSS cross-cutting runtime concerns (tasks/information/favorites)
 - `spec/domain/pat-domain.puml`: PAT patient and medical-values concepts
 - `spec/domain/tplk-domain.puml`: TPLK episode/coordination/procurement concepts
 - `spec/domain/koll-domain.puml`: KOLL colloquium and agenda relationships

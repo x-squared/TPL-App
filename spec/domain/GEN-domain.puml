@@ -1,5 +1,5 @@
 @startuml
-title TPL Domain - GEN (Foundations and Cross-Domain Overview)
+title TPL Domain - GEN (Cross-Domain Overview)
 
 hide methods
 hide stereotypes
@@ -7,7 +7,7 @@ skinparam shadowing false
 skinparam classAttributeIconSize 0
 left to right direction
 
-package "GEN Foundations" {
+package "BASE Domain" {
   class User
   class Person
   class PersonTeam
@@ -50,7 +50,7 @@ package "KOLL Domain" {
   class ColloqiumAgenda
 }
 
-package "Cross-Cutting Runtime" {
+package "CROSS Domain" {
   class TaskGroupTemplate
   class TaskTemplate
   class TaskGroup

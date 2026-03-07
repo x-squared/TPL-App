@@ -13,6 +13,8 @@ Dieses Feature macht die Vorgaben an die Architektur der App.
 
 #### Item: {architecture, specification} Die Spezifikation ist gemäss der Domänen aufgeteilt [Spec]
 
+### Story: {architecture} Domäne: GEN Grundlagen [Spec]
+
 ### Story: {architecture} Domäne: PAT Patient [Spec]
 
 ### Story: {architecture} Domäne: TPLK Transplantationskoordination [Spec]
@@ -27,7 +29,7 @@ Dieses Feature macht die Vorgaben an die Architektur der App.
 
 ### Story: {architecture} Domäne: STCS Transplant-Kohortenstudie [Spec]
 
-### Story: {architecture} Domäne: GEN Grundlagen [Spec]
+### Story: {architecture} Domäne: CROSS Querschnitt [Spec]
 
 ## Use Case: {architecture} Datenarchitektur [Spec]
 

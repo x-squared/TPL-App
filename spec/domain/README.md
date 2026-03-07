@@ -4,13 +4,15 @@ This directory contains intent-level domain specifications that are independent 
 
 ## Artifacts
 
-- `gen-domain.puml`: integrated GEN-centric overview across all defined domains.
-- `gen-paths-domain.puml`: scenario/path-centric view (`P1..P6`) across domains.
-- `pat-domain.puml`: PAT patient and medical-values domain concepts.
-- `tplk-domain.puml`: TPLK episode/coordination/procurement workflow concepts.
-- `koll-domain.puml`: KOLL colloquium, agenda, and participant concepts.
-- `ltpl-domain.puml`: LTPL domain boundary/status in current model.
-- `stcs-domain.puml`: STCS domain boundary/status in current model.
+- `GEN-domain.puml`: integrated GEN-centric overview across all defined domains.
+- `GEN-paths-domain.puml`: scenario/path-centric view (`P1..P6`) across domains.
+- `BASE-domain.puml`: foundational/base entities (identity, references, scheduler, translations).
+- `CROSS-domain.puml`: cross-cutting runtime entities (tasks, information/read-state, favorites).
+- `PAT-domain.puml`: PAT patient and medical-values domain concepts.
+- `TPLK-domain.puml`: TPLK episode/coordination/procurement workflow concepts.
+- `KOLL-domain.puml`: KOLL colloquium, agenda, and participant concepts.
+- `LTPL-domain.puml`: LTPL domain boundary/status in current model.
+- `STCS-domain.puml`: STCS domain boundary/status in current model.
 - `domain-sync-mapping.json`: conceptual-to-model alias and checker configuration.
 
 ## Scope
@@ -33,7 +35,7 @@ The conceptual model intentionally does not capture:
 Example with PlantUML installed locally:
 
 ```bash
-plantuml spec/domain/gen-domain.puml
+plantuml spec/domain/GEN-domain.puml
 ```
 
 ## Domain sync check
