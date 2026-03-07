@@ -18,11 +18,11 @@ Beispiel: `TPLK-Episode-Spezifikation.md` mit Kopf `# Feature-of [TPLK]: Koordin
 #### Item: Überschriften dürfen optionale Übersetzungshinweise im Format `[<LANG>: <text>]` tragen. [Spec]
 Beispiel: `### Story: Koordinationsprotokoll [EN: Coordination Protocol] [Spec]`.
 
-#### Item: Überschriften dürfen optionale semantische Hinweislabels im Format `{name}` oder `{name1, name2, ...}` tragen (z. B. `{view}`, `{tab}`, `{panel}`, `{process}`, `{function}`, `{structure}`, `{design}`, `{architecture}`, `{data}`). [Spec]
+#### Item: Überschriften dürfen optionale semantische Hinweislabels im Format `{name}` oder `{name1, name2, ...}` tragen (z. B. `{view}`, `{tab}`, `{panel}`, `{process}`, `{function}`, `{structure}`, `{design}`, `{architecture}`, `{data}`, `{quality}`, `{documentation}`, `{specification}`). [Spec]
 Beispiel: `### Story: Koordinationsprotokoll {process} [EN: Coordination Protocol] [Spec]`.
 Beispiel mit mehreren Hints: `### Story: Koordinationsprotokoll {design, function} [EN: Coordination Protocol] [Spec]`.
 
-#### Item: Hinweislabels werden kurz interpretiert: `{view}` Seite/View, `{tab}` Tab, `{panel}` Panel/Section, `{process}` Ablauf, `{function}` Funktionalität, `{structure}` Struktur, `{design}` visuelle Gestaltung/UX, `{architecture}` Architekturbelange, `{data}` Datenhandling/Seed-Daten. [Spec]
+#### Item: Hinweislabels werden kurz interpretiert: `{view}` Seite/View, `{tab}` Tab, `{panel}` Panel/Section, `{process}` Ablauf, `{function}` Funktionalität, `{structure}` Struktur, `{design}` visuelle Gestaltung/UX, `{architecture}` Architekturbelange, `{data}` Datenhandling/Seed-Daten, `{quality}` Qualitätsziele/Testbarkeit/Verifikation, `{documentation}` Dokumentationsumfang/Manual-Pflege, `{specification}` Regeln der Spezifikationssystematik. [Spec]
 
 ## Use Case: Neue Funktion wird beschrieben [Spec]
 

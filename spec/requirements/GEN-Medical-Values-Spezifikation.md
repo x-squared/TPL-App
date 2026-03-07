@@ -1,8 +1,8 @@
-# Feature-of [TPLK]: Koordination Transplantation
+# Feature-of [GEN]: Architektur
 
-Feature-Datei: `TPLK-Koordination-Transplantation.md`
+Feature-Datei: `GEN-Architektur-Spezifikation.md`
 
-## Use Case: {data} Medizinische Werte im TPLK-Kontext [Spec
+## Use Case: {data} Medizinische Werte im GEN-Kontext [Spec]
 
 ### Story: {data} Typen von Einheiten [Spec]
 
@@ -46,7 +46,7 @@ Es werden drei MELD-Werte erfasst. Dies sind alles ganzzahlige Werte zwischen 0 
 Die Template-Definition enthält fachliche Schlüssel (z. B. LAB-/KIS-Schlüssel), eine fachliche Bezeichnung und die Zuordnung zu einer Gruppe.
 
 #### Item: {architecture, data} Der technische Datentyp wird separat als Datatype-Definition geführt. [Spec]
-Die Datatype-Definition beschreibt Primitive (z. B. number, catalogue, date), Formatregeln, Präzision, Katalogtyp sowie Einheitenspezifika.
+Die Datatype-Definition beschreibt Primitive (z. B. number, catalogue, date), Formatregeln, Präzision sowie Einheitenspezifika.
 
 #### Item: {architecture, data} Eine konkrete Werteinstanz wird patienten- und kontextbezogen gespeichert. [Spec]
 Kontexte sind mindestens STATIC, ORGAN und DONOR; die Kontexte werden als Datenbeziehung modelliert und nicht als fest codierte Einzelfelder.
@@ -80,8 +80,8 @@ Für zentrale und häufig getauschte Werte wird die schrittweise Ergänzung von 
 
 ### Story: {data} Basiswerte und Anthropometrie [Spec]
 
-#### Item: {data} Blutgruppe wird als katalogbasierter Basiswert geführt. [Spec]
-Die Blutgruppe ist ein statischer Basiswert und wird typischerweise über eine Katalogliste erfasst.
+#### Item: {data} Blutgruppe wird als codebasierter Basiswert geführt. [Spec]
+Die Blutgruppe ist ein statischer Basiswert und wird typischerweise über eine stabile Codeliste erfasst.
 
 #### Item: {data} Größe und Gewicht werden als metrische Werte geführt. [Spec]
 Größe ist eine Längeneinheit (kanonisch `cm`), Gewicht eine Masseneinheit (kanonisch `kg`).
@@ -115,6 +115,5 @@ Der Wert 40 kennzeichnet die höchste Kritikalität.
 #### Item: {data} Neue medizinische Werte werden primär über Template-/Datatype-Definitionen ergänzt, nicht durch ad-hoc Sonderfelder. [Spec]
 Dadurch bleiben Validierung, Darstellung und Berechnung einheitlich.
 
-#### Item: {data} Bei Einführung neuer numerischer Werte sind kanonische Einheit, erlaubte UCUM-Einheiten und Konversionsregeln verpflichtend zu definieren. [Spec]
+#### Item: {data, quality} Bei Einführung neuer numerischer Werte sind kanonische Einheit, erlaubte UCUM-Einheiten und Konversionsregeln verpflichtend zu definieren. [Spec]
 Damit bleibt die rechnerische Sicherheit auch bei zukünftigen Erweiterungen erhalten.
-

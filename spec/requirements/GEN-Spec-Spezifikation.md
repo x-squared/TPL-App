@@ -104,7 +104,7 @@ Dieses Dokument beschreibt das Spezifikationssystem und dessen Regeln im Projekt
 
 #### Item: Semantische Hinweislabels werden im Format `{name}` oder `{name1, name2, ...}` notiert. [Ready]
 
-#### Item: Empfohlene Startlabels sind `{view}`, `{tab}`, `{panel}`, `{process}`, `{function}`, `{structure}`, `{design}`, `{architecture}` und `{data}`. [Ready]
+#### Item: Empfohlene Startlabels sind `{view}`, `{tab}`, `{panel}`, `{process}`, `{function}`, `{structure}`, `{design}`, `{architecture}`, `{data}`, `{quality}`, `{documentation}` und `{specification}`. [Ready]
 
 #### Item: Zusätzliche lokale Labels sind erlaubt, wenn sie den Kontext klarer machen. [Ready]
 
@@ -116,7 +116,7 @@ Dieses Dokument beschreibt das Spezifikationssystem und dessen Regeln im Projekt
 
 #### Item: Mehrere semantische Hints in einer Überschrift sind erlaubt, z. B. `{design, function}`. [Ready]
 
-#### Item: Kurzbedeutung der Labels: `{view}` Seite/View, `{tab}` Tab-Kontext, `{panel}` Panel/Section, `{process}` Ablaufhinweis, `{function}` Funktionshinweis, `{structure}` Strukturhinweis, `{design}` visuelle/UX-Hinweise, `{architecture}` Architekturhinweise, `{data}` Datenhandling- und Seed-Hinweise. [Ready]
+#### Item: Kurzbedeutung der Labels: `{view}` Seite/View, `{tab}` Tab-Kontext, `{panel}` Panel/Section, `{process}` Ablaufhinweis, `{function}` Funktionshinweis, `{structure}` Strukturhinweis, `{design}` visuelle/UX-Hinweise, `{architecture}` Architekturhinweise, `{data}` Datenhandling- und Seed-Hinweise, `{quality}` Qualitäts- und Testanforderungen inkl. Verifikationskriterien, `{documentation}` Dokumentations- und Manual-Anforderungen, `{specification}` Spezifikationsregeln und Strukturkonventionen. [Ready]
 
 ## Use Case: Feature-Label und Dateifamilie [Ready]
 

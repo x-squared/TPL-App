@@ -60,7 +60,7 @@ Defaulting rule:
 ## Semantic hint labels (optional)
 
 - Semantic hint labels are allowed in these formats: `{name}` or `{name1, name2, ...}`.
-- Initial recommended labels: `{view}`, `{tab}`, `{panel}`, `{process}`, `{function}`, `{structure}`, `{design}`, `{architecture}`, `{data}`.
+- Initial recommended labels: `{view}`, `{tab}`, `{panel}`, `{process}`, `{function}`, `{structure}`, `{design}`, `{architecture}`, `{data}`, `{quality}`, `{documentation}`, `{specification}`.
 - Authors may introduce additional local labels when useful.
 - The assistant should interpret labels as contextual guidance, not hard constraints.
 - Example interpretation: `{process}` suggests considering the process framework, but does not mandate it.
@@ -74,6 +74,9 @@ Defaulting rule:
  - `{design}`: visual design and UX appearance hints
  - `{architecture}`: system/module architecture concerns
  - `{data}`: data-handling semantics and default/core seed-data expectations
+ - `{quality}`: quality targets, testability expectations, and verification criteria
+ - `{documentation}`: documentation scope, authoring guidance, and manual maintenance requirements
+ - `{specification}`: specification-system rules, structure, and requirement-model conventions
 - Recommended heading order: `<Title> {label-or-label-list} [<LANG>: <text>] [Status]`.
 - Example: `### Story: Koordinationsprotokoll {process} [EN: Coordination Protocol] [Spec]`
 - Example with multiple hints: `### Story: Koordinationsprotokoll {design, function} [EN: Coordination Protocol] [Spec]`

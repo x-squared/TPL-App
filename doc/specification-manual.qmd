@@ -206,6 +206,9 @@ Initial examples with intent:
 - `{design}`: visual design and UX appearance hints
 - `{architecture}`: system/module architecture concerns
 - `{data}`: data-handling semantics and default/core seed-data expectations
+- `{quality}`: quality targets, testability expectations, and verification criteria
+- `{documentation}`: documentation scope, authoring guidance, and manual maintenance requirements
+- `{specification}`: specification-system rules, structure, and requirement-model conventions
 
 Extensibility:
 
