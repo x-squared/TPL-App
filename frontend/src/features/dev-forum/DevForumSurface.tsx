@@ -2,6 +2,7 @@ import { useCallback, useEffect, useMemo, useState } from 'react';
 import { api, type AppUser, type DevRequest } from '../../api';
 import { toUserErrorMessage } from '../../api/error';
 import { useI18n } from '../../i18n/i18n';
+import { DEV_FORUM_CAPTURE_CREATED_EVENT } from '../../views/layout/devForumEvents';
 import { openDevForumContextWithHighlight } from '../../views/layout/devForumHighlight';
 import { getCurrentCaptureContext, withSelectedComponent } from './devForumCaptureUtils';
 import { useDevForumComponentPicker } from './hooks/useDevForumComponentPicker';
@@ -18,6 +19,140 @@ interface DevForumSurfaceProps {
   enableDeveloperFilter: boolean;
   hasDevRole: boolean;
   compact?: boolean;
+}
+
+function asPrettyJson(raw: string): string {
+  try {
+    const parsed = JSON.parse(raw);
+    return JSON.stringify(parsed, null, 2);
+  } catch {
+    return raw;
+  }
+}
+
+function escapeHtml(value: string): string {
+  return value
+    .replaceAll('&', '&amp;')
+    .replaceAll('<', '&lt;')
+    .replaceAll('>', '&gt;')
+    .replaceAll('"', '&quot;')
+    .replaceAll("'", '&#39;');
+}
+
+function htmlToPlainText(html: string): string {
+  const element = document.createElement('div');
+  element.innerHTML = html || '';
+  return (element.textContent || '').trim();
+}
+
+function buildCursorPromptHtmlFromRequest(item: DevRequest): string {
+  const rawRequestHtml = (item.request_text || '').trim();
+  const requestHtml = rawRequestHtml
+    ? `<div>${rawRequestHtml}</div>`
+    : `<div><p>${escapeHtml('(empty)')}</p></div>`;
+  const captureState = asPrettyJson(item.capture_state_json);
+  return [
+    requestHtml,
+    `<p><strong>Context information:</strong></p>`,
+    `<ul>`,
+    `<li><strong>Request ID:</strong> ${escapeHtml(String(item.id))}</li>`,
+    `<li><strong>Status:</strong> ${escapeHtml(item.status)}</li>`,
+    `<li><strong>Submitter:</strong> ${escapeHtml(item.submitter_user?.name ?? '-')}</li>`,
+    `<li><strong>Claimed by:</strong> ${escapeHtml(item.claimed_by_user?.name ?? '-')}</li>`,
+    `<li><strong>GUI part:</strong> ${escapeHtml(item.capture_gui_part || '-')}</li>`,
+    `<li><strong>Capture URL:</strong> ${escapeHtml(item.capture_url || '-')}</li>`,
+    `</ul>`,
+    `<p><strong>Captured state JSON:</strong></p>`,
+    `<pre>${escapeHtml(captureState)}</pre>`,
+  ].join('');
+}
+
+function htmlToMarkdown(html: string): string {
+  const root = document.createElement('div');
+  root.innerHTML = html || '';
+
+  const walk = (node: Node): string => {
+    if (node.nodeType === Node.TEXT_NODE) {
+      return (node.textContent || '').replace(/\s+/g, ' ');
+    }
+    if (node.nodeType !== Node.ELEMENT_NODE) {
+      return '';
+    }
+    const element = node as HTMLElement;
+    const tag = element.tagName.toLowerCase();
+    const children = Array.from(element.childNodes).map(walk).join('');
+    if (tag === 'br') return '\n';
+    if (tag === 'strong' || tag === 'b') return `**${children.trim()}**`;
+    if (tag === 'em' || tag === 'i') return `*${children.trim()}*`;
+    if (tag === 'h1' || tag === 'h2' || tag === 'h3') return `${children.trim()}\n\n`;
+    if (tag === 'code') return `\`${children.trim()}\``;
+    if (tag === 'pre') return `\n\`\`\`\n${element.textContent || ''}\n\`\`\`\n\n`;
+    if (tag === 'li') return `- ${children.trim()}\n`;
+    if (tag === 'ul' || tag === 'ol') return `\n${children}\n`;
+    if (tag === 'p' || tag === 'div') return `${children.trim()}\n\n`;
+    if (tag === 'a') {
+      const href = element.getAttribute('href') || '';
+      return href ? `[${children.trim()}](${href})` : children;
+    }
+    return children;
+  };
+
+  return Array.from(root.childNodes)
+    .map(walk)
+    .join('')
+    .replace(/\n{3,}/g, '\n\n')
+    .trim();
+}
+
+function buildCursorCopyPayload(markdown: string): string {
+  const normalized = markdown.trim();
+  if (!normalized) {
+    return [
+      'MODE: IMPLEMENT TICKET ONLY',
+      'TICKET: (empty)',
+    ].join('\n');
+  }
+  const [ticketBlock, ...restBlocks] = normalized.split(/\n\s*\n/);
+  const ticket = ticketBlock.replace(/\s+/g, ' ').trim() || '(empty)';
+  const context = restBlocks.join('\n\n').trim();
+  if (!context) {
+    return [
+      'MODE: IMPLEMENT TICKET ONLY',
+      `TICKET: ${ticket}`,
+    ].join('\n\n');
+  }
+  return [
+    'MODE: IMPLEMENT TICKET ONLY',
+    `TICKET: ${ticket}`,
+    `CONTEXT:\n${context}`,
+  ].join('\n\n');
+}
+
+async function copyTextToClipboard(text: string): Promise<boolean> {
+  if (navigator.clipboard?.writeText) {
+    try {
+      await navigator.clipboard.writeText(text);
+      return true;
+    } catch {
+      // fallback below
+    }
+  }
+  const textarea = document.createElement('textarea');
+  textarea.value = text;
+  textarea.setAttribute('readonly', 'true');
+  textarea.style.position = 'fixed';
+  textarea.style.opacity = '0';
+  document.body.appendChild(textarea);
+  textarea.focus();
+  textarea.select();
+  let copied = false;
+  try {
+    copied = document.execCommand('copy');
+  } catch {
+    copied = false;
+  }
+  document.body.removeChild(textarea);
+  return copied;
 }
 
 export default function DevForumSurface({
@@ -41,11 +176,14 @@ export default function DevForumSurface({
   const [developmentNoteDraft, setDevelopmentNoteDraft] = useState<Record<number, string>>({});
   const [developmentResponseDraft, setDevelopmentResponseDraft] = useState<Record<number, string>>({});
   const [reviewRejectDraft, setReviewRejectDraft] = useState<Record<number, string>>({});
+  const [readOnlyDialogLineage, setReadOnlyDialogLineage] = useState<DevRequest[]>([]);
+  const [readOnlyDialogIndex, setReadOnlyDialogIndex] = useState(0);
   const [saving, setSaving] = useState(false);
   const {
     pickingComponent,
     selectedComponent,
     startPicking,
+    stopPicking,
     clearSelectedComponent,
   } = useDevForumComponentPicker();
 
@@ -85,6 +223,16 @@ export default function DevForumSurface({
 
   useEffect(() => {
     void refreshAll();
+  }, [refreshAll]);
+
+  useEffect(() => {
+    const onCaptureCreated = () => {
+      void refreshAll();
+    };
+    window.addEventListener(DEV_FORUM_CAPTURE_CREATED_EVENT, onCaptureCreated);
+    return () => {
+      window.removeEventListener(DEV_FORUM_CAPTURE_CREATED_EVENT, onCaptureCreated);
+    };
   }, [refreshAll]);
 
   const visibleTabs = useMemo<DevForumTabKey[]>(() => {
@@ -186,7 +334,37 @@ export default function DevForumSurface({
   };
 
   const onOpenContext = (item: DevRequest) => {
-    openDevForumContextWithHighlight(item.capture_url || '/', item.capture_state_json);
+    openDevForumContextWithHighlight(item.capture_url || '/', item.capture_state_json, item.capture_gui_part);
+  };
+
+  const onCancelCapture = () => {
+    setCaptureDraft('');
+    setCapturedContext(null);
+    clearSelectedComponent();
+    stopPicking();
+  };
+
+  const onOpenPreviousRequest = async (requestId: number) => {
+    setSaving(true);
+    setError('');
+    try {
+      const lineage = await api.listDevRequestLineage(requestId);
+      const index = lineage.findIndex((entry) => entry.id === requestId);
+      setReadOnlyDialogLineage(lineage);
+      setReadOnlyDialogIndex(index >= 0 ? index : 0);
+    } catch (err) {
+      setError(toUserErrorMessage(err, t('devForum.errors.loadFailed', 'Could not load Dev-Forum data.')));
+    } finally {
+      setSaving(false);
+    }
+  };
+
+  const readOnlyDialogRequest = readOnlyDialogLineage[readOnlyDialogIndex] ?? null;
+  const formatDialogDateTime = (value: string | null): string => {
+    if (!value) return '-';
+    const parsed = new Date(value);
+    if (Number.isNaN(parsed.getTime())) return value;
+    return parsed.toLocaleString();
   };
 
   return (
@@ -227,6 +405,7 @@ export default function DevForumSurface({
           onStartPicking={startPicking}
           onCaptureDraftChange={setCaptureDraft}
           onSubmitCapture={onSubmitCapture}
+          onCancelCapture={onCancelCapture}
         />
       ) : null}
 
@@ -241,6 +420,7 @@ export default function DevForumSurface({
           onReviewAccept={onReviewAccept}
           onReviewReject={onReviewReject}
           onOpenContext={onOpenContext}
+          onOpenPreviousRequest={onOpenPreviousRequest}
         />
       ) : null}
 
@@ -263,13 +443,137 @@ export default function DevForumSurface({
           onClaimRequest={onClaimRequest}
           onDecision={onDecision}
           onOpenContext={onOpenContext}
+          onOpenPreviousRequest={onOpenPreviousRequest}
           onCopyRequestText={(item) => {
-            setDevelopmentNoteDraft((prev) => ({ ...prev, [item.id]: item.request_text }));
+            void (async () => {
+              const promptHtml = buildCursorPromptHtmlFromRequest(item);
+              setDevelopmentNoteDraft((prev) => ({ ...prev, [item.id]: promptHtml }));
+              const copied = await copyTextToClipboard(buildCursorCopyPayload(htmlToMarkdown(promptHtml)));
+              if (!copied) {
+                setError(t('devForum.errors.copyFailed', 'Could not copy text to clipboard.'));
+              }
+            })();
           }}
           onCopyNoteForCursor={(requestId) => {
-            void navigator.clipboard.writeText(developmentNoteDraft[requestId] ?? '');
+            void (async () => {
+              const noteHtml = developmentNoteDraft[requestId] ?? '';
+              const noteMarkdown = htmlToMarkdown(noteHtml);
+              const copied = await copyTextToClipboard(
+                buildCursorCopyPayload(noteMarkdown || htmlToPlainText(noteHtml)),
+              );
+              if (!copied) {
+                setError(t('devForum.errors.copyFailed', 'Could not copy text to clipboard.'));
+              }
+            })();
           }}
         />
+      ) : null}
+      {readOnlyDialogRequest ? (
+        <div className="dev-forum-readonly-dialog-backdrop" onClick={() => setReadOnlyDialogLineage([])}>
+          <div
+            className="ui-panel-section dev-forum-readonly-dialog"
+            onClick={(event) => event.stopPropagation()}
+          >
+            <button
+              type="button"
+              className="dev-forum-dialog-close-icon"
+              aria-label={t('devForum.readOnlyDialog.close', 'Close')}
+              title={t('devForum.readOnlyDialog.close', 'Close')}
+              onClick={() => setReadOnlyDialogLineage([])}
+            >
+              x
+            </button>
+            <header className="dev-forum-header">
+              <h3 className="detail-section-heading">
+                {t('devForum.readOnlyDialog.title', 'Previous ticket')} #{readOnlyDialogRequest.id}
+              </h3>
+            </header>
+            <div className="dev-forum-actions-row">
+              <button
+                type="button"
+                className="patients-add-btn"
+                disabled={readOnlyDialogIndex <= 0}
+                onClick={() => setReadOnlyDialogIndex((prev) => Math.max(0, prev - 1))}
+              >
+                {t('devForum.readOnlyDialog.previous', 'Previous')}
+              </button>
+              <button
+                type="button"
+                className="patients-add-btn"
+                disabled={readOnlyDialogIndex >= readOnlyDialogLineage.length - 1}
+                onClick={() => setReadOnlyDialogIndex((prev) => Math.min(readOnlyDialogLineage.length - 1, prev + 1))}
+              >
+                {t('devForum.readOnlyDialog.next', 'Next')}
+              </button>
+              <span className="dev-forum-meta">
+                {t('devForum.readOnlyDialog.position', 'Ticket {current} of {total}')
+                  .replace('{current}', String(readOnlyDialogIndex + 1))
+                  .replace('{total}', String(readOnlyDialogLineage.length))}
+              </span>
+            </div>
+
+            <h4 className="detail-section-heading">{t('devForum.readOnlyDialog.historyTitle', 'Ticket line')}</h4>
+            <div className="dev-forum-lineage-row">
+              {readOnlyDialogLineage.map((entry, index) => (
+                <button
+                  key={entry.id}
+                  type="button"
+                  className={`patients-add-btn ${index === readOnlyDialogIndex ? 'active' : ''}`}
+                  onClick={() => setReadOnlyDialogIndex(index)}
+                >
+                  #{entry.id} - {entry.status}
+                </button>
+              ))}
+            </div>
+
+            <h4 className="detail-section-heading">{t('devForum.readOnlyDialog.metaTitle', 'Ticket details')}</h4>
+            <dl className="dev-forum-readonly-meta-grid">
+              <dt>{t('devForum.request.status', 'Status')}</dt>
+              <dd>{readOnlyDialogRequest.status}</dd>
+              <dt>{t('devForum.request.submitter', 'Submitter')}</dt>
+              <dd>{readOnlyDialogRequest.submitter_user?.name ?? '-'}</dd>
+              <dt>{t('devForum.request.claimedBy', 'Claimed by')}</dt>
+              <dd>{readOnlyDialogRequest.claimed_by_user?.name ?? '-'}</dd>
+              <dt>{t('devForum.readOnlyDialog.decision', 'Decision')}</dt>
+              <dd>{readOnlyDialogRequest.decision ?? '-'}</dd>
+              <dt>{t('devForum.readOnlyDialog.parentTicket', 'Parent ticket')}</dt>
+              <dd>{readOnlyDialogRequest.parent_request_id ?? '-'}</dd>
+              <dt>{t('devForum.readOnlyDialog.createdAt', 'Created at')}</dt>
+              <dd>{formatDialogDateTime(readOnlyDialogRequest.created_at)}</dd>
+              <dt>{t('devForum.readOnlyDialog.changedAt', 'Changed at')}</dt>
+              <dd>{formatDialogDateTime(readOnlyDialogRequest.changed_at ?? readOnlyDialogRequest.updated_at)}</dd>
+              <dt>{t('devForum.readOnlyDialog.closedAt', 'Closed at')}</dt>
+              <dd>{formatDialogDateTime(readOnlyDialogRequest.closed_at)}</dd>
+            </dl>
+
+            <h4 className="detail-section-heading">{t('devForum.readOnlyDialog.requestTextTitle', 'Request')}</h4>
+            <div className="dev-forum-request-box">
+              <p className="dev-forum-text" dangerouslySetInnerHTML={{ __html: readOnlyDialogRequest.request_text }} />
+            </div>
+            {readOnlyDialogRequest.developer_note_text ? (
+              <>
+                <h4 className="detail-section-heading">{t('devForum.readOnlyDialog.developerNoteTitle', 'Prompt')}</h4>
+                <p className="dev-forum-text" dangerouslySetInnerHTML={{ __html: readOnlyDialogRequest.developer_note_text }} />
+              </>
+            ) : null}
+            {readOnlyDialogRequest.developer_response_text ? (
+              <>
+                <h4 className="detail-section-heading">{t('devForum.review.developerReply', 'Developer reply')}</h4>
+                <p className="dev-forum-text" dangerouslySetInnerHTML={{ __html: readOnlyDialogRequest.developer_response_text }} />
+              </>
+            ) : null}
+            {readOnlyDialogRequest.user_review_text ? (
+              <>
+                <h4 className="detail-section-heading">{t('devForum.readOnlyDialog.userReviewTitle', 'User review')}</h4>
+                <p className="dev-forum-text" dangerouslySetInnerHTML={{ __html: readOnlyDialogRequest.user_review_text }} />
+              </>
+            ) : null}
+            <details className="dev-forum-context-details">
+              <summary>{t('devForum.development.contextToggle', 'Show context information')}</summary>
+              <pre className="dev-forum-capture-json">{asPrettyJson(readOnlyDialogRequest.capture_state_json)}</pre>
+            </details>
+          </div>
+        </div>
       ) : null}
     </section>
   );

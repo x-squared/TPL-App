@@ -134,6 +134,7 @@ from .dev_forum import (
 )
 from .information import InformationBase, InformationCreate, InformationResponse, InformationUpdate
 from .e2e_tests import (
+    E2ETestCaseResultResponse,
     E2ETestMetadataResponse,
     E2ETestRunRequest,
     E2ETestRunResponse,

@@ -52,6 +52,20 @@
   color: #222;
 }
 
+.dev-forum-request-box {
+  border: 1px solid #d2d5e3;
+  border-radius: 8px;
+  background: #f8f9ff;
+  padding: 0.6rem 0.7rem;
+}
+
+.dev-forum-context-details summary {
+  cursor: pointer;
+  color: #2f3e6a;
+  font-size: 0.85rem;
+  user-select: none;
+}
+
 .dev-forum-actions-row {
   display: flex;
   flex-wrap: wrap;
@@ -91,4 +105,74 @@
   border-radius: 6px;
   padding: 0.28rem 0.45rem;
   background: #fff;
+}
+
+.dev-forum-readonly-dialog-backdrop {
+  position: fixed;
+  inset: 0;
+  background: rgba(11, 18, 36, 0.45);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 1rem;
+  z-index: 1200;
+}
+
+.dev-forum-readonly-dialog {
+  width: min(860px, 100%);
+  max-height: 85vh;
+  overflow: auto;
+  display: flex;
+  flex-direction: column;
+  gap: 0.55rem;
+  position: relative;
+}
+
+.dev-forum-dialog-close-icon {
+  position: absolute;
+  top: 0.6rem;
+  right: 0.6rem;
+  width: 1.8rem;
+  height: 1.8rem;
+  border: 1px solid #9ca5c7;
+  border-radius: 999px;
+  background: #fff;
+  color: #2f3e6a;
+  cursor: pointer;
+  font-size: 0.95rem;
+  line-height: 1;
+}
+
+.dev-forum-dialog-close-icon:hover {
+  background: #eef1ff;
+}
+
+.dev-forum-lineage-row {
+  display: flex;
+  gap: 0.45rem;
+  flex-wrap: wrap;
+}
+
+.dev-forum-lineage-row .patients-add-btn.active {
+  background: #e8ecff;
+  border-color: #6f7de7;
+  color: #25318f;
+}
+
+.dev-forum-readonly-meta-grid {
+  margin: 0;
+  display: grid;
+  grid-template-columns: minmax(140px, 220px) 1fr;
+  gap: 0.25rem 0.7rem;
+}
+
+.dev-forum-readonly-meta-grid dt {
+  margin: 0;
+  color: #4f5678;
+  font-weight: 600;
+}
+
+.dev-forum-readonly-meta-grid dd {
+  margin: 0;
+  color: #222;
 }

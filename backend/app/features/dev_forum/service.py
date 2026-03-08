@@ -52,6 +52,76 @@ def list_review_requests(*, db: Session, current_user_id: int) -> list[DevReques
     )
 
 
+def get_request_for_view(*, db: Session, current_user: User, request_id: int) -> DevRequest:
+    _require_dev_mode_enabled()
+    item = (
+        db.query(DevRequest)
+        .options(
+            joinedload(DevRequest.submitter_user),
+            joinedload(DevRequest.claimed_by_user),
+            joinedload(DevRequest.decided_by_user),
+        )
+        .filter(DevRequest.id == request_id)
+        .first()
+    )
+    if item is None:
+        raise HTTPException(status_code=404, detail="Dev request not found")
+
+    is_participant = (
+        item.submitter_user_id == current_user.id
+        or item.claimed_by_user_id == current_user.id
+        or item.decided_by_user_id == current_user.id
+    )
+    if not is_participant and not _user_has_dev_role(current_user):
+        raise HTTPException(status_code=403, detail="Not allowed to view this dev request")
+    return item
+
+
+def list_request_lineage(*, db: Session, current_user: User, request_id: int) -> list[DevRequest]:
+    _require_dev_mode_enabled()
+    item = get_request_for_view(db=db, current_user=current_user, request_id=request_id)
+
+    # Walk up to root request.
+    root_id = item.id
+    cursor = item
+    while cursor.parent_request_id is not None:
+        parent = db.query(DevRequest).filter(DevRequest.id == cursor.parent_request_id).first()
+        if parent is None:
+            break
+        root_id = parent.id
+        cursor = parent
+
+    # Collect all descendants of root to form the ticket line.
+    all_rows = db.query(DevRequest).all()
+    by_parent: dict[int, list[int]] = {}
+    for row in all_rows:
+        if row.parent_request_id is not None:
+            by_parent.setdefault(row.parent_request_id, []).append(row.id)
+
+    lineage_ids: set[int] = set()
+    queue: list[int] = [root_id]
+    while queue:
+        current_id = queue.pop(0)
+        if current_id in lineage_ids:
+            continue
+        lineage_ids.add(current_id)
+        for child_id in by_parent.get(current_id, []):
+            queue.append(child_id)
+
+    result = (
+        db.query(DevRequest)
+        .options(
+            joinedload(DevRequest.submitter_user),
+            joinedload(DevRequest.claimed_by_user),
+            joinedload(DevRequest.decided_by_user),
+        )
+        .filter(DevRequest.id.in_(lineage_ids))
+        .order_by(DevRequest.created_at.asc(), DevRequest.id.asc())
+        .all()
+    )
+    return result
+
+
 def list_development_requests(
     *,
     db: Session,

@@ -1,0 +1,181 @@
+# Project Splitting Migration Plan (Draft)
+
+Purpose: provide a realistic migration path from one large source tree to multiple strictly separated projects, while preserving high delivery speed and shared quality.
+
+This is a reflection and decision document, not yet a binding policy.
+
+## Target outcomes
+
+- Split sources into separate projects with clear ownership boundaries.
+- Default development mode: reference other projects live in one workspace (for rapid co-development).
+- Optional stabilization mode: pin fixed versions temporarily.
+- Move seamlessly between projects in daily work.
+- Allow Cursor and agents to work across all projects concurrently.
+- Ensure reusable features and framework parts are moved into base/shared projects.
+- Establish an explicit way to negotiate diverging project requirements.
+
+## Working modes
+
+### Mode 1 (default): live workspace references
+
+- Keep projects separate, but open together in one multi-root workspace.
+- Reference sibling projects directly (workspace/path references).
+- Use this mode for fast iteration and coordinated changes across boundaries.
+
+### Mode 2 (temporary): fixed-version references
+
+- Pin shared project dependencies to released versions.
+- Use this mode during stabilization windows, release hardening, or when upstream is noisy.
+- Return to Mode 1 by default after stabilization.
+
+## Proposed target structure
+
+```text
+/Workspace
+  /platform-ui          # shared design system, CSS tokens, generic components
+  /platform-frontend    # shared frontend hooks/services/runtime helpers
+  /platform-backend     # shared backend cross-cutting services/utilities
+  /platform-process     # process/workflow framework primitives
+  /product-app-a        # domain-specific product
+  /product-app-b        # domain-specific product
+  /product-app-c        # domain-specific product
+```
+
+Each folder is a separate project/repository with independent lifecycle.
+
+## Phased migration plan
+
+## Phase 0: Inventory and boundary map
+
+- Build explicit map of current modules:
+  - `domain-specific`
+  - `cross-cutting reusable`
+  - `unclear/needs decision`
+- Tag candidates for extraction into platform projects.
+- Define ownership per target project.
+
+Exit criteria:
+
+- module inventory complete
+- first extraction backlog created
+
+## Phase 1: Establish multi-project workspace and tooling
+
+- Create a standard multi-root workspace layout in Cursor.
+- Standardize commands across projects (`dev`, `build`, `test`, `verify`).
+- Add switch helpers/scripts for rapid context move between projects.
+- Validate that agents can read/edit/run tasks across all workspace roots.
+
+Exit criteria:
+
+- one-click/open script for full workspace
+- command parity documented
+- first end-to-end cross-project edit validated
+
+## Phase 2: Extract shared foundation (low-risk first)
+
+- Move low-risk reusable artifacts first:
+  - shared styles/tokens
+  - utility helpers
+  - non-domain UI primitives
+- Wire projects in Mode 1 (live workspace references).
+- Keep contract and regression tests green.
+
+Exit criteria:
+
+- first shared package consumed by at least 2 product projects
+- no behavior regression in product flows
+
+## Phase 3: Extract cross-cutting runtime features
+
+- Move reusable features:
+  - error/ticket capture framework
+  - i18n runtime scaffolding
+  - audit and common process helpers
+- Introduce compatibility adapters where needed.
+- Expand tests to cover cross-project contracts.
+
+Exit criteria:
+
+- shared runtime modules actively used by multiple products
+- clear owner per module
+
+## Phase 4: Stabilization and versioning discipline
+
+- Introduce release/version protocol for shared projects.
+- Use Mode 2 (fixed versions) where needed for release stabilization.
+- Keep Mode 1 as default for active development periods.
+
+Exit criteria:
+
+- repeatable release flow for shared projects
+- documented switch criteria between Mode 1 and Mode 2
+
+## Governance to ensure reusable code goes to base
+
+## Mandatory “base check” in every non-trivial change
+
+Before closing a feature slice, answer:
+
+1. Is this capability domain-independent?
+2. Is it likely needed by 2+ products?
+3. Can we place it in platform without leaking domain assumptions?
+
+If yes, create or update a platform extraction item immediately.
+
+## Review gate
+
+- Every PR includes one explicit line:
+  - `Base extraction check: [done | not applicable | follow-up ticket]`
+- Conductor/reviewer blocks merge if reusable logic was added locally without justification.
+
+## Negotiating diverging project requirements
+
+Use a lightweight “decision triangle” process:
+
+1. **Shared-first proposal**: define common contract and behavior.
+2. **Divergence request**: product explains why common contract is insufficient.
+3. **Resolution path**:
+   - configurable extension point (preferred)
+   - product-specific adapter
+   - approved fork only as last resort
+
+Record the outcome in an ADR-style note with:
+
+- context
+- decision
+- consequences
+- review date
+
+## Operating model for Cursor and agents across projects
+
+- Conductor coordinates slices spanning multiple projects.
+- Specialist agents work lane-based (backend/frontend/qa/docs) across workspace roots.
+- Handoffs must list:
+  - touched projects
+  - contract changes
+  - validation commands/results
+  - risks at project boundaries
+
+## Risks and mitigations
+
+- **Risk**: shared layer becomes a dumping ground  
+  **Mitigation**: strict base-check + review gate + ownership map.
+- **Risk**: product needs diverge too far  
+  **Mitigation**: extension-point policy and explicit divergence process.
+- **Risk**: cross-project CI slows delivery  
+  **Mitigation**: two-tier checks (fast lane checks + stricter integration checks).
+- **Risk**: migration stalls mid-way  
+  **Mitigation**: phased milestones with exit criteria and small extraction batches.
+
+## Suggested first pilot
+
+- Pick one reusable flow already present (for example error-context capture + ticket bridge).
+- Extract it to one platform project and consume from one product project.
+- Evaluate:
+  - developer speed
+  - integration friction
+  - test overhead
+  - agent effectiveness across project roots
+
+If pilot metrics are acceptable, continue phased rollout.

@@ -1,6 +1,7 @@
 import { api } from '../../api';
 import { getRecentErrorLog, type ClientErrorLogEntry } from '../../api/errorLog';
 import { getLastCapturedComponent } from './errorContextCapture';
+import { DEV_FORUM_CAPTURE_CREATED_EVENT } from './devForumEvents';
 
 const wrapBase64 = (value: string): string => value.replace(/(.{1,76})/g, '$1\r\n').trimEnd();
 const UUID_RE = /^[0-9a-f]{8}-[0-9a-f]{4}-[1-5][0-9a-f]{3}-[89ab][0-9a-f]{3}-[0-9a-f]{12}$/i;
@@ -102,9 +103,14 @@ function deriveGuiPartFromPath(pathname: string): string {
 function collectCurrentContext(recent: ClientErrorLogEntry[]) {
   const ids = new Map<string, string>();
   const hasWindow = typeof window !== 'undefined' && !!window.location;
+  const body = typeof document !== 'undefined' ? document.body : null;
+  const currentPage = body?.dataset.tplCurrentPage?.trim() || '';
+  const currentPatientId = body?.dataset.tplCurrentPatientId?.trim() || '';
+  const currentCoordinationId = body?.dataset.tplCurrentCoordinationId?.trim() || '';
+  const currentColloquiumId = body?.dataset.tplCurrentColloquiumId?.trim() || '';
   const href = hasWindow ? window.location.href : '';
   const pathname = hasWindow ? window.location.pathname : '';
-  const guiPart = deriveGuiPartFromPath(pathname);
+  const guiPart = currentPage || deriveGuiPartFromPath(pathname);
 
   if (hasWindow) {
     const parts = pathname.split('/').filter(Boolean);
@@ -122,6 +128,9 @@ function collectCurrentContext(recent: ClientErrorLogEntry[]) {
       }
     });
   }
+  if (currentPatientId) addIdContext(ids, 'patient_id', currentPatientId);
+  if (currentCoordinationId) addIdContext(ids, 'coordination_id', currentCoordinationId);
+  if (currentColloquiumId) addIdContext(ids, 'colloquium_id', currentColloquiumId);
 
   recent.forEach((entry) => {
     if (entry.path) {
@@ -149,6 +158,7 @@ function collectCurrentContext(recent: ClientErrorLogEntry[]) {
   const selectedComponent = getLastCapturedComponent();
   return {
     href,
+    page: currentPage,
     guiPart,
     ids: Array.from(ids.entries()),
     latestError: latest?.message ?? '',
@@ -168,9 +178,21 @@ function escapeHtml(value: string): string {
 
 function buildDevForumCapturePayload(bannerMessage: string, recent: ClientErrorLogEntry[]) {
   const context = collectCurrentContext(recent);
+  const captureUrl = (() => {
+    try {
+      const url = new URL(context.href || '/', window.location.origin);
+      if (context.page) {
+        url.searchParams.set('page', context.page);
+      }
+      return url.toString();
+    } catch {
+      return context.href || '/';
+    }
+  })();
   const captureState = {
     source: 'support_ticket',
     href: context.href,
+    page: context.page || null,
     gui_part: context.guiPart,
     ids: context.ids.map(([key, value]) => ({ key, value })),
     latest_error: context.latestError,
@@ -192,7 +214,7 @@ function buildDevForumCapturePayload(bannerMessage: string, recent: ClientErrorL
   ];
   const requestTextHtml = requestTextLines.map((line) => escapeHtml(line)).join('<br/>');
   return {
-    capture_url: context.href || '/',
+    capture_url: captureUrl,
     capture_gui_part: context.guiPart,
     capture_state_json: JSON.stringify(captureState),
     request_text: requestTextHtml,
@@ -253,12 +275,30 @@ async function getSupportEmail(): Promise<string> {
   return cachedSupportEmail;
 }
 
-export async function openTicketDraft(bannerMessage: string): Promise<void> {
+export interface OpenTicketDraftResult {
+  dev_forum_capture_created: boolean;
+  dev_forum_request_id: number | null;
+}
+
+export async function openTicketDraft(bannerMessage: string): Promise<OpenTicketDraftResult> {
   const supportEmail = await getSupportEmail();
   const subject = buildSubject(bannerMessage);
   const recent = getRecentErrorLog(40);
   const devForumPayload = buildDevForumCapturePayload(bannerMessage, recent);
-  void api.captureSupportTicketInDevForum(devForumPayload).catch(() => undefined);
+  let devForumCaptureCreated = false;
+  let devForumRequestId: number | null = null;
+  try {
+    const response = await api.captureSupportTicketInDevForum(devForumPayload);
+    devForumCaptureCreated = true;
+    devForumRequestId = response.request_id;
+    if (typeof window !== 'undefined') {
+      window.dispatchEvent(new CustomEvent(DEV_FORUM_CAPTURE_CREATED_EVENT, {
+        detail: { request_id: response.request_id },
+      }));
+    }
+  } catch {
+    devForumCaptureCreated = false;
+  }
   const body = buildFriendlyBody(bannerMessage, recent);
   const attachmentText = buildAttachmentText(bannerMessage);
   const attachmentBase64 = wrapBase64(utf8ToBase64(attachmentText));
@@ -286,4 +326,8 @@ export async function openTicketDraft(bannerMessage: string): Promise<void> {
     '',
   ].join('\r\n');
   downloadFile('tpl-open-ticket.eml', eml, 'message/rfc822');
+  return {
+    dev_forum_capture_created: devForumCaptureCreated,
+    dev_forum_request_id: devForumRequestId,
+  };
 }

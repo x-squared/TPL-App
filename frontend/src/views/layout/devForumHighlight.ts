@@ -1,3 +1,5 @@
+import { DEV_FORUM_OPEN_CONTEXT_EVENT, type DevForumOpenContextDetail } from './devForumEvents';
+
 const DEV_FORUM_HIGHLIGHT_STORAGE_PREFIX = 'dev_forum_highlight_payload:';
 const DEV_FORUM_HIGHLIGHT_QUERY_KEY = 'dev_forum_highlight_key';
 
@@ -33,12 +35,23 @@ function resolveElement(selected: CapturedSelectedComponent): HTMLElement | null
   return null;
 }
 
-export function openDevForumContextWithHighlight(captureUrl: string, captureStateJson: string): void {
+export function openDevForumContextWithHighlight(
+  captureUrl: string,
+  captureStateJson: string,
+  captureGuiPart?: string | null,
+): void {
   const payloadKey = `k${Date.now()}_${Math.random().toString(36).slice(2, 10)}`;
   sessionStorage.setItem(`${DEV_FORUM_HIGHLIGHT_STORAGE_PREFIX}${payloadKey}`, captureStateJson);
   const url = new URL(captureUrl || '/', window.location.origin);
   url.searchParams.set(DEV_FORUM_HIGHLIGHT_QUERY_KEY, payloadKey);
-  window.location.assign(`${url.pathname}${url.search}${url.hash}`);
+  window.history.pushState(null, '', `${url.pathname}${url.search}${url.hash}`);
+  const eventDetail: DevForumOpenContextDetail = {
+    capture_url: `${url.pathname}${url.search}${url.hash}`,
+    capture_state_json: captureStateJson,
+    capture_gui_part: captureGuiPart ?? null,
+  };
+  window.dispatchEvent(new CustomEvent<DevForumOpenContextDetail>(DEV_FORUM_OPEN_CONTEXT_EVENT, { detail: eventDetail }));
+  applyDevForumHighlightFromLocation();
 }
 
 export function applyDevForumHighlightFromLocation(): void {

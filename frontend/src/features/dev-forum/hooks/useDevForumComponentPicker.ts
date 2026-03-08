@@ -108,6 +108,7 @@ export function useDevForumComponentPicker() {
     pickingComponent,
     selectedComponent,
     startPicking: () => setPickingComponent(true),
+    stopPicking: () => setPickingComponent(false),
     clearSelectedComponent: () => setSelectedComponent(null),
   };
 }

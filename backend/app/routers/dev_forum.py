@@ -8,6 +8,8 @@ from ..features.dev_forum import (
     claim_request as claim_request_service,
     create_capture_request as create_capture_request_service,
     decide_request as decide_request_service,
+    get_request_for_view as get_request_for_view_service,
+    list_request_lineage as list_request_lineage_service,
     list_development_requests as list_development_requests_service,
     list_review_requests as list_review_requests_service,
     reject_review_and_create_follow_up as reject_review_and_create_follow_up_service,
@@ -44,6 +46,24 @@ def list_development_requests(
         include_claimed_by_other_developers=include_claimed_by_other_developers,
         filter_claimed_by_user_id=filter_claimed_by_user_id,
     )
+
+
+@router.get("/{request_id}", response_model=DevRequestResponse)
+def get_request_for_view(
+    request_id: int,
+    db: Session = Depends(get_db),
+    current_user: User = Depends(get_current_user),
+):
+    return get_request_for_view_service(db=db, current_user=current_user, request_id=request_id)
+
+
+@router.get("/{request_id}/lineage", response_model=list[DevRequestResponse])
+def list_request_lineage(
+    request_id: int,
+    db: Session = Depends(get_db),
+    current_user: User = Depends(get_current_user),
+):
+    return list_request_lineage_service(db=db, current_user=current_user, request_id=request_id)
 
 
 @router.post("/", response_model=DevRequestResponse, status_code=201)

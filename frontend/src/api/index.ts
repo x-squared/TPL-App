@@ -120,6 +120,7 @@ export type {
 } from './reports';
 export { e2eTestsApi } from './e2eTests';
 export type {
+  E2ETestCaseResult,
   E2ETestRunnerKey,
   E2ETestRunnerOption,
   E2ETestMetadataResponse,

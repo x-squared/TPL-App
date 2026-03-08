@@ -12,6 +12,7 @@ interface CapturingTabProps {
   onStartPicking: () => void;
   onCaptureDraftChange: (next: string) => void;
   onSubmitCapture: () => Promise<void>;
+  onCancelCapture: () => void;
 }
 
 export default function CapturingTab({
@@ -24,23 +25,28 @@ export default function CapturingTab({
   onStartPicking,
   onCaptureDraftChange,
   onSubmitCapture,
+  onCancelCapture,
 }: CapturingTabProps) {
   const { t } = useI18n();
 
   return (
     <div className="ui-panel-section dev-forum-panel">
       <div className="dev-forum-capture-actions">
-        <button type="button" className="patients-add-btn" onClick={onCaptureContext} disabled={saving}>
-          {t('devForum.capture.captureContext', 'Capture current context')}
-        </button>
-        <button
-          type="button"
-          className="patients-add-btn"
-          onClick={onStartPicking}
-          disabled={saving || pickingComponent}
-        >
-          {t('devForum.capture.pickComponent', 'Pick component')}
-        </button>
+        {!capturedContext ? (
+          <button type="button" className="patients-add-btn" onClick={onCaptureContext} disabled={saving}>
+            {t('devForum.capture.captureContext', 'Open ticket')}
+          </button>
+        ) : null}
+        {capturedContext ? (
+          <button
+            type="button"
+            className="patients-add-btn"
+            onClick={onStartPicking}
+            disabled={saving || pickingComponent}
+          >
+            {t('devForum.capture.pickComponent', 'Pick component')}
+          </button>
+        ) : null}
       </div>
       {pickingComponent ? (
         <p className="dev-forum-meta">{t('devForum.capture.pickHint', 'Move mouse over the app and press Enter to store the highlighted component. Esc cancels.')}</p>
@@ -66,6 +72,9 @@ export default function CapturingTab({
           <div className="dev-forum-actions-row">
             <button type="button" className="patients-save-btn" onClick={() => void onSubmitCapture()} disabled={saving || !captureDraft.trim()}>
               {t('devForum.capture.submit', 'Send request')}
+            </button>
+            <button type="button" className="patients-cancel-btn" onClick={onCancelCapture} disabled={saving}>
+              {t('devForum.capture.cancel', 'Cancel')}
             </button>
           </div>
         </>

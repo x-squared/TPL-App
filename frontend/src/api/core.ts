@@ -480,6 +480,10 @@ export const devForumApi = {
       method: 'POST',
       body: JSON.stringify(data),
     }),
+  getDevRequestById: (requestId: number) =>
+    request<DevRequest>(`/dev-forum/requests/${requestId}`),
+  listDevRequestLineage: (requestId: number) =>
+    request<DevRequest[]>(`/dev-forum/requests/${requestId}/lineage`),
   listReviewDevRequests: () =>
     request<DevRequest[]>('/dev-forum/requests/review'),
   listDevelopmentDevRequests: (params?: {

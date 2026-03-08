@@ -239,6 +239,17 @@ def _clear_translation_bundles() -> int:
     return deleted_rows
 
 
+def _normalize_legacy_dev_forum_capture_label_overrides() -> dict[str, int]:
+    from .database import SessionLocal
+    from .features.translations import normalize_legacy_dev_forum_capture_label_overrides
+
+    db = SessionLocal()
+    try:
+        return normalize_legacy_dev_forum_capture_label_overrides(db=db)
+    finally:
+        db.close()
+
+
 def _seed(*, app_env: str | None, seed_profile: str | None) -> dict[str, object]:
     from .database import SessionLocal
     from .seed import run_seed_profile
@@ -802,6 +813,7 @@ def main() -> int:
             "migrate-procurement-typed",
             "export-translations-json",
             "clear-translation-bundles",
+            "normalize-legacy-dev-forum-capture-label",
         ),
         default="refresh",
         help=(
@@ -812,7 +824,8 @@ def main() -> int:
             "migrate-procurement-runtime=backfill legacy procurement runtime, "
             "migrate-procurement-typed=backfill typed procurement model from generic runtime rows, "
             "export-translations-json=write DB translations to frontend/src/i18n/translations.json, "
-            "clear-translation-bundles=delete translation override rows from DB only"
+            "clear-translation-bundles=delete translation override rows from DB only, "
+            "normalize-legacy-dev-forum-capture-label=normalize stale devForum.capture.captureContext override labels"
         ),
     )
     parser.add_argument("--env", default=os.getenv("TPL_ENV", "DEV"), help="Application env (DEV/TEST/PROD)")
@@ -918,6 +931,15 @@ def main() -> int:
     if args.mode == "clear-translation-bundles":
         deleted_rows = _clear_translation_bundles()
         print(f"Translation bundle rows deleted from DB: {deleted_rows}")
+
+    if args.mode == "normalize-legacy-dev-forum-capture-label":
+        result = _normalize_legacy_dev_forum_capture_label_overrides()
+        print(
+            "Legacy Dev-Forum capture label normalization complete: "
+            + f"scanned_bundles={result['scanned_bundles']} "
+            + f"updated_bundles={result['updated_bundles']} "
+            + f"skipped_invalid_payload={result['skipped_invalid_payload']}"
+        )
 
     return 0
 

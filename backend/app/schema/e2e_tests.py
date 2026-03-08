@@ -23,6 +23,15 @@ class E2ETestRunRequest(BaseModel):
     output_tail_lines: int = 160
 
 
+class E2ETestCaseResultResponse(BaseModel):
+    case_id: str
+    name: str
+    status: str
+    message: str
+    source_link: str
+    source_file_abs: str
+
+
 class E2ETestRunResponse(BaseModel):
     runner: E2ETestRunnerKey
     success: bool
@@ -31,5 +40,7 @@ class E2ETestRunResponse(BaseModel):
     finished_at: datetime
     duration_seconds: float
     report_path: str | None
+    report_file_abs: str | None
     output_tail: str
     report_excerpt: str | None
+    case_results: list[E2ETestCaseResultResponse]

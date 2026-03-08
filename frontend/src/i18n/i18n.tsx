@@ -85,8 +85,54 @@ export function I18nProvider({ children }: { children: ReactNode }) {
   }, []);
 
   const setRuntimeTranslations = useCallback((nextTranslations: TranslationMap) => {
-    setRuntimeTranslationsState(nextTranslations);
-  }, []);
+    const normalized = { ...nextTranslations };
+    const captureLabelKey = 'devForum.capture.captureContext';
+    const captureValue = normalized[captureLabelKey];
+    if (typeof captureValue === 'string') {
+      const isLegacyEn = captureValue.trim().toLowerCase() === 'capture current context';
+      const isLegacyDe = captureValue.trim().toLowerCase() === 'aktuellen kontext erfassen';
+      if (isLegacyEn || isLegacyDe) {
+        normalized[captureLabelKey] = locale === 'de' ? 'Ticket öffnen' : 'Open ticket';
+      }
+    }
+    const copyRequestKey = 'devForum.development.copyRequest';
+    const copyRequestValue = normalized[copyRequestKey];
+    if (typeof copyRequestValue === 'string') {
+      const isLegacyEn = copyRequestValue.trim().toLowerCase() === 'copy request text';
+      const isLegacyDe = copyRequestValue.trim().toLowerCase() === 'anfragetext kopieren';
+      if (isLegacyEn || isLegacyDe) {
+        normalized[copyRequestKey] = locale === 'de' ? 'Anfrage kopieren' : 'Copy request';
+      }
+    }
+    const promptHeadingKey = 'devForum.development.notes';
+    const promptHeadingValue = normalized[promptHeadingKey];
+    if (typeof promptHeadingValue === 'string') {
+      const isLegacyEn = promptHeadingValue.trim().toLowerCase() === 'developer notes';
+      const isLegacyDe = promptHeadingValue.trim().toLowerCase() === 'notizen der entwicklung';
+      if (isLegacyEn || isLegacyDe) {
+        normalized[promptHeadingKey] = locale === 'de' ? 'Prompt' : 'Prompt';
+      }
+    }
+    const promptEditorKey = 'devForum.development.notesEditorAria';
+    const promptEditorValue = normalized[promptEditorKey];
+    if (typeof promptEditorValue === 'string') {
+      const isLegacyEn = promptEditorValue.trim().toLowerCase() === 'developer notes editor';
+      const isLegacyDe = promptEditorValue.trim().toLowerCase() === 'notizeneditor der entwicklung';
+      if (isLegacyEn || isLegacyDe) {
+        normalized[promptEditorKey] = locale === 'de' ? 'Prompt-Editor' : 'Prompt editor';
+      }
+    }
+    const donorsTitleKey = 'donors.title';
+    const donorsTitleValue = normalized[donorsTitleKey];
+    if (typeof donorsTitleValue === 'string') {
+      const isLegacyEn = donorsTitleValue.trim().toLowerCase() === 'donors';
+      const isLegacyDe = donorsTitleValue.trim().toLowerCase() === 'spender';
+      if (isLegacyEn || isLegacyDe) {
+        normalized[donorsTitleKey] = locale === 'de' ? 'Spender!' : 'Donors!';
+      }
+    }
+    setRuntimeTranslationsState(normalized);
+  }, [locale]);
 
   const t = useCallback((key: string, englishDefault: string): string => {
     const builtinByLocale = builtinTranslationsByLocale[locale] ?? {};

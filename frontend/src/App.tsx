@@ -12,11 +12,105 @@ import { useAppPermissions } from './app/useAppPermissions';
 import { useAppSession } from './app/useAppSession';
 import { useI18n } from './i18n/i18n';
 import { applyDevForumHighlightFromLocation } from './views/layout/devForumHighlight';
+import { DEV_FORUM_OPEN_CONTEXT_EVENT, type DevForumOpenContextDetail } from './views/layout/devForumEvents';
 import { initializeErrorContextCapture } from './views/layout/errorContextCapture';
 import './App.css';
 import './styles/TableStyles.css';
 import ColloquiumDetailView from './views/ColloquiumDetailView';
 import CoordinationDetailView from './views/CoordinationDetailView';
+
+type NumericContext = {
+  keyedIds: Record<string, number>;
+  fallbackIds: number[];
+};
+
+function parseCaptureState(raw: string): Record<string, unknown> {
+  try {
+    const parsed = JSON.parse(raw);
+    if (typeof parsed === 'object' && parsed !== null && !Array.isArray(parsed)) {
+      return parsed as Record<string, unknown>;
+    }
+  } catch {
+    // keep empty object for invalid payloads
+  }
+  return {};
+}
+
+function toFiniteNumber(value: unknown): number | null {
+  if (typeof value === 'number' && Number.isFinite(value)) return value;
+  if (typeof value === 'string') {
+    const numeric = Number(value.trim());
+    if (Number.isFinite(numeric)) return numeric;
+  }
+  return null;
+}
+
+function extractNumericContext(captureState: Record<string, unknown>): NumericContext {
+  const keyedIds: Record<string, number> = {};
+  const fallbackIds: number[] = [];
+  const ids = captureState.ids;
+  if (!Array.isArray(ids)) return { keyedIds, fallbackIds };
+  ids.forEach((entry) => {
+    const plain = toFiniteNumber(entry);
+    if (plain !== null) {
+      fallbackIds.push(plain);
+      return;
+    }
+    if (typeof entry !== 'object' || entry === null || Array.isArray(entry)) return;
+    const key = String((entry as Record<string, unknown>).key ?? '').trim().toLowerCase();
+    const value = toFiniteNumber((entry as Record<string, unknown>).value);
+    if (value === null) return;
+    if (key) keyedIds[key] = value;
+    fallbackIds.push(value);
+  });
+  return { keyedIds, fallbackIds };
+}
+
+function pickId(context: NumericContext, keywords: string[]): number | null {
+  const matched = Object.entries(context.keyedIds).find(([key]) => keywords.some((kw) => key.includes(kw)));
+  if (matched) return matched[1];
+  return context.fallbackIds[0] ?? null;
+}
+
+type ContextTarget =
+  | 'my-work'
+  | 'patients'
+  | 'donors'
+  | 'colloquiums'
+  | 'coordinations'
+  | 'reports'
+  | 'admin'
+  | 'preferences'
+  | 'dev-forum'
+  | 'e2e-tests'
+  | '';
+
+function resolveContextTarget(candidates: string[]): ContextTarget {
+  const combined = candidates.join(' ').toLowerCase();
+  if (combined.includes('my-work') || combined.includes('my work')) return 'my-work';
+  if (combined.includes('coordination')) return 'coordinations';
+  if (combined.includes('colloq')) return 'colloquiums';
+  if (combined.includes('donor')) return 'donors';
+  if (combined.includes('patient')) return 'patients';
+  if (combined.includes('report')) return 'reports';
+  if (combined.includes('admin')) return 'admin';
+  if (combined.includes('preference')) return 'preferences';
+  if (combined.includes('dev-forum') || combined.includes('dev forum')) return 'dev-forum';
+  if (combined.includes('e2e')) return 'e2e-tests';
+  return '';
+}
+
+function inferTargetFromErrorPath(path: string): ContextTarget {
+  const normalized = (path || '').toLowerCase();
+  if (!normalized) return '';
+  if (normalized.includes('/e2e-tests/')) return 'e2e-tests';
+  if (normalized.includes('/coordinations') || normalized.includes('/coordination_')) return 'coordinations';
+  if (normalized.includes('/colloq')) return 'colloquiums';
+  if (normalized.includes('/patients') || normalized.includes('/diagnoses') || normalized.includes('/episodes')) return 'patients';
+  if (normalized.includes('/reports')) return 'reports';
+  if (normalized.includes('/admin')) return 'admin';
+  return '';
+}
 
 function App() {
   const { t, setLocale, setRuntimeTranslations } = useI18n();
@@ -138,6 +232,117 @@ function App() {
   });
   const { unreadCount: unreadInformationCount } = useInformationUnreadCount(Boolean(user));
   const { openTaskCount } = useMyWorkOpenTaskCount(Boolean(user));
+
+  useEffect(() => {
+    document.body.dataset.tplCurrentPage = page;
+    if (selectedPatientId !== null) {
+      document.body.dataset.tplCurrentPatientId = String(selectedPatientId);
+    } else {
+      delete document.body.dataset.tplCurrentPatientId;
+    }
+    if (selectedCoordinationId !== null) {
+      document.body.dataset.tplCurrentCoordinationId = String(selectedCoordinationId);
+    } else {
+      delete document.body.dataset.tplCurrentCoordinationId;
+    }
+    if (selectedColloqiumId !== null) {
+      document.body.dataset.tplCurrentColloquiumId = String(selectedColloqiumId);
+    } else {
+      delete document.body.dataset.tplCurrentColloquiumId;
+    }
+  }, [page, selectedPatientId, selectedCoordinationId, selectedColloqiumId]);
+
+  useEffect(() => {
+    const onOpenContext = (event: Event) => {
+      const customEvent = event as CustomEvent<DevForumOpenContextDetail>;
+      const detail = customEvent.detail;
+      if (!detail) return;
+      const captureState = parseCaptureState(detail.capture_state_json || '');
+      const numericContext = extractNumericContext(captureState);
+      const rawGuiPart = (detail.capture_gui_part ?? captureState.gui_part ?? '').toString().trim().toLowerCase();
+      const statePage = String(captureState.page ?? '').trim().toLowerCase();
+      const pathPart = (() => {
+        try {
+          const url = new URL(detail.capture_url || '/', window.location.origin);
+          const pathHead = url.pathname.split('/').filter(Boolean)[0]?.toLowerCase() ?? '';
+          const queryPage = url.searchParams.get('page')?.toLowerCase() ?? '';
+          return [pathHead, queryPage].filter(Boolean).join(' ');
+        } catch {
+          return '';
+        }
+      })();
+      const candidates = [rawGuiPart, statePage, pathPart].filter(Boolean);
+      const hasPatientKey = Object.keys(numericContext.keyedIds).some((key) => key.includes('patient'));
+      const hasCoordinationKey = Object.keys(numericContext.keyedIds).some((key) => key.includes('coordination'));
+      const hasColloquiumKey = Object.keys(numericContext.keyedIds).some((key) => key.includes('colloq') || key.includes('colloquium'));
+      const inferredFromErrorPath = inferTargetFromErrorPath(String(captureState.latest_error_path ?? ''));
+      const target = resolveContextTarget(candidates)
+        || inferredFromErrorPath
+        || (hasCoordinationKey ? 'coordinations' : hasColloquiumKey ? 'colloquiums' : hasPatientKey ? 'patients' : '');
+
+      if (target === 'coordinations') {
+        setPage('coordinations');
+        setSelectedColloqiumId(null);
+        setSelectedColloqiumTab(undefined);
+        setSelectedPatientId(null);
+        setPatientInitialTab(undefined);
+        setPatientInitialEpisodeId(null);
+        setSelectedCoordinationTab(undefined);
+        const coordinationId = pickId(numericContext, ['coordination']);
+        if (coordinationId !== null) setSelectedCoordinationId(coordinationId);
+        return;
+      }
+      if (target === 'colloquiums') {
+        setPage('colloquiums');
+        setSelectedCoordinationId(null);
+        setSelectedCoordinationTab(undefined);
+        setSelectedPatientId(null);
+        setPatientInitialTab(undefined);
+        setPatientInitialEpisodeId(null);
+        setSelectedColloqiumTab(undefined);
+        const colloquiumId = pickId(numericContext, ['colloq', 'colloquium', 'protocol']);
+        if (colloquiumId !== null) setSelectedColloqiumId(colloquiumId);
+        return;
+      }
+      if (target === 'patients' || target === 'donors') {
+        setPage(target);
+        setSelectedColloqiumId(null);
+        setSelectedColloqiumTab(undefined);
+        setSelectedCoordinationId(null);
+        setSelectedCoordinationTab(undefined);
+        const patientId = pickId(numericContext, ['patient']);
+        if (patientId !== null) setSelectedPatientId(patientId);
+        return;
+      }
+      if (
+        target === 'my-work'
+        || target === 'reports'
+        || target === 'admin'
+        || target === 'preferences'
+        || target === 'dev-forum'
+        || target === 'e2e-tests'
+      ) {
+        setPage(target);
+        return;
+      }
+      if (hasCoordinationKey || hasColloquiumKey || hasPatientKey) {
+        setPage(hasCoordinationKey ? 'coordinations' : hasColloquiumKey ? 'colloquiums' : 'patients');
+      }
+    };
+    window.addEventListener(DEV_FORUM_OPEN_CONTEXT_EVENT, onOpenContext);
+    return () => {
+      window.removeEventListener(DEV_FORUM_OPEN_CONTEXT_EVENT, onOpenContext);
+    };
+  }, [
+    setPage,
+    setPatientInitialEpisodeId,
+    setPatientInitialTab,
+    setSelectedColloqiumId,
+    setSelectedColloqiumTab,
+    setSelectedCoordinationId,
+    setSelectedCoordinationTab,
+    setSelectedPatientId,
+  ]);
 
   const handleLogout = () => {
     handleSessionLogout();

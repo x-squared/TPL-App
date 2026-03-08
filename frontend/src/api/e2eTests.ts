@@ -17,6 +17,15 @@ export interface E2ETestRunRequest {
   output_tail_lines: number;
 }
 
+export interface E2ETestCaseResult {
+  case_id: string;
+  name: string;
+  status: string;
+  message: string;
+  source_link: string;
+  source_file_abs: string;
+}
+
 export interface E2ETestRunResponse {
   runner: E2ETestRunnerKey;
   success: boolean;
@@ -25,8 +34,10 @@ export interface E2ETestRunResponse {
   finished_at: string;
   duration_seconds: number;
   report_path: string | null;
+  report_file_abs: string | null;
   output_tail: string;
   report_excerpt: string | null;
+  case_results: E2ETestCaseResult[];
 }
 
 export const e2eTestsApi = {

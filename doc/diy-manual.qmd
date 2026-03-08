@@ -164,6 +164,16 @@ python -m app.db_admin --mode clear-translation-bundles --env DEV
 
 This removes runtime translation overrides from DB tables (`TRANSLATION_BUNDLE` and legacy `TRANSLATION_OVERRIDE`) without exporting anything into `frontend/src/i18n/translations.json`.
 
+**H) One-time normalize stale Dev-Forum capture label override (keep all other overrides):**
+
+```{bash}
+cd /Users/stephan/Workspace/TPL-App/backend
+source .venv/bin/activate
+python -m app.db_admin --mode normalize-legacy-dev-forum-capture-label --env DEV
+```
+
+This rewrites only legacy values of `devForum.capture.captureContext` (`Capture current context` / `Aktuellen Kontext erfassen`) to the current label (`Open ticket` / `Ticket öffnen`) inside DB translation bundles.
+
 ### 3) Start backend
 
 ```{bash}

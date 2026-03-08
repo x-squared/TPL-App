@@ -21,9 +21,10 @@ def main() -> int:
             "migrate-procurement-runtime",
             "migrate-procurement-typed",
             "clear-translation-bundles",
+            "normalize-legacy-dev-forum-capture-label",
         ),
         default="refresh",
-        help="recreate=drop/create+seed, migrate=schema only, refresh=migrate+clean+seed, clean=data only, migrate-audit-fields=add/backfill CREATED_BY from CHANGED_BY, migrate-medical-value-units=add/backfill LOINC+UCUM medical value columns, verify-medical-value-units=read-only LOINC+UCUM coverage verification, migrate-procurement-runtime=legacy->unified procurement backfill, migrate-procurement-typed=unified->typed procurement backfill, clear-translation-bundles=delete DB translation overrides",
+        help="recreate=drop/create+seed, migrate=schema only, refresh=migrate+clean+seed, clean=data only, migrate-audit-fields=add/backfill CREATED_BY from CHANGED_BY, migrate-medical-value-units=add/backfill LOINC+UCUM medical value columns, verify-medical-value-units=read-only LOINC+UCUM coverage verification, migrate-procurement-runtime=legacy->unified procurement backfill, migrate-procurement-typed=unified->typed procurement backfill, clear-translation-bundles=delete DB translation overrides, normalize-legacy-dev-forum-capture-label=normalize stale Dev-Forum capture label overrides",
     )
     parser.add_argument("--env", default=os.getenv("TPL_ENV", "DEV"), help="Application env (DEV/TEST/PROD)")
     parser.add_argument("--seed-profile", default=os.getenv("TPL_SEED_PROFILE"), help="Optional seed profile override")
@@ -89,6 +90,12 @@ def main() -> int:
 
     if args.mode == "clear-translation-bundles":
         return run("app.db_data", ["--mode", "clear-translation-bundles", "--env", args.env, *db_url_args])
+
+    if args.mode == "normalize-legacy-dev-forum-capture-label":
+        return run(
+            "app.db_data",
+            ["--mode", "normalize-legacy-dev-forum-capture-label", "--env", args.env, *db_url_args],
+        )
 
     # Default: refresh = migrate + clean + seed.
     # If migrate cannot reconcile schema drift (e.g. missing columns on SQLite),

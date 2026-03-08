@@ -43,6 +43,11 @@ export default function ErrorBanner({ message, className = '' }: ErrorBannerProp
               setOpeningTicket(true);
               setTicketError('');
               void openTicketDraft(message)
+                .then((result) => {
+                  if (!result.dev_forum_capture_created) {
+                    setTicketError(t('errorBanner.devForumCaptureFailed', 'Ticket email was created, but adding to Dev-Forum failed.'));
+                  }
+                })
                 .catch((error) => {
                   setTicketError(toUserErrorMessage(error, t('errorBanner.ticketCreateFailed', 'Could not create support ticket draft.')));
                 })

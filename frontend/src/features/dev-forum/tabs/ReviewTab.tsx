@@ -10,6 +10,7 @@ interface ReviewTabProps {
   onReviewAccept: (requestId: number) => Promise<void>;
   onReviewReject: (requestId: number) => Promise<void>;
   onOpenContext: (item: DevRequest) => void;
+  onOpenPreviousRequest: (requestId: number) => void;
 }
 
 export default function ReviewTab({
@@ -20,13 +21,16 @@ export default function ReviewTab({
   onReviewAccept,
   onReviewReject,
   onOpenContext,
+  onOpenPreviousRequest,
 }: ReviewTabProps) {
   const { t } = useI18n();
 
   return (
     <div className="dev-forum-list">
       {reviewItems.length === 0 ? <p className="status">{t('devForum.review.empty', 'No review items right now.')}</p> : null}
-      {reviewItems.map((item) => (
+      {reviewItems.map((item) => {
+        const parentRequestId = item.parent_request_id;
+        return (
         <article key={item.id} className="ui-panel-section dev-forum-item">
           <h3 className="detail-section-heading">
             {t('devForum.request.title', 'Request')} #{item.id}
@@ -44,6 +48,11 @@ export default function ReviewTab({
             <button type="button" className="patients-add-btn" onClick={() => onOpenContext(item)}>
               {t('devForum.actions.openContext', 'Open context')}
             </button>
+            {parentRequestId !== null ? (
+              <button type="button" className="patients-add-btn" onClick={() => onOpenPreviousRequest(parentRequestId)}>
+                {t('devForum.actions.openPreviousTicket', 'Open previous ticket')}
+              </button>
+            ) : null}
             <button type="button" className="patients-save-btn" onClick={() => void onReviewAccept(item.id)} disabled={saving}>
               {t('devForum.review.accept', 'Accept')}
             </button>
@@ -63,7 +72,8 @@ export default function ReviewTab({
             </button>
           </div>
         </article>
-      ))}
+        );
+      })}
     </div>
   );
 }

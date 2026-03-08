@@ -695,17 +695,179 @@
           "en": "Open context",
           "de": "Kontext öffnen"
         }
+      },
+      "openPreviousTicket": {
+        "label": {
+          "en": "Dev-Forum action open previous ticket",
+          "de": "Dev-Forum Aktion vorheriges Ticket öffnen"
+        },
+        "text": {
+          "en": "Open previous ticket",
+          "de": "Vorheriges Ticket öffnen"
+        }
+      }
+    },
+    "readOnlyDialog": {
+      "title": {
+        "label": {
+          "en": "Dev-Forum read-only dialog title",
+          "de": "Dev-Forum Nur-Lesen Dialog Titel"
+        },
+        "text": {
+          "en": "Previous ticket",
+          "de": "Vorheriges Ticket"
+        }
+      },
+      "close": {
+        "label": {
+          "en": "Dev-Forum read-only dialog close action",
+          "de": "Dev-Forum Nur-Lesen Dialog Schließen Aktion"
+        },
+        "text": {
+          "en": "Close",
+          "de": "Schließen"
+        }
+      },
+      "previous": {
+        "label": {
+          "en": "Dev-Forum read-only dialog previous action",
+          "de": "Dev-Forum Nur-Lesen Dialog Vorherige Aktion"
+        },
+        "text": {
+          "en": "Previous",
+          "de": "Vorherige"
+        }
+      },
+      "next": {
+        "label": {
+          "en": "Dev-Forum read-only dialog next action",
+          "de": "Dev-Forum Nur-Lesen Dialog Nächste Aktion"
+        },
+        "text": {
+          "en": "Next",
+          "de": "Nächste"
+        }
+      },
+      "position": {
+        "label": {
+          "en": "Dev-Forum read-only dialog position text",
+          "de": "Dev-Forum Nur-Lesen Dialog Positionshinweis"
+        },
+        "text": {
+          "en": "Ticket {current} of {total}",
+          "de": "Ticket {current} von {total}"
+        }
+      },
+      "historyTitle": {
+        "label": {
+          "en": "Dev-Forum read-only dialog history title",
+          "de": "Dev-Forum Nur-Lesen Dialog Verlaufstitel"
+        },
+        "text": {
+          "en": "Ticket line",
+          "de": "Ticket-Linie"
+        }
+      },
+      "metaTitle": {
+        "label": {
+          "en": "Dev-Forum read-only dialog metadata title",
+          "de": "Dev-Forum Nur-Lesen Dialog Metadaten Titel"
+        },
+        "text": {
+          "en": "Ticket details",
+          "de": "Ticket-Details"
+        }
+      },
+      "decision": {
+        "label": {
+          "en": "Dev-Forum read-only dialog decision label",
+          "de": "Dev-Forum Nur-Lesen Dialog Entscheidung Label"
+        },
+        "text": {
+          "en": "Decision",
+          "de": "Entscheidung"
+        }
+      },
+      "parentTicket": {
+        "label": {
+          "en": "Dev-Forum read-only dialog parent ticket label",
+          "de": "Dev-Forum Nur-Lesen Dialog Ursprungsticket Label"
+        },
+        "text": {
+          "en": "Parent ticket",
+          "de": "Ursprungsticket"
+        }
+      },
+      "createdAt": {
+        "label": {
+          "en": "Dev-Forum read-only dialog created at label",
+          "de": "Dev-Forum Nur-Lesen Dialog Erstellt-am Label"
+        },
+        "text": {
+          "en": "Created at",
+          "de": "Erstellt am"
+        }
+      },
+      "changedAt": {
+        "label": {
+          "en": "Dev-Forum read-only dialog changed at label",
+          "de": "Dev-Forum Nur-Lesen Dialog Geändert-am Label"
+        },
+        "text": {
+          "en": "Changed at",
+          "de": "Geändert am"
+        }
+      },
+      "closedAt": {
+        "label": {
+          "en": "Dev-Forum read-only dialog closed at label",
+          "de": "Dev-Forum Nur-Lesen Dialog Geschlossen-am Label"
+        },
+        "text": {
+          "en": "Closed at",
+          "de": "Geschlossen am"
+        }
+      },
+      "requestTextTitle": {
+        "label": {
+          "en": "Dev-Forum read-only dialog request text section title",
+          "de": "Dev-Forum Nur-Lesen Dialog Anfrage Abschnittstitel"
+        },
+        "text": {
+          "en": "Request",
+          "de": "Anfrage"
+        }
+      },
+      "developerNoteTitle": {
+        "label": {
+          "en": "Dev-Forum read-only dialog developer note title",
+          "de": "Dev-Forum Nur-Lesen Dialog Prompt Titel"
+        },
+        "text": {
+          "en": "Prompt",
+          "de": "Prompt"
+        }
+      },
+      "userReviewTitle": {
+        "label": {
+          "en": "Dev-Forum read-only dialog user review title",
+          "de": "Dev-Forum Nur-Lesen Dialog Nutzerreview Titel"
+        },
+        "text": {
+          "en": "User review",
+          "de": "Nutzerreview"
+        }
       }
     },
     "capture": {
       "captureContext": {
         "label": {
-          "en": "Dev-Forum capture action",
-          "de": "Dev-Forum Erfassungsaktion"
+          "en": "Dev-Forum open ticket action",
+          "de": "Dev-Forum Ticket öffnen Aktion"
         },
         "text": {
-          "en": "Capture current context",
-          "de": "Aktuellen Kontext erfassen"
+          "en": "Open ticket",
+          "de": "Ticket öffnen"
         }
       },
       "pickComponent": {
@@ -746,6 +908,16 @@
         "text": {
           "en": "Send request",
           "de": "Anfrage senden"
+        }
+      },
+      "cancel": {
+        "label": {
+          "en": "Dev-Forum capture cancel action",
+          "de": "Dev-Forum Erfassung Abbrechen Aktion"
+        },
+        "text": {
+          "en": "Cancel",
+          "de": "Abbrechen"
         }
       },
       "hint": {
@@ -870,6 +1042,16 @@
         "text": {
           "en": "Could not reopen request.",
           "de": "Anfrage konnte nicht erneut geöffnet werden."
+        }
+      },
+      "copyFailed": {
+        "label": {
+          "en": "Dev-Forum clipboard copy error",
+          "de": "Dev-Forum Zwischenablage-Kopierfehler"
+        },
+        "text": {
+          "en": "Could not copy text to clipboard.",
+          "de": "Text konnte nicht in die Zwischenablage kopiert werden."
         }
       }
     },
@@ -1024,8 +1206,8 @@
           "de": "Dev-Forum Anfrage kopieren Aktion"
         },
         "text": {
-          "en": "Copy request text",
-          "de": "Anfragetext kopieren"
+          "en": "Copy request",
+          "de": "Anfrage kopieren"
         }
       },
       "copyForCursor": {
@@ -1034,8 +1216,8 @@
           "de": "Dev-Forum Notiz für Cursor kopieren Aktion"
         },
         "text": {
-          "en": "Copy note for Cursor",
-          "de": "Notiz für Cursor kopieren"
+          "en": "Copy prompt for Cursor",
+          "de": "Prompt für Cursor kopieren"
         }
       },
       "claim": {
@@ -1054,8 +1236,8 @@
           "de": "Dev-Forum Entwicklernotizen Überschrift"
         },
         "text": {
-          "en": "Developer notes",
-          "de": "Notizen der Entwicklung"
+          "en": "Prompt",
+          "de": "Prompt"
         }
       },
       "notesEditorAria": {
@@ -1064,8 +1246,8 @@
           "de": "Dev-Forum Notizeneditor Aria"
         },
         "text": {
-          "en": "Developer notes editor",
-          "de": "Notizeneditor der Entwicklung"
+          "en": "Prompt editor",
+          "de": "Prompt-Editor"
         }
       },
       "response": {
@@ -1106,6 +1288,16 @@
         "text": {
           "en": "Accepted and implemented",
           "de": "Akzeptiert und umgesetzt"
+        }
+      },
+      "contextToggle": {
+        "label": {
+          "en": "Dev-Forum development context toggle label",
+          "de": "Dev-Forum Entwicklung Kontext Umschalter"
+        },
+        "text": {
+          "en": "Show context information",
+          "de": "Kontextinformationen anzeigen"
         }
       }
     }
@@ -1305,6 +1497,16 @@
       "text": {
         "en": "Could not create support ticket draft.",
         "de": "Support-Ticket-Entwurf konnte nicht erstellt werden."
+      }
+    },
+    "devForumCaptureFailed": {
+      "label": {
+        "en": "Error banner Dev-Forum capture failed message",
+        "de": "Fehlerbanner Dev-Forum-Erfassung fehlgeschlagen Meldung"
+      },
+      "text": {
+        "en": "Ticket email was created, but adding to Dev-Forum failed.",
+        "de": "Die Ticket-E-Mail wurde erstellt, aber das Hinzufuegen zum Dev-Forum ist fehlgeschlagen."
       }
     }
   },
@@ -6169,6 +6371,220 @@
         }
       }
     },
+    "results": {
+      "noRunYet": {
+        "label": {
+          "en": "E2E results no run yet state",
+          "de": "E2E Ergebnisse Kein Lauf bisher Zustand"
+        },
+        "text": {
+          "en": "No run yet.",
+          "de": "Noch kein Lauf."
+        }
+      },
+      "statusPass": {
+        "label": {
+          "en": "E2E results pass status",
+          "de": "E2E Ergebnisse Pass Status"
+        },
+        "text": {
+          "en": "PASS",
+          "de": "PASS"
+        }
+      },
+      "statusFail": {
+        "label": {
+          "en": "E2E results fail status",
+          "de": "E2E Ergebnisse Fail Status"
+        },
+        "text": {
+          "en": "FAIL",
+          "de": "FAIL"
+        }
+      },
+      "exitCode": {
+        "label": {
+          "en": "E2E results exit code label",
+          "de": "E2E Ergebnisse Exit-Code Label"
+        },
+        "text": {
+          "en": "Exit code",
+          "de": "Exit-Code"
+        }
+      },
+      "duration": {
+        "label": {
+          "en": "E2E results duration label",
+          "de": "E2E Ergebnisse Dauer Label"
+        },
+        "text": {
+          "en": "Duration",
+          "de": "Dauer"
+        }
+      },
+      "reportPath": {
+        "label": {
+          "en": "E2E results report path label",
+          "de": "E2E Ergebnisse Report-Pfad Label"
+        },
+        "text": {
+          "en": "Report",
+          "de": "Report"
+        }
+      },
+      "viewTable": {
+        "label": {
+          "en": "E2E results table view toggle",
+          "de": "E2E Ergebnisse Tabellenansicht Umschalter"
+        },
+        "text": {
+          "en": "Table view",
+          "de": "Tabellenansicht"
+        }
+      },
+      "viewText": {
+        "label": {
+          "en": "E2E results text view toggle",
+          "de": "E2E Ergebnisse Textansicht Umschalter"
+        },
+        "text": {
+          "en": "Text view",
+          "de": "Textansicht"
+        }
+      },
+      "caseResultsTitle": {
+        "label": {
+          "en": "E2E results case results title",
+          "de": "E2E Ergebnisse Testfall-Ergebnisse Titel"
+        },
+        "text": {
+          "en": "Test Case Results",
+          "de": "Testfall-Ergebnisse"
+        }
+      },
+      "noCaseResults": {
+        "label": {
+          "en": "E2E results no case results state",
+          "de": "E2E Ergebnisse Keine Testfall-Ergebnisse Zustand"
+        },
+        "text": {
+          "en": "No case results available for this runner.",
+          "de": "Für diesen Runner sind keine Testfall-Ergebnisse verfügbar."
+        }
+      },
+      "columns": {
+        "caseId": {
+          "label": {
+            "en": "E2E results table column case id",
+            "de": "E2E Ergebnisse Tabelle Spalte Fall-ID"
+          },
+          "text": {
+            "en": "Case ID",
+            "de": "Fall-ID"
+          }
+        },
+        "result": {
+          "label": {
+            "en": "E2E results table column result",
+            "de": "E2E Ergebnisse Tabelle Spalte Ergebnis"
+          },
+          "text": {
+            "en": "Result",
+            "de": "Ergebnis"
+          }
+        },
+        "name": {
+          "label": {
+            "en": "E2E results table column name",
+            "de": "E2E Ergebnisse Tabelle Spalte Name"
+          },
+          "text": {
+            "en": "Name",
+            "de": "Name"
+          }
+        },
+        "message": {
+          "label": {
+            "en": "E2E results table column message",
+            "de": "E2E Ergebnisse Tabelle Spalte Nachricht"
+          },
+          "text": {
+            "en": "Message",
+            "de": "Nachricht"
+          }
+        },
+        "spec": {
+          "label": {
+            "en": "E2E results table column spec",
+            "de": "E2E Ergebnisse Tabelle Spalte Spezifikation"
+          },
+          "text": {
+            "en": "Spec",
+            "de": "Spezifikation"
+          }
+        }
+      },
+      "openSpec": {
+        "label": {
+          "en": "E2E results open testcase spec title",
+          "de": "E2E Ergebnisse Testfall-Spezifikation öffnen Titel"
+        },
+        "text": {
+          "en": "Open testcase specification",
+          "de": "Testfall-Spezifikation öffnen"
+        }
+      },
+      "openSpecIcon": {
+        "label": {
+          "en": "E2E results open testcase spec icon text",
+          "de": "E2E Ergebnisse Testfall-Spezifikation öffnen Symboltext"
+        },
+        "text": {
+          "en": "🔗",
+          "de": "🔗"
+        }
+      },
+      "consoleTail": {
+        "label": {
+          "en": "E2E results console output tail label",
+          "de": "E2E Ergebnisse Konsole Ausgabe Ende Label"
+        },
+        "text": {
+          "en": "Console output (tail)",
+          "de": "Konsolenausgabe (Ende)"
+        }
+      },
+      "noOutputCaptured": {
+        "label": {
+          "en": "E2E results no output captured text",
+          "de": "E2E Ergebnisse Keine Ausgabe erfasst Text"
+        },
+        "text": {
+          "en": "No output captured.",
+          "de": "Keine Ausgabe erfasst."
+        }
+      },
+      "reportExcerpt": {
+        "label": {
+          "en": "E2E results report excerpt label",
+          "de": "E2E Ergebnisse Report-Auszug Label"
+        },
+        "text": {
+          "en": "Report excerpt",
+          "de": "Report-Auszug"
+        }
+      },
+      "noReportAvailable": {
+        "label": {
+          "en": "E2E results no report available text",
+          "de": "E2E Ergebnisse Kein Report verfügbar Text"
+        },
+        "text": {
+          "en": "No report available.",
+          "de": "Kein Report verfügbar."
+        }
+      }
+    },
     "health": {
       "title": {
         "label": {
@@ -6363,8 +6779,8 @@
         "de": "Spenderansicht Titel"
       },
       "text": {
-        "en": "Donors",
-        "de": "Spender"
+        "en": "Donors!",
+        "de": "Spender!"
       }
     },
     "notImplemented": {

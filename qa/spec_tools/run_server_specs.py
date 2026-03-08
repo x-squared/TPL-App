@@ -1,6 +1,7 @@
 from __future__ import annotations
 
 import datetime as dt
+import json
 import re
 import subprocess
 import sys
@@ -73,21 +74,51 @@ def _write_report(
     for action_id, title, details in suggestions:
         lines.append(f"- `{action_id}`: **{title}** - {details}")
     lines.append("")
-    lines.append("## Test Case Results")
-    lines.append("")
-    for result in case_results:
-        source_link = source_link_from_report(result.source_file)
-        details = f" - {result.message}" if result.message else ""
-        lines.append(
-            f"- `{result.case_id}` | **{result.status}** | {result.name}{details} | [Testcase document]({source_link})"
-        )
-    lines.append("")
     lines.append("## Test Output Excerpt")
     lines.append("")
     excerpt = output[-4000:] if len(output) > 4000 else output
     lines.append("```text")
     lines.append(excerpt.rstrip())
     lines.append("```")
+    lines.append("")
+    lines.append("## Test Case Results")
+    lines.append("")
+    lines.append("| Case ID | Result | Name | Message | Testcase document |")
+    lines.append("| --- | --- | --- | --- | --- |")
+
+    def _md_cell(value: str) -> str:
+        normalized = value.replace("\n", " ").replace("|", "\\|").strip()
+        return normalized
+
+    for result in case_results:
+        source_link = source_link_from_report(result.source_file)
+        lines.append(
+            "| "
+            + f"`{_md_cell(result.case_id)}` | "
+            + f"**{_md_cell(result.status)}** | "
+            + f"{_md_cell(result.name)} | "
+            + f"{_md_cell(result.message or '-')} | "
+            + f"[Testcase document]({_md_cell(source_link)}) |"
+        )
+    lines.append("")
+    lines.append("<!-- TPL:CASE_RESULTS:BEGIN -->")
+    lines.append(
+        json.dumps(
+            [
+                {
+                    "case_id": result.case_id,
+                    "status": result.status,
+                    "name": result.name,
+                    "message": result.message or "",
+                    "source_link": source_link_from_report(result.source_file),
+                }
+                for result in case_results
+            ],
+            ensure_ascii=False,
+            indent=2,
+        )
+    )
+    lines.append("<!-- TPL:CASE_RESULTS:END -->")
     LATEST_REPORT.write_text("\n".join(lines), encoding="utf-8")
 
 

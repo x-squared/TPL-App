@@ -17,6 +17,7 @@ interface DevelopmentTabProps {
   onClaimRequest: (requestId: number) => Promise<void>;
   onDecision: (requestId: number, decision: 'REJECTED' | 'IMPLEMENTED') => Promise<void>;
   onOpenContext: (item: DevRequest) => void;
+  onOpenPreviousRequest: (requestId: number) => void;
   onCopyRequestText: (item: DevRequest) => void;
   onCopyNoteForCursor: (requestId: number) => void;
 }
@@ -35,6 +36,7 @@ export default function DevelopmentTab({
   onClaimRequest,
   onDecision,
   onOpenContext,
+  onOpenPreviousRequest,
   onCopyRequestText,
   onCopyNoteForCursor,
 }: DevelopmentTabProps) {
@@ -62,6 +64,7 @@ export default function DevelopmentTab({
       {developmentItems.length === 0 ? <p className="status">{t('devForum.development.empty', 'No pending requests right now.')}</p> : null}
       {developmentItems.map((item) => {
         const captureState = parseCaptureState(item.capture_state_json);
+        const parentRequestId = item.parent_request_id;
         return (
           <article key={item.id} className="ui-panel-section dev-forum-item">
             <h3 className="detail-section-heading">
@@ -70,35 +73,47 @@ export default function DevelopmentTab({
             <p className="dev-forum-meta">{t('devForum.request.status', 'Status')}: {item.status}</p>
             <p className="dev-forum-meta">{t('devForum.request.submitter', 'Submitter')}: {item.submitter_user?.name ?? '-'}</p>
             <p className="dev-forum-meta">{t('devForum.request.claimedBy', 'Claimed by')}: {item.claimed_by_user?.name ?? '-'}</p>
-            <p className="dev-forum-text" dangerouslySetInnerHTML={{ __html: item.request_text }} />
-            <pre className="dev-forum-capture-json">{JSON.stringify(captureState, null, 2)}</pre>
+            <div className="dev-forum-request-box">
+              <p className="dev-forum-text" dangerouslySetInnerHTML={{ __html: item.request_text }} />
+            </div>
+            <details className="dev-forum-context-details">
+              <summary>{t('devForum.development.contextToggle', 'Show context information')}</summary>
+              <pre className="dev-forum-capture-json">{JSON.stringify(captureState, null, 2)}</pre>
+            </details>
             <div className="dev-forum-actions-row">
               <button type="button" className="patients-add-btn" onClick={() => onOpenContext(item)}>
                 {t('devForum.actions.openContext', 'Open context')}
               </button>
+              {parentRequestId !== null ? (
+                <button type="button" className="patients-add-btn" onClick={() => onOpenPreviousRequest(parentRequestId)}>
+                  {t('devForum.actions.openPreviousTicket', 'Open previous ticket')}
+                </button>
+              ) : null}
               <button type="button" className="patients-add-btn" onClick={() => onCopyRequestText(item)}>
-                {t('devForum.development.copyRequest', 'Copy request text')}
-              </button>
-              <button
-                type="button"
-                className="patients-add-btn"
-                onClick={() => onCopyNoteForCursor(item.id)}
-              >
-                {t('devForum.development.copyForCursor', 'Copy note for Cursor')}
+                {t('devForum.development.copyRequest', 'Copy request')}
               </button>
               <button type="button" className="patients-add-btn" onClick={() => void onClaimRequest(item.id)} disabled={saving}>
                 {t('devForum.development.claim', 'Claim')}
               </button>
             </div>
-            <h4 className="detail-section-heading">{t('devForum.development.notes', 'Developer notes')}</h4>
+            <h4 className="detail-section-heading">{t('devForum.development.notes', 'Prompt')}</h4>
             <RichTextEditor
               value={developmentNoteDraft[item.id] ?? ''}
               onChange={(next) => onSetDevelopmentNoteDraft(item.id, next)}
-              ariaLabel={t('devForum.development.notesEditorAria', 'Developer notes editor')}
+              ariaLabel={t('devForum.development.notesEditorAria', 'Prompt editor')}
               boldTitle={t('devForum.editor.bold', 'Bold')}
               italicTitle={t('devForum.editor.italic', 'Italic')}
               underlineTitle={t('devForum.editor.underline', 'Underline')}
             />
+            <div className="dev-forum-actions-row">
+              <button
+                type="button"
+                className="patients-add-btn"
+                onClick={() => onCopyNoteForCursor(item.id)}
+              >
+                {t('devForum.development.copyForCursor', 'Copy prompt for Cursor')}
+              </button>
+            </div>
             <h4 className="detail-section-heading">{t('devForum.development.response', 'Reply to user')}</h4>
             <RichTextEditor
               value={developmentResponseDraft[item.id] ?? ''}

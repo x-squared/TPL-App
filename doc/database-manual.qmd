@@ -61,7 +61,7 @@ Use `verify` in CI or before release checks.
 ## `app.db_data` (DML only)
 
 ```{bash}
-python -m app.db_data --mode <clean|seed|refresh|migrate-audit-fields|migrate-medical-value-units|verify-medical-value-units|migrate-procurement-runtime|migrate-procurement-typed|export-translations-json> --env <DEV|TEST|PROD> [--seed-profile <PROFILE>] [--db-url <URL>] [--migration-check-level <basic|strict>]
+python -m app.db_data --mode <clean|seed|refresh|migrate-audit-fields|migrate-medical-value-units|verify-medical-value-units|migrate-procurement-runtime|migrate-procurement-typed|export-translations-json|normalize-legacy-dev-forum-capture-label> --env <DEV|TEST|PROD> [--seed-profile <PROFILE>] [--db-url <URL>] [--migration-check-level <basic|strict>]
 ```
 
 - `clean`: wipes row data, keeps schema.
@@ -73,6 +73,7 @@ python -m app.db_data --mode <clean|seed|refresh|migrate-audit-fields|migrate-me
 - `migrate-procurement-runtime`: idempotent backfill from legacy procurement runtime tables (`COORDINATION_PROCUREMENT_VALUE*`) into unified runtime tables (`COORDINATION_PROCUREMENT_DATA*`).
 - `migrate-procurement-typed`: idempotent backfill from unified runtime rows into typed procurement runtime tables.
 - `export-translations-json`: writes current DB translation bundles back to `frontend/src/i18n/translations.json` (preserves existing labels, updates text values).
+- `normalize-legacy-dev-forum-capture-label`: one-time targeted normalization of stale runtime override values for `devForum.capture.captureContext` (`Capture current context` / `Aktuellen Kontext erfassen`) to the current labels (`Open ticket` / `Ticket öffnen`) without deleting other overrides.
 - `--migration-check-level strict` (default): after every migration mode, run strict schema verification and fail on drift (`exit code 2`).
 - `--migration-check-level basic`: after every migration mode, verify only table/column presence.
 
@@ -134,10 +135,16 @@ Export current translations from DB to frontend baseline file:
 python -m app.db_data --mode export-translations-json --env DEV
 ```
 
+One-time targeted cleanup for legacy Dev-Forum capture label overrides:
+
+```{bash}
+python -m app.db_data --mode normalize-legacy-dev-forum-capture-label --env DEV
+```
+
 ## `app.db_admin` (wrapper)
 
 ```{bash}
-python -m app.db_admin --mode <recreate|migrate|refresh|clean|migrate-audit-fields|migrate-medical-value-units|verify-medical-value-units|migrate-procurement-runtime|migrate-procurement-typed> --env <DEV|TEST|PROD> [--seed-profile <PROFILE>] [--db-url <URL>] [--migration-check-level <basic|strict>]
+python -m app.db_admin --mode <recreate|migrate|refresh|clean|migrate-audit-fields|migrate-medical-value-units|verify-medical-value-units|migrate-procurement-runtime|migrate-procurement-typed|normalize-legacy-dev-forum-capture-label> --env <DEV|TEST|PROD> [--seed-profile <PROFILE>] [--db-url <URL>] [--migration-check-level <basic|strict>]
 ```
 
 Mode behavior:
@@ -151,6 +158,7 @@ Mode behavior:
 - `verify-medical-value-units` = `db_data verify-medical-value-units`
 - `migrate-procurement-runtime` = `db_data migrate-procurement-runtime`
 - `migrate-procurement-typed` = `db_data migrate-procurement-typed`
+- `normalize-legacy-dev-forum-capture-label` = `db_data normalize-legacy-dev-forum-capture-label`
 
 For `refresh`, if `migrate` cannot reconcile schema drift, the wrapper automatically falls back to `db_schema recreate` before data refresh.
 
