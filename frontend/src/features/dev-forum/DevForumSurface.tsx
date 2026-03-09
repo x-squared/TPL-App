@@ -5,6 +5,7 @@ import { useI18n } from '../../i18n/i18n';
 import { DEV_FORUM_CAPTURE_CREATED_EVENT } from '../../views/layout/devForumEvents';
 import { openDevForumContextWithHighlight } from '../../views/layout/devForumHighlight';
 import { getCurrentCaptureContext, withSelectedComponent } from './devForumCaptureUtils';
+import DevForumReadOnlyDialog from './DevForumReadOnlyDialog';
 import { useDevForumComponentPicker } from './hooks/useDevForumComponentPicker';
 import type { CapturedContextPayload, DevForumTabKey } from './types';
 import CapturingTab from './tabs/CapturingTab';
@@ -360,12 +361,6 @@ export default function DevForumSurface({
   };
 
   const readOnlyDialogRequest = readOnlyDialogLineage[readOnlyDialogIndex] ?? null;
-  const formatDialogDateTime = (value: string | null): string => {
-    if (!value) return '-';
-    const parsed = new Date(value);
-    if (Number.isNaN(parsed.getTime())) return value;
-    return parsed.toLocaleString();
-  };
 
   return (
     <section className={`dev-forum-surface ${compact ? 'compact' : ''}`}>
@@ -469,111 +464,12 @@ export default function DevForumSurface({
         />
       ) : null}
       {readOnlyDialogRequest ? (
-        <div className="dev-forum-readonly-dialog-backdrop" onClick={() => setReadOnlyDialogLineage([])}>
-          <div
-            className="ui-panel-section dev-forum-readonly-dialog"
-            onClick={(event) => event.stopPropagation()}
-          >
-            <button
-              type="button"
-              className="dev-forum-dialog-close-icon"
-              aria-label={t('devForum.readOnlyDialog.close', 'Close')}
-              title={t('devForum.readOnlyDialog.close', 'Close')}
-              onClick={() => setReadOnlyDialogLineage([])}
-            >
-              x
-            </button>
-            <header className="dev-forum-header">
-              <h3 className="detail-section-heading">
-                {t('devForum.readOnlyDialog.title', 'Previous ticket')} #{readOnlyDialogRequest.id}
-              </h3>
-            </header>
-            <div className="dev-forum-actions-row">
-              <button
-                type="button"
-                className="patients-add-btn"
-                disabled={readOnlyDialogIndex <= 0}
-                onClick={() => setReadOnlyDialogIndex((prev) => Math.max(0, prev - 1))}
-              >
-                {t('devForum.readOnlyDialog.previous', 'Previous')}
-              </button>
-              <button
-                type="button"
-                className="patients-add-btn"
-                disabled={readOnlyDialogIndex >= readOnlyDialogLineage.length - 1}
-                onClick={() => setReadOnlyDialogIndex((prev) => Math.min(readOnlyDialogLineage.length - 1, prev + 1))}
-              >
-                {t('devForum.readOnlyDialog.next', 'Next')}
-              </button>
-              <span className="dev-forum-meta">
-                {t('devForum.readOnlyDialog.position', 'Ticket {current} of {total}')
-                  .replace('{current}', String(readOnlyDialogIndex + 1))
-                  .replace('{total}', String(readOnlyDialogLineage.length))}
-              </span>
-            </div>
-
-            <h4 className="detail-section-heading">{t('devForum.readOnlyDialog.historyTitle', 'Ticket line')}</h4>
-            <div className="dev-forum-lineage-row">
-              {readOnlyDialogLineage.map((entry, index) => (
-                <button
-                  key={entry.id}
-                  type="button"
-                  className={`patients-add-btn ${index === readOnlyDialogIndex ? 'active' : ''}`}
-                  onClick={() => setReadOnlyDialogIndex(index)}
-                >
-                  #{entry.id} - {entry.status}
-                </button>
-              ))}
-            </div>
-
-            <h4 className="detail-section-heading">{t('devForum.readOnlyDialog.metaTitle', 'Ticket details')}</h4>
-            <dl className="dev-forum-readonly-meta-grid">
-              <dt>{t('devForum.request.status', 'Status')}</dt>
-              <dd>{readOnlyDialogRequest.status}</dd>
-              <dt>{t('devForum.request.submitter', 'Submitter')}</dt>
-              <dd>{readOnlyDialogRequest.submitter_user?.name ?? '-'}</dd>
-              <dt>{t('devForum.request.claimedBy', 'Claimed by')}</dt>
-              <dd>{readOnlyDialogRequest.claimed_by_user?.name ?? '-'}</dd>
-              <dt>{t('devForum.readOnlyDialog.decision', 'Decision')}</dt>
-              <dd>{readOnlyDialogRequest.decision ?? '-'}</dd>
-              <dt>{t('devForum.readOnlyDialog.parentTicket', 'Parent ticket')}</dt>
-              <dd>{readOnlyDialogRequest.parent_request_id ?? '-'}</dd>
-              <dt>{t('devForum.readOnlyDialog.createdAt', 'Created at')}</dt>
-              <dd>{formatDialogDateTime(readOnlyDialogRequest.created_at)}</dd>
-              <dt>{t('devForum.readOnlyDialog.changedAt', 'Changed at')}</dt>
-              <dd>{formatDialogDateTime(readOnlyDialogRequest.changed_at ?? readOnlyDialogRequest.updated_at)}</dd>
-              <dt>{t('devForum.readOnlyDialog.closedAt', 'Closed at')}</dt>
-              <dd>{formatDialogDateTime(readOnlyDialogRequest.closed_at)}</dd>
-            </dl>
-
-            <h4 className="detail-section-heading">{t('devForum.readOnlyDialog.requestTextTitle', 'Request')}</h4>
-            <div className="dev-forum-request-box">
-              <p className="dev-forum-text" dangerouslySetInnerHTML={{ __html: readOnlyDialogRequest.request_text }} />
-            </div>
-            {readOnlyDialogRequest.developer_note_text ? (
-              <>
-                <h4 className="detail-section-heading">{t('devForum.readOnlyDialog.developerNoteTitle', 'Prompt')}</h4>
-                <p className="dev-forum-text" dangerouslySetInnerHTML={{ __html: readOnlyDialogRequest.developer_note_text }} />
-              </>
-            ) : null}
-            {readOnlyDialogRequest.developer_response_text ? (
-              <>
-                <h4 className="detail-section-heading">{t('devForum.review.developerReply', 'Developer reply')}</h4>
-                <p className="dev-forum-text" dangerouslySetInnerHTML={{ __html: readOnlyDialogRequest.developer_response_text }} />
-              </>
-            ) : null}
-            {readOnlyDialogRequest.user_review_text ? (
-              <>
-                <h4 className="detail-section-heading">{t('devForum.readOnlyDialog.userReviewTitle', 'User review')}</h4>
-                <p className="dev-forum-text" dangerouslySetInnerHTML={{ __html: readOnlyDialogRequest.user_review_text }} />
-              </>
-            ) : null}
-            <details className="dev-forum-context-details">
-              <summary>{t('devForum.development.contextToggle', 'Show context information')}</summary>
-              <pre className="dev-forum-capture-json">{asPrettyJson(readOnlyDialogRequest.capture_state_json)}</pre>
-            </details>
-          </div>
-        </div>
+        <DevForumReadOnlyDialog
+          lineage={readOnlyDialogLineage}
+          activeIndex={readOnlyDialogIndex}
+          onSetActiveIndex={setReadOnlyDialogIndex}
+          onClose={() => setReadOnlyDialogLineage([])}
+        />
       ) : null}
     </section>
   );

@@ -54,6 +54,7 @@ For full option reference and detailed behavior, see `doc/database-manual.qmd`.
 
 Default for `app.db_admin` is `--mode refresh` (migrate schema + clean data + seed).
 If schema drift cannot be reconciled by `migrate`, `refresh` automatically falls back to schema recreate.
+Before refresh/recreate, `db_admin` now automatically exports Dev-Forum requests to a timestamped folder under the database directory (`.../dev_forum_exports/export-<timestamp>`) and then attempts re-import after rebuild.
 
 ```{bash}
 cd /Users/stephan/Workspace/TPL-App/backend
@@ -106,6 +107,7 @@ python -m app.db_data --mode clean --env DEV
 ```
 
 Note: clean/refresh now exports current DB translation bundles into `backend/app/seed/datasets/core/translations_runtime_snapshot.py` before wiping tables.
+If Dev-Forum restore fails after rebuild, the exported snapshot files are kept and the CLI prints a retry hint.
 
 **E) Backfill procurement runtime (legacy -> unified, idempotent):**
 

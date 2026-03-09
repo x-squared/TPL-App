@@ -3,6 +3,7 @@ from __future__ import annotations
 import argparse
 import json
 import os
+from datetime import datetime, timezone
 from pathlib import Path
 
 from sqlalchemy import MetaData, inspect, text
@@ -248,6 +249,233 @@ def _normalize_legacy_dev_forum_capture_label_overrides() -> dict[str, int]:
         return normalize_legacy_dev_forum_capture_label_overrides(db=db)
     finally:
         db.close()
+
+
+def _default_dev_forum_export_base_dir() -> Path:
+    from .config import get_config
+
+    database_url = (get_config().database_url or "").strip()
+    if database_url.startswith("sqlite:///"):
+        db_path = Path(database_url.removeprefix("sqlite:///")).expanduser()
+        if not db_path.is_absolute():
+            db_path = (Path.cwd() / db_path).resolve()
+        return db_path.parent / "dev_forum_exports"
+    return Path(__file__).resolve().parents[2] / "database" / "dev_forum_exports"
+
+
+def _normalize_export_dir(target: str | None) -> Path:
+    if target and target.strip():
+        return Path(target).expanduser().resolve()
+    timestamp = datetime.now(timezone.utc).strftime("%Y%m%d-%H%M%S")
+    return (_default_dev_forum_export_base_dir() / f"export-{timestamp}").resolve()
+
+
+def _json_safe(value: object) -> object:
+    if value is None:
+        return None
+    if isinstance(value, (str, int, float, bool)):
+        return value
+    if hasattr(value, "isoformat"):
+        try:
+            return value.isoformat()  # type: ignore[no-any-return]
+        except Exception:  # noqa: BLE001
+            return str(value)
+    return str(value)
+
+
+def _export_dev_forum_snapshot(*, export_dir: Path) -> dict[str, object]:
+    from .config import get_config
+    from .database import engine
+
+    export_dir.mkdir(parents=True, exist_ok=True)
+    requests_path = export_dir / "dev_forum_requests.json"
+    readme_path = export_dir / "README.md"
+    exported_at = datetime.now(timezone.utc).isoformat()
+
+    rows_payload: list[dict[str, object]] = []
+    with engine.begin() as conn:
+        inspector = inspect(conn)
+        if not inspector.has_table("DEV_REQUEST"):
+            payload = {
+                "exported_at": exported_at,
+                "database_url": get_config().database_url,
+                "count": 0,
+                "requests": [],
+                "note": "DEV_REQUEST table not found. Nothing exported.",
+            }
+            requests_path.write_text(json.dumps(payload, ensure_ascii=False, indent=2) + "\n", encoding="utf-8")
+            readme_path.write_text(
+                "\n".join(
+                    [
+                        "# Dev-Forum Export",
+                        "",
+                        f"- Exported at (UTC): `{exported_at}`",
+                        "- Result: `DEV_REQUEST` table not found, no rows exported.",
+                        "",
+                    ]
+                ),
+                encoding="utf-8",
+            )
+            return {"export_dir": str(export_dir), "count": 0, "table_found": False}
+
+        rows = conn.execute(
+            text(
+                'SELECT d.*, '
+                'submitter."EXT_ID" AS "SUBMITTER_USER_EXT_ID", '
+                'claimer."EXT_ID" AS "CLAIMED_BY_USER_EXT_ID", '
+                'decider."EXT_ID" AS "DECIDED_BY_USER_EXT_ID" '
+                'FROM "DEV_REQUEST" d '
+                'LEFT JOIN "USER" submitter ON submitter."ID" = d."SUBMITTER_USER_ID" '
+                'LEFT JOIN "USER" claimer ON claimer."ID" = d."CLAIMED_BY_USER_ID" '
+                'LEFT JOIN "USER" decider ON decider."ID" = d."DECIDED_BY_USER_ID" '
+                'ORDER BY d."ID"'
+            )
+        ).mappings().all()
+        for row in rows:
+            item = {str(key): _json_safe(value) for key, value in row.items()}
+            rows_payload.append(item)
+
+    payload = {
+        "exported_at": exported_at,
+        "database_url": get_config().database_url,
+        "count": len(rows_payload),
+        "requests": rows_payload,
+    }
+    requests_path.write_text(json.dumps(payload, ensure_ascii=False, indent=2) + "\n", encoding="utf-8")
+    readme_path.write_text(
+        "\n".join(
+            [
+                "# Dev-Forum Export",
+                "",
+                f"- Exported at (UTC): `{exported_at}`",
+                f"- Requests exported: `{len(rows_payload)}`",
+                "",
+                "## Files",
+                "",
+                "- `dev_forum_requests.json`: full export payload for restore.",
+                "",
+            ]
+        ),
+        encoding="utf-8",
+    )
+    return {"export_dir": str(export_dir), "count": len(rows_payload), "table_found": True}
+
+
+def _import_dev_forum_snapshot(*, export_dir: Path) -> dict[str, object]:
+    from .database import engine
+
+    requests_path = export_dir / "dev_forum_requests.json"
+    if not requests_path.exists():
+        return {"ok": False, "hint": f"Missing export file: {requests_path}"}
+
+    raw = json.loads(requests_path.read_text(encoding="utf-8"))
+    source_rows = raw.get("requests", []) if isinstance(raw, dict) else []
+    if not isinstance(source_rows, list):
+        return {"ok": False, "hint": "Invalid export format: requests must be an array."}
+
+    with engine.begin() as conn:
+        inspector = inspect(conn)
+        if not inspector.has_table("DEV_REQUEST"):
+            return {"ok": False, "hint": 'Target schema has no "DEV_REQUEST" table.'}
+        dev_columns = {col["name"] for col in inspector.get_columns("DEV_REQUEST")}
+        required = {
+            "ID",
+            "SUBMITTER_USER_ID",
+            "STATUS",
+            "CAPTURE_URL",
+            "CAPTURE_GUI_PART",
+            "CAPTURE_STATE_JSON",
+            "REQUEST_TEXT",
+        }
+        missing_required = sorted(required - dev_columns)
+        if missing_required:
+            return {
+                "ok": False,
+                "hint": "Target DEV_REQUEST schema missing required columns: " + ", ".join(missing_required),
+            }
+
+        user_id_by_ext: dict[str, int] = {}
+        if inspector.has_table("USER"):
+            user_columns = {col["name"] for col in inspector.get_columns("USER")}
+            if "ID" in user_columns and "EXT_ID" in user_columns:
+                user_rows = conn.execute(text('SELECT "ID", "EXT_ID" FROM "USER"')).mappings().all()
+                for user in user_rows:
+                    ext_id = str(user.get("EXT_ID") or "").strip()
+                    if ext_id:
+                        user_id_by_ext[ext_id] = int(user["ID"])
+        existing_user_ids = set()
+        if inspector.has_table("USER") and "ID" in {col["name"] for col in inspector.get_columns("USER")}:
+            existing_user_ids = {
+                int(row["ID"]) for row in conn.execute(text('SELECT "ID" FROM "USER"')).mappings().all()
+            }
+
+        def resolve_user_id(value: object, ext_value: object, *, required_user: bool) -> int | None:
+            resolved: int | None = None
+            if value is not None and str(value).strip():
+                try:
+                    candidate = int(value)  # type: ignore[arg-type]
+                    if candidate in existing_user_ids:
+                        resolved = candidate
+                except (TypeError, ValueError):
+                    resolved = None
+            if resolved is None and isinstance(ext_value, str):
+                ext_key = ext_value.strip()
+                if ext_key:
+                    resolved = user_id_by_ext.get(ext_key)
+            if resolved is None and required_user:
+                return None
+            return resolved
+
+        conn.execute(text('DELETE FROM "DEV_REQUEST"'))
+        inserted = 0
+        for source in source_rows:
+            if not isinstance(source, dict):
+                continue
+            submitter_id = resolve_user_id(
+                source.get("SUBMITTER_USER_ID"),
+                source.get("SUBMITTER_USER_EXT_ID"),
+                required_user=True,
+            )
+            if submitter_id is None:
+                return {
+                    "ok": False,
+                    "hint": (
+                        f'Could not resolve submitter user for request ID {source.get("ID")} '
+                        "(missing user ID and no matching EXT_ID)."
+                    ),
+                }
+            claimed_id = resolve_user_id(
+                source.get("CLAIMED_BY_USER_ID"),
+                source.get("CLAIMED_BY_USER_EXT_ID"),
+                required_user=False,
+            )
+            decided_id = resolve_user_id(
+                source.get("DECIDED_BY_USER_ID"),
+                source.get("DECIDED_BY_USER_EXT_ID"),
+                required_user=False,
+            )
+
+            payload: dict[str, object] = {}
+            for column in dev_columns:
+                if column == "SUBMITTER_USER_ID":
+                    payload[column] = submitter_id
+                    continue
+                if column == "CLAIMED_BY_USER_ID":
+                    payload[column] = claimed_id
+                    continue
+                if column == "DECIDED_BY_USER_ID":
+                    payload[column] = decided_id
+                    continue
+                if column in source:
+                    payload[column] = source.get(column)
+            if "ID" not in payload:
+                continue
+            column_list = ", ".join(f'"{name}"' for name in payload.keys())
+            value_list = ", ".join(f":{name}" for name in payload.keys())
+            conn.execute(text(f'INSERT INTO "DEV_REQUEST" ({column_list}) VALUES ({value_list})'), payload)
+            inserted += 1
+
+    return {"ok": True, "imported_count": inserted, "export_dir": str(export_dir)}
 
 
 def _seed(*, app_env: str | None, seed_profile: str | None) -> dict[str, object]:
@@ -806,6 +1034,8 @@ def main() -> int:
             "clean",
             "seed",
             "refresh",
+            "export-dev-forum",
+            "import-dev-forum",
             "migrate-audit-fields",
             "migrate-medical-value-units",
             "verify-medical-value-units",
@@ -818,6 +1048,8 @@ def main() -> int:
         default="refresh",
         help=(
             "clean=wipe data, seed=seed only, refresh=clean+seed, "
+            "export-dev-forum=export DEV_REQUEST rows to JSON/Markdown snapshot, "
+            "import-dev-forum=import DEV_REQUEST rows from snapshot, "
             "migrate-audit-fields=add missing CREATED_BY columns and backfill values from CHANGED_BY, "
             "migrate-medical-value-units=add/backfill LOINC+UCUM medical value columns, "
             "verify-medical-value-units=read-only coverage check for LOINC/UCUM rollout, "
@@ -831,6 +1063,11 @@ def main() -> int:
     parser.add_argument("--env", default=os.getenv("TPL_ENV", "DEV"), help="Application env (DEV/TEST/PROD)")
     parser.add_argument("--seed-profile", default=os.getenv("TPL_SEED_PROFILE"), help="Optional seed profile override")
     parser.add_argument("--db-url", default=None, help="Optional DB URL override")
+    parser.add_argument(
+        "--dev-forum-export-dir",
+        default=None,
+        help="Optional export directory used by export-dev-forum/import-dev-forum.",
+    )
     parser.add_argument(
         "--migration-check-level",
         choices=("basic", "strict"),
@@ -849,6 +1086,32 @@ def main() -> int:
         print(f"Translation snapshot exported: {snapshot_path} (locales: {bundle_count})")
         cleaned_tables = _clean_data()
         print(f"Data clean complete. Tables wiped: {cleaned_tables}")
+
+    if args.mode == "export-dev-forum":
+        export_dir = _normalize_export_dir(args.dev_forum_export_dir)
+        result = _export_dev_forum_snapshot(export_dir=export_dir)
+        print(
+            "Dev-Forum export complete: "
+            + f"dir={result['export_dir']} "
+            + f"rows={result['count']} "
+            + f"table_found={result['table_found']}"
+        )
+
+    if args.mode == "import-dev-forum":
+        export_dir = _normalize_export_dir(args.dev_forum_export_dir)
+        result = _import_dev_forum_snapshot(export_dir=export_dir)
+        if not bool(result.get("ok")):
+            print(
+                "Dev-Forum import skipped: "
+                + str(result.get("hint") or "unknown reason")
+                + f" | export_dir={export_dir}"
+            )
+            return 3
+        print(
+            "Dev-Forum import complete: "
+            + f"dir={result['export_dir']} "
+            + f"rows={result['imported_count']}"
+        )
 
     if args.mode in {"seed", "refresh"}:
         result = _seed(app_env=args.env, seed_profile=args.seed_profile)

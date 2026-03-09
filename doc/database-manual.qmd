@@ -61,12 +61,14 @@ Use `verify` in CI or before release checks.
 ## `app.db_data` (DML only)
 
 ```{bash}
-python -m app.db_data --mode <clean|seed|refresh|migrate-audit-fields|migrate-medical-value-units|verify-medical-value-units|migrate-procurement-runtime|migrate-procurement-typed|export-translations-json|normalize-legacy-dev-forum-capture-label> --env <DEV|TEST|PROD> [--seed-profile <PROFILE>] [--db-url <URL>] [--migration-check-level <basic|strict>]
+python -m app.db_data --mode <clean|seed|refresh|export-dev-forum|import-dev-forum|migrate-audit-fields|migrate-medical-value-units|verify-medical-value-units|migrate-procurement-runtime|migrate-procurement-typed|export-translations-json|normalize-legacy-dev-forum-capture-label> --env <DEV|TEST|PROD> [--seed-profile <PROFILE>] [--db-url <URL>] [--migration-check-level <basic|strict>] [--dev-forum-export-dir <DIR>]
 ```
 
 - `clean`: wipes row data, keeps schema.
 - `seed`: loads seed jobs resolved by env/profile.
 - `refresh`: `clean + seed`.
+- `export-dev-forum`: exports current `DEV_REQUEST` rows to snapshot files (`dev_forum_requests.json` + `README.md`) in a timestamped folder under the database directory (`.../dev_forum_exports/export-<timestamp>`).
+- `import-dev-forum`: imports `DEV_REQUEST` rows from an export snapshot (`--dev-forum-export-dir` required for deterministic restore).
 - `migrate-audit-fields`: idempotent audit backfill helper that adds missing `CREATED_BY` columns on tables with `CHANGED_BY` and backfills `CREATED_BY <- CHANGED_BY` where empty.
 - `migrate-medical-value-units`: idempotent helper that adds missing LOINC/UCUM medical-value columns and backfills compatibility values.
 - `verify-medical-value-units`: read-only rollout verification (LOINC template coverage, UCUM canonical-unit completeness for numeric datatypes, runtime normalization completeness).
@@ -149,9 +151,9 @@ python -m app.db_admin --mode <recreate|migrate|refresh|clean|migrate-audit-fiel
 
 Mode behavior:
 
-- `recreate` = `db_schema recreate` + `db_data seed`
+- `recreate` = `db_data export-dev-forum` + `db_schema recreate` + `db_data seed` + `db_data import-dev-forum` (best effort)
 - `migrate` = `db_schema migrate`
-- `refresh` = `db_schema migrate` + `db_data refresh` (default)
+- `refresh` = `db_data export-dev-forum` + `db_schema migrate` + `db_data refresh` + `db_data import-dev-forum` (best effort, default)
 - `clean` = `db_data clean`
 - `migrate-audit-fields` = `db_data migrate-audit-fields`
 - `migrate-medical-value-units` = `db_data migrate-medical-value-units`
@@ -161,6 +163,8 @@ Mode behavior:
 - `normalize-legacy-dev-forum-capture-label` = `db_data normalize-legacy-dev-forum-capture-label`
 
 For `refresh`, if `migrate` cannot reconcile schema drift, the wrapper automatically falls back to `db_schema recreate` before data refresh.
+
+If Dev-Forum import cannot be applied after rebuild (for example schema/user-reference incompatibility), the wrapper prints a warning/hint and keeps the export files in `.../dev_forum_exports/...` for manual inspection/retry.
 
 ## Recommended Usage by Scenario
 

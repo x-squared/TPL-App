@@ -4,6 +4,20 @@ import argparse
 import os
 import subprocess
 import sys
+from datetime import datetime, timezone
+from pathlib import Path
+
+
+def _resolve_dev_forum_export_dir(*, db_url: str | None) -> Path:
+    if db_url and db_url.strip().startswith("sqlite:///"):
+        db_path = Path(db_url.strip().removeprefix("sqlite:///")).expanduser()
+        if not db_path.is_absolute():
+            db_path = (Path.cwd() / db_path).resolve()
+        base = db_path.parent
+    else:
+        base = Path(__file__).resolve().parents[2] / "database"
+    timestamp = datetime.now(timezone.utc).strftime("%Y%m%d-%H%M%S")
+    return (base / "dev_forum_exports" / f"export-{timestamp}").resolve()
 
 
 def main() -> int:
@@ -46,11 +60,51 @@ def main() -> int:
     seed_args = ["--seed-profile", args.seed_profile] if args.seed_profile else []
     migration_check_args = ["--migration-check-level", args.migration_check_level]
 
+    def run_with_dev_forum_backup(
+        *,
+        schema_mode: str,
+        data_mode: str,
+        data_args: list[str],
+    ) -> int:
+        export_dir = _resolve_dev_forum_export_dir(db_url=args.db_url)
+        export_args = ["--dev-forum-export-dir", str(export_dir)]
+        export_code = run("app.db_data", ["--mode", "export-dev-forum", "--env", args.env, *export_args, *db_url_args])
+        if export_code != 0:
+            return export_code
+
+        schema_code = run("app.db_schema", ["--mode", schema_mode, "--env", args.env, *db_url_args])
+        if schema_code != 0 and data_mode == "refresh" and schema_mode == "migrate":
+            # refresh fallback: recreate when migrate fails
+            schema_code = run("app.db_schema", ["--mode", "recreate", "--env", args.env, *db_url_args])
+        if schema_code != 0:
+            return schema_code
+
+        data_code = run("app.db_data", ["--mode", data_mode, "--env", args.env, *data_args, *db_url_args])
+        if data_code != 0:
+            return data_code
+
+        import_code = run("app.db_data", ["--mode", "import-dev-forum", "--env", args.env, *export_args, *db_url_args])
+        if import_code != 0:
+            print(
+                "WARNING: Dev-Forum import could not be applied after DB rebuild. "
+                + f"Export kept at: {export_dir}"
+            )
+            print(
+                "HINT: Schema/user references may have changed. "
+                + "You can inspect/edit dev_forum_requests.json and retry:"
+            )
+            print(
+                f'{sys.executable} -m app.db_data --mode import-dev-forum --env {args.env} '
+                + f'--dev-forum-export-dir "{export_dir}"'
+            )
+        return 0
+
     if args.mode == "recreate":
-        code = run("app.db_schema", ["--mode", "recreate", "--env", args.env, *db_url_args])
-        if code != 0:
-            return code
-        return run("app.db_data", ["--mode", "seed", "--env", args.env, *seed_args, *db_url_args])
+        return run_with_dev_forum_backup(
+            schema_mode="recreate",
+            data_mode="seed",
+            data_args=[*seed_args],
+        )
 
     if args.mode == "migrate":
         return run("app.db_schema", ["--mode", "migrate", "--env", args.env, *db_url_args])
@@ -97,15 +151,12 @@ def main() -> int:
             ["--mode", "normalize-legacy-dev-forum-capture-label", "--env", args.env, *db_url_args],
         )
 
-    # Default: refresh = migrate + clean + seed.
-    # If migrate cannot reconcile schema drift (e.g. missing columns on SQLite),
-    # refresh falls back to recreate because refresh already implies data reset.
-    migrate_code = run("app.db_schema", ["--mode", "migrate", "--env", args.env, *db_url_args])
-    if migrate_code != 0:
-        recreate_code = run("app.db_schema", ["--mode", "recreate", "--env", args.env, *db_url_args])
-        if recreate_code != 0:
-            return recreate_code
-    return run("app.db_data", ["--mode", "refresh", "--env", args.env, *seed_args, *db_url_args])
+    # Default refresh with automatic Dev-Forum backup/restore.
+    return run_with_dev_forum_backup(
+        schema_mode="migrate",
+        data_mode="refresh",
+        data_args=[*seed_args],
+    )
 
 
 if __name__ == "__main__":
