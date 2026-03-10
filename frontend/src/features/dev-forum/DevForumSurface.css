@@ -59,6 +59,10 @@
   padding: 0.6rem 0.7rem;
 }
 
+.dev-forum-summary-box {
+  background: #fcfcff;
+}
+
 .dev-forum-context-details summary {
   cursor: pointer;
   color: #2f3e6a;
@@ -175,17 +179,6 @@
   padding-left: 1.35rem;
 }
 
-.dev-forum-ticket-timeline::before {
-  content: "";
-  position: absolute;
-  left: 0.55rem;
-  top: 1rem;
-  bottom: 1rem;
-  width: 2px;
-  background: #c9d1ea;
-  z-index: 0;
-}
-
 .dev-forum-ticket-timeline-item {
   position: relative;
   display: block;
@@ -198,6 +191,25 @@
   cursor: pointer;
 }
 
+.dev-forum-ticket-timeline-item::before {
+  content: "";
+  position: absolute;
+  left: -0.8rem;
+  top: -0.35rem;
+  bottom: -0.35rem;
+  width: 2px;
+  background: #c9d1ea;
+  z-index: 1;
+}
+
+.dev-forum-ticket-timeline-item:first-child::before {
+  top: 50%;
+}
+
+.dev-forum-ticket-timeline-item:last-child::before {
+  bottom: 50%;
+}
+
 .dev-forum-ticket-timeline-item:hover {
   background: #f5f7ff;
 }
@@ -205,7 +217,7 @@
 .dev-forum-ticket-timeline-dot {
   position: absolute;
   left: -0.8rem;
-  top: 1rem;
+  top: 50%;
   transform: translate(-50%, -50%);
   width: 0.95rem;
   height: 0.95rem;
@@ -218,6 +230,16 @@
 .dev-forum-ticket-timeline-label {
   display: block;
   font-size: 0.84rem;
+  white-space: nowrap;
+}
+
+.dev-forum-ticket-timeline-text {
+  display: block;
+  margin-top: 0.1rem;
+  font-size: 0.78rem;
+  color: #4f5678;
+  overflow: hidden;
+  text-overflow: ellipsis;
   white-space: nowrap;
 }
 

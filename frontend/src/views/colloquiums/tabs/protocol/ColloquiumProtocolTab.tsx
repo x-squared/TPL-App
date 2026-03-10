@@ -119,7 +119,6 @@ export default function ColloquiumProtocolTab({
                 selectedPeople={draftParticipantsPeople}
                 onChange={onChangeDraftParticipantsPeople}
               />
-              <span className="detail-value">{draftParticipants || t('common.emptySymbol', '–')}</span>
             </div>
           </div>
         </section>
@@ -165,9 +164,10 @@ export default function ColloquiumProtocolTab({
                         onChange={(e) => onChangeAgendaDraft(agenda.id, { presented_by: e.target.value })}
                       />
                     </label>
-                    <label>
+                    <label className="colloquiums-protocol-decision-field">
                       {t('colloquiums.protocol.decision', 'Decision')}
                       <select
+                        className="colloquiums-protocol-decision-select"
                         value={draft.decision}
                         onChange={(e) => onChangeAgendaDraft(agenda.id, { decision: e.target.value })}
                       >

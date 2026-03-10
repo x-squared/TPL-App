@@ -69,6 +69,7 @@ export default function ColloquiumDetailView({
       editingAgendaId={model.editingAgendaId}
       agendaSaving={model.agendaSaving}
       agendaDeletingId={model.agendaDeletingId}
+      agendaSaveError={model.agendaSaveError}
       agendaForm={model.agendaForm}
       selectedEpisodePreviews={model.selectedEpisodePreviews}
       selectedEpisodeLabel={model.selectedEpisodeLabel}

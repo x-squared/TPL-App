@@ -203,29 +203,32 @@ export default function AppSidebar({
               <span className="nav-icon">{'\u2699'}</span>
               {sidebarOpen && <span className="nav-label">{t('navigation.dev.e2eTests', 'E2E Tests')}</span>}
             </button>
-            <button
-              className={`nav-item ${page === 'dev-forum' ? 'active' : ''}`}
-              onClick={() => {
-                setPage('dev-forum');
-                onResetSelection();
-              }}
-              title={t('navigation.dev.devForum', 'Dev-Forum')}
-            >
-              <span className="nav-icon">{'\u270E'}</span>
-              {sidebarOpen && <span className="nav-label">{t('navigation.dev.devForum', 'Dev-Forum')}</span>}
-            </button>
-            <button
-              className="nav-item"
-              onClick={onToggleDevForumPanel}
-              title={devForumPanelOpen
-                ? t('devForum.panel.hide', 'Hide Dev-Forum panel')
-                : t('devForum.panel.show', 'Show Dev-Forum panel')}
-            >
-              <span className="nav-icon">{devForumPanelOpen ? '\u25C2' : '\u25B8'}</span>
-              {sidebarOpen && <span className="nav-label">{devForumPanelOpen
-                ? t('devForum.panel.hide', 'Hide Dev-Forum panel')
-                : t('devForum.panel.show', 'Show Dev-Forum panel')}</span>}
-            </button>
+            <div className={`nav-item-with-toggle ${page === 'dev-forum' ? 'active' : ''}`}>
+              <button
+                className={`nav-item ${page === 'dev-forum' ? 'active' : ''}`}
+                onClick={() => {
+                  setPage('dev-forum');
+                  onResetSelection();
+                }}
+                title={t('navigation.dev.devForum', 'Dev-Forum')}
+              >
+                <span className="nav-icon">{'\u270E'}</span>
+                {sidebarOpen && <span className="nav-label">{t('navigation.dev.devForum', 'Dev-Forum')}</span>}
+              </button>
+              <button
+                className={`history-nav-btn dev-forum-panel-toggle ${devForumPanelOpen ? 'enabled' : 'disabled'}`}
+                type="button"
+                onClick={onToggleDevForumPanel}
+                title={devForumPanelOpen
+                  ? t('devForum.panel.hide', 'Hide Dev-Forum panel')
+                  : t('devForum.panel.show', 'Show Dev-Forum panel')}
+                aria-label={devForumPanelOpen
+                  ? t('devForum.panel.hide', 'Hide Dev-Forum panel')
+                  : t('devForum.panel.show', 'Show Dev-Forum panel')}
+              >
+                {devForumPanelOpen ? '\u25B6' : '\u25C0'}
+              </button>
+            </div>
           </>
         )}
       </nav>

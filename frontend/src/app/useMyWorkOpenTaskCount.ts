@@ -1,5 +1,6 @@
 import { useCallback, useEffect, useState } from 'react';
 import { api } from '../api';
+import { MY_WORK_OPEN_TASK_COUNT_POLL_MS } from './runtimeConfig';
 import { TASK_CHANGED_EVENT } from '../views/tasks/taskEvents';
 
 const isOpenTask = (statusKey: string | null | undefined): boolean => {
@@ -49,7 +50,7 @@ export function useMyWorkOpenTaskCount(enabled: boolean) {
     if (!enabled) return undefined;
     const interval = window.setInterval(() => {
       void reloadOpenTaskCount();
-    }, 15000);
+    }, MY_WORK_OPEN_TASK_COUNT_POLL_MS);
     return () => {
       window.clearInterval(interval);
     };

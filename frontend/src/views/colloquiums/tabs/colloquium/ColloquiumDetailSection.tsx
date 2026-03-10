@@ -52,6 +52,7 @@ interface Props {
   editingAgendaId: number | null;
   savingAgenda: boolean;
   deletingAgendaId: number | null;
+  agendaSaveError: string;
   decisionOptions: Code[];
   editingAgendaForm: {
     episode_id: number | null;
@@ -108,6 +109,7 @@ export default function ColloquiumDetailSection({
   editingAgendaId,
   savingAgenda,
   deletingAgendaId,
+  agendaSaveError,
   decisionOptions,
   editingAgendaForm,
   selectedEpisodePreviews,
@@ -205,6 +207,7 @@ export default function ColloquiumDetailSection({
             <button className="ci-add-btn" onClick={onStartAddAgenda}>{t('colloquiums.actions.add', '+ Add')}</button>
           )}
         </div>
+        <ErrorBanner message={agendaSaveError} />
         {loadingAgendas ? (
           <p className="status">{t('colloquiums.agenda.loading', 'Loading agenda...')}</p>
         ) : (

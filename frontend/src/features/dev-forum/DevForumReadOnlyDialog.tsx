@@ -28,6 +28,17 @@ function toTicketPrefix(html: string): string {
   return `${base.trim()}...`;
 }
 
+function toTicketSnippet(html: string, fallback: string): string {
+  const plain = htmlToPlainText(html);
+  if (!plain) return fallback;
+  const limit = 72;
+  if (plain.length <= limit) return plain;
+  const candidate = plain.slice(0, limit - 1);
+  const lastSpace = candidate.lastIndexOf(' ');
+  const base = lastSpace >= 30 ? candidate.slice(0, lastSpace) : candidate;
+  return `${base.trim()}...`;
+}
+
 function asPrettyJson(raw: string): string {
   try {
     const parsed = JSON.parse(raw);
@@ -121,7 +132,10 @@ export default function DevForumReadOnlyDialog({
                 }}
               >
                 <span className="dev-forum-ticket-timeline-dot" aria-hidden="true" />
-                <span className="dev-forum-ticket-timeline-label">#{entry.id} - {entry.status}</span>
+              <span className="dev-forum-ticket-timeline-label">#{entry.id} - {entry.status}</span>
+              <span className="dev-forum-ticket-timeline-text">
+                {toTicketSnippet(entry.request_text, t('devForum.request.summaryFallback', 'No request text.'))}
+              </span>
               </button>
             ))}
           </div>

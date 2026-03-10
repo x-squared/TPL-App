@@ -47,6 +47,7 @@ export function useColloquiumDetailViewModel(colloqiumId: number, initialTab?: C
     editingAgendaId: agendas.editingAgendaId,
     agendaSaving: agendas.agendaSaving,
     agendaDeletingId: agendas.agendaDeletingId,
+    agendaSaveError: agendas.agendaSaveError,
     agendaForm: agendas.agendaForm,
     setAgendaForm: agendas.setAgendaForm,
     pickerOpen: agendas.pickerOpen,

@@ -110,23 +110,55 @@ function buildCursorCopyPayload(markdown: string): string {
   if (!normalized) {
     return [
       'MODE: IMPLEMENT TICKET ONLY',
-      'TICKET: (empty)',
+      '',
+      'TICKET:',
+      '(empty)',
+      '',
+      'SCOPE:',
+      '- Allowed files/areas: (not specified in ticket)',
+      '- Do not touch: (not specified in ticket)',
+      '',
+      'DONE WHEN:',
+      '- Requested change is implemented and visible in UI/behavior.',
+      '- Existing behavior outside ticket scope remains unchanged.',
+      '',
+      'OUT OF SCOPE:',
+      '- Unrelated refactors and behavior changes.',
+      '',
+      'CONTEXT:',
+      '(none)',
+      '',
+      'REQUIREMENT: First restate the ticket in 3 bullets and wait for my OK before coding.',
     ].join('\n');
+  }
+  if (/^\s*MODE:\s*IMPLEMENT TICKET ONLY\b/i.test(normalized)) {
+    return normalized;
   }
   const [ticketBlock, ...restBlocks] = normalized.split(/\n\s*\n/);
   const ticket = ticketBlock.replace(/\s+/g, ' ').trim() || '(empty)';
   const context = restBlocks.join('\n\n').trim();
-  if (!context) {
-    return [
-      'MODE: IMPLEMENT TICKET ONLY',
-      `TICKET: ${ticket}`,
-    ].join('\n\n');
-  }
   return [
     'MODE: IMPLEMENT TICKET ONLY',
-    `TICKET: ${ticket}`,
-    `CONTEXT:\n${context}`,
-  ].join('\n\n');
+    '',
+    'TICKET:',
+    ticket,
+    '',
+    'SCOPE:',
+    '- Allowed files/areas: (not specified in ticket)',
+    '- Do not touch: (not specified in ticket)',
+    '',
+    'DONE WHEN:',
+    '- Requested behavior is implemented exactly as described.',
+    '- Add/adjust error handling and user-facing message if failure is possible.',
+    '- Build/typecheck for touched frontend/backend parts passes.',
+    '',
+    'OUT OF SCOPE:',
+    '- Additional UX or architecture changes not required by this ticket.',
+    '',
+    `CONTEXT:\n${context || '(none)'}`,
+    '',
+    'REQUIREMENT: First restate the ticket in 3 bullets and wait for my OK before coding.',
+  ].join('\n');
 }
 
 async function copyTextToClipboard(text: string): Promise<boolean> {

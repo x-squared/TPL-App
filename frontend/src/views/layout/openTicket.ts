@@ -155,6 +155,11 @@ function collectCurrentContext(recent: ClientErrorLogEntry[]) {
   });
 
   const latest = recent[recent.length - 1];
+  const latestWithPath = [...recent].reverse().find((entry) => Boolean(entry.path && entry.path.trim()));
+  const latestHttpWithPath = [...recent]
+    .reverse()
+    .find((entry) => entry.source === 'http' && Boolean(entry.path && entry.path.trim()));
+  const latestErrorPath = latestHttpWithPath?.path || latestWithPath?.path || '';
   const selectedComponent = getLastCapturedComponent();
   return {
     href,
@@ -162,7 +167,7 @@ function collectCurrentContext(recent: ClientErrorLogEntry[]) {
     guiPart,
     ids: Array.from(ids.entries()),
     latestError: latest?.message ?? '',
-    latestErrorPath: latest?.path ?? '',
+    latestErrorPath,
     selectedComponent,
   };
 }

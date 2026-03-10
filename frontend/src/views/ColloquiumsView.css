@@ -273,6 +273,7 @@
 }
 
 .colloquiums-protocol-episode-fields input,
+.colloquiums-protocol-episode-fields select,
 .colloquiums-protocol-episode-fields textarea {
   border: 1px solid #c8cfde;
   border-radius: 4px;
@@ -280,6 +281,8 @@
   background: #fcfdff;
   color: #1f2430;
   font-size: 0.86rem;
+  width: 100%;
+  box-sizing: border-box;
 }
 
 .colloquiums-protocol-episode-fields textarea {
@@ -337,6 +340,14 @@
 
 .colloquiums-protocol-episode-fields label:last-child {
   grid-column: 1 / -1;
+}
+
+.colloquiums-protocol-decision-field {
+  grid-column: 1 / -1;
+}
+
+.colloquiums-protocol-decision-select {
+  min-height: 3.1rem;
 }
 
 .colloquiums-protocol-tasks-placeholder {

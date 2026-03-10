@@ -705,6 +705,26 @@
           "en": "Open previous ticket",
           "de": "Vorheriges Ticket öffnen"
         }
+      },
+      "showTicket": {
+        "label": {
+          "en": "Dev-Forum action show ticket details",
+          "de": "Dev-Forum Aktion Ticketdetails anzeigen"
+        },
+        "text": {
+          "en": "Show ticket",
+          "de": "Ticket anzeigen"
+        }
+      },
+      "collapseTicket": {
+        "label": {
+          "en": "Dev-Forum action collapse ticket details",
+          "de": "Dev-Forum Aktion Ticketdetails einklappen"
+        },
+        "text": {
+          "en": "Collapse ticket",
+          "de": "Ticket einklappen"
+        }
       }
     },
     "readOnlyDialog": {
@@ -1104,6 +1124,16 @@
         "text": {
           "en": "Claimed by",
           "de": "Übernommen von"
+        }
+      },
+      "summaryFallback": {
+        "label": {
+          "en": "Dev-Forum request summary fallback",
+          "de": "Dev-Forum Anfrage Zusammenfassung Fallback"
+        },
+        "text": {
+          "en": "No request text.",
+          "de": "Kein Anfragetext."
         }
       }
     },
@@ -5472,6 +5502,26 @@
         "text": {
           "en": "No agenda entries.",
           "de": "Keine Agenda-Einträge."
+        }
+      },
+      "saveError": {
+        "label": {
+          "en": "Colloquiums agenda save error",
+          "de": "Kolloquien Agenda Speichern Fehler"
+        },
+        "text": {
+          "en": "Could not save agenda changes.",
+          "de": "Agenda-Änderungen konnten nicht gespeichert werden."
+        }
+      },
+      "deleteError": {
+        "label": {
+          "en": "Colloquiums agenda delete error",
+          "de": "Kolloquien Agenda Löschen Fehler"
+        },
+        "text": {
+          "en": "Could not delete agenda entry.",
+          "de": "Agenda-Eintrag konnte nicht gelöscht werden."
         }
       }
     },

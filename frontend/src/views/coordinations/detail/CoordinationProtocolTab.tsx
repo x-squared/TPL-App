@@ -7,6 +7,7 @@ import CoordinationProtocolDataPanel from './CoordinationProtocolDataPanel';
 import CoordinationProtocolEventLogPanel from './CoordinationProtocolEventLogPanel';
 import { CoordinationProtocolStateProvider, useCoordinationProtocolState } from './CoordinationProtocolStateContext';
 import CoordinationProtocolTasksPanel from './CoordinationProtocolTasksPanel';
+import { TASK_CHANGED_EVENT } from '../../tasks/taskEvents';
 
 interface ProtocolOverviewGroup {
   organ: { id: number; key?: string; name_default: string; pos?: number | null };
@@ -299,29 +300,29 @@ function CoordinationProtocolTabContent({
     let cancelled = false;
     const loadPerOrganStatus = async () => {
       try {
-        const [flex, openTasksByOrganEntries] = await Promise.all([
+        const [flex, allTaskGroups] = await Promise.all([
           api.getCoordinationProcurementFlex(coordinationId),
-          Promise.all(
-            visibleOrganIds.map(async (organId) => {
-              const taskGroups = await api.listTaskGroups({
-                coordination_id: coordinationId,
-                organ_id: organId,
-              });
-              if (taskGroups.length === 0) {
-                return [organId, false] as const;
-              }
-              const taskRows = await Promise.all(
-                taskGroups.map((group) =>
-                  api.listTasks({
-                    task_group_id: group.id,
-                    status_key: ['PENDING'],
-                  }),
-                ),
-              );
-              return [organId, taskRows.some((entries) => entries.length > 0)] as const;
-            }),
-          ),
+          api.listTaskGroups({
+            coordination_id: coordinationId,
+          }),
         ]);
+        const openTasksByOrganEntries = await Promise.all(
+          visibleOrganIds.map(async (organId) => {
+            const taskGroups = allTaskGroups.filter((group) => group.organ_id === organId);
+            if (taskGroups.length === 0) {
+              return [organId, false] as const;
+            }
+            const taskRows = await Promise.all(
+              taskGroups.map((group) =>
+                api.listTasks({
+                  task_group_id: group.id,
+                  status_key: ['PENDING'],
+                }),
+              ),
+            );
+            return [organId, taskRows.some((entries) => entries.length > 0)] as const;
+          }),
+        );
         if (!cancelled) {
           const openTaskMap = Object.fromEntries(openTasksByOrganEntries);
           setHasOpenTasksByOrganId((prev) => ({ ...prev, ...openTaskMap }));
@@ -338,13 +339,14 @@ function CoordinationProtocolTabContent({
         }
       }
     };
-    void loadPerOrganStatus();
-    const interval = window.setInterval(() => {
+    const handleTaskChanged = () => {
       void loadPerOrganStatus();
-    }, 15000);
+    };
+    void loadPerOrganStatus();
+    window.addEventListener(TASK_CHANGED_EVENT, handleTaskChanged);
     return () => {
       cancelled = true;
-      window.clearInterval(interval);
+      window.removeEventListener(TASK_CHANGED_EVENT, handleTaskChanged);
     };
   }, [coordinationId, tasksPanelRefreshSignal, visibleOrganIds]);
   const handleProtocolMutation = async () => {

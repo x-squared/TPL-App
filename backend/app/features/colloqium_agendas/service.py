@@ -50,12 +50,20 @@ def _normalize_agenda_text_fields(data: dict[str, object]) -> dict[str, object]:
     return normalized
 
 
-def _validate_decision_catalogue_or_422(*, db: Session, decision_key: str) -> None:
-    if not decision_key:
+def _validate_decision_catalogue_or_422(
+    *,
+    db: Session,
+    decision_key: str | None = None,
+    decision: str | None = None,
+) -> None:
+    # Keep backward-compatible argument handling to avoid runtime failures
+    # if older call sites still pass `decision=...`.
+    resolved_decision_key = decision_key if decision_key is not None else decision
+    if not resolved_decision_key:
         return
     existing = db.query(Code).filter(
         Code.type == _DECISION_CODE_TYPE,
-        Code.key == decision_key,
+        Code.key == resolved_decision_key,
     ).first()
     if not existing:
         raise HTTPException(
@@ -100,7 +108,7 @@ def create_colloqium_agenda(*, payload: ColloqiumAgendaCreate, changed_by_id: in
     normalized_payload = _normalize_agenda_text_fields(payload.model_dump())
     _validate_colloqium_or_422(db=db, colloqium_id=payload.colloqium_id)
     _validate_episode_or_422(db=db, episode_id=payload.episode_id)
-    _validate_decision_catalogue_or_422(db=db, decision=str(normalized_payload.get("decision", "")))
+    _validate_decision_catalogue_or_422(db=db, decision_key=str(normalized_payload.get("decision", "")))
     _validate_decision_reason_or_422(
         decision=str(normalized_payload.get("decision", "")),
         decision_reason=str(normalized_payload.get("decision_reason", "")),

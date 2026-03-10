@@ -28,6 +28,7 @@ interface Props {
   editingAgendaId: number | null;
   agendaSaving: boolean;
   agendaDeletingId: number | null;
+  agendaSaveError: string;
   agendaForm: {
     episode_id: number | null;
     episode_ids: number[];
@@ -92,6 +93,7 @@ export default function ColloquiumDetailTabs({
   editingAgendaId,
   agendaSaving,
   agendaDeletingId,
+  agendaSaveError,
   agendaForm,
   selectedEpisodePreviews,
   selectedEpisodeLabel,
@@ -172,6 +174,7 @@ export default function ColloquiumDetailTabs({
           editingAgendaId={editingAgendaId}
           savingAgenda={agendaSaving}
           deletingAgendaId={agendaDeletingId}
+          agendaSaveError={agendaSaveError}
           decisionOptions={decisionOptions}
           editingAgendaForm={agendaForm}
           selectedEpisodePreviews={selectedEpisodePreviews}

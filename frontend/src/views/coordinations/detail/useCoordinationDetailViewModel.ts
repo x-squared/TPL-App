@@ -252,11 +252,12 @@ export function useCoordinationDetailViewModel(
   }, [coordinationId, initialTab]);
 
   useEffect(() => {
+    if (!activeClockLog) return undefined;
     const id = window.setInterval(() => {
       void refreshClockState();
     }, 5000);
     return () => window.clearInterval(id);
-  }, [refreshClockState]);
+  }, [activeClockLog, refreshClockState]);
 
   useEffect(() => {
     if (!activeClockLog?.start || activeClockLog.coordination_id !== coordinationId) {
